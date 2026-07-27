@@ -2661,6 +2661,7 @@ const state = {
   standingsLeagueView:null,
   otherLeagueStandings:null,
   pendingAfterProfile:null,
+  pendingAfterProfileKind:null,
   pantheonView:'season',
   pantheonFilterLeague:'',
   pantheonFilterClub:''
@@ -4592,13 +4593,33 @@ async function initAuth(){
       cb();
     }
     // Retour d'une connexion Google : le hash #access_token=... a fait son
-    // travail, on nettoie l'URL et on amène le joueur sur son compte pour
-    // qu'il voie explicitement que la connexion a fonctionné.
+    // travail, on nettoie l'URL et on restaure la partie telle qu'elle
+    // était avant la redirection (draft, saison, transfert en cours...).
     if(session && sessionStorage.getItem('pendingGoogleAuth')){
       sessionStorage.removeItem('pendingGoogleAuth');
-      history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
-      showScreen('account', { skipHistory:true });
-      renderAccountScreen();
+      const snap = restoreGameStateSnapshot();
+
+      if(snap && snap.season){
+        history.replaceState({ screen:'season' }, '', location.pathname + location.search + '#season');
+        showScreen('season', { skipHistory:true });
+        if(snap.club) applyClubTheme(snap.club);
+        if(snap.kind === 'recordSeason'){
+          // La sauvegarde de fin de saison avait été bloquée en attendant
+          // la connexion : on la relance maintenant qu'une session existe.
+          state.season.recorded = false;
+          recordSeasonIfNeeded();
+        }
+        renderSeason();
+      } else if(snap && snap.club){
+        history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
+        showScreen('game', { skipHistory:true });
+        applyClubTheme(snap.club);
+        renderGame();
+      } else {
+        history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
+        showScreen('account', { skipHistory:true });
+        renderAccountScreen();
+      }
     }
     if(state.screen === 'account') renderAccountScreen();
   });
@@ -4659,6 +4680,57 @@ async function submitAuthForm(){
   }
 }
 
+const PENDING_STATE_KEY = 'specialone_pending_game_state';
+
+// La connexion Google recharge entièrement la page (redirection puis retour
+// depuis Google) — tout l'état en mémoire (draft en cours, saison en cours,
+// transfert en cours...) serait perdu sans ça. On en capture un instantané
+// juste avant de partir, et on le restaure au retour (voir initAuth).
+function snapshotGameState(){
+  return {
+    kind: state.pendingAfterProfileKind,
+    screen: state.screen,
+    league: state.league,
+    club: state.club,
+    formationKey: state.formationKey,
+    locked: state.locked,
+    slots: state.slots,
+    subs: state.subs,
+    hand: state.hand,
+    selectedUid: state.selectedUid,
+    repositionSlotId: state.repositionSlotId,
+    rerollsLeft: state.rerollsLeft,
+    usedNames: Array.from(state.usedNames || []),
+    season: state.season,
+    euro: state.euro,
+    seasonView: state.seasonView,
+    seasonNumber: state.seasonNumber,
+    prevSeasonStanding: state.prevSeasonStanding,
+    prevSeasonCupWinner: state.prevSeasonCupWinner,
+    prevSeasonEuroWinners: state.prevSeasonEuroWinners,
+    currentSeasonEuroWinners: state.currentSeasonEuroWinners,
+    transfer: state.transfer,
+    standingsLeagueView: state.standingsLeagueView,
+    otherLeagues: state.otherLeagues
+  };
+}
+
+function restoreGameStateSnapshot(){
+  const raw = localStorage.getItem(PENDING_STATE_KEY);
+  localStorage.removeItem(PENDING_STATE_KEY);
+  if(!raw) return null;
+  try {
+    const snap = JSON.parse(raw);
+    Object.assign(state, snap);
+    state.usedNames = new Set(snap.usedNames || []);
+    state.pendingAfterProfile = null; // la fonction elle-même ne survit pas au rechargement
+    return snap;
+  } catch(e){
+    console.error('Impossible de restaurer la partie après connexion :', e);
+    return null;
+  }
+}
+
 async function signInWithGoogle(){
   if(!sbClient) return;
   // IMPORTANT : ne jamais inclure le hash de routing de l'app (#account,
@@ -4666,6 +4738,7 @@ async function signInWithGoogle(){
   // hash (#access_token=...) au retour de Google, et les deux hash entrent
   // en conflit sinon.
   const redirectTo = window.location.origin + window.location.pathname + window.location.search;
+  localStorage.setItem(PENDING_STATE_KEY, JSON.stringify(snapshotGameState()));
   sessionStorage.setItem('pendingGoogleAuth', '1');
   await sbClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo } });
 }
@@ -4677,8 +4750,9 @@ async function signOutUser(){
   showScreen('landing');
 }
 
-function showProfileModal(afterCb){
+function showProfileModal(afterCb, kind){
   state.pendingAfterProfile = afterCb || null;
+  state.pendingAfterProfileKind = kind || null;
   clearAuthError();
   document.getElementById('profile-input').value = '';
   document.getElementById('profile-password').value = '';
@@ -4691,15 +4765,16 @@ function showProfileModal(afterCb){
 function closeProfileModal(){
   document.getElementById('profile-modal').style.display = 'none';
   state.pendingAfterProfile = null;
+  state.pendingAfterProfileKind = null;
   if(state.screen === 'account'){
     if(state.season){ showScreen('season'); renderSeason(); }
     else { showScreen('landing'); }
   }
 }
 
-function ensureProfile(cb){
+function ensureProfile(cb, kind){
   if(state.session){ cb(); return; }
-  showProfileModal(cb);
+  showProfileModal(cb, kind);
 }
 
 // ============================================================
@@ -4827,7 +4902,7 @@ function recordSeasonIfNeeded(){
     };
     const { error } = await sbClient.from('career_history').insert(record);
     if(error) console.error('Erreur de sauvegarde de la saison :', error.message);
-  });
+  }, 'recordSeason');
 }
 
 function countTrophies(history){
@@ -4913,7 +4988,7 @@ function populatePantheonClubFilter(){
 }
 
 async function renderAccountScreen(){
-  if(!state.session){ showProfileModal(renderAccountScreen); return; }
+  if(!state.session){ showProfileModal(renderAccountScreen, 'viewAccount'); return; }
   document.getElementById('account-profile-name').textContent = currentUserLabel();
   document.getElementById('pseudo-input').value = (state.session.user.user_metadata && state.session.user.user_metadata.pseudo) || '';
   document.getElementById('pseudo-hint').textContent = '';
