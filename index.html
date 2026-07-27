@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Special One — Créez le club ultime</title>
+<title>Special One - Créez le club ultime</title>
 
 <link rel="stylesheet" href="https://use.typekit.net/dee3jbl.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
 
 
 /* ==================================================================
-   COMPOSANT CARTE — positions exactes récupérées du mode Dev Figma
+   COMPOSANT CARTE - positions exactes récupérées du mode Dev Figma
    (node 23:309 "Player Card", cadre source 989x1344px). Chaque
    règle ci-dessous reprend directement les valeurs inset Tailwind
    du dev mode (haut_droite_bas_gauche en %), donc 100% fidèle et
@@ -79,7 +79,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   box-shadow:0 25px 60px rgba(0,0,0,.5);
   flex-shrink:0;
 
-  /* IMPORTANT : ceci fait de la carte un container query — tout le
+  /* IMPORTANT : ceci fait de la carte un container query - tout le
      texte ci-dessous est exprimé en "cqw" (% de LA LARGEUR RÉELLE de
      cette carte précise) plutôt qu'en px figés. Résultat : une carte
      à 150px de large a EXACTEMENT les mêmes proportions qu'à 300px,
@@ -115,7 +115,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
 }
 .pc-illustration svg{ width:100%; height:100%; display:block; }
 
-/* écusson (calque "Logo") — accueille désormais le drapeau du pays */
+/* écusson (calque "Logo") - accueille désormais le drapeau du pays */
 .pc-crest{
   position:absolute;
   top:7.81%; left:5.46%; width:20.73%; aspect-ratio:1/1;
@@ -215,7 +215,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   z-index:2;
 }
 
-/* calque "BU-AD-MOC" (poste) — occupe désormais tout le bas de la
+/* calque "BU-AD-MOC" (poste) - occupe désormais tout le bas de la
    carte, libéré par la suppression de l'âge et de la nationalité
    (celle-ci reste lisible via le drapeau en haut à gauche) */
 .pc-position{
@@ -242,7 +242,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
 
 
 /* ==================================================================
-   SPECIAL ONE — App shell styling
+   SPECIAL ONE - App shell styling
    Namespaced with "gm-" / "app-" so nothing collides with the
    untouched pc-* player card component above.
    ================================================================== */
@@ -264,12 +264,12 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   --r-md:8px;
   --r-lg:10px;
 
-  /* club theme — overridden per selection, sensible PSG-ish default */
+  /* club theme - overridden per selection, sensible PSG-ish default */
   --club-primary:#0B3D91;
   --club-secondary:#C1121F;
   --club-accent:#F5B700;
 
-  /* paliers européens — teintes maison plutôt que le bleu/orange/vert
+  /* paliers européens - teintes maison plutôt que le bleu/orange/vert
      par défaut de Tailwind, un peu plus riches et moins "dashboard" */
   --zone-cl:#3D5FA6;
   --zone-el:#C1642E;
@@ -299,7 +299,7 @@ button{ font-family:inherit; cursor:pointer; }
   width:100%;
 }
 
-/* One persistent background for the whole app — never per-screen, never
+/* One persistent background for the whole app - never per-screen, never
    faded in/out, always fully present. Colors follow --club-* and update
    instantly whenever a club is selected. */
 #bg-wash{
@@ -397,6 +397,14 @@ button{ font-family:inherit; cursor:pointer; }
   z-index:50;
   flex-direction:column;
   gap:2px;
+  overflow:hidden;
+}
+.gm-account-dropdown::before{
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:2px;
+  background:var(--club-accent);
 }
 .gm-account-menu.open .gm-account-dropdown{ display:flex; }
 .gm-dropdown-item{
@@ -797,6 +805,7 @@ button{ font-family:inherit; cursor:pointer; }
   border-bottom:1px solid var(--border);
   margin-bottom:4px;
 }
+.st-row.st-head > div:nth-child(n+3){ text-align:center; }
 .st-row.st-me{
   color:var(--text);
 }
@@ -857,22 +866,23 @@ button{ font-family:inherit; cursor:pointer; }
   font-weight:600;
 }
 .st-badge{
-  display:inline-block;
-  font-family:var(--sans);
-  font-size:9px;
-  font-weight:700;
-  letter-spacing:.03em;
-  padding:1px 4px;
-  border-radius:4px;
+  display:inline-flex;
+  align-items:center;
+  font-family:var(--bn-bold);
+  font-size:11px;
+  letter-spacing:.02em;
+  padding:1px 6px 0;
+  line-height:1.6;
   vertical-align:middle;
-  line-height:1.4;
+  border-radius:2px 7px 2px 7px;
+  text-shadow:0 1px 1px rgba(0,0,0,.3);
 }
-.st-badge-champ{ background:rgba(250,204,21,.18); color:#FACC15; border:1px solid rgba(250,204,21,.4); }
-.st-badge-cup{ background:rgba(203,213,225,.18); color:#CBD5E1; border:1px solid rgba(203,213,225,.4); }
-.st-badge-c1{ background:color-mix(in srgb, var(--zone-cl) 18%, transparent); color:var(--zone-cl); border:1px solid color-mix(in srgb, var(--zone-cl) 40%, transparent); }
-.st-badge-c3{ background:color-mix(in srgb, var(--zone-el) 18%, transparent); color:var(--zone-el); border:1px solid color-mix(in srgb, var(--zone-el) 40%, transparent); }
-.st-badge-c4{ background:color-mix(in srgb, var(--zone-ecl) 18%, transparent); color:var(--zone-ecl); border:1px solid color-mix(in srgb, var(--zone-ecl) 40%, transparent); }
-.st-badge-sc{ background:rgba(167,139,250,.18); color:#A78BFA; border:1px solid rgba(167,139,250,.4); }
+.st-badge-champ{ background:#FACC15; color:#2b2100; }
+.st-badge-cup{ background:#CBD5E1; color:#20242c; }
+.st-badge-c1{ background:var(--zone-cl); color:#fff; }
+.st-badge-c3{ background:var(--zone-el); color:#fff; }
+.st-badge-c4{ background:var(--zone-ecl); color:#fff; }
+.st-badge-sc{ background:#A78BFA; color:#241a3d; }
 .st-num{ text-align:center; font-variant-numeric:tabular-nums; font-weight:600; }
 .st-pts{ font-family:var(--bn-bold); font-size:15px; color:var(--text); text-align:center; font-variant-numeric:tabular-nums; }
 
@@ -1019,25 +1029,35 @@ button{ font-family:inherit; cursor:pointer; }
   margin-bottom:22px;
 }
 .stat-tile{
+  position:relative;
   background:var(--surface-2);
   border:1px solid rgba(255,255,255,.06);
-  border-radius:var(--r-sm);
-  padding:9px 4px;
+  border-radius:2px 16px 2px 16px;
+  padding:14px 4px 10px;
   text-align:center;
+  overflow:hidden;
+}
+.stat-tile::before{
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:26px; height:3px;
+  background:var(--club-accent);
 }
 .stat-tile .v{
   font-family:var(--bn-bold);
-  font-size:22px;
+  font-size:24px;
   color:var(--club-accent);
   line-height:1;
 }
 .stat-tile .l{
   font-family:var(--sans);
-  font-size:9.5px;
-  letter-spacing:.5px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.08em;
   text-transform:uppercase;
   color:var(--text-faint);
-  margin-top:3px;
+  margin-top:5px;
 }
 
 .matchsheet{
@@ -1310,8 +1330,9 @@ button{ font-family:inherit; cursor:pointer; }
   transform:translateX(-50%) translateY(20px);
   background:var(--surface-2);
   border:1px solid var(--border-2);
+  border-left:3px solid var(--club-accent);
   padding:14px 22px;
-  border-radius:var(--r-md);
+  border-radius:2px var(--r-md) var(--r-md) 2px;
   font-family:var(--sans);
   font-size:13px;
   color:var(--text);
@@ -1469,7 +1490,8 @@ button{ font-family:inherit; cursor:pointer; }
 .account-season-card{
   background:var(--surface-2);
   border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--r-md);
+  border-left:3px solid var(--club-accent);
+  border-radius:2px var(--r-md) var(--r-md) 2px;
   padding:16px 18px;
 }
 .account-season-head{
@@ -1494,11 +1516,20 @@ button{ font-family:inherit; cursor:pointer; }
 }
 
 .profile-card{
+  position:relative;
   background:var(--surface-2);
   border:1px solid var(--border);
-  border-radius:var(--r-md);
+  border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:20px 22px;
   margin-bottom:24px;
+  overflow:hidden;
+}
+.profile-card::before{
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:40px; height:3px;
+  background:var(--club-accent);
 }
 .profile-card-title{
   font-family:var(--sans);
@@ -1578,7 +1609,27 @@ button{ font-family:inherit; cursor:pointer; }
   box-shadow:0 12px 32px rgba(0,0,0,.45);
   z-index:60;
 }
+.pf-dropdown-menu::before{
+  content:'';
+  display:block;
+  flex-shrink:0;
+  width:100%; height:2px;
+  margin-bottom:2px;
+  background:var(--club-accent);
+}
 .pf-dropdown.open .pf-dropdown-menu{ display:flex; }
+.pf-dropdown-form{ width:100%; }
+.pf-dropdown-form .pf-dropdown-toggle{
+  width:100%;
+  max-width:none;
+  border-radius:var(--r-sm);
+  background:rgba(255,255,255,.06);
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:400;
+  justify-content:space-between;
+}
+.pf-dropdown-form .pf-dropdown-menu{ width:100%; left:0; }
 .pf-dropdown-option{
   font-family:var(--sans);
   font-size:12.5px;
@@ -1607,12 +1658,17 @@ button{ font-family:inherit; cursor:pointer; }
   align-items:center;
   gap:14px;
   padding:12px 16px;
-  border-radius:var(--r-md);
+  border-radius:2px var(--r-md) var(--r-md) 2px;
   background:var(--surface-2);
   border:1px solid var(--border);
+  border-left:3px solid var(--border-2);
 }
+.pantheon-row:nth-child(1){ border-left-color:#FACC15; }
+.pantheon-row:nth-child(2){ border-left-color:#CBD5E1; }
+.pantheon-row:nth-child(3){ border-left-color:#C9834A; }
 .pantheon-row.pantheon-me{
   border-color:var(--club-accent);
+  border-left-color:var(--club-accent);
   background:color-mix(in srgb, var(--club-accent) 10%, var(--surface-2));
 }
 .pantheon-rank{
@@ -1671,9 +1727,17 @@ button{ font-family:inherit; cursor:pointer; }
   width:min(400px, 90vw);
   background:var(--surface-2);
   border:1px solid rgba(255,255,255,.12);
-  border-radius:var(--r-lg);
+  border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:28px;
   position:relative;
+  overflow:hidden;
+}
+.modal-box::before{
+  content:'';
+  position:absolute;
+  top:0; left:0;
+  width:40px; height:3px;
+  background:var(--club-accent);
 }
 .modal-close{
   position:absolute;
@@ -1960,7 +2024,7 @@ button{ font-family:inherit; cursor:pointer; }
     <div class="account-shell">
       <div class="account-header">
         <div>
-          <div class="account-title" id="account-profile-name">—</div>
+          <div class="account-title" id="account-profile-name"></div>
           <div class="account-subtitle">Réglages du compte</div>
         </div>
         <button class="season-btn season-btn-ghost" id="btn-switch-profile">Se déconnecter</button>
@@ -1972,27 +2036,37 @@ button{ font-family:inherit; cursor:pointer; }
           <div class="profile-field profile-field-wide">
             <label for="pseudo-input">Pseudo public</label>
             <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
-            <div class="profile-field-hint">Affiché au Palmarès et au Panthéon — jamais ton nom ou ton email.</div>
+            <div class="profile-field-hint">Affiché au Palmarès et au Panthéon - jamais ton nom ou ton email.</div>
           </div>
           <div class="profile-field">
             <label for="profile-birthdate">Date de naissance</label>
             <input type="date" id="profile-birthdate" class="modal-input">
           </div>
           <div class="profile-field">
-            <label for="profile-gender">Genre</label>
-            <select id="profile-gender" class="modal-input">
-              <option value="">Ne souhaite pas le dire</option>
-              <option value="homme">Homme</option>
-              <option value="femme">Femme</option>
-              <option value="non-binaire">Non-binaire</option>
-              <option value="autre">Autre</option>
-            </select>
+            <label>Genre</label>
+            <div class="pf-dropdown pf-dropdown-form" id="profile-gender-dropdown">
+              <button type="button" class="pf-dropdown-toggle" id="profile-gender-toggle" data-value="">
+                <span id="profile-gender-label">Ne souhaite pas le dire</span><span class="pf-caret">&#9662;</span>
+              </button>
+              <div class="pf-dropdown-menu" id="profile-gender-menu">
+                <button class="pf-dropdown-option is-active" data-value="">Ne souhaite pas le dire</button>
+                <button class="pf-dropdown-option" data-value="homme">Homme</button>
+                <button class="pf-dropdown-option" data-value="femme">Femme</button>
+                <button class="pf-dropdown-option" data-value="non-binaire">Non-binaire</button>
+                <button class="pf-dropdown-option" data-value="autre">Autre</button>
+              </div>
+            </div>
           </div>
           <div class="profile-field profile-field-wide">
-            <label for="profile-favorite-club">Club favori</label>
-            <select id="profile-favorite-club" class="modal-input">
-              <option value="">Aucun</option>
-            </select>
+            <label>Club favori</label>
+            <div class="pf-dropdown pf-dropdown-form" id="profile-favorite-club-dropdown">
+              <button type="button" class="pf-dropdown-toggle" id="profile-favorite-club-toggle" data-value="">
+                <span id="profile-favorite-club-label">Aucun</span><span class="pf-caret">&#9662;</span>
+              </button>
+              <div class="pf-dropdown-menu" id="profile-favorite-club-menu">
+                <button class="pf-dropdown-option is-active" data-value="">Aucun</button>
+              </div>
+            </div>
           </div>
         </div>
         <button class="season-btn season-btn-primary" id="btn-save-profile" style="margin-top:18px">Enregistrer</button>
@@ -2094,20 +2168,30 @@ button{ font-family:inherit; cursor:pointer; }
         <input type="date" id="onboarding-birthdate" class="modal-input">
       </div>
       <div class="profile-field" style="margin-top:12px">
-        <label for="onboarding-gender">Genre</label>
-        <select id="onboarding-gender" class="modal-input">
-          <option value="">Ne souhaite pas le dire</option>
-          <option value="homme">Homme</option>
-          <option value="femme">Femme</option>
-          <option value="non-binaire">Non-binaire</option>
-          <option value="autre">Autre</option>
-        </select>
+        <label>Genre</label>
+        <div class="pf-dropdown pf-dropdown-form" id="onboarding-gender-dropdown">
+          <button type="button" class="pf-dropdown-toggle" id="onboarding-gender-toggle" data-value="">
+            <span id="onboarding-gender-label">Ne souhaite pas le dire</span><span class="pf-caret">&#9662;</span>
+          </button>
+          <div class="pf-dropdown-menu" id="onboarding-gender-menu">
+            <button class="pf-dropdown-option is-active" data-value="">Ne souhaite pas le dire</button>
+            <button class="pf-dropdown-option" data-value="homme">Homme</button>
+            <button class="pf-dropdown-option" data-value="femme">Femme</button>
+            <button class="pf-dropdown-option" data-value="non-binaire">Non-binaire</button>
+            <button class="pf-dropdown-option" data-value="autre">Autre</button>
+          </div>
+        </div>
       </div>
       <div class="profile-field" style="margin-top:12px">
-        <label for="onboarding-favorite-club">Club favori</label>
-        <select id="onboarding-favorite-club" class="modal-input">
-          <option value="">Aucun</option>
-        </select>
+        <label>Club favori</label>
+        <div class="pf-dropdown pf-dropdown-form" id="onboarding-favorite-club-dropdown">
+          <button type="button" class="pf-dropdown-toggle" id="onboarding-favorite-club-toggle" data-value="">
+            <span id="onboarding-favorite-club-label">Aucun</span><span class="pf-caret">&#9662;</span>
+          </button>
+          <div class="pf-dropdown-menu" id="onboarding-favorite-club-menu">
+            <button class="pf-dropdown-option is-active" data-value="">Aucun</button>
+          </div>
+        </div>
       </div>
       <button class="season-btn season-btn-primary" id="btn-onboarding-save" style="margin-top:16px; width:100%">Enregistrer</button>
       <button class="modal-skip" id="btn-onboarding-skip">Plus tard</button>
@@ -2356,7 +2440,7 @@ function fitFirstname(cardEl){
   }
 }
 
-// Taille du poste : même principe que le nom — grande taille de référence,
+// Taille du poste : même principe que le nom - grande taille de référence,
 // réduite seulement si la combinaison de postes (ex. "AD - BU - MOC") est
 // trop longue pour la carte. Un poste unique ("BU") s'affiche donc bien
 // plus grand qu'une combinaison à 3 postes, au lieu d'une taille fixe
@@ -2423,7 +2507,7 @@ function renderPlayerCard(club, player){
 
 
 /* ==================================================================
-   SPECIAL ONE — Game logic
+   SPECIAL ONE - Game logic
    Uses renderPlayerCard / silhouetteMarkup / fitSurname exactly as
    defined above (untouched card component).
    ================================================================== */
@@ -2735,7 +2819,7 @@ const FORMATIONS = {
 };
 
 // ---------------------------- PLAYER POOL ----------------------------
-// Legends spanning eras — rendered inside whichever club shirt you pick.
+// Legends spanning eras - rendered inside whichever club shirt you pick.
 const POOL = [
   { prenom:"GIANLUIGI", nom:"BUFFON", poste:"G", nationalite:"Italie", age:39, saison:"2017-2018", note:91, numero:1 },
   { prenom:"IKER", nom:"CASILLAS", poste:"G", nationalite:"Espagne", age:28, saison:"2009-2010", note:90, numero:1 },
@@ -2791,7 +2875,7 @@ const POOL = [
 // by the browser when the old element is torn down, which permanently trips
 // the card's onerror fallback (the little circular trigram badge). Fetching
 // each crest once as a blob and reusing that local object URL everywhere
-// removes the network entirely after the first load — no more flaky crests.
+// removes the network entirely after the first load - no more flaky crests.
 const crestBlobCache = {};
 function preloadCrest(url){
   if(!url || crestBlobCache[url]) return;
@@ -2877,7 +2961,7 @@ const SCREEN_RENDERERS = {
 };
 
 // Certains écrans exigent un état minimal (un club choisi, une saison en
-// cours) pour être affichables — notamment après un retour arrière du
+// cours) pour être affichables - notamment après un retour arrière du
 // navigateur, où l'état en mémoire peut ne plus correspondre à l'URL.
 function canShowScreen(name){
   if(name === 'game') return !!state.club;
@@ -2924,11 +3008,11 @@ const LANDING_PLAYER_PAIRS = [
 
 let landingTimer = null;
 
-// Names naturally auto-fit per card (longer surnames shrink more — that's
+// Names naturally auto-fit per card (longer surnames shrink more - that's
 // the sacred component's own responsive behavior, untouched here). But a
 // row of cards with wildly different sizes reads as inconsistent, so once
 // each card has found its own best-fit size, we re-align every card in the
-// same visible group to the smallest size needed — using only the inline
+// same visible group to the smallest size needed - using only the inline
 // style fitSurname already writes, never altering fitSurname itself.
 function whenFontsReady(cb){
   if(document.fonts && document.fonts.status === 'loaded'){ cb(); }
@@ -3194,7 +3278,7 @@ function onSlotClick(slotId){
   }
   // placing a freshly drafted card
   if(state.selectedUid){ placeSelected(slotId); return; }
-  // nothing active yet — clicking a filled slot picks that player back up
+  // nothing active yet - clicking a filled slot picks that player back up
   const slot = findSlot(slotId);
   if(slot && slot.player){
     state.repositionSlotId = slotId;
@@ -3440,7 +3524,7 @@ function renderHand(){
   const uidsKey = state.hand.map(c=>c.uid).join(',');
 
   if(handEl.dataset.uids === uidsKey){
-    // same cards as last render — just move the selection highlight, no rebuild
+    // same cards as last render - just move the selection highlight, no rebuild
     handEl.querySelectorAll('.hand-card').forEach(el=>{
       el.classList.toggle('is-selected', el.dataset.uid===state.selectedUid);
     });
@@ -3588,7 +3672,7 @@ function renderTransferGame(){
 
   renderClubCrest('game-club-crest', state.club);
   document.getElementById('game-club-name').textContent = state.club.name;
-  document.getElementById('game-club-league').textContent = `${state.league} — Mercato`;
+  document.getElementById('game-club-league').textContent = `${state.league} - Mercato`;
 
   document.getElementById('formation-grid').innerHTML = `<div class="hand-empty" style="padding:8px 0;">Formation verrouillée pendant le mercato.</div>`;
 
@@ -3630,7 +3714,7 @@ function renderTransferGame(){
     draftBtn.disabled = true;
     relanceBtn.disabled = true;
     relanceBtn.textContent = 'Terminer le mercato';
-    rerollCountEl.textContent = `Poste concerné : ${slot ? (isBenchSlot(tr.activeSlotId) ? 'Remplaçant ('+compatiblePositions(slot.player).join('/')+')' : slot.label) : ''} — conservez votre joueur ou remplacez-le.`;
+    rerollCountEl.textContent = `Poste concerné : ${slot ? (isBenchSlot(tr.activeSlotId) ? 'Remplaçant ('+compatiblePositions(slot.player).join('/')+')' : slot.label) : ''} - conservez votre joueur ou remplacez-le.`;
   } else { // 'review'
     state.hand = [];
     draftBtn.textContent = 'Mercato terminé (3/3 choix utilisés)';
@@ -3656,7 +3740,7 @@ function poissonSample(lambda){
   return k - 1;
 }
 
-// Round-robin calendar (circle method) — single round, every club plays every other once
+// Round-robin calendar (circle method) - single round, every club plays every other once
 function buildSingleLeg(clubIds){
   const list = clubIds.slice();
   const n = list.length;
@@ -3694,7 +3778,7 @@ function estimateClubStrength(club){
   if(roster && roster.length){
     const recent = roster.filter(p => p.saison >= '2022-2023');
     const pool = recent.length >= 11 ? recent : roster;
-    // Top 11 to match the size of the player's own starting XI —
+    // Top 11 to match the size of the player's own starting XI,
     // comparing like for like rather than 11 vs 16.
     const sorted = [...pool].sort((a,b)=>b.note-a.note).slice(0, 11);
     const avg = sorted.reduce((a,p)=>a+p.note,0) / sorted.length;
@@ -3744,7 +3828,7 @@ function initOtherLeagues(){
 }
 
 // Avance chaque autre championnat jusqu'à la même FRACTION de sa propre
-// saison que celle atteinte par le joueur — les championnats n'ont pas
+// saison que celle atteinte par le joueur - les championnats n'ont pas
 // forcément le même nombre de journées (34 pour 18 clubs, 38 pour 20),
 // donc on se cale sur une progression relative plutôt qu'un round exact.
 function tickOtherLeagues(){
@@ -3842,7 +3926,7 @@ function simulateCupStage(stageKey){
   else if(stageKey==='final'){ cup.stage = 'done'; cup.champion = winners[0]; }
 }
 
-const CUP_STAGE_LABEL = { r16:'Coupe — 8èmes de finale', qf:'Coupe — Quarts de finale', sf:'Coupe — Demi-finales', final:'Coupe — Finale' };
+const CUP_STAGE_LABEL = { r16:'Coupe - 8èmes de finale', qf:'Coupe - Quarts de finale', sf:'Coupe - Demi-finales', final:'Coupe - Finale' };
 
 function enterSeason(){
   const league = LEAGUES[state.league];
@@ -4032,14 +4116,14 @@ function euroTierFromRank(quotas, rank){
 // classement simulé de la saison précédente ; les 4 autres restent figés
 // sur les vrais résultats 2025-2026.
 //
-// `euroWinners` (optionnel) : { cl, el, ecl } — les vainqueurs des 3 coupes
+// `euroWinners` (optionnel) : { cl, el, ecl } - les vainqueurs des 3 coupes
 // d'Europe de la saison précédente. Chaque victoire donne à son club une
 // place de qualification bonus au palier supérieur (Conférence -> Europa,
 // Europa -> Ligue des Champions, LDC -> LDC garantie), qui vient S'AJOUTER
 // aux places de championnat plutôt que d'en retirer une à quelqu'un
 // d'autre. Si le club était déjà qualifié à ce palier (ou mieux), il n'y a
 // aucun effet. Sinon, il est retiré du classement avant de recalculer les
-// paliers des autres — ce qui fait automatiquement remonter tout le monde
+// paliers des autres - ce qui fait automatiquement remonter tout le monde
 // en dessous d'un cran, exactement comme pour le vainqueur de la coupe
 // nationale.
 function computeQualificationMapWithCascade(standing, quotas, cupWinnerId, euroWinners){
@@ -4145,7 +4229,7 @@ function clubNameForAnyId(id){
 
 // Simule intégralement, en une fois et sans détail match par match, la
 // compétition européenne d'un palier que le joueur ne dispute pas cette
-// saison (son propre club n'y participe pas) — uniquement pour déterminer
+// saison (son propre club n'y participe pas) - uniquement pour déterminer
 // un vainqueur plausible, au même titre que les 4 championnats simulés
 // instantanément par l'IA. Reproduit le même format à 36 clubs (phase de
 // ligue à 8 journées, barrages, 8es, quarts, demies, finale).
@@ -4228,7 +4312,7 @@ function maybeResolveSuperCup(){
 }
 
 // 8 adversaires différents par club : on prend les 8 premiers tours d'un
-// aller-simple complet (méthode du cercle) sur les 36 participants — chaque
+// aller-simple complet (méthode du cercle) sur les 36 participants - chaque
 // tour y est une confrontation valide sans répétition d'adversaire.
 function buildEuroLeaguePhase(participants){
   const ids = shuffleArr(participants.map(c=>c.id));
@@ -4311,7 +4395,7 @@ function simulateEuroLeagueRound(domesticRoundIdx){
     else if(hg < ag){ away.w++; away.pts += 3; home.l++; }
     else { home.d++; away.d++; home.pts++; away.pts++; }
   });
-  euro.resultsByRound.push({ label:`Phase de ligue — J${euro.currentRound+1}`, matches:roundResults, roundIdx:domesticRoundIdx });
+  euro.resultsByRound.push({ label:`Phase de ligue - J${euro.currentRound+1}`, matches:roundResults, roundIdx:domesticRoundIdx });
   euro.currentRound++;
   if(euro.currentRound >= euro.calendar.length){
     const ranked = sortedEuroStandings();
@@ -4420,6 +4504,36 @@ function euroTrophyBadgesHtml(clubId, euroFullyDone){
   return html;
 }
 
+// Rangée de pastilles partagée entre le championnat et l'Europe - au lieu
+// d'un bouton séparé "Voir l'Europe", la coupe d'Europe disputée cette
+// saison apparaît comme une pastille de plus, à côté des 5 championnats.
+function renderLeagueSwitchRow(activeIsEuro){
+  const switchEl = document.getElementById('league-switch');
+  const viewLeague = state.standingsLeagueView || state.league;
+  const euro = state.euro;
+  let html = Object.keys(LEAGUES).map(lg => `
+    <button class="league-switch-btn ${(!activeIsEuro && lg===viewLeague)?'active':''}" data-league="${lg}">${lg}${lg===state.league?' ★':''}</button>
+  `).join('');
+  if(euro){
+    html += `<button class="league-switch-btn ${activeIsEuro?'active':''}" data-euro="1">${EURO_LABELS[euro.tier]} ★</button>`;
+  }
+  switchEl.innerHTML = html;
+  switchEl.querySelectorAll('.league-switch-btn[data-league]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.standingsLeagueView = btn.dataset.league;
+      state.seasonView = 'league';
+      renderSeason();
+    });
+  });
+  const europeBtn = switchEl.querySelector('.league-switch-btn[data-euro]');
+  if(europeBtn){
+    europeBtn.addEventListener('click', ()=>{
+      state.seasonView = 'euro';
+      renderSeason();
+    });
+  }
+}
+
 function renderLeaguePanels(){
   const season = state.season;
   const seasonDone = season.currentRound >= season.calendar.length;
@@ -4427,16 +4541,7 @@ function renderLeaguePanels(){
   const viewLeague = state.standingsLeagueView || state.league;
   const isOwnLeague = viewLeague === state.league;
 
-  const switchEl = document.getElementById('league-switch');
-  switchEl.innerHTML = Object.keys(LEAGUES).map(lg => `
-    <button class="league-switch-btn ${lg===viewLeague?'active':''}" data-league="${lg}">${lg}${lg===state.league?' ★':''}</button>
-  `).join('');
-  switchEl.querySelectorAll('.league-switch-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.standingsLeagueView = btn.dataset.league;
-      renderSeason();
-    });
-  });
+  renderLeagueSwitchRow(false);
 
   let standingArr, zoneMap;
   if(isOwnLeague){
@@ -4489,7 +4594,7 @@ function renderLeaguePanels(){
 
   const resultsEl = document.getElementById('results-list');
   if(!isOwnLeague){
-    resultsEl.innerHTML = `<div class="hand-empty">${viewLeague} est simulé automatiquement par l'IA — voici son classement final, sans détail match par match.</div>`;
+    resultsEl.innerHTML = `<div class="hand-empty">${viewLeague} est simulé automatiquement par l'IA - voici son classement final, sans détail match par match.</div>`;
     return;
   }
 
@@ -4504,7 +4609,7 @@ function renderLeaguePanels(){
   }
   if(state.euro){
     state.euro.resultsByRound.forEach(er=>{
-      timeline.push({ type:`euro-${state.euro.tier}`, roundIdx:er.roundIdx, label:`${EURO_LABELS[state.euro.tier]} — ${er.label}`, matches:er.matches });
+      timeline.push({ type:`euro-${state.euro.tier}`, roundIdx:er.roundIdx, label:`${EURO_LABELS[state.euro.tier]} - ${er.label}`, matches:er.matches });
     });
   }
   timeline.sort((a,b)=>a.roundIdx - b.roundIdx);
@@ -4538,7 +4643,7 @@ const EURO_STAGE_LABEL = { league:'Phase de ligue', playoff:'Barrages', ro16:'Hu
 
 function renderEuroPanels(){
   const euro = state.euro;
-  document.getElementById('league-switch').innerHTML = '';
+  renderLeagueSwitchRow(true);
   const tierClass = `euro-${euro.tier}`;
   const table = document.getElementById('standings-table');
   const rows = sortedEuroStandings().map((s,i)=>`
@@ -4559,13 +4664,13 @@ function renderEuroPanels(){
     </div>
   ` + rows + `
     <div class="st-legend">
-      <span class="st-legend-item"><i class="st-dot ${tierClass}"></i>${EURO_LABELS[euro.tier]} — ${EURO_STAGE_LABEL[euro.stage]}${euro.calendar.length ? ` (${Math.min(euro.currentRound, euro.calendar.length)}/${euro.calendar.length} journées de ligue jouées)` : ''}</span>
+      <span class="st-legend-item"><i class="st-dot ${tierClass}"></i>${EURO_LABELS[euro.tier]} - ${EURO_STAGE_LABEL[euro.stage]}${euro.calendar.length ? ` (${Math.min(euro.currentRound, euro.calendar.length)}/${euro.calendar.length} journées de ligue jouées)` : ''}</span>
     </div>
   `;
 
   const resultsEl = document.getElementById('results-list');
   if(!euro.resultsByRound.length){
-    resultsEl.innerHTML = `<div class="hand-empty">Aucun match européen joué pour l'instant — les rencontres démarrent autour de la 10e journée de championnat.</div>`;
+    resultsEl.innerHTML = `<div class="hand-empty">Aucun match européen joué pour l'instant - les rencontres démarrent autour de la 10e journée de championnat.</div>`;
   } else {
     resultsEl.innerHTML = euro.resultsByRound.slice().reverse().map(entry=>`
       <div class="rd-heading ${tierClass}-text">${entry.label}</div>
@@ -4610,12 +4715,9 @@ function renderSeason(){
   const nextSeasonBtn = document.getElementById('btn-next-season');
   backBtn.disabled = season.currentRound > 0;
 
-  if(euro){
-    euroToggle.style.display = '';
-    euroToggle.textContent = state.seasonView==='euro' ? 'Voir le championnat' : `Voir l'Europe (${EURO_LABELS[euro.tier]})`;
-  } else {
-    euroToggle.style.display = 'none';
-  }
+  // Le passage championnat <-> Europe se fait désormais via la pastille
+  // dédiée dans la même rangée que les championnats (renderLeagueSwitchRow).
+  euroToggle.style.display = 'none';
 
   const euroPlaysItself = euro && ['league','playoff','ro16','qf'].includes(euro.stage);
   if(state.seasonView === 'euro' && euro){
@@ -4623,7 +4725,7 @@ function renderSeason(){
     if(euroPlaysItself){
       nextBtn.disabled = true;
       simBtn.disabled = true;
-      nextBtn.textContent = `${EURO_STAGE_LABEL[euro.stage]} — se joue avec le championnat`;
+      nextBtn.textContent = `${EURO_STAGE_LABEL[euro.stage]} - se joue avec le championnat`;
       simBtn.textContent = 'Simuler la campagne';
     } else {
       nextBtn.disabled = euroDone;
@@ -4656,7 +4758,7 @@ function renderSeason(){
           ? `Vous remportez la ${EURO_LABELS[euro.tier]} !`
           : `${championClub.name} remporte la ${EURO_LABELS[euro.tier]}.`;
       } else {
-        banner.textContent = `${EURO_LABELS[euro.tier]} — ${EURO_STAGE_LABEL[euro.stage]} en cours.`;
+        banner.textContent = `${EURO_LABELS[euro.tier]} - ${EURO_STAGE_LABEL[euro.stage]} en cours.`;
       }
     } else {
       const standing = sortedStandings();
@@ -4671,7 +4773,7 @@ function renderSeason(){
       if(euro){
         euroLine = euro.stage === 'done'
           ? (euro.champion === state.club.id ? ` Vous avez remporté la ${EURO_LABELS[euro.tier]} !` : ` Votre campagne de ${EURO_LABELS[euro.tier]} s'est terminée.`)
-          : ` Votre campagne de ${EURO_LABELS[euro.tier]} se poursuit (${EURO_STAGE_LABEL[euro.stage]}) — voir l'onglet Europe.`;
+          : ` Votre campagne de ${EURO_LABELS[euro.tier]} se poursuit (${EURO_STAGE_LABEL[euro.stage]}) - voir l'onglet Europe.`;
       }
       let continentalLine = '';
       let scoreLine = '';
@@ -4695,7 +4797,7 @@ function renderSeason(){
       }
       banner.textContent = (myPos===1
         ? `Champion ! ${state.club.name} termine 1er de ${state.league} avec ${standing[0].pts} points.`
-        : `${state.club.name} termine ${myPos}${myPos===1?'er':'ème'} de ${state.league} — ${champion.name} est champion avec ${champion.pts} points.`) + cupLine + euroLine + continentalLine + scoreLine;
+        : `${state.club.name} termine ${myPos}${myPos===1?'er':'ème'} de ${state.league} - ${champion.name} est champion avec ${champion.pts} points.`) + cupLine + euroLine + continentalLine + scoreLine;
     }
   } else if(banner){
     banner.remove();
@@ -4708,7 +4810,7 @@ function startNextSeason(){
 }
 
 // ============================================================
-// COMPTE & HISTORIQUE DE CARRIÈRE (Supabase — email + Google)
+// COMPTE & HISTORIQUE DE CARRIÈRE (Supabase - email + Google)
 // ============================================================
 
 const SUPABASE_URL = 'https://wzulqvqsyhuxrebmtbma.supabase.co';
@@ -4727,8 +4829,8 @@ function currentUserLabel(){
 }
 
 // Nom affiché aux AUTRES joueurs (Panthéon). Contrairement à
-// currentUserLabel(), ne retombe jamais sur l'email — celui-ci ne doit
-// jamais être exposé publiquement — mais sur un pseudo anonyme stable.
+// currentUserLabel(), ne retombe jamais sur l'email - celui-ci ne doit
+// jamais être exposé publiquement - mais sur un pseudo anonyme stable.
 function pantheonDisplayName(){
   if(!state.session) return 'Invité';
   const u = state.session.user;
@@ -4753,18 +4855,42 @@ function updateAccountMenuLabel(){
   }
 }
 
-function populateFavoriteClubOptions(){
-  const select = document.getElementById('profile-favorite-club');
-  if(!select) return;
-  const current = (state.session && state.session.user.user_metadata && state.session.user.user_metadata.favorite_club) || '';
+// --- Petits utilitaires pour les menus déroulants personnalisés (.pf-dropdown) ---
+// Lire/écrire leur valeur, et peupler leurs options - utilisé pour Genre et
+// Club favori (compte + onboarding) et pour les filtres du Panthéon.
+function getDropdownValue(toggleId){
+  const el = document.getElementById(toggleId);
+  return el ? (el.dataset.value || '') : '';
+}
+function setDropdownValue(toggleId, labelId, menuId, value){
+  const toggle = document.getElementById(toggleId);
+  const menu = document.getElementById(menuId);
+  const label = document.getElementById(labelId);
+  if(!toggle || !menu) return;
+  const opt = menu.querySelector(`.pf-dropdown-option[data-value="${CSS.escape(value || '')}"]`) || menu.querySelector('.pf-dropdown-option[data-value=""]');
+  toggle.dataset.value = opt ? opt.dataset.value : '';
+  if(label && opt) label.textContent = opt.textContent;
+  menu.querySelectorAll('.pf-dropdown-option').forEach(o=>o.classList.toggle('is-active', o===opt));
+}
+function populateDropdownOptions(menuId, names, placeholder){
+  const menu = document.getElementById(menuId);
+  if(!menu) return;
+  menu.innerHTML = `<button class="pf-dropdown-option is-active" data-value="">${placeholder}</button>`
+    + names.map(n=>`<button class="pf-dropdown-option" data-value="${n}">${n}</button>`).join('');
+}
+function playableClubNames(){
   const clubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false);
-  const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
-  select.innerHTML = `<option value="">Aucun</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
-  select.value = names.includes(current) ? current : '';
+  return Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
+}
+
+function populateFavoriteClubOptions(){
+  const current = (state.session && state.session.user.user_metadata && state.session.user.user_metadata.favorite_club) || '';
+  populateDropdownOptions('profile-favorite-club-menu', playableClubNames(), 'Aucun');
+  setDropdownValue('profile-favorite-club-toggle', 'profile-favorite-club-label', 'profile-favorite-club-menu', current);
 }
 
 // Propose de compléter le profil (pseudo, date de naissance, genre, club
-// favori) juste après une connexion — jamais si déjà complet, jamais deux
+// favori) juste après une connexion - jamais si déjà complet, jamais deux
 // fois dans la même session si le joueur a choisi "Plus tard".
 function maybeShowOnboarding(afterCb){
   const meta = state.session && state.session.user.user_metadata;
@@ -4776,10 +4902,7 @@ function maybeShowOnboarding(afterCb){
 }
 
 function populateOnboardingClubOptions(){
-  const select = document.getElementById('onboarding-favorite-club');
-  const clubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false);
-  const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
-  select.innerHTML = `<option value="">Aucun</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+  populateDropdownOptions('onboarding-favorite-club-menu', playableClubNames(), 'Aucun');
 }
 
 function showOnboardingModal(afterCb){
@@ -4787,9 +4910,9 @@ function showOnboardingModal(afterCb){
   const meta = state.session.user.user_metadata || {};
   document.getElementById('onboarding-pseudo').value = meta.pseudo || '';
   document.getElementById('onboarding-birthdate').value = meta.birthdate || '';
-  document.getElementById('onboarding-gender').value = meta.gender || '';
+  setDropdownValue('onboarding-gender-toggle', 'onboarding-gender-label', 'onboarding-gender-menu', meta.gender || '');
   populateOnboardingClubOptions();
-  document.getElementById('onboarding-favorite-club').value = meta.favorite_club || '';
+  setDropdownValue('onboarding-favorite-club-toggle', 'onboarding-favorite-club-label', 'onboarding-favorite-club-menu', meta.favorite_club || '');
   document.getElementById('onboarding-hint').textContent = '';
   document.getElementById('onboarding-modal').style.display = 'flex';
 }
@@ -4819,8 +4942,8 @@ async function saveOnboarding(){
     const { data, error } = await sbClient.auth.updateUser({ data:{
       pseudo,
       birthdate: document.getElementById('onboarding-birthdate').value || null,
-      gender: document.getElementById('onboarding-gender').value || null,
-      favorite_club: document.getElementById('onboarding-favorite-club').value || null,
+      gender: getDropdownValue('onboarding-gender-toggle') || null,
+      favorite_club: getDropdownValue('onboarding-favorite-club-toggle') || null,
       profile_completed: true
     }});
     if(error){ hint.textContent = `Erreur : ${error.message}`; return; }
@@ -4835,8 +4958,6 @@ async function saveOnboarding(){
 async function saveProfile(){
   const pseudoInput = document.getElementById('pseudo-input');
   const birthdateInput = document.getElementById('profile-birthdate');
-  const genderInput = document.getElementById('profile-gender');
-  const favoriteClubInput = document.getElementById('profile-favorite-club');
   const hint = document.getElementById('pseudo-hint');
   const btn = document.getElementById('btn-save-profile');
 
@@ -4850,8 +4971,8 @@ async function saveProfile(){
     const { data, error: updErr } = await sbClient.auth.updateUser({ data:{
       pseudo,
       birthdate: birthdateInput.value || null,
-      gender: genderInput.value || null,
-      favorite_club: favoriteClubInput.value || null,
+      gender: getDropdownValue('profile-gender-toggle') || null,
+      favorite_club: getDropdownValue('profile-favorite-club-toggle') || null,
       profile_completed: true
     }});
     if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
@@ -4938,7 +5059,7 @@ async function submitAuthForm(){
       const { data, error } = await sbClient.auth.signUp({ email, password });
       if(error){ showAuthError(error.message); return; }
       if(!data.session){
-        showAuthError("Compte créé — vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.");
+        showAuthError("Compte créé - vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.");
         return;
       }
       state.session = data.session;
@@ -4958,7 +5079,7 @@ async function submitAuthForm(){
 
 const PENDING_STATE_KEY = 'specialone_pending_game_state';
 
-// Sauvegarde continue de la partie en cours dans localStorage — pour que
+// Sauvegarde continue de la partie en cours dans localStorage - pour que
 // recharger la page (ou revenir d'une redirection Google) ne remette jamais
 // à zéro : draft en cours, saison en cours, transfert en cours, etc.
 function snapshotGameState(){
@@ -4996,7 +5117,7 @@ function saveSnapshotNow(){
 }
 
 // Les écrans jeu/saison se re-rendent très souvent (chaque clic, et même en
-// boucle serrée lors d'une simulation instantanée de saison) — on ne veut
+// boucle serrée lors d'une simulation instantanée de saison) - on ne veut
 // pas ré-écrire localStorage à chaque fois, donc la sauvegarde réelle est
 // différée de quelques centaines de ms après la dernière activité.
 let saveSnapshotTimer = null;
@@ -5008,7 +5129,7 @@ function scheduleSaveSnapshot(){
 // Ne consomme PAS la sauvegarde (contrairement à avant) : un simple
 // rechargement doit pouvoir la relire indéfiniment, elle n'est retirée que
 // lorsqu'il n'y a plus rien de pertinent à restaurer (déconnexion, retour
-// à l'accueil volontaire, etc. — gérés ailleurs).
+// à l'accueil volontaire, etc. - gérés ailleurs).
 function restoreGameStateSnapshot(){
   const raw = localStorage.getItem(PENDING_STATE_KEY);
   if(!raw) return null;
@@ -5058,7 +5179,7 @@ function routeToRestoredScreen(snap, opts){
 async function signInWithGoogle(){
   if(!sbClient) return;
   // IMPORTANT : ne jamais inclure le hash de routing de l'app (#account,
-  // #season, ...) dans redirectTo — Supabase a besoin d'ajouter son propre
+  // #season, ...) dans redirectTo - Supabase a besoin d'ajouter son propre
   // hash (#access_token=...) au retour de Google, et les deux hash entrent
   // en conflit sinon.
   const redirectTo = window.location.origin + window.location.pathname + window.location.search;
@@ -5276,7 +5397,7 @@ async function renderPantheonScreen(){
         <div class="pantheon-rank">${i+1}</div>
         <div>
           <div class="pantheon-name">${r.player_name || 'Manager anonyme'}</div>
-          <div class="pantheon-sub">${r.club} (${r.league}) — Saison ${r.season_number}</div>
+          <div class="pantheon-sub">${r.club} (${r.league}) - Saison ${r.season_number}</div>
         </div>
         <div class="pantheon-score">${r.score.total}<span class="l">pts</span></div>
       </div>
@@ -5310,7 +5431,7 @@ function populatePantheonClubFilter(){
   const league = state.pantheonFilterLeague;
   const pool = league ? (LEAGUES[league] || []) : Object.values(LEAGUES).flat();
   // Seuls les clubs réellement jouables (effectif gérable par le joueur)
-  // ont un sens au Palmarès — les autres ne servent que d'adversaires IA.
+  // ont un sens au Palmarès - les autres ne servent que d'adversaires IA.
   const clubs = pool.filter(c => c.playable !== false);
   const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
   if(!names.includes(state.pantheonFilterClub)) state.pantheonFilterClub = '';
@@ -5325,7 +5446,7 @@ async function renderAccountScreen(){
   const meta = state.session.user.user_metadata || {};
   document.getElementById('pseudo-input').value = meta.pseudo || '';
   document.getElementById('profile-birthdate').value = meta.birthdate || '';
-  document.getElementById('profile-gender').value = meta.gender || '';
+  setDropdownValue('profile-gender-toggle', 'profile-gender-label', 'profile-gender-menu', meta.gender || '');
   populateFavoriteClubOptions();
   document.getElementById('pseudo-hint').textContent = '';
 }
@@ -5370,7 +5491,7 @@ async function renderPalmaresScreen(){
       return `
         <div class="account-season-card">
           <div class="account-season-head">
-            <div class="account-season-title">Saison ${r.season_number} — ${r.club} (${r.league})</div>
+            <div class="account-season-title">Saison ${r.season_number} - ${r.club} (${r.league})</div>
             ${r.is_champion ? '<span class="st-badge st-badge-champ">C</span>' : ''}
             ${r.cup_won ? '<span class="st-badge st-badge-cup">CN</span>' : ''}
             ${r.euro_result && r.euro_result.won ? `<span class="st-badge st-badge-${r.euro_result.tier==='cl'?'c1':r.euro_result.tier==='el'?'c3':'c4'}">${EURO_TROPHY_BADGE[r.euro_result.tier]}</span>` : ''}
@@ -5447,10 +5568,15 @@ document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
 });
 document.getElementById('btn-save-profile').addEventListener('click', saveProfile);
 
-function setupPfDropdown(dropdownId, toggleId, menuId){
+// Composant générique de menu déroulant personnalisé (utilisé pour les
+// filtres du Panthéon, et pour Genre / Club favori dans les formulaires de
+// profil) - évite les <select> natifs dont la liste ouverte ne peut pas
+// être stylée et casse le thème sombre.
+function setupCustomSelect(dropdownId, toggleId, menuId, labelId, onSelect){
   const dropdown = document.getElementById(dropdownId);
   const toggle = document.getElementById(toggleId);
   const menu = document.getElementById(menuId);
+  const label = labelId ? document.getElementById(labelId) : null;
   toggle.addEventListener('click', (e)=>{
     e.stopPropagation();
     document.querySelectorAll('.pf-dropdown.open').forEach(d=>{ if(d !== dropdown) d.classList.remove('open'); });
@@ -5460,18 +5586,24 @@ function setupPfDropdown(dropdownId, toggleId, menuId){
     const opt = e.target.closest('.pf-dropdown-option');
     if(!opt) return;
     dropdown.classList.remove('open');
-    if(dropdownId === 'pf-league-dropdown'){
-      state.pantheonFilterLeague = opt.dataset.value;
-      document.getElementById('pf-league-label').textContent = opt.dataset.value || 'Tous les championnats';
-      menu.querySelectorAll('.pf-dropdown-option').forEach(o=>o.classList.toggle('is-active', o===opt));
-    } else {
-      state.pantheonFilterClub = opt.dataset.value;
-    }
-    renderPantheonScreen();
+    toggle.dataset.value = opt.dataset.value;
+    if(label) label.textContent = opt.textContent;
+    menu.querySelectorAll('.pf-dropdown-option').forEach(o=>o.classList.toggle('is-active', o===opt));
+    if(onSelect) onSelect(opt.dataset.value);
   });
 }
-setupPfDropdown('pf-league-dropdown', 'pf-league-toggle', 'pf-league-menu');
-setupPfDropdown('pf-club-dropdown', 'pf-club-toggle', 'pf-club-menu');
+setupCustomSelect('pf-league-dropdown', 'pf-league-toggle', 'pf-league-menu', 'pf-league-label', (value)=>{
+  state.pantheonFilterLeague = value;
+  renderPantheonScreen();
+});
+setupCustomSelect('pf-club-dropdown', 'pf-club-toggle', 'pf-club-menu', null, (value)=>{
+  state.pantheonFilterClub = value;
+  renderPantheonScreen();
+});
+setupCustomSelect('profile-gender-dropdown', 'profile-gender-toggle', 'profile-gender-menu', 'profile-gender-label');
+setupCustomSelect('profile-favorite-club-dropdown', 'profile-favorite-club-toggle', 'profile-favorite-club-menu', 'profile-favorite-club-label');
+setupCustomSelect('onboarding-gender-dropdown', 'onboarding-gender-toggle', 'onboarding-gender-menu', 'onboarding-gender-label');
+setupCustomSelect('onboarding-favorite-club-dropdown', 'onboarding-favorite-club-toggle', 'onboarding-favorite-club-menu', 'onboarding-favorite-club-label');
 document.addEventListener('click', ()=>{
   document.querySelectorAll('.pf-dropdown.open').forEach(d=>d.classList.remove('open'));
 });
@@ -5517,7 +5649,7 @@ window.addEventListener('pagehide', saveSnapshotNow);
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnapshotNow(); });
 
 // Ne jamais écraser le hash au démarrage s'il contient un retour de
-// connexion OAuth (#access_token=...) — sinon Supabase perd le jeton avant
+// connexion OAuth (#access_token=...) - sinon Supabase perd le jeton avant
 // de pouvoir l'analyser, et la connexion Google échoue silencieusement.
 // Dans ce cas, on laisse initAuth() gérer la restauration une fois la
 // session détectée.
