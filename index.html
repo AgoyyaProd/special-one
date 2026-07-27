@@ -380,6 +380,38 @@ button{ font-family:inherit; cursor:pointer; }
   transition:all .15s ease;
 }
 .gm-account-btn:hover{ color:var(--text); border-color:rgba(255,255,255,.35); }
+.gm-account-menu{ position:relative; }
+.gm-account-menu .gm-account-btn{ max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gm-account-dropdown{
+  display:none;
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:180px;
+  background:var(--surface-2);
+  border:1px solid var(--border-2);
+  border-radius:var(--r-md);
+  padding:6px;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+  z-index:50;
+  flex-direction:column;
+  gap:2px;
+}
+.gm-account-menu.open .gm-account-dropdown{ display:flex; }
+.gm-dropdown-item{
+  font-family:var(--sans);
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--text-dim);
+  background:none;
+  border:none;
+  text-align:left;
+  padding:9px 12px;
+  border-radius:var(--r-sm);
+  width:100%;
+}
+.gm-dropdown-item:hover{ color:var(--text); background:rgba(255,255,255,.06); }
+.gm-dropdown-item-danger:hover{ color:#F87171; background:rgba(248,113,113,.1); }
 .gm-logo-img{
   width:40px; height:40px;
   object-fit:contain;
@@ -746,7 +778,7 @@ button{ font-family:inherit; cursor:pointer; }
 .standings-table{ display:flex; flex-direction:column; }
 .st-row{
   display:grid;
-  grid-template-columns:28px 1fr 34px 34px 34px 44px 50px;
+  grid-template-columns:28px 1fr 30px 30px 30px 34px 44px 50px;
   align-items:center;
   gap:8px;
   padding:10px 8px;
@@ -1315,7 +1347,7 @@ button{ font-family:inherit; cursor:pointer; }
   .gm-header-right{ display:none; }
   .season-wrap{ padding:18px var(--gutter) 40px; }
   .season-top{ flex-direction:column; align-items:flex-start; }
-  .st-row{ grid-template-columns:22px 1fr 26px 26px 26px 34px 40px; font-size:11px; gap:5px; }
+  .st-row{ grid-template-columns:22px 1fr 22px 22px 22px 28px 34px 40px; font-size:10.5px; gap:4px; }
   .fx-row{ font-size:12px; }
   .gm-logo{ font-size:19px; gap:8px; }
   .howto{ padding:0 var(--gutter) 60px; }
@@ -1688,8 +1720,14 @@ button{ font-family:inherit; cursor:pointer; }
   <div class="gm-header">
     <div class="gm-header-inner">
     <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> THE SPECIAL ONE</div>
-    <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
-    <button class="gm-account-btn" id="btn-account">Mon compte</button>
+    <div class="gm-account-menu" id="account-menu">
+      <button class="gm-account-btn" id="btn-account-menu-toggle">Mon compte</button>
+      <div class="gm-account-dropdown" id="account-dropdown">
+        <button class="gm-dropdown-item" id="menu-item-account">Mon compte</button>
+        <button class="gm-dropdown-item" id="menu-item-pantheon">Palmarès</button>
+        <button class="gm-dropdown-item gm-dropdown-item-danger" id="menu-item-logout">Déconnexion</button>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -1868,7 +1906,7 @@ button{ font-family:inherit; cursor:pointer; }
       </div>
 
       <div class="pseudo-editor">
-        <label for="pseudo-input" class="pseudo-label">Pseudo public (affiché au Panthéon, jamais ton nom ou ton email)</label>
+        <label for="pseudo-input" class="pseudo-label">Pseudo public (affiché au Palmarès, jamais ton nom ou ton email)</label>
         <div class="pseudo-row">
           <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
           <button class="season-btn season-btn-primary" id="btn-save-pseudo">Enregistrer</button>
@@ -1888,7 +1926,7 @@ button{ font-family:inherit; cursor:pointer; }
     <div class="account-shell">
       <div class="account-header">
         <div>
-          <div class="account-title">Panthéon</div>
+          <div class="account-title">Palmarès</div>
           <div class="account-subtitle">Les meilleures performances, toutes carrières confondues</div>
         </div>
       </div>
@@ -3182,6 +3220,7 @@ function renderClubCrest(elId, club){
 }
 
 function renderGame(){
+  scheduleSaveSnapshot();
   if(state.transfer){ renderTransferGame(); return; }
   // club box
   renderClubCrest('game-club-crest', state.club);
@@ -4278,6 +4317,7 @@ function renderLeaguePanels(){
       <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
+      <div class="st-num">${s.d}</div>
       <div class="st-num">${s.l}</div>
       <div class="st-num">${s.gf-s.ga>0?'+':''}${s.gf-s.ga}</div>
       <div class="st-pts">${s.pts}</div>
@@ -4285,7 +4325,7 @@ function renderLeaguePanels(){
   `).join('');
   table.innerHTML = `
     <div class="st-row st-head">
-      <div>#</div><div>Club</div><div>J</div><div>V</div><div>D</div><div>Diff</div><div>Pts</div>
+      <div>#</div><div>Club</div><div>J</div><div>V</div><div>N</div><div>D</div><div>Diff</div><div>Pts</div>
     </div>
   ` + rows + `
     <div class="st-legend">
@@ -4363,6 +4403,7 @@ function renderEuroPanels(){
       <div class="st-name">${s.name}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
+      <div class="st-num">${s.d}</div>
       <div class="st-num">${s.l}</div>
       <div class="st-num">${s.gf-s.ga>0?'+':''}${s.gf-s.ga}</div>
       <div class="st-pts">${s.pts}</div>
@@ -4370,7 +4411,7 @@ function renderEuroPanels(){
   `).join('');
   table.innerHTML = `
     <div class="st-row st-head">
-      <div>#</div><div>Club</div><div>J</div><div>V</div><div>D</div><div>Diff</div><div>Pts</div>
+      <div>#</div><div>Club</div><div>J</div><div>V</div><div>N</div><div>D</div><div>Diff</div><div>Pts</div>
     </div>
   ` + rows + `
     <div class="st-legend">
@@ -4401,6 +4442,7 @@ function renderEuroPanels(){
 }
 
 function renderSeason(){
+  scheduleSaveSnapshot();
   const season = state.season;
   if(!season) return;
 
@@ -4551,6 +4593,22 @@ function pantheonDisplayName(){
   return 'Manager-' + u.id.slice(0, 6);
 }
 
+// Le libellé du bouton d'en-tête reflète l'état de connexion : le pseudo
+// une fois connecté, "Mon compte" sinon. L'option "Déconnexion" du menu
+// n'a de sens que si une session existe.
+function updateAccountMenuLabel(){
+  const btn = document.getElementById('btn-account-menu-toggle');
+  const logoutItem = document.getElementById('menu-item-logout');
+  if(!btn || !logoutItem) return;
+  if(state.session){
+    btn.textContent = pantheonDisplayName();
+    logoutItem.style.display = '';
+  } else {
+    btn.textContent = 'Mon compte';
+    logoutItem.style.display = 'none';
+  }
+}
+
 async function savePseudo(){
   const input = document.getElementById('pseudo-input');
   const hint = document.getElementById('pseudo-hint');
@@ -4565,9 +4623,11 @@ async function savePseudo(){
     const { data, error: updErr } = await sbClient.auth.updateUser({ data:{ pseudo } });
     if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
     state.session.user = data.user;
+    updateAccountMenuLabel();
+    document.getElementById('account-profile-name').textContent = pantheonDisplayName();
 
     // Répercute le nouveau pseudo sur les saisons déjà enregistrées, pour
-    // que l'historique du Panthéon reste cohérent avec le compte.
+    // que l'historique du Palmarès reste cohérent avec le compte.
     const { error: histErr } = await sbClient
       .from('career_history')
       .update({ player_name: pseudo })
@@ -4584,8 +4644,10 @@ async function initAuth(){
   if(!sbClient) return;
   const { data } = await sbClient.auth.getSession();
   state.session = data.session;
+  updateAccountMenuLabel();
   sbClient.auth.onAuthStateChange((event, session)=>{
     state.session = session;
+    updateAccountMenuLabel();
     if(session && state.pendingAfterProfile){
       document.getElementById('profile-modal').style.display = 'none';
       const cb = state.pendingAfterProfile;
@@ -4598,28 +4660,7 @@ async function initAuth(){
     if(session && sessionStorage.getItem('pendingGoogleAuth')){
       sessionStorage.removeItem('pendingGoogleAuth');
       const snap = restoreGameStateSnapshot();
-
-      if(snap && snap.season){
-        history.replaceState({ screen:'season' }, '', location.pathname + location.search + '#season');
-        showScreen('season', { skipHistory:true });
-        if(snap.club) applyClubTheme(snap.club);
-        if(snap.kind === 'recordSeason'){
-          // La sauvegarde de fin de saison avait été bloquée en attendant
-          // la connexion : on la relance maintenant qu'une session existe.
-          state.season.recorded = false;
-          recordSeasonIfNeeded();
-        }
-        renderSeason();
-      } else if(snap && snap.club){
-        history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
-        showScreen('game', { skipHistory:true });
-        applyClubTheme(snap.club);
-        renderGame();
-      } else {
-        history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
-        showScreen('account', { skipHistory:true });
-        renderAccountScreen();
-      }
+      routeToRestoredScreen(snap, { retryRecordSeason:true, fallbackAccount:true });
     }
     if(state.screen === 'account') renderAccountScreen();
   });
@@ -4682,10 +4723,9 @@ async function submitAuthForm(){
 
 const PENDING_STATE_KEY = 'specialone_pending_game_state';
 
-// La connexion Google recharge entièrement la page (redirection puis retour
-// depuis Google) — tout l'état en mémoire (draft en cours, saison en cours,
-// transfert en cours...) serait perdu sans ça. On en capture un instantané
-// juste avant de partir, et on le restaure au retour (voir initAuth).
+// Sauvegarde continue de la partie en cours dans localStorage — pour que
+// recharger la page (ou revenir d'une redirection Google) ne remette jamais
+// à zéro : draft en cours, saison en cours, transfert en cours, etc.
 function snapshotGameState(){
   return {
     kind: state.pendingAfterProfileKind,
@@ -4715,9 +4755,27 @@ function snapshotGameState(){
   };
 }
 
+function saveSnapshotNow(){
+  try { localStorage.setItem(PENDING_STATE_KEY, JSON.stringify(snapshotGameState())); }
+  catch(e){ /* stockage plein ou indisponible : on ignore silencieusement */ }
+}
+
+// Les écrans jeu/saison se re-rendent très souvent (chaque clic, et même en
+// boucle serrée lors d'une simulation instantanée de saison) — on ne veut
+// pas ré-écrire localStorage à chaque fois, donc la sauvegarde réelle est
+// différée de quelques centaines de ms après la dernière activité.
+let saveSnapshotTimer = null;
+function scheduleSaveSnapshot(){
+  clearTimeout(saveSnapshotTimer);
+  saveSnapshotTimer = setTimeout(saveSnapshotNow, 250);
+}
+
+// Ne consomme PAS la sauvegarde (contrairement à avant) : un simple
+// rechargement doit pouvoir la relire indéfiniment, elle n'est retirée que
+// lorsqu'il n'y a plus rien de pertinent à restaurer (déconnexion, retour
+// à l'accueil volontaire, etc. — gérés ailleurs).
 function restoreGameStateSnapshot(){
   const raw = localStorage.getItem(PENDING_STATE_KEY);
-  localStorage.removeItem(PENDING_STATE_KEY);
   if(!raw) return null;
   try {
     const snap = JSON.parse(raw);
@@ -4726,8 +4784,38 @@ function restoreGameStateSnapshot(){
     state.pendingAfterProfile = null; // la fonction elle-même ne survit pas au rechargement
     return snap;
   } catch(e){
-    console.error('Impossible de restaurer la partie après connexion :', e);
+    console.error('Impossible de restaurer la partie :', e);
+    localStorage.removeItem(PENDING_STATE_KEY);
     return null;
+  }
+}
+
+// Reconstitue l'écran à afficher à partir d'un instantané restauré.
+function routeToRestoredScreen(snap, opts){
+  opts = opts || {};
+  if(snap && snap.season){
+    history.replaceState({ screen:'season' }, '', location.pathname + location.search + '#season');
+    showScreen('season', { skipHistory:true });
+    if(snap.club) applyClubTheme(snap.club);
+    if(opts.retryRecordSeason && snap.kind === 'recordSeason'){
+      // La sauvegarde de fin de saison avait été bloquée en attendant la
+      // connexion : on la relance maintenant qu'une session existe.
+      state.season.recorded = false;
+      recordSeasonIfNeeded();
+    }
+    renderSeason();
+  } else if(snap && snap.club){
+    history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
+    showScreen('game', { skipHistory:true });
+    applyClubTheme(snap.club);
+    renderGame();
+  } else if(opts.fallbackAccount){
+    history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
+    showScreen('account', { skipHistory:true });
+    renderAccountScreen();
+  } else {
+    history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
+    renderLanding();
   }
 }
 
@@ -4738,7 +4826,7 @@ async function signInWithGoogle(){
   // hash (#access_token=...) au retour de Google, et les deux hash entrent
   // en conflit sinon.
   const redirectTo = window.location.origin + window.location.pathname + window.location.search;
-  localStorage.setItem(PENDING_STATE_KEY, JSON.stringify(snapshotGameState()));
+  saveSnapshotNow();
   sessionStorage.setItem('pendingGoogleAuth', '1');
   await sbClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo } });
 }
@@ -4917,7 +5005,7 @@ async function renderPantheonScreen(){
 
   const listEl = document.getElementById('pantheon-list');
   if(!sbClient){
-    listEl.innerHTML = `<div class="hand-empty">Le Panthéon nécessite une connexion au service de comptes.</div>`;
+    listEl.innerHTML = `<div class="hand-empty">Le Palmarès nécessite une connexion au service de comptes.</div>`;
     return;
   }
   listEl.innerHTML = `<div class="hand-empty">Chargement…</div>`;
@@ -4928,7 +5016,7 @@ async function renderPantheonScreen(){
     .limit(2000);
 
   if(error){
-    listEl.innerHTML = `<div class="hand-empty">Impossible de charger le Panthéon : ${error.message}</div>`;
+    listEl.innerHTML = `<div class="hand-empty">Impossible de charger le Palmarès : ${error.message}</div>`;
     return;
   }
   let rows = (data || []).filter(r => r.score && typeof r.score.total === 'number');
@@ -4989,7 +5077,7 @@ function populatePantheonClubFilter(){
 
 async function renderAccountScreen(){
   if(!state.session){ showProfileModal(renderAccountScreen, 'viewAccount'); return; }
-  document.getElementById('account-profile-name').textContent = currentUserLabel();
+  document.getElementById('account-profile-name').textContent = pantheonDisplayName();
   document.getElementById('pseudo-input').value = (state.session.user.user_metadata && state.session.user.user_metadata.pseudo) || '';
   document.getElementById('pseudo-hint').textContent = '';
   document.getElementById('account-stats').innerHTML = `<div class="hand-empty">Chargement…</div>`;
@@ -5053,6 +5141,7 @@ async function renderAccountScreen(){
 // ============================================================
 document.getElementById('btn-home').addEventListener('click', ()=>{
   if(state.screen !== 'landing'){
+    localStorage.removeItem(PENDING_STATE_KEY);
     showScreen('landing');
     renderLanding();
   }
@@ -5072,13 +5161,27 @@ document.getElementById('btn-back-to-squad').addEventListener('click', ()=>{
 document.getElementById('btn-home').addEventListener('keydown', (e)=>{
   if(e.key==='Enter' || e.key===' '){ e.preventDefault(); document.getElementById('btn-home').click(); }
 });
-document.getElementById('btn-account').addEventListener('click', ()=>{
+const accountMenuEl = document.getElementById('account-menu');
+document.getElementById('btn-account-menu-toggle').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  accountMenuEl.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if(!accountMenuEl.contains(e.target)) accountMenuEl.classList.remove('open');
+});
+document.getElementById('menu-item-account').addEventListener('click', ()=>{
+  accountMenuEl.classList.remove('open');
   showScreen('account');
   renderAccountScreen();
 });
-document.getElementById('btn-pantheon').addEventListener('click', ()=>{
+document.getElementById('menu-item-pantheon').addEventListener('click', ()=>{
+  accountMenuEl.classList.remove('open');
   showScreen('pantheon');
   renderPantheonScreen();
+});
+document.getElementById('menu-item-logout').addEventListener('click', ()=>{
+  accountMenuEl.classList.remove('open');
+  signOutUser();
 });
 document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -5126,14 +5229,23 @@ document.getElementById('relance-btn').addEventListener('click', rerollAll);
 document.getElementById('draft-btn').addEventListener('click', startDraft);
 
 primeCrestCache();
+window.addEventListener('pagehide', saveSnapshotNow);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnapshotNow(); });
+
 // Ne jamais écraser le hash au démarrage s'il contient un retour de
 // connexion OAuth (#access_token=...) — sinon Supabase perd le jeton avant
 // de pouvoir l'analyser, et la connexion Google échoue silencieusement.
+// Dans ce cas, on laisse initAuth() gérer la restauration une fois la
+// session détectée.
 const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
-if(!isOAuthCallbackHash){
-  history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
+if(isOAuthCallbackHash){
+  renderLanding();
+} else {
+  // Simple rechargement de page (ou réouverture) : on restaure la partie
+  // en cours si une sauvegarde existe, sinon écran d'accueil normal.
+  const snap = restoreGameStateSnapshot();
+  routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
 }
-renderLanding();
 
 </script>
 
