@@ -2485,11 +2485,44 @@ function toast(msg){
 }
 
 // ---------------------------- SCREEN SWITCH ----------------------------
-function showScreen(name){
+// Postes de rendu associés à chaque écran, utilisés à la fois pour
+// l'affichage initial et pour la navigation arrière/avant du navigateur.
+const SCREEN_RENDERERS = {
+  landing: ()=>renderLanding(),
+  select: ()=>renderSelect(),
+  game: ()=>renderGame(),
+  season: ()=>renderSeason(),
+  account: ()=>renderAccountScreen()
+};
+
+// Certains écrans exigent un état minimal (un club choisi, une saison en
+// cours) pour être affichables — notamment après un retour arrière du
+// navigateur, où l'état en mémoire peut ne plus correspondre à l'URL.
+function canShowScreen(name){
+  if(name === 'game') return !!state.club;
+  if(name === 'season') return !!state.season;
+  return true;
+}
+
+function showScreen(name, opts){
+  opts = opts || {};
   state.screen = name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
+  if(!opts.skipHistory && location.hash !== '#'+name){
+    history.pushState({ screen:name }, '', '#'+name);
+  }
 }
+
+window.addEventListener('popstate', (e)=>{
+  let name = (e.state && e.state.screen) || (location.hash ? location.hash.slice(1) : 'landing');
+  if(!document.getElementById('screen-'+name) || !canShowScreen(name)){
+    name = 'landing';
+  }
+  showScreen(name, { skipHistory:true });
+  const renderFn = SCREEN_RENDERERS[name];
+  if(renderFn) renderFn();
+});
 
 // ============================================================
 // LANDING
@@ -4453,6 +4486,7 @@ document.getElementById('relance-btn').addEventListener('click', rerollAll);
 document.getElementById('draft-btn').addEventListener('click', startDraft);
 
 primeCrestCache();
+history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
 renderLanding();
 
 </script>
