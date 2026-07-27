@@ -4591,6 +4591,15 @@ async function initAuth(){
       state.pendingAfterProfile = null;
       cb();
     }
+    // Retour d'une connexion Google : le hash #access_token=... a fait son
+    // travail, on nettoie l'URL et on amène le joueur sur son compte pour
+    // qu'il voie explicitement que la connexion a fonctionné.
+    if(session && sessionStorage.getItem('pendingGoogleAuth')){
+      sessionStorage.removeItem('pendingGoogleAuth');
+      history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
+      showScreen('account', { skipHistory:true });
+      renderAccountScreen();
+    }
     if(state.screen === 'account') renderAccountScreen();
   });
 }
@@ -4652,7 +4661,13 @@ async function submitAuthForm(){
 
 async function signInWithGoogle(){
   if(!sbClient) return;
-  await sbClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.href } });
+  // IMPORTANT : ne jamais inclure le hash de routing de l'app (#account,
+  // #season, ...) dans redirectTo — Supabase a besoin d'ajouter son propre
+  // hash (#access_token=...) au retour de Google, et les deux hash entrent
+  // en conflit sinon.
+  const redirectTo = window.location.origin + window.location.pathname + window.location.search;
+  sessionStorage.setItem('pendingGoogleAuth', '1');
+  await sbClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo } });
 }
 
 async function signOutUser(){
@@ -5036,7 +5051,13 @@ document.getElementById('relance-btn').addEventListener('click', rerollAll);
 document.getElementById('draft-btn').addEventListener('click', startDraft);
 
 primeCrestCache();
-history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
+// Ne jamais écraser le hash au démarrage s'il contient un retour de
+// connexion OAuth (#access_token=...) — sinon Supabase perd le jeton avant
+// de pouvoir l'analyser, et la connexion Google échoue silencieusement.
+const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
+if(!isOAuthCallbackHash){
+  history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
+}
 renderLanding();
 
 </script>
