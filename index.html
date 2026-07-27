@@ -30,8 +30,8 @@ body{
   padding:40px 24px;
 }
 
-h1{ font-size:22px; margin:0 0 4px; font-family:Arial,sans-serif; }
-.subtitle{ color:#8891a3; font-size:13px; margin:0 0 32px; max-width:640px; line-height:1.6; font-family:Arial,sans-serif; }
+h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
+.subtitle{ color:#8891a3; font-size:13px; margin:0 0 32px; max-width:640px; line-height:1.6; font-family:var(--sans); }
 
 .gallery{
   display:flex;
@@ -268,6 +268,12 @@ h1{ font-size:22px; margin:0 0 4px; font-family:Arial,sans-serif; }
   --club-primary:#0B3D91;
   --club-secondary:#C1121F;
   --club-accent:#F5B700;
+
+  /* paliers européens — teintes maison plutôt que le bleu/orange/vert
+     par défaut de Tailwind, un peu plus riches et moins "dashboard" */
+  --zone-cl:#3D5FA6;
+  --zone-el:#C1642E;
+  --zone-ecl:#2E9B6F;
 }
 @media(min-width:768px){
   :root{ --gutter:120px; }
@@ -730,9 +736,10 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .league-switch-btn:hover{ color:var(--text); border-color:var(--club-accent); }
 .league-switch-btn.active{
-  color:#fff;
+  color:#0a0d13;
   background:var(--club-accent);
   border-color:var(--club-accent);
+  font-weight:700;
 }
 .season-panel > .standings-table, .season-panel > .results-list{ overflow-y:auto; min-height:0; }
 
@@ -746,7 +753,7 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:var(--r-sm);
   font-family:var(--sans);
   font-size:13px;
-  color:var(--text-dim);
+  color:var(--text);
 }
 .st-row.st-head{
   font-size:10.5px;
@@ -761,9 +768,9 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
 }
 .st-row.st-me .st-name{ color:var(--club-accent); font-weight:700; }
-.st-row.st-cl{ border-left:3px solid #3B82F6; background:rgba(59,130,246,.10); }
-.st-row.st-el{ border-left:3px solid #F97316; background:rgba(249,115,22,.10); }
-.st-row.st-ecl{ border-left:3px solid #22C55E; background:rgba(34,197,94,.10); }
+.st-row.st-cl{ border-left:3px solid var(--zone-cl); background:color-mix(in srgb, var(--zone-cl) 10%, transparent); }
+.st-row.st-el{ border-left:3px solid var(--zone-el); background:color-mix(in srgb, var(--zone-el) 10%, transparent); }
+.st-row.st-ecl{ border-left:3px solid var(--zone-ecl); background:color-mix(in srgb, var(--zone-ecl) 10%, transparent); }
 .st-legend{
   display:flex;
   flex-wrap:wrap;
@@ -783,10 +790,10 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:50%;
   display:inline-block;
 }
-.st-dot.st-cl{ background:#3B82F6; border:none; }
-.st-dot.st-el{ background:#F97316; border:none; }
-.st-dot.st-ecl{ background:#22C55E; border:none; }
-.st-pos{ font-family:var(--bn-bold); color:var(--text-faint); }
+.st-dot.st-cl{ background:var(--zone-cl); border:none; }
+.st-dot.st-el{ background:var(--zone-el); border:none; }
+.st-dot.st-ecl{ background:var(--zone-ecl); border:none; }
+.st-pos{ font-family:var(--bn-bold); color:var(--text-dim); font-variant-numeric:tabular-nums; }
 .st-row.st-me .st-pos{ color:var(--club-accent); }
 
 .rd-heading.rd-cup{ color:#CBD5E1; }
@@ -796,21 +803,21 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .fx-row.fx-cup.fx-me{ background:rgba(203,213,225,.16); }
 
-.rd-heading.euro-cl-text{ color:#3B82F6; }
-.rd-heading.euro-el-text{ color:#F97316; }
-.rd-heading.euro-ecl-text{ color:#22C55E; }
-.fx-row.euro-cl{ border:1px solid rgba(59,130,246,.4); background:rgba(59,130,246,.08); }
-.fx-row.euro-cl.fx-me{ background:rgba(59,130,246,.18); }
-.fx-row.euro-el{ border:1px solid rgba(249,115,22,.4); background:rgba(249,115,22,.08); }
-.fx-row.euro-el.fx-me{ background:rgba(249,115,22,.18); }
-.fx-row.euro-ecl{ border:1px solid rgba(34,197,94,.4); background:rgba(34,197,94,.08); }
-.fx-row.euro-ecl.fx-me{ background:rgba(34,197,94,.18); }
-.st-row.euro-cl{ border-left:3px solid #3B82F6; background:rgba(59,130,246,.10); }
-.st-row.euro-el{ border-left:3px solid #F97316; background:rgba(249,115,22,.10); }
-.st-row.euro-ecl{ border-left:3px solid #22C55E; background:rgba(34,197,94,.10); }
-.st-dot.euro-cl{ background:#3B82F6; border:none; }
-.st-dot.euro-el{ background:#F97316; border:none; }
-.st-dot.euro-ecl{ background:#22C55E; border:none; }
+.rd-heading.euro-cl-text{ color:var(--zone-cl); }
+.rd-heading.euro-el-text{ color:var(--zone-el); }
+.rd-heading.euro-ecl-text{ color:var(--zone-ecl); }
+.fx-row.euro-cl{ border:1px solid color-mix(in srgb, var(--zone-cl) 40%, transparent); background:color-mix(in srgb, var(--zone-cl) 8%, transparent); }
+.fx-row.euro-cl.fx-me{ background:color-mix(in srgb, var(--zone-cl) 18%, transparent); }
+.fx-row.euro-el{ border:1px solid color-mix(in srgb, var(--zone-el) 40%, transparent); background:color-mix(in srgb, var(--zone-el) 8%, transparent); }
+.fx-row.euro-el.fx-me{ background:color-mix(in srgb, var(--zone-el) 18%, transparent); }
+.fx-row.euro-ecl{ border:1px solid color-mix(in srgb, var(--zone-ecl) 40%, transparent); background:color-mix(in srgb, var(--zone-ecl) 8%, transparent); }
+.fx-row.euro-ecl.fx-me{ background:color-mix(in srgb, var(--zone-ecl) 18%, transparent); }
+.st-row.euro-cl{ border-left:3px solid var(--zone-cl); background:color-mix(in srgb, var(--zone-cl) 10%, transparent); }
+.st-row.euro-el{ border-left:3px solid var(--zone-el); background:color-mix(in srgb, var(--zone-el) 10%, transparent); }
+.st-row.euro-ecl{ border-left:3px solid var(--zone-ecl); background:color-mix(in srgb, var(--zone-ecl) 10%, transparent); }
+.st-dot.euro-cl{ background:var(--zone-cl); border:none; }
+.st-dot.euro-el{ background:var(--zone-el); border:none; }
+.st-dot.euro-ecl{ background:var(--zone-ecl); border:none; }
 .st-name{
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   color:var(--text);
@@ -829,8 +836,12 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .st-badge-champ{ background:rgba(250,204,21,.18); color:#FACC15; border:1px solid rgba(250,204,21,.4); }
 .st-badge-cup{ background:rgba(203,213,225,.18); color:#CBD5E1; border:1px solid rgba(203,213,225,.4); }
-.st-num{ text-align:center; }
-.st-pts{ font-family:var(--bn-bold); font-size:15px; color:var(--text); text-align:center; }
+.st-badge-c1{ background:color-mix(in srgb, var(--zone-cl) 18%, transparent); color:var(--zone-cl); border:1px solid color-mix(in srgb, var(--zone-cl) 40%, transparent); }
+.st-badge-c3{ background:color-mix(in srgb, var(--zone-el) 18%, transparent); color:var(--zone-el); border:1px solid color-mix(in srgb, var(--zone-el) 40%, transparent); }
+.st-badge-c4{ background:color-mix(in srgb, var(--zone-ecl) 18%, transparent); color:var(--zone-ecl); border:1px solid color-mix(in srgb, var(--zone-ecl) 40%, transparent); }
+.st-badge-sc{ background:rgba(167,139,250,.18); color:#A78BFA; border:1px solid rgba(167,139,250,.4); }
+.st-num{ text-align:center; font-variant-numeric:tabular-nums; font-weight:600; }
+.st-pts{ font-family:var(--bn-bold); font-size:15px; color:var(--text); text-align:center; font-variant-numeric:tabular-nums; }
 
 .results-list{ display:flex; flex-direction:column; gap:8px; flex:1; min-height:0; }
 .rd-heading{
@@ -1449,6 +1460,68 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-dim);
 }
 
+.pantheon-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:16px;
+}
+.pantheon-row{
+  display:grid;
+  grid-template-columns:36px 1fr auto;
+  align-items:center;
+  gap:14px;
+  padding:12px 16px;
+  border-radius:var(--r-md);
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+.pantheon-row.pantheon-me{
+  border-color:var(--club-accent);
+  background:color-mix(in srgb, var(--club-accent) 10%, var(--surface-2));
+}
+.pantheon-rank{
+  font-family:var(--bn-bold);
+  font-size:20px;
+  color:var(--text-dim);
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.pantheon-row:nth-child(1) .pantheon-rank{ color:#FACC15; }
+.pantheon-row:nth-child(2) .pantheon-rank{ color:#CBD5E1; }
+.pantheon-row:nth-child(3) .pantheon-rank{ color:#C9834A; }
+.pantheon-name{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:14px;
+  color:var(--text);
+}
+.pantheon-row.pantheon-me .pantheon-name{ color:var(--club-accent); }
+.pantheon-sub{
+  font-family:var(--sans);
+  font-size:11.5px;
+  color:var(--text-faint);
+  margin-top:2px;
+}
+.pantheon-score{
+  font-family:var(--bn-bold);
+  font-size:20px;
+  color:var(--text);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+.pantheon-score .l{
+  display:block;
+  font-family:var(--sans);
+  font-size:9px;
+  font-weight:600;
+  color:var(--text-faint);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-top:2px;
+}
+
 /* ============================ PROFILE MODAL ============================ */
 .modal-overlay{
   position:fixed; inset:0;
@@ -1465,7 +1538,36 @@ button{ font-family:inherit; cursor:pointer; }
   border:1px solid rgba(255,255,255,.12);
   border-radius:var(--r-lg);
   padding:28px;
+  position:relative;
 }
+.modal-close{
+  position:absolute;
+  top:12px; right:12px;
+  width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border-2);
+  border-radius:50%;
+  color:var(--text-dim);
+  font-size:18px;
+  line-height:1;
+  padding:0;
+}
+.modal-close:hover{ color:var(--text); border-color:var(--club-accent); }
+.modal-skip{
+  display:block;
+  width:100%;
+  margin-top:14px;
+  background:none;
+  border:none;
+  color:var(--text-faint);
+  font-family:var(--sans);
+  font-size:12.5px;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  padding:4px;
+}
+.modal-skip:hover{ color:var(--text-dim); }
 .modal-tabs{
   display:flex;
   gap:6px;
@@ -1541,6 +1643,7 @@ button{ font-family:inherit; cursor:pointer; }
   <div class="gm-header">
     <div class="gm-header-inner">
     <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> THE SPECIAL ONE</div>
+    <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
     <button class="gm-account-btn" id="btn-account">Mon compte</button>
     </div>
   </div>
@@ -1726,8 +1829,28 @@ button{ font-family:inherit; cursor:pointer; }
     </div>
   </section>
 
+  <!-- ============================ PANTHÉON ============================ -->
+  <section id="screen-pantheon" class="screen">
+    <div class="account-shell">
+      <div class="account-header">
+        <div>
+          <div class="account-title">Panthéon</div>
+          <div class="account-subtitle">Les meilleures performances, toutes carrières confondues</div>
+        </div>
+      </div>
+
+      <div class="league-switch" id="pantheon-tabs">
+        <button class="league-switch-btn active" data-view="season">Meilleure saison</button>
+        <button class="league-switch-btn" data-view="total">Total carrière</button>
+      </div>
+
+      <div class="pantheon-list" id="pantheon-list"></div>
+    </div>
+  </section>
+
   <div class="modal-overlay" id="profile-modal" style="display:none">
     <div class="modal-box">
+      <button class="modal-close" id="profile-modal-close" aria-label="Fermer" title="Fermer">&times;</button>
       <div class="modal-tabs">
         <button class="modal-tab active" id="tab-signin" data-mode="signin">Se connecter</button>
         <button class="modal-tab" id="tab-signup" data-mode="signup">Créer un compte</button>
@@ -1739,6 +1862,7 @@ button{ font-family:inherit; cursor:pointer; }
       <button class="season-btn season-btn-primary" id="profile-confirm" style="margin-top:14px; width:100%">Se connecter</button>
       <div class="modal-divider"><span>ou</span></div>
       <button class="season-btn season-btn-ghost" id="btn-google-auth" style="width:100%">Continuer avec Google</button>
+      <button class="modal-skip" id="profile-skip">Continuer sans compte</button>
     </div>
   </div>
 
@@ -2463,10 +2587,13 @@ const state = {
   seasonNumber:1,
   prevSeasonStanding:null,
   prevSeasonCupWinner:null,
+  prevSeasonEuroWinners:null,
+  currentSeasonEuroWinners:null,
   transfer:null,
   standingsLeagueView:null,
   otherLeagueStandings:null,
-  pendingAfterProfile:null
+  pendingAfterProfile:null,
+  pantheonView:'season'
 };
 
 function applyClubTheme(club){
@@ -2492,7 +2619,8 @@ const SCREEN_RENDERERS = {
   select: ()=>renderSelect(),
   game: ()=>renderGame(),
   season: ()=>renderSeason(),
-  account: ()=>renderAccountScreen()
+  account: ()=>renderAccountScreen(),
+  pantheon: ()=>renderPantheonScreen()
 };
 
 // Certains écrans exigent un état minimal (un club choisi, une saison en
@@ -3488,6 +3616,10 @@ function enterSeason(){
   const euroTier = determineEuroQualification();
   if(euroTier) initEuroCompetition(euroTier);
 
+  state.currentSeasonEuroWinners = { cl:null, el:null, ecl:null, superCupWinner:null };
+  resolveShadowEuroTiers(euroTier);
+  maybeResolveSuperCup();
+
   showScreen('season');
   renderSeason();
 }
@@ -3553,12 +3685,20 @@ function sortedStandings(){
   );
 }
 
+function euroFullyDoneNow(){
+  const euro = state.euro;
+  return !euro || euro.stage === 'done';
+}
+
 function zoneClassMap(){
   const quotas = EURO_QUOTAS[state.league];
   if(!quotas) return {};
   const standing = sortedStandings();
   const cupWinnerId = state.season.cup ? state.season.cup.champion : null;
-  const map = computeQualificationMapWithCascade(standing, quotas, cupWinnerId);
+  // Les paliers gagnés grâce à une coupe d'Europe ne sont connus (et donc
+  // affichés) qu'une fois la campagne européenne de la saison terminée.
+  const euroWinners = euroFullyDoneNow() ? state.currentSeasonEuroWinners : null;
+  const map = computeQualificationMapWithCascade(standing, quotas, cupWinnerId, euroWinners);
   const classFor = { cl:'st-cl', el:'st-el', ecl:'st-ecl' };
   const out = {};
   Object.keys(map).forEach(id=>{ if(map[id]) out[id] = classFor[map[id]]; });
@@ -3637,32 +3777,52 @@ function euroTierFromRank(quotas, rank){
 // saison. Le championnat du joueur peut avoir été recalculé à partir du
 // classement simulé de la saison précédente ; les 4 autres restent figés
 // sur les vrais résultats 2025-2026.
-function computeQualificationMapWithCascade(standing, quotas, cupWinnerId){
-  const map = {};
-  standing.forEach((s,i)=>{ map[s.id] = euroTierFromRank(quotas, i+1); });
-  if(!cupWinnerId || !map.hasOwnProperty(cupWinnerId)) return map;
-  const winnerTier = map[cupWinnerId];
-  if(winnerTier === 'ecl'){
-    // La coupe rapporte une place en Ligue Europa : le vainqueur, déjà
-    // qualifié en Conférence, est promu en Europa. Sa place de Conférence
-    // se libère et revient au premier non-qualifié du classement.
-    map[cupWinnerId] = 'el';
-    const firstNone = standing.find(s => !map[s.id]);
-    if(firstNone) map[firstNone.id] = 'ecl';
-  } else if(!winnerTier){
-    // Le vainqueur n'était pas qualifié : il prend directement la place
-    // de Ligue Europa gagnée par la coupe, sans effet sur les autres.
-    map[cupWinnerId] = 'el';
+//
+// `euroWinners` (optionnel) : { cl, el, ecl } — les vainqueurs des 3 coupes
+// d'Europe de la saison précédente. Chaque victoire donne à son club une
+// place de qualification bonus au palier supérieur (Conférence -> Europa,
+// Europa -> Ligue des Champions, LDC -> LDC garantie), qui vient S'AJOUTER
+// aux places de championnat plutôt que d'en retirer une à quelqu'un
+// d'autre. Si le club était déjà qualifié à ce palier (ou mieux), il n'y a
+// aucun effet. Sinon, il est retiré du classement avant de recalculer les
+// paliers des autres — ce qui fait automatiquement remonter tout le monde
+// en dessous d'un cran, exactement comme pour le vainqueur de la coupe
+// nationale.
+function computeQualificationMapWithCascade(standing, quotas, cupWinnerId, euroWinners){
+  const naturalMap = {};
+  standing.forEach((s,i)=>{ naturalMap[s.id] = euroTierFromRank(quotas, i+1); });
+
+  const tierOrder = { cl:3, el:2, ecl:1 };
+  const forced = {};
+  function proposePromotion(id, targetTier){
+    if(!id || !naturalMap.hasOwnProperty(id)) return;
+    const current = forced[id] || naturalMap[id];
+    if(tierOrder[targetTier] > (tierOrder[current] || 0)) forced[id] = targetTier;
   }
-  // Vainqueur déjà en Ligue des Champions ou en Ligue Europa : la place
-  // gagnée par la coupe fait doublon, aucun changement.
+
+  // La coupe nationale rapporte au minimum une place de Ligue Europa.
+  if(cupWinnerId) proposePromotion(cupWinnerId, 'el');
+
+  // Les coupes d'Europe remportées la saison précédente promeuvent leur
+  // vainqueur au palier supérieur pour la saison qui vient.
+  if(euroWinners){
+    if(euroWinners.ecl) proposePromotion(euroWinners.ecl, 'el');
+    if(euroWinners.el) proposePromotion(euroWinners.el, 'cl');
+    if(euroWinners.cl) proposePromotion(euroWinners.cl, 'cl');
+  }
+
+  const promotedIds = Object.keys(forced);
+  const remaining = standing.filter(s => !promotedIds.includes(s.id));
+  const map = {};
+  remaining.forEach((s,i)=>{ map[s.id] = euroTierFromRank(quotas, i+1); });
+  promotedIds.forEach(id=>{ map[id] = forced[id]; });
   return map;
 }
 
 function qualifiersForLeagueTier(leagueName, tier){
   if(leagueName === state.league && state.seasonNumber > 1 && state.prevSeasonStanding){
     const quotas = EURO_QUOTAS[leagueName];
-    const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner);
+    const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner, state.prevSeasonEuroWinners);
     return state.prevSeasonStanding.filter(s => map[s.id] === tier).map(s=>s.id);
   }
   return SEASON1_QUALIFIERS[tier].filter(id => (LEAGUES[leagueName]||[]).some(c=>c.id===id));
@@ -3677,7 +3837,7 @@ function determineEuroQualification(){
   }
   const quotas = EURO_QUOTAS[state.league];
   if(!quotas || !state.prevSeasonStanding) return null;
-  const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner);
+  const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner, state.prevSeasonEuroWinners);
   return map[state.club.id] || null;
 }
 
@@ -3697,6 +3857,120 @@ function buildEuroParticipants(tier){
     if(!seen.has(c.id)){ participants.push(c); seen.add(c.id); }
   }
   return participants.slice(0,36);
+}
+
+const EURO_TROPHY_BADGE = { cl:'C1', el:'C3', ecl:'C4' };
+
+function leagueOfClub(id){
+  for(const [name, clubs] of Object.entries(LEAGUES)){
+    if(clubs.some(c=>c.id===id)) return name;
+  }
+  return null;
+}
+
+function strengthForAnyClub(id){
+  if(id === state.club.id) return myTeamStrength();
+  for(const clubs of Object.values(LEAGUES)){
+    const club = clubs.find(c=>c.id===id);
+    if(club) return estimateClubStrength(club);
+  }
+  const filler = EURO_FILLER_CLUBS.find(c=>c.id===id);
+  if(filler) return filler.strength;
+  return 75;
+}
+
+function clubNameForAnyId(id){
+  if(id === state.club.id) return state.club.name;
+  for(const clubs of Object.values(LEAGUES)){
+    const club = clubs.find(c=>c.id===id);
+    if(club) return club.name;
+  }
+  const filler = EURO_FILLER_CLUBS.find(c=>c.id===id);
+  return filler ? filler.name : id;
+}
+
+// Simule intégralement, en une fois et sans détail match par match, la
+// compétition européenne d'un palier que le joueur ne dispute pas cette
+// saison (son propre club n'y participe pas) — uniquement pour déterminer
+// un vainqueur plausible, au même titre que les 4 championnats simulés
+// instantanément par l'IA. Reproduit le même format à 36 clubs (phase de
+// ligue à 8 journées, barrages, 8es, quarts, demies, finale).
+function instantSimulateEuroTier(tier){
+  const participants = buildEuroParticipants(tier);
+  if(participants.length < 24) return participants[0] ? participants[0].id : null;
+  const strengths = {};
+  participants.forEach(c=>{ strengths[c.id] = estimateClubStrength(c); });
+
+  const ids = shuffleArr(participants.map(c=>c.id));
+  const leaguePhase = buildSingleLeg(ids).slice(0, 8);
+  const pts = {}, gf = {}, ga = {};
+  participants.forEach(c=>{ pts[c.id] = 0; gf[c.id] = 0; ga[c.id] = 0; });
+  leaguePhase.forEach(round=>{
+    round.forEach(fx=>{
+      const hg = simulateGoals(strengths[fx.home], strengths[fx.away], true);
+      const ag = simulateGoals(strengths[fx.away], strengths[fx.home], false);
+      gf[fx.home] += hg; ga[fx.home] += ag; gf[fx.away] += ag; ga[fx.away] += hg;
+      if(hg > ag) pts[fx.home] += 3;
+      else if(ag > hg) pts[fx.away] += 3;
+      else { pts[fx.home]++; pts[fx.away]++; }
+    });
+  });
+  const ranked = participants.map(c=>c.id).sort((a,b)=>
+    pts[b]-pts[a] || (gf[b]-ga[b])-(gf[a]-ga[a]) || gf[b]-gf[a]
+  );
+
+  const playSingle = (h,a)=>{
+    let hg = simulateGoals(strengths[h], strengths[a], true);
+    let ag = simulateGoals(strengths[a], strengths[h], false);
+    if(hg === ag){
+      const pHome = strengths[h] / (strengths[h] + strengths[a]);
+      if(Math.random() < pHome) hg++; else ag++;
+    }
+    return hg > ag ? h : a;
+  };
+  const knockRound = (clubIds)=>{
+    const winners = [];
+    for(let i=0;i<clubIds.length;i+=2) winners.push(playSingle(clubIds[i], clubIds[i+1]));
+    return winners;
+  };
+
+  const pairIdx = [[8,23],[9,22],[10,21],[11,20],[12,19],[13,18],[14,17],[15,16]];
+  const playoffWinners = pairIdx.map(([a,b])=>playSingle(ranked[a], ranked[b]));
+  const ro16Clubs = shuffleArr([...ranked.slice(0,8), ...playoffWinners]);
+  const qfWinners = knockRound(ro16Clubs);
+  const sfWinners = knockRound(shuffleArr(qfWinners));
+  const finalists = knockRound(shuffleArr(sfWinners));
+  return finalists[0];
+}
+
+// Recalcule, à chaque étape où une information nouvelle est connue, les
+// vainqueurs des 2 coupes d'Europe que le joueur ne dispute pas cette
+// saison, afin de savoir dès le début de saison qui pourra prétendre à
+// une place de qualification bonus la saison suivante et qui affrontera
+// qui en Supercoupe d'UEFA.
+function resolveShadowEuroTiers(playedTier){
+  ['cl','el','ecl'].forEach(t=>{
+    if(t !== playedTier && !state.currentSeasonEuroWinners[t]){
+      state.currentSeasonEuroWinners[t] = instantSimulateEuroTier(t);
+    }
+  });
+}
+
+// Supercoupe d'UEFA : vainqueur de la Ligue des Champions contre vainqueur
+// de la Ligue Europa. Résolue dès que les deux sont connus, qu'ils soient
+// le fruit de la campagne jouée par le joueur ou d'une simulation fantôme.
+function maybeResolveSuperCup(){
+  const w = state.currentSeasonEuroWinners;
+  if(!w || w.superCupWinner || !w.cl || !w.el) return;
+  const clStr = strengthForAnyClub(w.cl);
+  const elStr = strengthForAnyClub(w.el);
+  let hg = simulateGoals(clStr, elStr, true);
+  let ag = simulateGoals(elStr, clStr, false);
+  if(hg === ag){
+    const pCl = clStr / (clStr + elStr);
+    if(Math.random() < pCl) hg++; else ag++;
+  }
+  w.superCupWinner = hg > ag ? w.cl : w.el;
 }
 
 // 8 adversaires différents par club : on prend les 8 premiers tours d'un
@@ -3826,6 +4100,8 @@ function simulateEuroFinalMatch(){
   euro.resultsByRound.push({ label:'Finale', matches:[{...euro.finalFixture}], roundIdx:Infinity });
   euro.champion = euro.finalFixture.winner;
   euro.stage = 'done';
+  state.currentSeasonEuroWinners[euro.tier] = euro.champion;
+  maybeResolveSuperCup();
 }
 
 // Appelée depuis playMatchday() à chaque journée de championnat, pour
@@ -3878,9 +4154,22 @@ function handleSimRest(){
   else simulateRestOfSeason();
 }
 
+function euroTrophyBadgesHtml(clubId, euroFullyDone){
+  if(!euroFullyDone) return '';
+  const w = state.currentSeasonEuroWinners;
+  if(!w) return '';
+  let html = '';
+  if(w.cl === clubId) html += ` <span class="st-badge st-badge-c1" title="Vainqueur de la Ligue des Champions">C1</span>`;
+  if(w.el === clubId) html += ` <span class="st-badge st-badge-c3" title="Vainqueur de la Ligue Europa">C3</span>`;
+  if(w.ecl === clubId) html += ` <span class="st-badge st-badge-c4" title="Vainqueur de la Ligue Conférence">C4</span>`;
+  if(w.superCupWinner === clubId) html += ` <span class="st-badge st-badge-sc" title="Vainqueur de la Supercoupe d'UEFA">SC</span>`;
+  return html;
+}
+
 function renderLeaguePanels(){
   const season = state.season;
   const seasonDone = season.currentRound >= season.calendar.length;
+  const euroFullyDone = euroFullyDoneNow();
   const viewLeague = state.standingsLeagueView || state.league;
   const isOwnLeague = viewLeague === state.league;
 
@@ -3915,7 +4204,7 @@ function renderLeaguePanels(){
   const rows = standingArr.map((s,i)=>`
     <div class="st-row ${(isOwnLeague && s.id===state.club.id)?'st-me':''} ${zoneMap[s.id]||''}">
       <div class="st-pos">${i+1}</div>
-      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}</div>
+      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
       <div class="st-num">${s.l}</div>
@@ -3932,6 +4221,14 @@ function renderLeaguePanels(){
       <span class="st-legend-item"><i class="st-dot st-cl"></i>Ligue des Champions</span>
       <span class="st-legend-item"><i class="st-dot st-el"></i>Ligue Europa</span>
       <span class="st-legend-item"><i class="st-dot st-ecl"></i>Ligue Conférence</span>
+    </div>
+    <div class="st-legend">
+      <span class="st-legend-item"><span class="st-badge st-badge-champ">C</span>Championnat</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-cup">CN</span>Coupe Nationale</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c1">C1</span>Ligue des Champions</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c3">C3</span>Ligue Europa</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c4">C4</span>Ligue Conférence</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-sc">SC</span>Supercoupe d'UEFA</span>
     </div>
   `;
 
@@ -4086,7 +4383,7 @@ function renderSeason(){
 
   const euroFullyDone = !euro || euro.stage === 'done';
   nextSeasonBtn.style.display = (seasonDone && euroFullyDone) ? '' : 'none';
-  if(seasonDone && euroFullyDone) recordSeasonIfNeeded();
+  if(seasonDone && euroFullyDone){ recordSeasonIfNeeded(); finalizeSeasonEuroWinners(); }
 
   let banner = document.querySelector('.season-banner');
   if(seasonDone){
@@ -4119,14 +4416,29 @@ function renderSeason(){
           ? (euro.champion === state.club.id ? ` Vous avez remporté la ${EURO_LABELS[euro.tier]} !` : ` Votre campagne de ${EURO_LABELS[euro.tier]} s'est terminée.`)
           : ` Votre campagne de ${EURO_LABELS[euro.tier]} se poursuit (${EURO_STAGE_LABEL[euro.stage]}) — voir l'onglet Europe.`;
       }
+      let continentalLine = '';
       let scoreLine = '';
       if(euroFullyDone){
+        const w = state.currentSeasonEuroWinners;
+        if(w){
+          const parts = [];
+          ['cl','el','ecl'].forEach(t=>{
+            if((!euro || t !== euro.tier) && w[t]){
+              parts.push(`${clubNameForAnyId(w[t])} remporte la ${EURO_LABELS[t]}`);
+            }
+          });
+          if(parts.length) continentalLine = ` ${parts.join('. ')}.`;
+          if(w.superCupWinner){
+            const loser = w.superCupWinner === w.cl ? w.el : w.cl;
+            continentalLine += ` En Supercoupe d'UEFA, ${clubNameForAnyId(w.superCupWinner)} s'impose face à ${clubNameForAnyId(loser)}.`;
+          }
+        }
         const score = computeSeasonScore();
         scoreLine = ` Score de la saison : ${score.total} pts (Championnat ${score.league} · Coupe ${score.cup} · Europe ${score.euro}).`;
       }
       banner.textContent = (myPos===1
         ? `Champion ! ${state.club.name} termine 1er de ${state.league} avec ${standing[0].pts} points.`
-        : `${state.club.name} termine ${myPos}${myPos===1?'er':'ème'} de ${state.league} — ${champion.name} est champion avec ${champion.pts} points.`) + cupLine + euroLine + scoreLine;
+        : `${state.club.name} termine ${myPos}${myPos===1?'er':'ème'} de ${state.league} — ${champion.name} est champion avec ${champion.pts} points.`) + cupLine + euroLine + continentalLine + scoreLine;
     }
   } else if(banner){
     banner.remove();
@@ -4155,6 +4467,17 @@ function currentUserLabel(){
   if(!state.session) return null;
   const u = state.session.user;
   return (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email;
+}
+
+// Nom affiché aux AUTRES joueurs (Panthéon). Contrairement à
+// currentUserLabel(), ne retombe jamais sur l'email — celui-ci ne doit
+// jamais être exposé publiquement — mais sur un pseudo anonyme stable.
+function pantheonDisplayName(){
+  if(!state.session) return 'Invité';
+  const u = state.session.user;
+  const meta = u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name);
+  if(meta) return meta;
+  return 'Manager-' + u.id.slice(0, 6);
 }
 
 async function initAuth(){
@@ -4247,6 +4570,17 @@ function showProfileModal(afterCb){
   document.getElementById('profile-password').value = '';
   setAuthMode('signin');
   document.getElementById('profile-modal').style.display = 'flex';
+}
+
+// Ferme la fenêtre de connexion sans exiger de compte : la partie continue
+// normalement, seule la sauvegarde en ligne de cette saison est ignorée.
+function closeProfileModal(){
+  document.getElementById('profile-modal').style.display = 'none';
+  state.pendingAfterProfile = null;
+  if(state.screen === 'account'){
+    if(state.season){ showScreen('season'); renderSeason(); }
+    else { showScreen('landing'); }
+  }
 }
 
 function ensureProfile(cb){
@@ -4345,6 +4679,12 @@ function computeSeasonScore(){
   return { league, cup, euro, total: league + cup + euro, cupJourney, euroJourney };
 }
 
+function finalizeSeasonEuroWinners(){
+  if(!state.season || state.season.euroWinnersFinalized) return;
+  state.season.euroWinnersFinalized = true;
+  state.prevSeasonEuroWinners = { ...state.currentSeasonEuroWinners };
+}
+
 function recordSeasonIfNeeded(){
   if(!state.season || state.season.recorded) return;
   state.season.recorded = true;
@@ -4353,11 +4693,13 @@ function recordSeasonIfNeeded(){
     const myPos = standing.findIndex(s=>s.id===state.club.id) + 1;
     let euroResult = null;
     if(state.euro){
-      euroResult = { tier: state.euro.tier, won: state.euro.champion === state.club.id, stage: state.euro.stage };
+      const superCupWon = !!(state.currentSeasonEuroWinners && state.currentSeasonEuroWinners.superCupWinner === state.club.id);
+      euroResult = { tier: state.euro.tier, won: state.euro.champion === state.club.id, stage: state.euro.stage, superCupWon };
     }
     const score = computeSeasonScore();
     const record = {
       user_id: state.session.user.id,
+      player_name: pantheonDisplayName(),
       season_number: state.seasonNumber,
       club: state.club.name,
       league: state.league,
@@ -4375,7 +4717,70 @@ function recordSeasonIfNeeded(){
 }
 
 function countTrophies(history){
-  return history.reduce((n,r)=> n + (r.is_champion?1:0) + (r.cup_won?1:0) + (r.euro_result && r.euro_result.won?1:0), 0);
+  return history.reduce((n,r)=> n + (r.is_champion?1:0) + (r.cup_won?1:0) + (r.euro_result && r.euro_result.won?1:0) + (r.euro_result && r.euro_result.superCupWon?1:0), 0);
+}
+
+async function renderPantheonScreen(){
+  document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.view === state.pantheonView);
+  });
+
+  const listEl = document.getElementById('pantheon-list');
+  if(!sbClient){
+    listEl.innerHTML = `<div class="hand-empty">Le Panthéon nécessite une connexion au service de comptes.</div>`;
+    return;
+  }
+  listEl.innerHTML = `<div class="hand-empty">Chargement…</div>`;
+
+  const { data, error } = await sbClient
+    .from('career_history')
+    .select('user_id, player_name, club, league, season_number, score')
+    .limit(2000);
+
+  if(error){
+    listEl.innerHTML = `<div class="hand-empty">Impossible de charger le Panthéon : ${error.message}</div>`;
+    return;
+  }
+  const rows = (data || []).filter(r => r.score && typeof r.score.total === 'number');
+  if(!rows.length){
+    listEl.innerHTML = `<div class="hand-empty">Aucune saison enregistrée pour l'instant — sois le premier au Panthéon !</div>`;
+    return;
+  }
+
+  const myId = state.session ? state.session.user.id : null;
+
+  if(state.pantheonView === 'season'){
+    const ranked = rows.slice().sort((a,b)=> b.score.total - a.score.total).slice(0, 50);
+    listEl.innerHTML = ranked.map((r,i)=>`
+      <div class="pantheon-row ${r.user_id===myId ? 'pantheon-me' : ''}">
+        <div class="pantheon-rank">${i+1}</div>
+        <div>
+          <div class="pantheon-name">${r.player_name || 'Manager anonyme'}</div>
+          <div class="pantheon-sub">${r.club} (${r.league}) — Saison ${r.season_number}</div>
+        </div>
+        <div class="pantheon-score">${r.score.total}<span class="l">pts</span></div>
+      </div>
+    `).join('');
+  } else {
+    const byUser = {};
+    rows.forEach(r=>{
+      const entry = byUser[r.user_id] || (byUser[r.user_id] = { user_id:r.user_id, player_name:r.player_name, total:0, seasons:0 });
+      entry.total += r.score.total;
+      entry.seasons += 1;
+      if(r.player_name) entry.player_name = r.player_name;
+    });
+    const ranked = Object.values(byUser).sort((a,b)=> b.total - a.total).slice(0, 50);
+    listEl.innerHTML = ranked.map((r,i)=>`
+      <div class="pantheon-row ${r.user_id===myId ? 'pantheon-me' : ''}">
+        <div class="pantheon-rank">${i+1}</div>
+        <div>
+          <div class="pantheon-name">${r.player_name || 'Manager anonyme'}</div>
+          <div class="pantheon-sub">${r.seasons} saison${r.seasons>1?'s':''} jouée${r.seasons>1?'s':''}</div>
+        </div>
+        <div class="pantheon-score">${r.total}<span class="l">pts</span></div>
+      </div>
+    `).join('');
+  }
 }
 
 async function renderAccountScreen(){
@@ -4411,7 +4816,7 @@ async function renderAccountScreen(){
     historyEl.innerHTML = history.slice().reverse().map(r=>{
       const posLabel = r.position===1 ? '1er' : `${r.position}e`;
       const euroLine = r.euro_result
-        ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}`
+        ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}${r.euro_result.superCupWon ? " · Supercoupe d'UEFA remportée 🏆" : ''}`
         : "Pas d'Europe cette saison-là";
       const scoreLine = r.score
         ? `Score de la saison : <strong>${r.score.total} pts</strong> (Championnat ${r.score.league} · Coupe ${r.score.cup} · Europe ${r.score.euro})`
@@ -4422,6 +4827,8 @@ async function renderAccountScreen(){
             <div class="account-season-title">Saison ${r.season_number} — ${r.club} (${r.league})</div>
             ${r.is_champion ? '<span class="st-badge st-badge-champ">C</span>' : ''}
             ${r.cup_won ? '<span class="st-badge st-badge-cup">CN</span>' : ''}
+            ${r.euro_result && r.euro_result.won ? `<span class="st-badge st-badge-${r.euro_result.tier==='cl'?'c1':r.euro_result.tier==='el'?'c3':'c4'}">${EURO_TROPHY_BADGE[r.euro_result.tier]}</span>` : ''}
+            ${r.euro_result && r.euro_result.superCupWon ? '<span class="st-badge st-badge-sc">SC</span>' : ''}
           </div>
           <div class="account-season-body">
             <div>Classement : ${posLabel} / ${r.total_clubs} (${r.points ?? '-'} pts)</div>
@@ -4463,11 +4870,29 @@ document.getElementById('btn-account').addEventListener('click', ()=>{
   showScreen('account');
   renderAccountScreen();
 });
+document.getElementById('btn-pantheon').addEventListener('click', ()=>{
+  showScreen('pantheon');
+  renderPantheonScreen();
+});
+document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.pantheonView = btn.dataset.view;
+    renderPantheonScreen();
+  });
+});
 document.getElementById('btn-switch-profile').addEventListener('click', signOutUser);
 document.getElementById('tab-signin').addEventListener('click', ()=> setAuthMode('signin'));
 document.getElementById('tab-signup').addEventListener('click', ()=> setAuthMode('signup'));
 document.getElementById('profile-confirm').addEventListener('click', submitAuthForm);
 document.getElementById('btn-google-auth').addEventListener('click', signInWithGoogle);
+document.getElementById('profile-modal-close').addEventListener('click', closeProfileModal);
+document.getElementById('profile-skip').addEventListener('click', closeProfileModal);
+document.getElementById('profile-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'profile-modal') closeProfileModal();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && document.getElementById('profile-modal').style.display === 'flex') closeProfileModal();
+});
 document.getElementById('profile-password').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ submitAuthForm(); }
 });
