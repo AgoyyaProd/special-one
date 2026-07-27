@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Special One - Créez le club ultime</title>
+<title>Special One — Créez le club ultime</title>
 
 <link rel="stylesheet" href="https://use.typekit.net/dee3jbl.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1460,6 +1460,51 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-dim);
 }
 
+.pseudo-editor{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  padding:14px 16px;
+  margin-bottom:24px;
+}
+.pseudo-label{
+  display:block;
+  font-family:var(--sans);
+  font-size:11.5px;
+  color:var(--text-faint);
+  margin-bottom:8px;
+}
+.pseudo-row{
+  display:flex;
+  gap:10px;
+}
+.pseudo-row .modal-input{ flex:1; margin-top:0; }
+.pseudo-hint{
+  font-family:var(--sans);
+  font-size:11.5px;
+  color:var(--text-dim);
+  margin-top:8px;
+  min-height:14px;
+}
+
+.pantheon-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.pantheon-select{
+  font-family:var(--sans);
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--text);
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border-2);
+  border-radius:999px;
+  padding:8px 12px;
+}
+.pantheon-select:focus{ outline:none; border-color:var(--club-accent); }
+
 .pantheon-list{
   display:flex;
   flex-direction:column;
@@ -1822,6 +1867,15 @@ button{ font-family:inherit; cursor:pointer; }
         <button class="season-btn season-btn-ghost" id="btn-switch-profile">Se déconnecter</button>
       </div>
 
+      <div class="pseudo-editor">
+        <label for="pseudo-input" class="pseudo-label">Pseudo public (affiché au Panthéon, jamais ton nom ou ton email)</label>
+        <div class="pseudo-row">
+          <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
+          <button class="season-btn season-btn-primary" id="btn-save-pseudo">Enregistrer</button>
+        </div>
+        <div class="pseudo-hint" id="pseudo-hint"></div>
+      </div>
+
       <div class="account-stats" id="account-stats"></div>
 
       <div class="section-label">Saisons jouées</div>
@@ -1842,6 +1896,20 @@ button{ font-family:inherit; cursor:pointer; }
       <div class="league-switch" id="pantheon-tabs">
         <button class="league-switch-btn active" data-view="season">Meilleure saison</button>
         <button class="league-switch-btn" data-view="total">Total carrière</button>
+      </div>
+
+      <div class="pantheon-filters">
+        <select class="pantheon-select" id="pantheon-filter-league">
+          <option value="">Tous les championnats</option>
+          <option value="Ligue 1">Ligue 1</option>
+          <option value="Premier League">Premier League</option>
+          <option value="La Liga">La Liga</option>
+          <option value="Bundesliga">Bundesliga</option>
+          <option value="Serie A">Serie A</option>
+        </select>
+        <select class="pantheon-select" id="pantheon-filter-club">
+          <option value="">Tous les clubs</option>
+        </select>
       </div>
 
       <div class="pantheon-list" id="pantheon-list"></div>
@@ -2593,7 +2661,9 @@ const state = {
   standingsLeagueView:null,
   otherLeagueStandings:null,
   pendingAfterProfile:null,
-  pantheonView:'season'
+  pantheonView:'season',
+  pantheonFilterLeague:'',
+  pantheonFilterClub:''
 };
 
 function applyClubTheme(club){
@@ -4475,9 +4545,38 @@ function currentUserLabel(){
 function pantheonDisplayName(){
   if(!state.session) return 'Invité';
   const u = state.session.user;
-  const meta = u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name);
+  const meta = u.user_metadata && (u.user_metadata.pseudo || u.user_metadata.full_name || u.user_metadata.name);
   if(meta) return meta;
   return 'Manager-' + u.id.slice(0, 6);
+}
+
+async function savePseudo(){
+  const input = document.getElementById('pseudo-input');
+  const hint = document.getElementById('pseudo-hint');
+  const btn = document.getElementById('btn-save-pseudo');
+  const pseudo = input.value.trim();
+  if(!pseudo){ hint.textContent = 'Choisis un pseudo avant d\'enregistrer.'; return; }
+  if(pseudo.length > 24){ hint.textContent = 'Le pseudo doit faire 24 caractères maximum.'; return; }
+
+  btn.disabled = true;
+  hint.textContent = 'Enregistrement…';
+  try {
+    const { data, error: updErr } = await sbClient.auth.updateUser({ data:{ pseudo } });
+    if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
+    state.session.user = data.user;
+
+    // Répercute le nouveau pseudo sur les saisons déjà enregistrées, pour
+    // que l'historique du Panthéon reste cohérent avec le compte.
+    const { error: histErr } = await sbClient
+      .from('career_history')
+      .update({ player_name: pseudo })
+      .eq('user_id', state.session.user.id);
+    hint.textContent = histErr
+      ? `Pseudo enregistré, mais l'historique n'a pas pu être mis à jour : ${histErr.message}`
+      : 'Pseudo enregistré !';
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function initAuth(){
@@ -4724,6 +4823,7 @@ async function renderPantheonScreen(){
   document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.view === state.pantheonView);
   });
+  populatePantheonClubFilter();
 
   const listEl = document.getElementById('pantheon-list');
   if(!sbClient){
@@ -4741,9 +4841,11 @@ async function renderPantheonScreen(){
     listEl.innerHTML = `<div class="hand-empty">Impossible de charger le Panthéon : ${error.message}</div>`;
     return;
   }
-  const rows = (data || []).filter(r => r.score && typeof r.score.total === 'number');
+  let rows = (data || []).filter(r => r.score && typeof r.score.total === 'number');
+  if(state.pantheonFilterLeague) rows = rows.filter(r => r.league === state.pantheonFilterLeague);
+  if(state.pantheonFilterClub) rows = rows.filter(r => r.club === state.pantheonFilterClub);
   if(!rows.length){
-    listEl.innerHTML = `<div class="hand-empty">Aucune saison enregistrée pour l'instant — sois le premier au Panthéon !</div>`;
+    listEl.innerHTML = `<div class="hand-empty">Aucune saison enregistrée pour ces filtres.</div>`;
     return;
   }
 
@@ -4783,9 +4885,23 @@ async function renderPantheonScreen(){
   }
 }
 
+// Reconstruit la liste "Club" du filtre en fonction du championnat choisi
+// (tous les clubs du championnat, ou l'ensemble des clubs si "Tous").
+function populatePantheonClubFilter(){
+  const clubSelect = document.getElementById('pantheon-filter-club');
+  const league = state.pantheonFilterLeague;
+  const clubs = league ? (LEAGUES[league] || []) : Object.values(LEAGUES).flat();
+  const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
+  if(!names.includes(state.pantheonFilterClub)) state.pantheonFilterClub = '';
+  clubSelect.innerHTML = `<option value="">Tous les clubs</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+  clubSelect.value = state.pantheonFilterClub;
+}
+
 async function renderAccountScreen(){
   if(!state.session){ showProfileModal(renderAccountScreen); return; }
   document.getElementById('account-profile-name').textContent = currentUserLabel();
+  document.getElementById('pseudo-input').value = (state.session.user.user_metadata && state.session.user.user_metadata.pseudo) || '';
+  document.getElementById('pseudo-hint').textContent = '';
   document.getElementById('account-stats').innerHTML = `<div class="hand-empty">Chargement…</div>`;
   document.getElementById('account-history').innerHTML = '';
 
@@ -4879,6 +4995,15 @@ document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
     state.pantheonView = btn.dataset.view;
     renderPantheonScreen();
   });
+});
+document.getElementById('btn-save-pseudo').addEventListener('click', savePseudo);
+document.getElementById('pantheon-filter-league').addEventListener('change', (e)=>{
+  state.pantheonFilterLeague = e.target.value;
+  renderPantheonScreen();
+});
+document.getElementById('pantheon-filter-club').addEventListener('change', (e)=>{
+  state.pantheonFilterClub = e.target.value;
+  renderPantheonScreen();
 });
 document.getElementById('btn-switch-profile').addEventListener('click', signOutUser);
 document.getElementById('tab-signin').addEventListener('click', ()=> setAuthMode('signin'));
