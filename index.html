@@ -381,6 +381,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .gm-account-btn:hover{ color:var(--text); border-color:rgba(255,255,255,.35); }
 .gm-account-menu{ position:relative; }
+.gm-header-actions{ display:flex; align-items:center; gap:10px; }
 .gm-account-menu .gm-account-btn{ max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gm-account-dropdown{
   display:none;
@@ -1492,30 +1493,46 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-dim);
 }
 
-.pseudo-editor{
+.profile-card{
   background:var(--surface-2);
   border:1px solid var(--border);
   border-radius:var(--r-md);
-  padding:14px 16px;
+  padding:20px 22px;
   margin-bottom:24px;
 }
-.pseudo-label{
-  display:block;
+.profile-card-title{
+  font-family:var(--sans);
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:16px;
+}
+.profile-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.profile-field{ display:flex; flex-direction:column; }
+.profile-field-wide{ grid-column:1 / -1; }
+.profile-field label{
   font-family:var(--sans);
   font-size:11.5px;
   color:var(--text-faint);
   margin-bottom:8px;
 }
-.pseudo-row{
-  display:flex;
-  gap:10px;
+.profile-field .modal-input{ margin-top:0; width:100%; }
+.profile-field-hint{
+  font-family:var(--sans);
+  font-size:10.5px;
+  color:var(--text-faint);
+  margin-top:6px;
+  line-height:1.5;
 }
-.pseudo-row .modal-input{ flex:1; margin-top:0; }
 .pseudo-hint{
   font-family:var(--sans);
   font-size:11.5px;
   color:var(--text-dim);
-  margin-top:8px;
+  margin-top:10px;
   min-height:14px;
 }
 
@@ -1524,8 +1541,13 @@ button{ font-family:inherit; cursor:pointer; }
   flex-wrap:wrap;
   gap:8px;
   margin-top:14px;
+  position:relative;
 }
-.pantheon-select{
+.pf-dropdown{ position:relative; }
+.pf-dropdown-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
   font-family:var(--sans);
   font-size:12.5px;
   font-weight:600;
@@ -1533,9 +1555,45 @@ button{ font-family:inherit; cursor:pointer; }
   background:rgba(255,255,255,.04);
   border:1px solid var(--border-2);
   border-radius:999px;
-  padding:8px 12px;
+  padding:8px 14px;
+  max-width:220px;
 }
-.pantheon-select:focus{ outline:none; border-color:var(--club-accent); }
+.pf-dropdown-toggle span:first-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pf-dropdown-toggle:hover{ border-color:var(--club-accent); }
+.pf-caret{ font-size:10px; color:var(--text-faint); flex-shrink:0; }
+.pf-dropdown-menu{
+  display:none;
+  flex-direction:column;
+  gap:2px;
+  position:absolute;
+  top:calc(100% + 8px);
+  left:0;
+  min-width:220px;
+  max-height:280px;
+  overflow-y:auto;
+  background:var(--surface-2);
+  border:1px solid var(--border-2);
+  border-radius:var(--r-md);
+  padding:6px;
+  box-shadow:0 12px 32px rgba(0,0,0,.45);
+  z-index:60;
+}
+.pf-dropdown.open .pf-dropdown-menu{ display:flex; }
+.pf-dropdown-option{
+  font-family:var(--sans);
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--text-dim);
+  background:none;
+  border:none;
+  text-align:left;
+  padding:9px 12px;
+  border-radius:var(--r-sm);
+  width:100%;
+  flex-shrink:0;
+}
+.pf-dropdown-option:hover{ color:var(--text); background:rgba(255,255,255,.06); }
+.pf-dropdown-option.is-active{ color:var(--club-accent); }
 
 .pantheon-list{
   display:flex;
@@ -1720,12 +1778,15 @@ button{ font-family:inherit; cursor:pointer; }
   <div class="gm-header">
     <div class="gm-header-inner">
     <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> THE SPECIAL ONE</div>
-    <div class="gm-account-menu" id="account-menu">
-      <button class="gm-account-btn" id="btn-account-menu-toggle">Mon compte</button>
-      <div class="gm-account-dropdown" id="account-dropdown">
-        <button class="gm-dropdown-item" id="menu-item-account">Mon compte</button>
-        <button class="gm-dropdown-item" id="menu-item-pantheon">Palmarès</button>
-        <button class="gm-dropdown-item gm-dropdown-item-danger" id="menu-item-logout">Déconnexion</button>
+    <div class="gm-header-actions">
+      <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
+      <div class="gm-account-menu" id="account-menu">
+        <button class="gm-account-btn" id="btn-account-menu-toggle">Se connecter</button>
+        <div class="gm-account-dropdown" id="account-dropdown">
+          <button class="gm-dropdown-item" id="menu-item-account">Mon compte</button>
+          <button class="gm-dropdown-item" id="menu-item-palmares">Palmarès</button>
+          <button class="gm-dropdown-item gm-dropdown-item-danger" id="menu-item-logout">Déconnexion</button>
+        </div>
       </div>
     </div>
     </div>
@@ -1894,24 +1955,60 @@ button{ font-family:inherit; cursor:pointer; }
     </div>
   </section>
 
-  <!-- ============================ ACCOUNT ============================ -->
+  <!-- ============================ ACCOUNT (réglages du profil) ============================ -->
   <section id="screen-account" class="screen">
     <div class="account-shell">
       <div class="account-header">
         <div>
           <div class="account-title" id="account-profile-name">—</div>
-          <div class="account-subtitle">Historique de carrière</div>
+          <div class="account-subtitle">Réglages du compte</div>
         </div>
         <button class="season-btn season-btn-ghost" id="btn-switch-profile">Se déconnecter</button>
       </div>
 
-      <div class="pseudo-editor">
-        <label for="pseudo-input" class="pseudo-label">Pseudo public (affiché au Palmarès, jamais ton nom ou ton email)</label>
-        <div class="pseudo-row">
-          <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
-          <button class="season-btn season-btn-primary" id="btn-save-pseudo">Enregistrer</button>
+      <div class="profile-card">
+        <div class="profile-card-title">Informations du profil</div>
+        <div class="profile-grid">
+          <div class="profile-field profile-field-wide">
+            <label for="pseudo-input">Pseudo public</label>
+            <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
+            <div class="profile-field-hint">Affiché au Palmarès et au Panthéon — jamais ton nom ou ton email.</div>
+          </div>
+          <div class="profile-field">
+            <label for="profile-birthdate">Date de naissance</label>
+            <input type="date" id="profile-birthdate" class="modal-input">
+          </div>
+          <div class="profile-field">
+            <label for="profile-gender">Genre</label>
+            <select id="profile-gender" class="modal-input">
+              <option value="">Ne souhaite pas le dire</option>
+              <option value="homme">Homme</option>
+              <option value="femme">Femme</option>
+              <option value="non-binaire">Non-binaire</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="profile-field profile-field-wide">
+            <label for="profile-favorite-club">Club favori</label>
+            <select id="profile-favorite-club" class="modal-input">
+              <option value="">Aucun</option>
+            </select>
+          </div>
         </div>
+        <button class="season-btn season-btn-primary" id="btn-save-profile" style="margin-top:18px">Enregistrer</button>
         <div class="pseudo-hint" id="pseudo-hint"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ PALMARÈS (historique personnel) ============================ -->
+  <section id="screen-palmares" class="screen">
+    <div class="account-shell">
+      <div class="account-header">
+        <div>
+          <div class="account-title">Palmarès</div>
+          <div class="account-subtitle">Ton historique de carrière</div>
+        </div>
       </div>
 
       <div class="account-stats" id="account-stats"></div>
@@ -1921,12 +2018,12 @@ button{ font-family:inherit; cursor:pointer; }
     </div>
   </section>
 
-  <!-- ============================ PANTHÉON ============================ -->
+  <!-- ============================ PANTHÉON (classement global) ============================ -->
   <section id="screen-pantheon" class="screen">
     <div class="account-shell">
       <div class="account-header">
         <div>
-          <div class="account-title">Palmarès</div>
+          <div class="account-title">Panthéon</div>
           <div class="account-subtitle">Les meilleures performances, toutes carrières confondues</div>
         </div>
       </div>
@@ -1937,17 +2034,27 @@ button{ font-family:inherit; cursor:pointer; }
       </div>
 
       <div class="pantheon-filters">
-        <select class="pantheon-select" id="pantheon-filter-league">
-          <option value="">Tous les championnats</option>
-          <option value="Ligue 1">Ligue 1</option>
-          <option value="Premier League">Premier League</option>
-          <option value="La Liga">La Liga</option>
-          <option value="Bundesliga">Bundesliga</option>
-          <option value="Serie A">Serie A</option>
-        </select>
-        <select class="pantheon-select" id="pantheon-filter-club">
-          <option value="">Tous les clubs</option>
-        </select>
+        <div class="pf-dropdown" id="pf-league-dropdown">
+          <button class="pf-dropdown-toggle" id="pf-league-toggle" type="button">
+            <span id="pf-league-label">Tous les championnats</span><span class="pf-caret">&#9662;</span>
+          </button>
+          <div class="pf-dropdown-menu" id="pf-league-menu">
+            <button class="pf-dropdown-option is-active" data-value="">Tous les championnats</button>
+            <button class="pf-dropdown-option" data-value="Ligue 1">Ligue 1</button>
+            <button class="pf-dropdown-option" data-value="Premier League">Premier League</button>
+            <button class="pf-dropdown-option" data-value="La Liga">La Liga</button>
+            <button class="pf-dropdown-option" data-value="Bundesliga">Bundesliga</button>
+            <button class="pf-dropdown-option" data-value="Serie A">Serie A</button>
+          </div>
+        </div>
+        <div class="pf-dropdown" id="pf-club-dropdown">
+          <button class="pf-dropdown-toggle" id="pf-club-toggle" type="button">
+            <span id="pf-club-label">Tous les clubs</span><span class="pf-caret">&#9662;</span>
+          </button>
+          <div class="pf-dropdown-menu" id="pf-club-menu">
+            <button class="pf-dropdown-option is-active" data-value="">Tous les clubs</button>
+          </div>
+        </div>
       </div>
 
       <div class="pantheon-list" id="pantheon-list"></div>
@@ -1969,6 +2076,41 @@ button{ font-family:inherit; cursor:pointer; }
       <div class="modal-divider"><span>ou</span></div>
       <button class="season-btn season-btn-ghost" id="btn-google-auth" style="width:100%">Continuer avec Google</button>
       <button class="modal-skip" id="profile-skip">Continuer sans compte</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="onboarding-modal" style="display:none">
+    <div class="modal-box">
+      <button class="modal-close" id="onboarding-modal-close" aria-label="Fermer" title="Fermer">&times;</button>
+      <div class="modal-text" style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:4px;">Complète ton profil</div>
+      <div class="modal-text">Facultatif, mais ça personnalise ton expérience et ton profil au Palmarès.</div>
+      <div class="pseudo-hint" id="onboarding-hint"></div>
+      <div class="profile-field" style="margin-top:12px">
+        <label for="onboarding-pseudo">Pseudo public</label>
+        <input type="text" id="onboarding-pseudo" class="modal-input" placeholder="Ton pseudo" maxlength="24">
+      </div>
+      <div class="profile-field" style="margin-top:12px">
+        <label for="onboarding-birthdate">Date de naissance</label>
+        <input type="date" id="onboarding-birthdate" class="modal-input">
+      </div>
+      <div class="profile-field" style="margin-top:12px">
+        <label for="onboarding-gender">Genre</label>
+        <select id="onboarding-gender" class="modal-input">
+          <option value="">Ne souhaite pas le dire</option>
+          <option value="homme">Homme</option>
+          <option value="femme">Femme</option>
+          <option value="non-binaire">Non-binaire</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="profile-field" style="margin-top:12px">
+        <label for="onboarding-favorite-club">Club favori</label>
+        <select id="onboarding-favorite-club" class="modal-input">
+          <option value="">Aucun</option>
+        </select>
+      </div>
+      <button class="season-btn season-btn-primary" id="btn-onboarding-save" style="margin-top:16px; width:100%">Enregistrer</button>
+      <button class="modal-skip" id="btn-onboarding-skip">Plus tard</button>
     </div>
   </div>
 
@@ -2700,6 +2842,7 @@ const state = {
   otherLeagueStandings:null,
   pendingAfterProfile:null,
   pendingAfterProfileKind:null,
+  onboardingAfterCb:null,
   pantheonView:'season',
   pantheonFilterLeague:'',
   pantheonFilterClub:''
@@ -2729,6 +2872,7 @@ const SCREEN_RENDERERS = {
   game: ()=>renderGame(),
   season: ()=>renderSeason(),
   account: ()=>renderAccountScreen(),
+  palmares: ()=>renderPalmaresScreen(),
   pantheon: ()=>renderPantheonScreen()
 };
 
@@ -4604,23 +4748,112 @@ function updateAccountMenuLabel(){
     btn.textContent = pantheonDisplayName();
     logoutItem.style.display = '';
   } else {
-    btn.textContent = 'Mon compte';
+    btn.textContent = 'Se connecter';
     logoutItem.style.display = 'none';
   }
 }
 
-async function savePseudo(){
-  const input = document.getElementById('pseudo-input');
+function populateFavoriteClubOptions(){
+  const select = document.getElementById('profile-favorite-club');
+  if(!select) return;
+  const current = (state.session && state.session.user.user_metadata && state.session.user.user_metadata.favorite_club) || '';
+  const clubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false);
+  const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
+  select.innerHTML = `<option value="">Aucun</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+  select.value = names.includes(current) ? current : '';
+}
+
+// Propose de compléter le profil (pseudo, date de naissance, genre, club
+// favori) juste après une connexion — jamais si déjà complet, jamais deux
+// fois dans la même session si le joueur a choisi "Plus tard".
+function maybeShowOnboarding(afterCb){
+  const meta = state.session && state.session.user.user_metadata;
+  if(!state.session || (meta && meta.profile_completed) || sessionStorage.getItem('onboardingDismissed')){
+    if(afterCb) afterCb();
+    return;
+  }
+  showOnboardingModal(afterCb);
+}
+
+function populateOnboardingClubOptions(){
+  const select = document.getElementById('onboarding-favorite-club');
+  const clubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false);
+  const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
+  select.innerHTML = `<option value="">Aucun</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+}
+
+function showOnboardingModal(afterCb){
+  state.onboardingAfterCb = afterCb || null;
+  const meta = state.session.user.user_metadata || {};
+  document.getElementById('onboarding-pseudo').value = meta.pseudo || '';
+  document.getElementById('onboarding-birthdate').value = meta.birthdate || '';
+  document.getElementById('onboarding-gender').value = meta.gender || '';
+  populateOnboardingClubOptions();
+  document.getElementById('onboarding-favorite-club').value = meta.favorite_club || '';
+  document.getElementById('onboarding-hint').textContent = '';
+  document.getElementById('onboarding-modal').style.display = 'flex';
+}
+
+function closeOnboardingModal(){
+  document.getElementById('onboarding-modal').style.display = 'none';
+  const cb = state.onboardingAfterCb;
+  state.onboardingAfterCb = null;
+  if(cb) cb();
+}
+
+function skipOnboarding(){
+  sessionStorage.setItem('onboardingDismissed', '1');
+  closeOnboardingModal();
+}
+
+async function saveOnboarding(){
+  const pseudo = document.getElementById('onboarding-pseudo').value.trim();
+  const hint = document.getElementById('onboarding-hint');
+  const btn = document.getElementById('btn-onboarding-save');
+  if(!pseudo){ hint.textContent = 'Choisis un pseudo avant de continuer.'; return; }
+  if(pseudo.length > 24){ hint.textContent = 'Le pseudo doit faire 24 caractères maximum.'; return; }
+
+  btn.disabled = true;
+  hint.textContent = 'Enregistrement…';
+  try {
+    const { data, error } = await sbClient.auth.updateUser({ data:{
+      pseudo,
+      birthdate: document.getElementById('onboarding-birthdate').value || null,
+      gender: document.getElementById('onboarding-gender').value || null,
+      favorite_club: document.getElementById('onboarding-favorite-club').value || null,
+      profile_completed: true
+    }});
+    if(error){ hint.textContent = `Erreur : ${error.message}`; return; }
+    state.session.user = data.user;
+    updateAccountMenuLabel();
+    closeOnboardingModal();
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function saveProfile(){
+  const pseudoInput = document.getElementById('pseudo-input');
+  const birthdateInput = document.getElementById('profile-birthdate');
+  const genderInput = document.getElementById('profile-gender');
+  const favoriteClubInput = document.getElementById('profile-favorite-club');
   const hint = document.getElementById('pseudo-hint');
-  const btn = document.getElementById('btn-save-pseudo');
-  const pseudo = input.value.trim();
+  const btn = document.getElementById('btn-save-profile');
+
+  const pseudo = pseudoInput.value.trim();
   if(!pseudo){ hint.textContent = 'Choisis un pseudo avant d\'enregistrer.'; return; }
   if(pseudo.length > 24){ hint.textContent = 'Le pseudo doit faire 24 caractères maximum.'; return; }
 
   btn.disabled = true;
   hint.textContent = 'Enregistrement…';
   try {
-    const { data, error: updErr } = await sbClient.auth.updateUser({ data:{ pseudo } });
+    const { data, error: updErr } = await sbClient.auth.updateUser({ data:{
+      pseudo,
+      birthdate: birthdateInput.value || null,
+      gender: genderInput.value || null,
+      favorite_club: favoriteClubInput.value || null,
+      profile_completed: true
+    }});
     if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
     state.session.user = data.user;
     updateAccountMenuLabel();
@@ -4633,8 +4866,8 @@ async function savePseudo(){
       .update({ player_name: pseudo })
       .eq('user_id', state.session.user.id);
     hint.textContent = histErr
-      ? `Pseudo enregistré, mais l'historique n'a pas pu être mis à jour : ${histErr.message}`
-      : 'Pseudo enregistré !';
+      ? `Profil enregistré, mais l'historique n'a pas pu être mis à jour : ${histErr.message}`
+      : 'Profil enregistré !';
   } finally {
     btn.disabled = false;
   }
@@ -4661,8 +4894,10 @@ async function initAuth(){
       sessionStorage.removeItem('pendingGoogleAuth');
       const snap = restoreGameStateSnapshot();
       routeToRestoredScreen(snap, { retryRecordSeason:true, fallbackAccount:true });
+      maybeShowOnboarding();
     }
     if(state.screen === 'account') renderAccountScreen();
+    if(state.screen === 'palmares') renderPalmaresScreen();
   });
 }
 
@@ -4715,7 +4950,7 @@ async function submitAuthForm(){
     document.getElementById('profile-modal').style.display = 'none';
     const cb = state.pendingAfterProfile;
     state.pendingAfterProfile = null;
-    if(cb) cb();
+    maybeShowOnboarding(cb);
   } finally {
     btn.disabled = false;
   }
@@ -4810,9 +5045,10 @@ function routeToRestoredScreen(snap, opts){
     applyClubTheme(snap.club);
     renderGame();
   } else if(opts.fallbackAccount){
-    history.replaceState({ screen:'account' }, '', location.pathname + location.search + '#account');
-    showScreen('account', { skipHistory:true });
-    renderAccountScreen();
+    const target = snap && snap.kind === 'viewPalmares' ? 'palmares' : 'account';
+    history.replaceState({ screen:target }, '', location.pathname + location.search + '#' + target);
+    showScreen(target, { skipHistory:true });
+    if(target === 'palmares') renderPalmaresScreen(); else renderAccountScreen();
   } else {
     history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
     renderLanding();
@@ -4854,7 +5090,7 @@ function closeProfileModal(){
   document.getElementById('profile-modal').style.display = 'none';
   state.pendingAfterProfile = null;
   state.pendingAfterProfileKind = null;
-  if(state.screen === 'account'){
+  if(state.screen === 'account' || state.screen === 'palmares'){
     if(state.season){ showScreen('season'); renderSeason(); }
     else { showScreen('landing'); }
   }
@@ -5001,6 +5237,10 @@ async function renderPantheonScreen(){
   document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.view === state.pantheonView);
   });
+  document.getElementById('pf-league-label').textContent = state.pantheonFilterLeague || 'Tous les championnats';
+  document.querySelectorAll('#pf-league-menu .pf-dropdown-option').forEach(o=>{
+    o.classList.toggle('is-active', o.dataset.value === state.pantheonFilterLeague);
+  });
   populatePantheonClubFilter();
 
   const listEl = document.getElementById('pantheon-list');
@@ -5066,20 +5306,32 @@ async function renderPantheonScreen(){
 // Reconstruit la liste "Club" du filtre en fonction du championnat choisi
 // (tous les clubs du championnat, ou l'ensemble des clubs si "Tous").
 function populatePantheonClubFilter(){
-  const clubSelect = document.getElementById('pantheon-filter-club');
+  const menu = document.getElementById('pf-club-menu');
   const league = state.pantheonFilterLeague;
-  const clubs = league ? (LEAGUES[league] || []) : Object.values(LEAGUES).flat();
+  const pool = league ? (LEAGUES[league] || []) : Object.values(LEAGUES).flat();
+  // Seuls les clubs réellement jouables (effectif gérable par le joueur)
+  // ont un sens au Palmarès — les autres ne servent que d'adversaires IA.
+  const clubs = pool.filter(c => c.playable !== false);
   const names = Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
   if(!names.includes(state.pantheonFilterClub)) state.pantheonFilterClub = '';
-  clubSelect.innerHTML = `<option value="">Tous les clubs</option>` + names.map(n=>`<option value="${n}">${n}</option>`).join('');
-  clubSelect.value = state.pantheonFilterClub;
+  menu.innerHTML = `<button class="pf-dropdown-option ${!state.pantheonFilterClub?'is-active':''}" data-value="">Tous les clubs</button>`
+    + names.map(n=>`<button class="pf-dropdown-option ${state.pantheonFilterClub===n?'is-active':''}" data-value="${n}">${n}</button>`).join('');
+  document.getElementById('pf-club-label').textContent = state.pantheonFilterClub || 'Tous les clubs';
 }
 
 async function renderAccountScreen(){
   if(!state.session){ showProfileModal(renderAccountScreen, 'viewAccount'); return; }
   document.getElementById('account-profile-name').textContent = pantheonDisplayName();
-  document.getElementById('pseudo-input').value = (state.session.user.user_metadata && state.session.user.user_metadata.pseudo) || '';
+  const meta = state.session.user.user_metadata || {};
+  document.getElementById('pseudo-input').value = meta.pseudo || '';
+  document.getElementById('profile-birthdate').value = meta.birthdate || '';
+  document.getElementById('profile-gender').value = meta.gender || '';
+  populateFavoriteClubOptions();
   document.getElementById('pseudo-hint').textContent = '';
+}
+
+async function renderPalmaresScreen(){
+  if(!state.session){ showProfileModal(renderPalmaresScreen, 'viewPalmares'); return; }
   document.getElementById('account-stats').innerHTML = `<div class="hand-empty">Chargement…</div>`;
   document.getElementById('account-history').innerHTML = '';
 
@@ -5174,14 +5426,18 @@ document.getElementById('menu-item-account').addEventListener('click', ()=>{
   showScreen('account');
   renderAccountScreen();
 });
-document.getElementById('menu-item-pantheon').addEventListener('click', ()=>{
+document.getElementById('menu-item-palmares').addEventListener('click', ()=>{
   accountMenuEl.classList.remove('open');
-  showScreen('pantheon');
-  renderPantheonScreen();
+  showScreen('palmares');
+  renderPalmaresScreen();
 });
 document.getElementById('menu-item-logout').addEventListener('click', ()=>{
   accountMenuEl.classList.remove('open');
   signOutUser();
+});
+document.getElementById('btn-pantheon').addEventListener('click', ()=>{
+  showScreen('pantheon');
+  renderPantheonScreen();
 });
 document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -5189,14 +5445,35 @@ document.querySelectorAll('#pantheon-tabs .league-switch-btn').forEach(btn=>{
     renderPantheonScreen();
   });
 });
-document.getElementById('btn-save-pseudo').addEventListener('click', savePseudo);
-document.getElementById('pantheon-filter-league').addEventListener('change', (e)=>{
-  state.pantheonFilterLeague = e.target.value;
-  renderPantheonScreen();
-});
-document.getElementById('pantheon-filter-club').addEventListener('change', (e)=>{
-  state.pantheonFilterClub = e.target.value;
-  renderPantheonScreen();
+document.getElementById('btn-save-profile').addEventListener('click', saveProfile);
+
+function setupPfDropdown(dropdownId, toggleId, menuId){
+  const dropdown = document.getElementById(dropdownId);
+  const toggle = document.getElementById(toggleId);
+  const menu = document.getElementById(menuId);
+  toggle.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    document.querySelectorAll('.pf-dropdown.open').forEach(d=>{ if(d !== dropdown) d.classList.remove('open'); });
+    dropdown.classList.toggle('open');
+  });
+  menu.addEventListener('click', (e)=>{
+    const opt = e.target.closest('.pf-dropdown-option');
+    if(!opt) return;
+    dropdown.classList.remove('open');
+    if(dropdownId === 'pf-league-dropdown'){
+      state.pantheonFilterLeague = opt.dataset.value;
+      document.getElementById('pf-league-label').textContent = opt.dataset.value || 'Tous les championnats';
+      menu.querySelectorAll('.pf-dropdown-option').forEach(o=>o.classList.toggle('is-active', o===opt));
+    } else {
+      state.pantheonFilterClub = opt.dataset.value;
+    }
+    renderPantheonScreen();
+  });
+}
+setupPfDropdown('pf-league-dropdown', 'pf-league-toggle', 'pf-league-menu');
+setupPfDropdown('pf-club-dropdown', 'pf-club-toggle', 'pf-club-menu');
+document.addEventListener('click', ()=>{
+  document.querySelectorAll('.pf-dropdown.open').forEach(d=>d.classList.remove('open'));
 });
 document.getElementById('btn-switch-profile').addEventListener('click', signOutUser);
 document.getElementById('tab-signin').addEventListener('click', ()=> setAuthMode('signin'));
@@ -5210,6 +5487,13 @@ document.getElementById('profile-modal').addEventListener('click', (e)=>{
 });
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape' && document.getElementById('profile-modal').style.display === 'flex') closeProfileModal();
+  if(e.key === 'Escape' && document.getElementById('onboarding-modal').style.display === 'flex') skipOnboarding();
+});
+document.getElementById('onboarding-modal-close').addEventListener('click', skipOnboarding);
+document.getElementById('btn-onboarding-skip').addEventListener('click', skipOnboarding);
+document.getElementById('btn-onboarding-save').addEventListener('click', saveOnboarding);
+document.getElementById('onboarding-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'onboarding-modal') skipOnboarding();
 });
 document.getElementById('profile-password').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ submitAuthForm(); }
