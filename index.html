@@ -848,6 +848,8 @@ button{ font-family:inherit; cursor:pointer; }
 .live-event.is-red{ border-left-color:#EF4444; }
 .live-event.is-injury{ border-left-color:#F97316; }
 .live-event.is-suspension{ border-left-color:#EF4444; }
+.live-event.is-var{ border-left-color:#F97316; }
+.live-event.is-sub{ border-left-color:#38BDF8; }
 .live-event.is-decision{ border-left-color:var(--club-accent); }
 .live-event.is-ft{ border-left-color:var(--text-faint); }
 
@@ -901,12 +903,32 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .season-btn-primary:hover:not(:disabled){ filter:brightness(1.15); border-color:var(--club-primary); color:#fff; }
 .season-btn-ghost{ background:transparent; }
-.season-btn-europe{
-  background:color-mix(in srgb, var(--zone-cl) 16%, transparent);
-  border-color:var(--zone-cl);
-  color:#fff;
+.euro-tab-group{ margin-top:10px; }
+.euro-tab-label{
+  font-family:var(--sans);
+  font-size:10.5px;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:6px;
 }
-.season-btn-europe:hover{ background:color-mix(in srgb, var(--zone-cl) 26%, transparent); }
+
+.supercup-banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:color-mix(in srgb, #A78BFA 12%, var(--surface-2));
+  border:1px solid rgba(167,139,250,.35);
+  border-left:3px solid #A78BFA;
+  border-radius:2px var(--r-md) var(--r-md) 2px;
+  padding:10px 14px;
+  margin:12px 0;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--text);
+}
+.supercup-banner .l{ font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#A78BFA; }
 
 .euro-trophies{
   background:var(--surface-2);
@@ -1117,7 +1139,7 @@ button{ font-family:inherit; cursor:pointer; }
 .rd-heading:first-child{ margin-top:0; }
 .fx-row{
   display:grid;
-  grid-template-columns:1fr 52px 1fr;
+  grid-template-columns:1fr 52px 1fr 16px;
   align-items:center;
   gap:10px;
   padding:9px 10px;
@@ -1126,6 +1148,27 @@ button{ font-family:inherit; cursor:pointer; }
   font-family:var(--sans);
   font-size:13px;
 }
+.fx-details{ margin-bottom:0; }
+.fx-details summary.fx-row{ cursor:pointer; list-style:none; margin-bottom:6px; }
+.fx-details summary.fx-row::-webkit-details-marker{ display:none; }
+.fx-details[open] summary.fx-row{ border-radius:var(--r-sm) var(--r-sm) 0 0; margin-bottom:0; }
+.fx-toggle{
+  font-size:10px;
+  color:var(--text-faint);
+  text-align:center;
+  transition:transform .15s ease;
+}
+.fx-details[open] .fx-toggle{ transform:rotate(180deg); }
+.fx-events{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:10px;
+  margin-bottom:6px;
+  background:rgba(0,0,0,.18);
+  border-radius:0 0 var(--r-sm) var(--r-sm);
+}
+.fx-events .live-event{ padding:7px 12px; font-size:12px; }
 .fx-row.fx-me{ background:color-mix(in srgb, var(--club-accent) 14%, transparent); }
 .fx-home{ text-align:right; color:var(--text-dim); }
 .fx-away{ text-align:left; color:var(--text-dim); }
@@ -2231,7 +2274,6 @@ button{ font-family:inherit; cursor:pointer; }
         </div>
         <div class="season-controls">
           <button class="season-btn season-btn-ghost" id="btn-back-to-squad">Retour à l'effectif</button>
-          <button class="season-btn season-btn-europe" id="btn-euro-toggle" style="display:none"></button>
           <button class="season-btn" id="btn-play-live">Jouer en direct</button>
           <button class="season-btn" id="btn-next-matchday">Journée suivante</button>
           <button class="season-btn season-btn-primary" id="btn-sim-rest">Simuler la saison</button>
@@ -2243,6 +2285,15 @@ button{ font-family:inherit; cursor:pointer; }
         <div class="panel season-panel">
           <div class="section-label">Classement</div>
           <div class="league-switch" id="league-switch"></div>
+          <div class="euro-tab-group" id="euro-tab-group" style="display:none">
+            <div class="euro-tab-label">Coupe d'Europe</div>
+            <div class="league-switch">
+              <button class="league-switch-btn" id="euro-tab-cl" data-tier="cl">LDC</button>
+              <button class="league-switch-btn" id="euro-tab-el" data-tier="el">Europa</button>
+              <button class="league-switch-btn" id="euro-tab-ecl" data-tier="ecl">Conférence</button>
+            </div>
+          </div>
+          <div class="supercup-banner" id="supercup-banner" style="display:none"></div>
           <div class="standings-table" id="standings-table"></div>
         </div>
         <div class="panel season-panel">
@@ -3206,6 +3257,7 @@ const state = {
   pantheonFilterLeague:'',
   pantheonFilterClub:'',
   unavailable:{},
+  euroTierView:null,
   liveMatch:null
 };
 
@@ -4226,8 +4278,8 @@ function simulateCupStage(stageKey){
   const cup = state.season.cup;
   const fixtures = cup.bracket[stageKey];
   fixtures.forEach(fx=>{
-    const homeStr = estimateClubStrength(state.season.clubsById[fx.home]);
-    const awayStr = estimateClubStrength(state.season.clubsById[fx.away]);
+    const homeStr = fx.home === state.club.id ? myTeamStrength() : estimateClubStrength(state.season.clubsById[fx.home]);
+    const awayStr = fx.away === state.club.id ? myTeamStrength() : estimateClubStrength(state.season.clubsById[fx.away]);
     let hg = simulateGoals(homeStr, awayStr, true);
     let ag = simulateGoals(awayStr, homeStr, false);
     if(hg === ag){
@@ -4235,6 +4287,7 @@ function simulateCupStage(stageKey){
       if(Math.random() < pHome) hg++; else ag++;
     }
     fx.played = true; fx.hg = hg; fx.ag = ag;
+    fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
     fx.winner = hg > ag ? fx.home : fx.away;
   });
   cup.results.push({ stage:stageKey, roundIdx:cup.matchdayFor[stageKey], fixtures:fixtures.map(f=>({...f})) });
@@ -4271,6 +4324,7 @@ function enterSeason(){
   state.standingsLeagueView = state.league;
   initOtherLeagues();
   state.seasonView = 'league';
+  state.euroTierView = null;
 
   const euroTier = determineEuroQualification();
   if(euroTier) initEuroCompetition(euroTier);
@@ -4331,6 +4385,7 @@ function playMatchday(){
     const awayStr = currentClubStrength(fx.away, season);
     fx.hg = simulateGoals(homeStr, awayStr, true);
     fx.ag = simulateGoals(awayStr, homeStr, false);
+    fx.events = simulateMatchEvents(fx.home, fx.away, fx.hg, fx.ag);
     applyFixtureResult(season.standings, fx);
   });
   season.resultsByRound.push(round);
@@ -4452,6 +4507,111 @@ function pickWeightedPlayer(pool, kind, exclude){
     for(let i=0;i<w;i++) weighted.push(p);
   });
   return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
+// Construit un fil d'événements plausible (buts avec buteur/passeur, but
+// annulé après revue vidéo, cartons, blessure, changements) pour un match
+// déjà simulé (score déjà connu) - utilisé pour enrichir l'affichage des
+// résultats sans changer le score lui-même.
+function simulateMatchEvents(homeId, awayId, hg, ag){
+  const homePool = clubPlayerPool(homeId);
+  const awayPool = clubPlayerPool(awayId);
+  const poolFor = side => side === 'home' ? homePool : awayPool;
+  const randomMinute = () => 3 + Math.floor(Math.random() * 89);
+  const events = [];
+
+  const goalMinutes = [];
+  for(let i=0;i<hg;i++) goalMinutes.push({ minute: randomMinute(), side:'home' });
+  for(let i=0;i<ag;i++) goalMinutes.push({ minute: randomMinute(), side:'away' });
+  goalMinutes.forEach(g=>{
+    const pool = poolFor(g.side);
+    const scorer = pickWeightedPlayer(pool, 'scorer', null);
+    const assist = (scorer && Math.random() < 0.7) ? pickWeightedPlayer(pool, 'assist', scorer) : null;
+    events.push({ minute:g.minute, type:'goal', side:g.side, scorer: scorer ? scorer.nom : null, assist: assist ? assist.nom : null });
+  });
+
+  if(Math.random() < 0.08){
+    const side = Math.random() < 0.5 ? 'home' : 'away';
+    const p = pickWeightedPlayer(poolFor(side), 'scorer', null);
+    events.push({ minute: randomMinute(), type:'var', side, player: p ? p.nom : null });
+  }
+
+  const yellowCount = Math.random() < 0.3 ? 0 : (1 + Math.floor(Math.random() * 4));
+  for(let i=0;i<yellowCount;i++){
+    const side = Math.random() < 0.5 ? 'home' : 'away';
+    const p = pickWeightedPlayer(poolFor(side), 'assist', null);
+    events.push({ minute: randomMinute(), type:'yellow', side, player: p ? p.nom : null });
+  }
+
+  if(Math.random() < 0.05){
+    const side = Math.random() < 0.5 ? 'home' : 'away';
+    const p = pickWeightedPlayer(poolFor(side), 'assist', null);
+    events.push({ minute: randomMinute(), type:'red', side, player: p ? p.nom : null });
+  }
+
+  if(Math.random() < 0.12){
+    const side = Math.random() < 0.5 ? 'home' : 'away';
+    const p = pickWeightedPlayer(poolFor(side), 'assist', null);
+    events.push({ minute: randomMinute(), type:'injury', side, player: p ? p.nom : null });
+  }
+
+  const subCount = 1 + Math.floor(Math.random() * 3);
+  for(let i=0;i<subCount;i++){
+    const side = Math.random() < 0.5 ? 'home' : 'away';
+    const pool = poolFor(side);
+    const out = pickWeightedPlayer(pool, 'assist', null);
+    const inPlayer = pickWeightedPlayer(pool, 'assist', out);
+    events.push({ minute: 46 + Math.floor(Math.random() * 44), type:'sub', side, out: out ? out.nom : null, in: inPlayer ? inPlayer.nom : null });
+  }
+
+  events.sort((a,b)=> a.minute - b.minute);
+  return events;
+}
+
+function matchEventText(ev, homeName, awayName){
+  const teamName = ev.side === 'home' ? homeName : awayName;
+  switch(ev.type){
+    case 'goal':
+      if(!ev.scorer) return `But pour ${teamName}.`;
+      return ev.assist ? `But de ${ev.scorer} (${teamName}), passe de ${ev.assist}.` : `But de ${ev.scorer} (${teamName}).`;
+    case 'var':
+      return ev.player ? `But annulé pour ${teamName} (${ev.player}) après revue vidéo.` : `But annulé pour ${teamName} après revue vidéo.`;
+    case 'yellow':
+      return ev.player ? `Carton jaune pour ${ev.player} (${teamName}).` : `Carton jaune pour ${teamName}.`;
+    case 'red':
+      return ev.player ? `Carton rouge pour ${ev.player} (${teamName}) !` : `Carton rouge pour ${teamName} !`;
+    case 'injury':
+      return ev.player ? `${ev.player} (${teamName}) touché, sort sur blessure.` : `Blessure côté ${teamName}.`;
+    case 'sub':
+      return (ev.in && ev.out) ? `Changement (${teamName}) : ${ev.in} remplace ${ev.out}.` : `Changement chez ${teamName}.`;
+    default:
+      return '';
+  }
+}
+
+// Rend une ligne de résultat - dépliable pour voir le détail du match si des
+// événements ont été générés pour cette rencontre, simple sinon.
+function renderFixtureBlock(fx, homeName, awayName, extraClasses){
+  const rowInner = `
+    <div class="fx-home">${homeName}</div>
+    <div class="fx-score">${fx.hg} - ${fx.ag}</div>
+    <div class="fx-away">${awayName}</div>
+  `;
+  if(!fx.events || !fx.events.length){
+    return `<div class="fx-row ${extraClasses}">${rowInner}</div>`;
+  }
+  const eventsHtml = fx.events.map(ev=>`
+    <div class="live-event is-${ev.type}">
+      <div class="live-event-minute">${ev.minute}'</div>
+      <div class="live-event-text">${matchEventText(ev, homeName, awayName)}</div>
+    </div>
+  `).join('');
+  return `
+    <details class="fx-details">
+      <summary class="fx-row ${extraClasses}">${rowInner}<span class="fx-toggle">&#9662;</span></summary>
+      <div class="fx-events">${eventsHtml}</div>
+    </details>
+  `;
 }
 
 // Chaque scénario retourne un objet décision, ou null s'il ne s'applique
@@ -5069,7 +5229,10 @@ function resolveSuperCupForNewSeason(){
     const pCl = clStr / (clStr + elStr);
     if(Math.random() < pCl) hg++; else ag++;
   }
+  state.currentSeasonEuroWinners.superCupClId = prev.cl;
+  state.currentSeasonEuroWinners.superCupElId = prev.el;
   state.currentSeasonEuroWinners.superCupWinner = hg > ag ? prev.cl : prev.el;
+  state.currentSeasonEuroWinners.superCupScore = { clGoals: hg, elGoals: ag };
 }
 
 // 8 adversaires différents par club : on prend les 8 premiers tours d'un
@@ -5132,6 +5295,7 @@ function playEuroSingleMatch(fx){
     if(Math.random() < pHome) hg++; else ag++;
   }
   fx.played = true; fx.hg = hg; fx.ag = ag;
+  fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
   fx.winner = hg > ag ? fx.home : fx.away;
   return fx;
 }
@@ -5146,6 +5310,7 @@ function simulateEuroLeagueRound(domesticRoundIdx){
     const hg = simulateGoals(homeStr, awayStr, true);
     const ag = simulateGoals(awayStr, homeStr, false);
     fx.played = true; fx.hg = hg; fx.ag = ag;
+    fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
     roundResults.push(fx);
     const home = euro.standings[fx.home];
     const away = euro.standings[fx.away];
@@ -5289,6 +5454,7 @@ function renderLeaguePanels(){
   const isOwnLeague = viewLeague === state.league;
 
   renderLeagueSwitchRow();
+  document.getElementById('supercup-banner').style.display = 'none';
 
   let standingArr, zoneMap;
   if(isOwnLeague){
@@ -5374,13 +5540,8 @@ function renderLeaguePanels(){
         const home = resolveClub(fx.home);
         const away = resolveClub(fx.away);
         const isMe = fx.home===state.club.id || fx.away===state.club.id;
-        return `
-          <div class="fx-row ${isMe?'fx-me':''} ${entry.type==='cup'?'fx-cup':''} ${entry.type.startsWith('euro-')?entry.type:''}">
-            <div class="fx-home">${home.name}</div>
-            <div class="fx-score">${fx.hg} - ${fx.ag}</div>
-            <div class="fx-away">${away.name}</div>
-          </div>
-        `;
+        const extraClasses = `${isMe?'fx-me':''} ${entry.type==='cup'?'fx-cup':''} ${entry.type.startsWith('euro-')?entry.type:''}`;
+        return renderFixtureBlock(fx, home.name, away.name, extraClasses);
       }).join('')}
     `).join('');
   }
@@ -5391,8 +5552,10 @@ const EURO_STAGE_LABEL = { league:'Phase de ligue', playoff:'Barrages', ro16:'Hu
 function renderEuroPanels(){
   const euro = state.euro;
   renderLeagueSwitchRow();
-  const tierClass = `euro-${euro.tier}`;
+  const viewTier = state.euroTierView || euro.tier;
+  const tierClass = `euro-${viewTier}`;
   const winners = state.currentSeasonEuroWinners || {};
+
   const trophyRows = ['cl','el','ecl'].map(t=>{
     const name = winners[t] ? clubNameForAnyId(winners[t]) : 'À déterminer';
     return `
@@ -5400,12 +5563,45 @@ function renderEuroPanels(){
         <span class="euro-trophy-comp">${EURO_LABELS[t]}</span>
         <span class="euro-trophy-winner">${name}</span>
       </div>`;
-  }).join('') + `
-      <div class="euro-trophy-row">
-        <span class="euro-trophy-comp">Supercoupe d'UEFA</span>
-        <span class="euro-trophy-winner">${winners.superCupWinner ? clubNameForAnyId(winners.superCupWinner) : 'Non disputée cette saison'}</span>
-      </div>`;
+  }).join('');
+
   const table = document.getElementById('standings-table');
+  const resultsEl = document.getElementById('results-list');
+  const supercupBanner = document.getElementById('supercup-banner');
+
+  // Supercoupe d'UEFA : indépendante de l'onglet sélectionné - le match à
+  // jouer apparaît dans le classement, le résultat dans les résultats.
+  const superCupReady = winners.superCupWinner && winners.superCupClId && winners.superCupElId && winners.superCupScore;
+  if(superCupReady){
+    supercupBanner.style.display = '';
+    supercupBanner.innerHTML = `<span class="l">Supercoupe d'UEFA</span><span>${clubNameForAnyId(winners.superCupClId)} vs ${clubNameForAnyId(winners.superCupElId)}</span>`;
+  } else {
+    supercupBanner.style.display = 'none';
+  }
+  const isMySuperCup = winners.superCupClId === state.club.id || winners.superCupElId === state.club.id;
+  const supercupResultHTML = superCupReady ? `
+    <div class="rd-heading">Supercoupe d'UEFA</div>
+    <div class="fx-row ${isMySuperCup ? 'fx-me' : ''}">
+      <div class="fx-home">${clubNameForAnyId(winners.superCupClId)}</div>
+      <div class="fx-score">${winners.superCupScore.clGoals} - ${winners.superCupScore.elGoals}</div>
+      <div class="fx-away">${clubNameForAnyId(winners.superCupElId)}</div>
+    </div>
+  ` : '';
+
+  if(viewTier !== euro.tier){
+    // Le joueur ne dispute pas cette compétition cette saison - pas de
+    // classement détaillé disponible, seulement le vainqueur une fois connu.
+    table.innerHTML = `
+      <div class="euro-trophies">
+        <div class="euro-trophies-title">Trophées de la saison</div>
+        ${trophyRows}
+      </div>
+      <div class="hand-empty">Vous ne disputez pas la ${EURO_LABELS[viewTier]} cette saison.${winners[viewTier] ? ` Vainqueur : ${clubNameForAnyId(winners[viewTier])}.` : ''}</div>
+    `;
+    resultsEl.innerHTML = supercupResultHTML || `<div class="hand-empty">Compétition non disputée par votre club cette saison.</div>`;
+    return;
+  }
+
   const rows = sortedEuroStandings().map((s,i)=>`
     <div class="st-row ${s.id===state.club.id?'st-me':''} ${i<8?tierClass:''}">
       <div class="st-pos">${i+1}</div>
@@ -5432,23 +5628,16 @@ function renderEuroPanels(){
     </div>
   `;
 
-  const resultsEl = document.getElementById('results-list');
   if(!euro.resultsByRound.length){
-    resultsEl.innerHTML = `<div class="hand-empty">Aucun match européen joué pour l'instant - les rencontres démarrent autour de la 10e journée de championnat.</div>`;
+    resultsEl.innerHTML = supercupResultHTML + `<div class="hand-empty">Aucun match européen joué pour l'instant - les rencontres démarrent autour de la 10e journée de championnat.</div>`;
   } else {
-    resultsEl.innerHTML = euro.resultsByRound.slice().reverse().map(entry=>`
+    resultsEl.innerHTML = supercupResultHTML + euro.resultsByRound.slice().reverse().map(entry=>`
       <div class="rd-heading ${tierClass}-text">${entry.label}</div>
       ${entry.matches.map(fx=>{
         const home = euro.clubsById[fx.home];
         const away = euro.clubsById[fx.away];
         const isMe = fx.home===state.club.id || fx.away===state.club.id;
-        return `
-          <div class="fx-row ${isMe?'fx-me':''} ${tierClass}">
-            <div class="fx-home">${home.name}</div>
-            <div class="fx-score">${fx.hg} - ${fx.ag}</div>
-            <div class="fx-away">${away.name}</div>
-          </div>
-        `;
+        return renderFixtureBlock(fx, home.name, away.name, `${isMe?'fx-me':''} ${tierClass}`);
       }).join('')}
     `).join('');
   }
@@ -5505,15 +5694,16 @@ function renderSeason(){
   const simBtn = document.getElementById('btn-sim-rest');
   const liveBtn = document.getElementById('btn-play-live');
   const backBtn = document.getElementById('btn-back-to-squad');
-  const euroToggle = document.getElementById('btn-euro-toggle');
   const nextSeasonBtn = document.getElementById('btn-next-season');
   backBtn.disabled = season.currentRound > 0;
 
+  const euroTabGroup = document.getElementById('euro-tab-group');
+  euroTabGroup.style.display = euro ? '' : 'none';
   if(euro){
-    euroToggle.style.display = '';
-    euroToggle.textContent = state.seasonView==='euro' ? 'Voir le championnat' : `Coupes d'Europe : ${EURO_LABELS[euro.tier]}`;
-  } else {
-    euroToggle.style.display = 'none';
+    if(!state.euroTierView) state.euroTierView = euro.tier;
+    ['cl','el','ecl'].forEach(t=>{
+      document.getElementById(`euro-tab-${t}`).classList.toggle('active', state.seasonView === 'euro' && state.euroTierView === t);
+    });
   }
 
   const euroPlaysItself = euro && ['league','playoff','ro16','qf'].includes(euro.stage);
@@ -6333,9 +6523,12 @@ document.getElementById('live-decision-options').addEventListener('click', (e)=>
 });
 document.getElementById('btn-live-continue').addEventListener('click', commitLiveMatchResult);
 document.getElementById('btn-sim-rest').addEventListener('click', handleSimRest);
-document.getElementById('btn-euro-toggle').addEventListener('click', ()=>{
-  state.seasonView = state.seasonView === 'euro' ? 'league' : 'euro';
-  renderSeason();
+['cl','el','ecl'].forEach(t=>{
+  document.getElementById(`euro-tab-${t}`).addEventListener('click', ()=>{
+    state.seasonView = 'euro';
+    state.euroTierView = t;
+    renderSeason();
+  });
 });
 document.getElementById('btn-next-season').addEventListener('click', startTransferWindow);
 document.getElementById('btn-back-to-squad').addEventListener('click', ()=>{
