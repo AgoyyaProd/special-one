@@ -846,10 +846,40 @@ button{ font-family:inherit; cursor:pointer; }
 .live-event.is-goal .live-event-text{ color:var(--text); font-weight:700; }
 .live-event.is-card{ border-left-color:#FACC15; }
 .live-event.is-red{ border-left-color:#EF4444; }
+.live-event.is-injury{ border-left-color:#F97316; }
+.live-event.is-suspension{ border-left-color:#EF4444; }
 .live-event.is-decision{ border-left-color:var(--club-accent); }
 .live-event.is-ft{ border-left-color:var(--text-faint); }
 
-.live-endpanel{ display:flex; justify-content:center; }
+.live-endpanel{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+.live-scorers{
+  width:100%;
+  max-width:420px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.live-scorers-title{
+  font-family:var(--sans);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  text-align:center;
+  margin-bottom:4px;
+}
+.live-scorer-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:var(--sans);
+  font-size:13px;
+  color:var(--text);
+  padding:4px 0;
+}
+.live-scorer-row .l-minute{ color:var(--text-faint); font-variant-numeric:tabular-nums; margin-right:8px; }
+.live-scorer-row .l-assist{ color:var(--text-faint); font-size:11.5px; }
 
 .season-btn{
   font-family:var(--bn-regular);
@@ -871,6 +901,72 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .season-btn-primary:hover:not(:disabled){ filter:brightness(1.15); border-color:var(--club-primary); color:#fff; }
 .season-btn-ghost{ background:transparent; }
+.season-btn-europe{
+  background:color-mix(in srgb, var(--zone-cl) 16%, transparent);
+  border-color:var(--zone-cl);
+  color:#fff;
+}
+.season-btn-europe:hover{ background:color-mix(in srgb, var(--zone-cl) 26%, transparent); }
+
+.euro-trophies{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-left:3px solid var(--zone-cl);
+  border-radius:2px var(--r-md) var(--r-md) 2px;
+  padding:14px 16px;
+  margin-bottom:14px;
+}
+.euro-trophies-title{
+  font-family:var(--sans);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:10px;
+}
+.euro-trophy-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:var(--sans);
+  font-size:13px;
+  padding:6px 0;
+  border-top:1px solid var(--border);
+}
+.euro-trophy-row:first-child{ border-top:none; }
+.euro-trophy-comp{ color:var(--text-dim); }
+.euro-trophy-winner{ color:var(--text); font-weight:700; }
+
+.unavailable-banner{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-left:3px solid #DC2626;
+  border-radius:2px var(--r-md) var(--r-md) 2px;
+  padding:12px 16px;
+  margin-bottom:16px;
+}
+.unavailable-banner-title{
+  font-family:var(--sans);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:8px;
+}
+.unavailable-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:var(--sans);
+  font-size:13px;
+  padding:5px 0;
+  border-top:1px solid var(--border);
+}
+.unavailable-row:first-of-type{ border-top:none; }
+.unavailable-name{ color:var(--text); font-weight:700; }
+.unavailable-reason{ color:#F87171; font-size:12px; }
 
 .season-grid{
   display:grid;
@@ -1164,7 +1260,7 @@ button{ font-family:inherit; cursor:pointer; }
   content:'';
   position:absolute;
   top:0; left:0;
-  width:26px; height:3px;
+  width:30%; max-width:30px; height:3px;
   background:var(--club-accent);
 }
 .stat-tile .v{
@@ -1274,6 +1370,20 @@ button{ font-family:inherit; cursor:pointer; }
   gap:3px;
   transition:transform .15s ease;
   cursor:default;
+}
+.pitch-slot.is-out .jersey-svg{ opacity:.4; filter:grayscale(1); }
+.slot-out-tag{
+  position:absolute;
+  top:-6px; right:-10px;
+  background:#DC2626;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.03em;
+  padding:1px 4px;
+  border-radius:3px;
+  z-index:2;
 }
 .jersey-box{
   position:relative;
@@ -2121,7 +2231,7 @@ button{ font-family:inherit; cursor:pointer; }
         </div>
         <div class="season-controls">
           <button class="season-btn season-btn-ghost" id="btn-back-to-squad">Retour à l'effectif</button>
-          <button class="season-btn season-btn-ghost" id="btn-euro-toggle" style="display:none"></button>
+          <button class="season-btn season-btn-europe" id="btn-euro-toggle" style="display:none"></button>
           <button class="season-btn" id="btn-play-live">Jouer en direct</button>
           <button class="season-btn" id="btn-next-matchday">Journée suivante</button>
           <button class="season-btn season-btn-primary" id="btn-sim-rest">Simuler la saison</button>
@@ -2178,6 +2288,7 @@ button{ font-family:inherit; cursor:pointer; }
       <div class="live-ticker" id="live-ticker"></div>
 
       <div class="live-endpanel" id="live-endpanel" style="display:none">
+        <div class="live-scorers" id="live-scorers"></div>
         <button class="season-btn season-btn-primary" id="btn-live-continue">Continuer</button>
       </div>
     </div>
@@ -3094,6 +3205,7 @@ const state = {
   pantheonView:'season',
   pantheonFilterLeague:'',
   pantheonFilterClub:'',
+  unavailable:{},
   liveMatch:null
 };
 
@@ -3455,6 +3567,30 @@ function onSlotClick(slotId){
 
 function playerKey(p){ return p.prenom + '|' + p.nom; }
 
+// Un joueur peut être mis hors service pour plusieurs journées suite à une
+// décision prise en match en direct (blessure aggravée, carton rouge...).
+// roundIdx est la journée EN COURS au moment de la décision - le joueur
+// redevient disponible une fois state.season.currentRound >= untilRound.
+function setPlayerUnavailable(player, matches, reason, roundIdx){
+  if(!player) return;
+  const untilRound = roundIdx + 1 + matches;
+  const key = playerKey(player);
+  const existing = state.unavailable[key];
+  if(existing && existing.untilRound >= untilRound) return; // déjà indisponible au moins aussi longtemps
+  state.unavailable[key] = { untilRound, reason, playerName: player.nom };
+}
+
+function isPlayerUnavailable(player){
+  if(!player || !state.season) return false;
+  const rec = state.unavailable[playerKey(player)];
+  return !!(rec && state.season.currentRound < rec.untilRound);
+}
+
+function unavailabilityInfo(player){
+  if(!player) return null;
+  return state.unavailable[playerKey(player)] || null;
+}
+
 function activePool(){
   const roster = state.club && CLUB_ROSTERS[state.club.id];
   return (roster && roster.length) ? roster : POOL;
@@ -3732,8 +3868,9 @@ function renderHand(){
 function renderSlotHTML(slot, isOpen){
   const filled = !!slot.player;
   const lifted = state.repositionSlotId === slot.id;
+  const out = filled && isPlayerUnavailable(slot.player);
   return `
-    <div class="pitch-slot ${filled?'filled':''} ${isOpen?'compatible':''} ${lifted?'lifted':''}" data-id="${slot.id}"
+    <div class="pitch-slot ${filled?'filled':''} ${isOpen?'compatible':''} ${lifted?'lifted':''} ${out?'is-out':''}" data-id="${slot.id}"
          style="${slot.x!==undefined?`left:${slot.x}%;top:${slot.y}%`:''}">
       <div class="jersey-box">
         <svg class="jersey-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -3743,6 +3880,7 @@ function renderSlotHTML(slot, isOpen){
         <div class="slot-number">${filled?slot.player.numero:''}</div>
       </div>
       <div class="slot-name">${filled?slot.player.nom:''}</div>
+      ${out ? `<div class="slot-out-tag" title="Indisponible">IND.</div>` : ''}
     </div>
   `;
 }
@@ -3955,9 +4093,24 @@ function estimateClubStrength(club){
 }
 
 function myTeamStrength(){
-  const notes = state.slots.filter(s=>s.player).map(s=>s.player.note);
-  if(!notes.length) return 75;
-  return Math.round(notes.reduce((a,b)=>a+b,0) / notes.length);
+  const filled = state.slots.filter(s=>s.player);
+  const available = filled.filter(s=>!isPlayerUnavailable(s.player));
+  const missingCount = filled.length - available.length;
+  const notes = available.map(s=>s.player.note);
+  if(!notes.length) return 60;
+  const base = notes.reduce((a,b)=>a+b,0) / notes.length;
+  // Jouer avec des absences perturbe l'équipe au-delà de la simple moyenne
+  // des présents - ce n'est pas juste "un joueur en moins dans la moyenne".
+  return Math.round(base - missingCount * 1.5);
+}
+
+// La force du club du joueur doit être recalculée à chaque match (elle
+// dépend des indisponibilités du moment) ; celle des adversaires reste la
+// valeur mise en cache en début de saison, eux ne changent pas en cours
+// de route dans ce moteur.
+function currentClubStrength(clubId, season){
+  if(clubId === state.club.id) return myTeamStrength();
+  return season.strengths[clubId];
 }
 
 function simulateGoals(strengthFor, strengthAgainst, isHome){
@@ -4096,6 +4249,7 @@ function simulateCupStage(stageKey){
 const CUP_STAGE_LABEL = { r16:'Coupe - 8èmes de finale', qf:'Coupe - Quarts de finale', sf:'Coupe - Demi-finales', final:'Coupe - Finale' };
 
 function enterSeason(){
+  state.unavailable = {};
   const league = LEAGUES[state.league];
   const opponents = league.filter(c=>c.id !== state.club.id);
   const clubIds = [state.club.id, ...opponents.map(c=>c.id)];
@@ -4173,8 +4327,10 @@ function playMatchday(){
   const roundIdx = season.currentRound;
   const round = season.calendar[roundIdx];
   round.forEach(fx=>{
-    fx.hg = simulateGoals(season.strengths[fx.home], season.strengths[fx.away], true);
-    fx.ag = simulateGoals(season.strengths[fx.away], season.strengths[fx.home], false);
+    const homeStr = currentClubStrength(fx.home, season);
+    const awayStr = currentClubStrength(fx.away, season);
+    fx.hg = simulateGoals(homeStr, awayStr, true);
+    fx.ag = simulateGoals(awayStr, homeStr, false);
     applyFixtureResult(season.standings, fx);
   });
   season.resultsByRound.push(round);
@@ -4213,13 +4369,14 @@ function startLiveMatchday(){
     oppModKey: amHome ? 'modAway' : 'modHome',
     myName: amHome ? clubNameById(myFixture.home) : clubNameById(myFixture.away),
     oppName: amHome ? clubNameById(myFixture.away) : clubNameById(myFixture.home),
-    baseHomeStr: season.strengths[myFixture.home],
-    baseAwayStr: season.strengths[myFixture.away],
+    baseHomeStr: currentClubStrength(myFixture.home, season),
+    baseAwayStr: currentClubStrength(myFixture.away, season),
     modHome:0, modAway:0,
     minute:0,
     hg:0, ag:0,
     events:[],
     decisionsUsed:0,
+    scorers:[],
     maxDecisions:2,
     usedScenarioKeys:[],
     pendingDecision:null,
@@ -4245,10 +4402,56 @@ function isMyTeamHome(lm){ return lm.homeId === state.club.id; }
 function myModKey(lm){ return isMyTeamHome(lm) ? 'modHome' : 'modAway'; }
 function oppModKey(lm){ return isMyTeamHome(lm) ? 'modAway' : 'modHome'; }
 
-function randomStarterName(){
+function randomStarterPlayer(){
   const starters = state.slots.filter(s=>s.player).map(s=>s.player);
-  if(!starters.length) return 'Votre joueur';
-  return starters[Math.floor(Math.random()*starters.length)].nom;
+  if(!starters.length) return null;
+  return starters[Math.floor(Math.random() * starters.length)];
+}
+
+// Pioche un joueur plausible dans l'effectif d'un club pour lui attribuer un
+// but ou une passe décisive. Pour mon propre club, on utilise le onze
+// réellement composé par le joueur ; pour l'adversaire, on pioche dans son
+// effectif historique réel s'il est disponible (tous les clubs de Ligue 1
+// en ont un), sinon on renonce à nommer qui que ce soit.
+function clubPlayerPool(clubId){
+  if(clubId === state.club.id){
+    return state.slots.filter(s => s.player && !isPlayerUnavailable(s.player)).map(s => s.player);
+  }
+  const roster = CLUB_ROSTERS[clubId];
+  if(!roster || !roster.length) return [];
+  const recent = roster.filter(p => p.saison >= '2022-2023');
+  return recent.length >= 11 ? recent : roster;
+}
+
+function positionWeight(poste, kind){
+  const p = poste || '';
+  if(kind === 'scorer'){
+    if(p.includes('BU')) return 6;
+    if(p.includes('AG') || p.includes('AD')) return 4;
+    if(p.includes('MOC')) return 3;
+    if(p.includes('MDC')) return 0.5;
+    if(p.includes('M')) return 2;
+    if(p.includes('G')) return 0.05;
+    return 1; // défenseurs
+  }
+  // passeur : les milieux et ailiers créent plus d'occasions que les buteurs
+  if(p.includes('MOC') || p.includes('MD') || p.includes('MG')) return 4;
+  if(p.includes('AG') || p.includes('AD')) return 3.5;
+  if(p.includes('M')) return 3;
+  if(p.includes('BU')) return 1.5;
+  if(p.includes('G')) return 0.05;
+  return 1;
+}
+
+function pickWeightedPlayer(pool, kind, exclude){
+  const candidates = pool.filter(p => p !== exclude);
+  if(!candidates.length) return null;
+  const weighted = [];
+  candidates.forEach(p=>{
+    const w = Math.max(1, Math.round(positionWeight(p.poste, kind) * 2));
+    for(let i=0;i<w;i++) weighted.push(p);
+  });
+  return weighted[Math.floor(Math.random() * weighted.length)];
 }
 
 // Chaque scénario retourne un objet décision, ou null s'il ne s'applique
@@ -4273,7 +4476,8 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function injuryDecision(lm){
-    const name = randomStarterName();
+    const player = randomStarterPlayer();
+    const name = player ? player.nom : 'Votre joueur';
     return {
       title:'Coup dur',
       text:`${name} se tord la cheville et grimace de douleur. Comment réagir ?`,
@@ -4281,11 +4485,21 @@ const LIVE_DECISION_BUILDERS = [
         { key:'sub', label:'Le faire sortir immédiatement par précaution', apply(){
           lm[myModKey(lm)] -= 3;
           pushLiveEvent(lm, lm.minute, 'decision', `${name} cède sa place par précaution.`);
+          if(player && Math.random() < 0.15){
+            const matches = 1 + Math.floor(Math.random()*2); // 1-2 matchs
+            setPlayerUnavailable(player, matches, 'injury', lm.roundIdx);
+            pushLiveEvent(lm, lm.minute, 'injury', `Examen d'après-match : ${name} sera absent ${matches} match${matches>1?'s':''}.`);
+          }
         }},
         { key:'stay', label:'Le laisser sur le terrain, on avisera à la pause', apply(){
           if(Math.random() < 0.5){
             lm[myModKey(lm)] -= 8;
             pushLiveEvent(lm, lm.minute, 'decision', `${name} force sur sa cheville et perd en efficacité.`);
+            if(player && Math.random() < 0.55){
+              const matches = 2 + Math.floor(Math.random()*4); // 2-5 matchs, blessure sérieuse
+              setPlayerUnavailable(player, matches, 'injury', lm.roundIdx);
+              pushLiveEvent(lm, lm.minute, 'injury', `Diagnostic inquiétant : ${name} manquera ${matches} matchs.`);
+            }
           } else {
             pushLiveEvent(lm, lm.minute, 'decision', `${name} serre les dents et repart au combat.`);
           }
@@ -4294,7 +4508,8 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function cardRiskDecision(lm){
-    const name = randomStarterName();
+    const player = randomStarterPlayer();
+    const name = player ? player.nom : 'Votre joueur';
     return {
       title:'Sur le fil',
       text:`${name} est averti et l'arbitre siffle sévèrement ce soir. Comment gérer le risque ?`,
@@ -4307,6 +4522,10 @@ const LIVE_DECISION_BUILDERS = [
           if(Math.random() < 0.28){
             lm[myModKey(lm)] -= 10;
             pushLiveEvent(lm, lm.minute, 'red', `Deuxième carton jaune pour ${name} ! Votre équipe termine à dix.`);
+            if(player){
+              setPlayerUnavailable(player, 1, 'suspension', lm.roundIdx);
+              pushLiveEvent(lm, lm.minute, 'suspension', `${name} sera suspendu pour le prochain match.`);
+            }
           } else {
             pushLiveEvent(lm, lm.minute, 'decision', `${name} négocie parfaitement le reste de la rencontre.`);
           }
@@ -4372,6 +4591,14 @@ function advanceLiveMoment(lm){
     const homeAtFault = Math.random() < 0.5;
     if(homeAtFault) lm.modHome -= 10; else lm.modAway -= 10;
     pushLiveEvent(lm, lm.minute, 'red', `Carton rouge pour ${homeAtFault ? lm.homeName : lm.awayName} ! L'équipe termine en infériorité numérique.`);
+    const myTeamAtFault = (homeAtFault && lm.homeId === state.club.id) || (!homeAtFault && lm.awayId === state.club.id);
+    if(myTeamAtFault){
+      const player = randomStarterPlayer();
+      if(player){
+        setPlayerUnavailable(player, 1, 'suspension', lm.roundIdx);
+        pushLiveEvent(lm, lm.minute, 'suspension', `${player.nom} sera suspendu pour le prochain match.`);
+      }
+    }
     return;
   }
   if(roll < 0.14){
@@ -4391,7 +4618,21 @@ function advanceLiveMoment(lm){
 
   if(Math.random() < convert){
     if(homeHasChance) lm.hg++; else lm.ag++;
-    pushLiveEvent(lm, lm.minute, 'goal', `BUT ! ${teamName} fait trembler les filets (${lm.hg} - ${lm.ag}).`);
+    const scoringClubId = homeHasChance ? lm.homeId : lm.awayId;
+    const pool = clubPlayerPool(scoringClubId);
+    const scorer = pickWeightedPlayer(pool, 'scorer', null);
+    const assist = (scorer && Math.random() < 0.7) ? pickWeightedPlayer(pool, 'assist', scorer) : null;
+    let text;
+    if(scorer){
+      text = assist
+        ? `BUT ! ${scorer.nom} (${teamName}) marque sur un service de ${assist.nom} (${lm.hg} - ${lm.ag}).`
+        : `BUT ! ${scorer.nom} (${teamName}) fait trembler les filets (${lm.hg} - ${lm.ag}).`;
+      lm.scorers.push({ minute: lm.minute, team: teamName, scorer: scorer.nom, assist: assist ? assist.nom : null });
+    } else {
+      text = `BUT ! ${teamName} fait trembler les filets (${lm.hg} - ${lm.ag}).`;
+      lm.scorers.push({ minute: lm.minute, team: teamName, scorer: null, assist: null });
+    }
+    pushLiveEvent(lm, lm.minute, 'goal', text);
   } else {
     const flavor = Math.random() < 0.5 ? 'tir repoussé par le gardien' : 'occasion manquée de peu';
     pushLiveEvent(lm, lm.minute, 'chance', `${teamName} se procure une occasion, ${flavor}.`);
@@ -4506,6 +4747,17 @@ function renderLiveMatch(){
     controls.style.display = 'none';
     decisionPanel.style.display = 'none';
     endPanel.style.display = 'flex';
+    const scorersEl = document.getElementById('live-scorers');
+    if(!lm.scorers.length){
+      scorersEl.innerHTML = '';
+    } else {
+      scorersEl.innerHTML = `<div class="live-scorers-title">Buteurs</div>` + lm.scorers.map(s=>`
+        <div class="live-scorer-row">
+          <span><span class="l-minute">${s.minute}'</span>${s.scorer || s.team}${s.assist ? ` <span class="l-assist">(passe : ${s.assist})</span>` : ''}</span>
+          <span class="l-assist">${s.team}</span>
+        </div>
+      `).join('');
+    }
   } else {
     controls.style.display = '';
     decisionPanel.style.display = 'none';
@@ -4871,8 +5123,8 @@ function sortedEuroStandings(){
 }
 
 function playEuroSingleMatch(fx){
-  const homeStr = state.euro.strengths[fx.home];
-  const awayStr = state.euro.strengths[fx.away];
+  const homeStr = fx.home === state.club.id ? myTeamStrength() : state.euro.strengths[fx.home];
+  const awayStr = fx.away === state.club.id ? myTeamStrength() : state.euro.strengths[fx.away];
   let hg = simulateGoals(homeStr, awayStr, true);
   let ag = simulateGoals(awayStr, homeStr, false);
   if(hg === ag){
@@ -4889,8 +5141,8 @@ function simulateEuroLeagueRound(domesticRoundIdx){
   const round = euro.calendar[euro.currentRound];
   const roundResults = [];
   round.forEach(fx=>{
-    const homeStr = euro.strengths[fx.home];
-    const awayStr = euro.strengths[fx.away];
+    const homeStr = fx.home === state.club.id ? myTeamStrength() : euro.strengths[fx.home];
+    const awayStr = fx.away === state.club.id ? myTeamStrength() : euro.strengths[fx.away];
     const hg = simulateGoals(homeStr, awayStr, true);
     const ag = simulateGoals(awayStr, homeStr, false);
     fx.played = true; fx.hg = hg; fx.ag = ag;
@@ -5012,20 +5264,14 @@ function euroTrophyBadgesHtml(clubId, euroFullyDone){
   return html;
 }
 
-// Rangée de pastilles partagée entre le championnat et l'Europe - au lieu
-// d'un bouton séparé "Voir l'Europe", la coupe d'Europe disputée cette
-// saison apparaît comme une pastille de plus, à côté des 5 championnats.
-function renderLeagueSwitchRow(activeIsEuro){
+// Rangée de pastilles des 5 championnats. L'Europe a son propre bouton
+// bien distinct au-dessus (btn-euro-toggle), plutôt que d'être noyée ici.
+function renderLeagueSwitchRow(){
   const switchEl = document.getElementById('league-switch');
   const viewLeague = state.standingsLeagueView || state.league;
-  const euro = state.euro;
-  let html = Object.keys(LEAGUES).map(lg => `
-    <button class="league-switch-btn ${(!activeIsEuro && lg===viewLeague)?'active':''}" data-league="${lg}">${lg}${lg===state.league?' ★':''}</button>
+  switchEl.innerHTML = Object.keys(LEAGUES).map(lg => `
+    <button class="league-switch-btn ${(state.seasonView!=='euro' && lg===viewLeague)?'active':''}" data-league="${lg}">${lg}${lg===state.league?' ★':''}</button>
   `).join('');
-  if(euro){
-    html += `<button class="league-switch-btn ${activeIsEuro?'active':''}" data-euro="1">${EURO_LABELS[euro.tier]} ★</button>`;
-  }
-  switchEl.innerHTML = html;
   switchEl.querySelectorAll('.league-switch-btn[data-league]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       state.standingsLeagueView = btn.dataset.league;
@@ -5033,13 +5279,6 @@ function renderLeagueSwitchRow(activeIsEuro){
       renderSeason();
     });
   });
-  const europeBtn = switchEl.querySelector('.league-switch-btn[data-euro]');
-  if(europeBtn){
-    europeBtn.addEventListener('click', ()=>{
-      state.seasonView = 'euro';
-      renderSeason();
-    });
-  }
 }
 
 function renderLeaguePanels(){
@@ -5049,7 +5288,7 @@ function renderLeaguePanels(){
   const viewLeague = state.standingsLeagueView || state.league;
   const isOwnLeague = viewLeague === state.league;
 
-  renderLeagueSwitchRow(false);
+  renderLeagueSwitchRow();
 
   let standingArr, zoneMap;
   if(isOwnLeague){
@@ -5151,8 +5390,21 @@ const EURO_STAGE_LABEL = { league:'Phase de ligue', playoff:'Barrages', ro16:'Hu
 
 function renderEuroPanels(){
   const euro = state.euro;
-  renderLeagueSwitchRow(true);
+  renderLeagueSwitchRow();
   const tierClass = `euro-${euro.tier}`;
+  const winners = state.currentSeasonEuroWinners || {};
+  const trophyRows = ['cl','el','ecl'].map(t=>{
+    const name = winners[t] ? clubNameForAnyId(winners[t]) : 'À déterminer';
+    return `
+      <div class="euro-trophy-row">
+        <span class="euro-trophy-comp">${EURO_LABELS[t]}</span>
+        <span class="euro-trophy-winner">${name}</span>
+      </div>`;
+  }).join('') + `
+      <div class="euro-trophy-row">
+        <span class="euro-trophy-comp">Supercoupe d'UEFA</span>
+        <span class="euro-trophy-winner">${winners.superCupWinner ? clubNameForAnyId(winners.superCupWinner) : 'Non disputée cette saison'}</span>
+      </div>`;
   const table = document.getElementById('standings-table');
   const rows = sortedEuroStandings().map((s,i)=>`
     <div class="st-row ${s.id===state.club.id?'st-me':''} ${i<8?tierClass:''}">
@@ -5167,6 +5419,10 @@ function renderEuroPanels(){
     </div>
   `).join('');
   table.innerHTML = `
+    <div class="euro-trophies">
+      <div class="euro-trophies-title">Trophées de la saison</div>
+      ${trophyRows}
+    </div>
     <div class="st-row st-head">
       <div>#</div><div>Club</div><div>J</div><div>V</div><div>N</div><div>D</div><div>Diff</div><div>Pts</div>
     </div>
@@ -5198,6 +5454,34 @@ function renderEuroPanels(){
   }
 }
 
+// Bandeau "Infirmerie & suspensions" - liste les joueurs actuellement
+// indisponibles (blessure aggravée en direct, carton rouge...) et le
+// nombre de matchs qu'il leur reste à manquer.
+function renderUnavailabilityBanner(){
+  let el = document.querySelector('.unavailable-banner');
+  const season = state.season;
+  const activeEntries = season
+    ? Object.values(state.unavailable).filter(rec => season.currentRound < rec.untilRound)
+    : [];
+  if(!activeEntries.length){
+    if(el) el.remove();
+    return;
+  }
+  if(!el){
+    el = document.createElement('div');
+    el.className = 'unavailable-banner';
+    document.querySelector('.season-grid').before(el);
+  }
+  el.innerHTML = `
+    <div class="unavailable-banner-title">Infirmerie &amp; suspensions</div>
+    ${activeEntries.map(rec=>{
+      const remaining = rec.untilRound - season.currentRound;
+      const reasonLabel = rec.reason === 'suspension' ? 'Suspendu' : 'Blessé';
+      return `<div class="unavailable-row"><span class="unavailable-name">${rec.playerName}</span><span class="unavailable-reason">${reasonLabel} - encore ${remaining} match${remaining>1?'s':''}</span></div>`;
+    }).join('')}
+  `;
+}
+
 function renderSeason(){
   scheduleSaveSnapshot();
   const season = state.season;
@@ -5206,6 +5490,7 @@ function renderSeason(){
   renderClubCrest('season-club-crest', state.club);
   document.getElementById('season-club-name').textContent = state.club.name;
   document.getElementById('season-league-name').textContent = state.league;
+  renderUnavailabilityBanner();
 
   const seasonDone = season.currentRound >= season.calendar.length;
   const euro = state.euro;
@@ -5224,9 +5509,12 @@ function renderSeason(){
   const nextSeasonBtn = document.getElementById('btn-next-season');
   backBtn.disabled = season.currentRound > 0;
 
-  // Le passage championnat <-> Europe se fait désormais via la pastille
-  // dédiée dans la même rangée que les championnats (renderLeagueSwitchRow).
-  euroToggle.style.display = 'none';
+  if(euro){
+    euroToggle.style.display = '';
+    euroToggle.textContent = state.seasonView==='euro' ? 'Voir le championnat' : `Coupes d'Europe : ${EURO_LABELS[euro.tier]}`;
+  } else {
+    euroToggle.style.display = 'none';
+  }
 
   const euroPlaysItself = euro && ['league','playoff','ro16','qf'].includes(euro.stage);
   if(state.seasonView === 'euro' && euro){
