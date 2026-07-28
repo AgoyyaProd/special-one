@@ -728,6 +728,129 @@ button{ font-family:inherit; cursor:pointer; }
   gap:10px;
   flex-wrap:wrap;
 }
+
+.live-shell{
+  max-width:720px;
+  margin:0 auto;
+  padding:32px var(--gutter) 60px;
+}
+.live-scoreboard{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:2px var(--r-lg) 2px var(--r-lg);
+  padding:20px 24px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+}
+.live-scoreboard::before{
+  content:'';
+  position:absolute; top:0; left:0;
+  width:48px; height:3px;
+  background:var(--club-accent);
+}
+.live-team{ flex:1; text-align:left; font-family:var(--sans); font-weight:700; font-size:15px; color:var(--text); }
+.live-team-away{ text-align:right; }
+.live-score-block{ text-align:center; flex-shrink:0; }
+.live-competition{ font-family:var(--sans); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px; }
+.live-score{ font-family:var(--bn-bold); font-size:40px; color:var(--text); line-height:1; font-variant-numeric:tabular-nums; }
+.live-minute{ font-family:var(--sans); font-size:12px; color:var(--club-accent); font-weight:700; margin-top:4px; }
+
+.live-controls{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px;
+  margin-bottom:20px;
+}
+.live-speed-group{ display:flex; gap:6px; }
+.live-speed-btn{
+  font-family:var(--sans); font-size:12px; font-weight:700;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border-2);
+  background:rgba(255,255,255,.04);
+  color:var(--text-dim);
+}
+.live-speed-btn.is-active{ color:#0a0d13; background:var(--club-accent); border-color:var(--club-accent); }
+.live-speed-btn:hover{ border-color:var(--club-accent); }
+
+.live-decision{
+  background:var(--surface-2);
+  border:1px solid var(--club-accent);
+  border-radius:2px var(--r-lg) 2px var(--r-lg);
+  padding:18px 20px;
+  margin-bottom:20px;
+}
+.live-decision-title{
+  font-family:var(--bn-bold);
+  font-size:17px;
+  color:var(--club-accent);
+  margin-bottom:6px;
+}
+.live-decision-text{
+  font-family:var(--sans);
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:14px;
+  line-height:1.5;
+}
+.live-decision-options{ display:flex; flex-direction:column; gap:8px; }
+.live-decision-option{
+  font-family:var(--sans);
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border-2);
+  border-radius:var(--r-sm);
+  padding:12px 14px;
+  text-align:left;
+  width:100%;
+}
+.live-decision-option:hover{ border-color:var(--club-accent); background:rgba(255,255,255,.08); }
+
+.live-ticker{
+  display:flex;
+  flex-direction:column-reverse;
+  gap:8px;
+  max-height:420px;
+  overflow-y:auto;
+  margin-bottom:20px;
+}
+.live-event{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--surface-2);
+  border:1px solid rgba(255,255,255,.06);
+  border-left:3px solid var(--border-2);
+  border-radius:2px var(--r-sm) var(--r-sm) 2px;
+  padding:10px 14px;
+  font-family:var(--sans);
+  font-size:13px;
+  color:var(--text-dim);
+}
+.live-event-minute{
+  font-family:var(--bn-bold);
+  font-size:14px;
+  color:var(--text-faint);
+  flex-shrink:0;
+  width:34px;
+  text-align:center;
+}
+.live-event.is-goal{ border-left-color:#22C55E; }
+.live-event.is-goal .live-event-minute{ color:#22C55E; }
+.live-event.is-goal .live-event-text{ color:var(--text); font-weight:700; }
+.live-event.is-card{ border-left-color:#FACC15; }
+.live-event.is-red{ border-left-color:#EF4444; }
+.live-event.is-decision{ border-left-color:var(--club-accent); }
+.live-event.is-ft{ border-left-color:var(--text-faint); }
+
+.live-endpanel{ display:flex; justify-content:center; }
+
 .season-btn{
   font-family:var(--bn-regular);
   font-size:14px;
@@ -1999,6 +2122,7 @@ button{ font-family:inherit; cursor:pointer; }
         <div class="season-controls">
           <button class="season-btn season-btn-ghost" id="btn-back-to-squad">Retour à l'effectif</button>
           <button class="season-btn season-btn-ghost" id="btn-euro-toggle" style="display:none"></button>
+          <button class="season-btn" id="btn-play-live">Jouer en direct</button>
           <button class="season-btn" id="btn-next-matchday">Journée suivante</button>
           <button class="season-btn season-btn-primary" id="btn-sim-rest">Simuler la saison</button>
           <button class="season-btn season-btn-primary" id="btn-next-season" style="display:none">Mercato → Saison suivante</button>
@@ -2015,6 +2139,46 @@ button{ font-family:inherit; cursor:pointer; }
           <div class="section-label">Résultats</div>
           <div class="results-list" id="results-list"></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ MATCH EN DIRECT ============================ -->
+  <section id="screen-live-match" class="screen">
+    <div class="live-shell">
+      <div class="live-scoreboard">
+        <div class="live-team">
+          <div class="live-team-name" id="live-home-name">-</div>
+        </div>
+        <div class="live-score-block">
+          <div class="live-competition" id="live-competition-label">Championnat</div>
+          <div class="live-score" id="live-score">0 - 0</div>
+          <div class="live-minute" id="live-minute">0'</div>
+        </div>
+        <div class="live-team live-team-away">
+          <div class="live-team-name" id="live-away-name">-</div>
+        </div>
+      </div>
+
+      <div class="live-controls" id="live-controls">
+        <button class="season-btn" id="btn-live-playpause">Pause</button>
+        <div class="live-speed-group">
+          <button class="live-speed-btn is-active" data-speed="1">x1</button>
+          <button class="live-speed-btn" data-speed="2">x2</button>
+          <button class="live-speed-btn" data-speed="4">x4</button>
+        </div>
+      </div>
+
+      <div class="live-decision" id="live-decision" style="display:none">
+        <div class="live-decision-title" id="live-decision-title">Moment clé</div>
+        <div class="live-decision-text" id="live-decision-text"></div>
+        <div class="live-decision-options" id="live-decision-options"></div>
+      </div>
+
+      <div class="live-ticker" id="live-ticker"></div>
+
+      <div class="live-endpanel" id="live-endpanel" style="display:none">
+        <button class="season-btn season-btn-primary" id="btn-live-continue">Continuer</button>
       </div>
     </div>
   </section>
@@ -2929,7 +3093,8 @@ const state = {
   onboardingAfterCb:null,
   pantheonView:'season',
   pantheonFilterLeague:'',
-  pantheonFilterClub:''
+  pantheonFilterClub:'',
+  liveMatch:null
 };
 
 function applyClubTheme(club){
@@ -2957,7 +3122,8 @@ const SCREEN_RENDERERS = {
   season: ()=>renderSeason(),
   account: ()=>renderAccountScreen(),
   palmares: ()=>renderPalmaresScreen(),
-  pantheon: ()=>renderPantheonScreen()
+  pantheon: ()=>renderPantheonScreen(),
+  'live-match': ()=>renderLiveMatch()
 };
 
 // Certains écrans exigent un état minimal (un club choisi, une saison en
@@ -2966,6 +3132,7 @@ const SCREEN_RENDERERS = {
 function canShowScreen(name){
   if(name === 'game') return !!state.club;
   if(name === 'season') return !!state.season;
+  if(name === 'live-match') return !!state.liveMatch;
   return true;
 }
 
@@ -3956,37 +4123,30 @@ function enterSeason(){
 
   state.currentSeasonEuroWinners = { cl:null, el:null, ecl:null, superCupWinner:null };
   resolveShadowEuroTiers(euroTier);
-  maybeResolveSuperCup();
+  resolveSuperCupForNewSeason();
 
   showScreen('season');
   renderSeason();
 }
 
-function playMatchday(){
-  const season = state.season;
-  if(!season || season.currentRound >= season.calendar.length) return;
-  const roundIdx = season.currentRound;
-  const round = season.calendar[roundIdx];
-  const roundResults = [];
-  round.forEach(fx=>{
-    const homeStr = season.strengths[fx.home];
-    const awayStr = season.strengths[fx.away];
-    const hg = simulateGoals(homeStr, awayStr, true);
-    const ag = simulateGoals(awayStr, homeStr, false);
-    fx.played = true;
-    fx.hg = hg; fx.ag = ag;
-    roundResults.push(fx);
+// Applique le score d'une affiche déjà jouée (fx.hg / fx.ag renseignés) au
+// classement - partagé entre la simulation instantanée et le match en direct.
+function applyFixtureResult(standings, fx){
+  fx.played = true;
+  const home = standings[fx.home];
+  const away = standings[fx.away];
+  home.p++; away.p++;
+  home.gf += fx.hg; home.ga += fx.ag;
+  away.gf += fx.ag; away.ga += fx.hg;
+  if(fx.hg > fx.ag){ home.w++; home.pts += 3; away.l++; }
+  else if(fx.hg < fx.ag){ away.w++; away.pts += 3; home.l++; }
+  else { home.d++; away.d++; home.pts++; away.pts++; }
+}
 
-    const home = season.standings[fx.home];
-    const away = season.standings[fx.away];
-    home.p++; away.p++;
-    home.gf += hg; home.ga += ag;
-    away.gf += ag; away.ga += hg;
-    if(hg > ag){ home.w++; home.pts += 3; away.l++; }
-    else if(hg < ag){ away.w++; away.pts += 3; home.l++; }
-    else { home.d++; away.d++; home.pts++; away.pts++; }
-  });
-  season.resultsByRound.push(roundResults);
+// Tout ce qui doit se passer une fois une journée entièrement résolue :
+// coupe, Europe, et fin de saison - partagé lui aussi entre les deux modes.
+function finishRoundBookkeeping(roundIdx){
+  const season = state.season;
   season.currentRound++;
   tickOtherLeagues();
 
@@ -4005,8 +4165,356 @@ function playMatchday(){
     state.prevSeasonStanding = sortedStandings();
     state.prevSeasonCupWinner = season.cup ? season.cup.champion : null;
   }
+}
 
+function playMatchday(){
+  const season = state.season;
+  if(!season || season.currentRound >= season.calendar.length) return;
+  const roundIdx = season.currentRound;
+  const round = season.calendar[roundIdx];
+  round.forEach(fx=>{
+    fx.hg = simulateGoals(season.strengths[fx.home], season.strengths[fx.away], true);
+    fx.ag = simulateGoals(season.strengths[fx.away], season.strengths[fx.home], false);
+    applyFixtureResult(season.standings, fx);
+  });
+  season.resultsByRound.push(round);
+  finishRoundBookkeeping(roundIdx);
   renderSeason();
+}
+
+// ============================================================
+// MATCH EN DIRECT
+// ============================================================
+const LIVE_SPEED_DELAYS = { 1:1500, 2:750, 4:350 };
+
+function clubNameById(id){
+  const c = state.season.clubsById[id];
+  return c ? c.name : (id === state.club.id ? state.club.name : id);
+}
+
+function startLiveMatchday(){
+  const season = state.season;
+  if(!season || season.currentRound >= season.calendar.length) return;
+  const roundIdx = season.currentRound;
+  const round = season.calendar[roundIdx];
+  const myFixture = round.find(fx => fx.home === state.club.id || fx.away === state.club.id);
+  if(!myFixture){
+    // Pas de match pour le joueur cette journée : rien à jouer en direct.
+    playMatchday();
+    return;
+  }
+  const amHome = myFixture.home === state.club.id;
+  state.liveMatch = {
+    fx: myFixture, roundIdx,
+    homeId: myFixture.home, awayId: myFixture.away,
+    homeName: clubNameById(myFixture.home),
+    awayName: clubNameById(myFixture.away),
+    myModKey: amHome ? 'modHome' : 'modAway',
+    oppModKey: amHome ? 'modAway' : 'modHome',
+    myName: amHome ? clubNameById(myFixture.home) : clubNameById(myFixture.away),
+    oppName: amHome ? clubNameById(myFixture.away) : clubNameById(myFixture.home),
+    baseHomeStr: season.strengths[myFixture.home],
+    baseAwayStr: season.strengths[myFixture.away],
+    modHome:0, modAway:0,
+    minute:0,
+    hg:0, ag:0,
+    events:[],
+    decisionsUsed:0,
+    maxDecisions:2,
+    usedScenarioKeys:[],
+    pendingDecision:null,
+    finished:false,
+    playing:false,
+    speed:1,
+    timerId:null
+  };
+  showScreen('live-match');
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+
+function liveEffectiveStrength(lm, side){
+  return side==='home' ? lm.baseHomeStr + lm.modHome : lm.baseAwayStr + lm.modAway;
+}
+
+function pushLiveEvent(lm, minute, type, text){
+  lm.events.push({ minute, type, text });
+}
+
+function isMyTeamHome(lm){ return lm.homeId === state.club.id; }
+function myModKey(lm){ return isMyTeamHome(lm) ? 'modHome' : 'modAway'; }
+function oppModKey(lm){ return isMyTeamHome(lm) ? 'modAway' : 'modHome'; }
+
+function randomStarterName(){
+  const starters = state.slots.filter(s=>s.player).map(s=>s.player);
+  if(!starters.length) return 'Votre joueur';
+  return starters[Math.floor(Math.random()*starters.length)].nom;
+}
+
+// Chaque scénario retourne un objet décision, ou null s'il ne s'applique
+// pas au moment présent (ex : fin de match uniquement après la 75e).
+// Un est tiré au hasard parmi ceux éligibles à chaque moment clé, pour ne
+// pas répéter toujours la même situation.
+const LIVE_DECISION_BUILDERS = [
+  function tacticalDecision(lm){
+    return {
+      title:'Moment clé',
+      text:'Le match est serré. Comment réagir ?',
+      options:[
+        { key:'press', label:'Presser plus haut pour forcer la décision', apply(){
+          lm[myModKey(lm)] += 6; lm[oppModKey(lm)] -= 3;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous poussez votre équipe à presser plus haut.');
+        }},
+        { key:'manage', label:'Resserrer les lignes et gérer le score', apply(){
+          lm[myModKey(lm)] -= 2; lm[oppModKey(lm)] -= 5;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous consignez à votre équipe de resserrer les lignes.');
+        }}
+      ]
+    };
+  },
+  function injuryDecision(lm){
+    const name = randomStarterName();
+    return {
+      title:'Coup dur',
+      text:`${name} se tord la cheville et grimace de douleur. Comment réagir ?`,
+      options:[
+        { key:'sub', label:'Le faire sortir immédiatement par précaution', apply(){
+          lm[myModKey(lm)] -= 3;
+          pushLiveEvent(lm, lm.minute, 'decision', `${name} cède sa place par précaution.`);
+        }},
+        { key:'stay', label:'Le laisser sur le terrain, on avisera à la pause', apply(){
+          if(Math.random() < 0.5){
+            lm[myModKey(lm)] -= 8;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} force sur sa cheville et perd en efficacité.`);
+          } else {
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} serre les dents et repart au combat.`);
+          }
+        }}
+      ]
+    };
+  },
+  function cardRiskDecision(lm){
+    const name = randomStarterName();
+    return {
+      title:'Sur le fil',
+      text:`${name} est averti et l'arbitre siffle sévèrement ce soir. Comment gérer le risque ?`,
+      options:[
+        { key:'protect', label:'Le sortir par prudence', apply(){
+          lm[myModKey(lm)] -= 2;
+          pushLiveEvent(lm, lm.minute, 'decision', `${name} est préservé et cède sa place.`);
+        }},
+        { key:'risk', label:'Le laisser prendre des risques', apply(){
+          if(Math.random() < 0.28){
+            lm[myModKey(lm)] -= 10;
+            pushLiveEvent(lm, lm.minute, 'red', `Deuxième carton jaune pour ${name} ! Votre équipe termine à dix.`);
+          } else {
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} négocie parfaitement le reste de la rencontre.`);
+          }
+        }}
+      ]
+    };
+  },
+  function lateGameDecision(lm){
+    if(lm.minute < 75) return null;
+    return {
+      title:'Money time',
+      text:'Les dernières minutes approchent. Quelle consigne donner ?',
+      options:[
+        { key:'push', label:'Pousser pour aller chercher la victoire', apply(){
+          lm[myModKey(lm)] += 7; lm[oppModKey(lm)] += 3;
+          pushLiveEvent(lm, lm.minute, 'decision', "Vous envoyez tout le monde à l'attaque.");
+        }},
+        { key:'secure', label:'Assurer le résultat actuel', apply(){
+          lm[myModKey(lm)] -= 3; lm[oppModKey(lm)] -= 6;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous consignez à votre équipe de sécuriser le résultat.');
+        }}
+      ]
+    };
+  }
+];
+
+function buildRandomLiveDecision(lm){
+  const candidates = LIVE_DECISION_BUILDERS
+    .filter(fn => !lm.usedScenarioKeys.includes(fn.name))
+    .map(fn => ({ fn, decision: fn(lm) }))
+    .filter(c => c.decision);
+  if(!candidates.length) return null;
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  lm.usedScenarioKeys.push(chosen.fn.name);
+  return chosen.decision;
+}
+
+function advanceLiveMoment(lm){
+  if(lm.finished || lm.pendingDecision) return;
+
+  const step = 4 + Math.floor(Math.random()*6); // 4 à 9 minutes par instant
+  lm.minute = Math.min(93, lm.minute + step);
+
+  if(lm.minute >= 93){
+    lm.finished = true;
+    pushLiveEvent(lm, 90, 'ft', `Coup de sifflet final : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}.`);
+    return;
+  }
+
+  const margin = Math.abs(lm.hg - lm.ag);
+  if(lm.decisionsUsed < lm.maxDecisions && lm.minute >= 15 && lm.minute <= 88 && Math.random() < (margin <= 1 ? 0.22 : 0.13)){
+    const decision = buildRandomLiveDecision(lm);
+    if(decision){
+      lm.decisionsUsed++;
+      lm.pendingDecision = decision;
+      pushLiveEvent(lm, lm.minute, 'decision', 'Moment clé : votre banc de touche doit réagir.');
+      return;
+    }
+  }
+
+  const roll = Math.random();
+  if(roll < 0.006){
+    const homeAtFault = Math.random() < 0.5;
+    if(homeAtFault) lm.modHome -= 10; else lm.modAway -= 10;
+    pushLiveEvent(lm, lm.minute, 'red', `Carton rouge pour ${homeAtFault ? lm.homeName : lm.awayName} ! L'équipe termine en infériorité numérique.`);
+    return;
+  }
+  if(roll < 0.14){
+    const homeCarded = Math.random() < 0.5;
+    pushLiveEvent(lm, lm.minute, 'card', `Carton jaune pour ${homeCarded ? lm.homeName : lm.awayName}.`);
+    return;
+  }
+
+  const homeStr = liveEffectiveStrength(lm, 'home');
+  const awayStr = liveEffectiveStrength(lm, 'away');
+  const pHomeChance = homeStr / (homeStr + awayStr);
+  const homeHasChance = Math.random() < pHomeChance;
+  const attackStr = homeHasChance ? homeStr : awayStr;
+  const defendStr = homeHasChance ? awayStr : homeStr;
+  const convert = Math.max(0.08, Math.min(0.42, 0.24 + (attackStr-defendStr)/160));
+  const teamName = homeHasChance ? lm.homeName : lm.awayName;
+
+  if(Math.random() < convert){
+    if(homeHasChance) lm.hg++; else lm.ag++;
+    pushLiveEvent(lm, lm.minute, 'goal', `BUT ! ${teamName} fait trembler les filets (${lm.hg} - ${lm.ag}).`);
+  } else {
+    const flavor = Math.random() < 0.5 ? 'tir repoussé par le gardien' : 'occasion manquée de peu';
+    pushLiveEvent(lm, lm.minute, 'chance', `${teamName} se procure une occasion, ${flavor}.`);
+  }
+}
+
+function stopLiveMatchTimer(){
+  const lm = state.liveMatch;
+  if(lm && lm.timerId){ clearInterval(lm.timerId); lm.timerId = null; }
+  if(lm) lm.playing = false;
+}
+
+function resumeLiveMatch(){
+  const lm = state.liveMatch;
+  if(!lm || lm.finished || lm.pendingDecision) return;
+  stopLiveMatchTimer();
+  lm.playing = true;
+  lm.timerId = setInterval(liveMatchTick, LIVE_SPEED_DELAYS[lm.speed] || 1500);
+  renderLiveMatch();
+}
+
+function liveMatchTick(){
+  const lm = state.liveMatch;
+  if(!lm) return;
+  advanceLiveMoment(lm);
+  renderLiveMatch();
+  if(lm.finished || lm.pendingDecision) stopLiveMatchTimer();
+}
+
+function toggleLivePause(){
+  const lm = state.liveMatch;
+  if(!lm || lm.finished || lm.pendingDecision) return;
+  if(lm.playing) stopLiveMatchTimer(); else resumeLiveMatch();
+  renderLiveMatch();
+}
+
+function setLiveSpeed(speed){
+  const lm = state.liveMatch;
+  if(!lm) return;
+  lm.speed = speed;
+  if(lm.playing) resumeLiveMatch();
+  renderLiveMatch();
+}
+
+function chooseLiveDecision(key){
+  const lm = state.liveMatch;
+  if(!lm || !lm.pendingDecision) return;
+  const opt = lm.pendingDecision.options.find(o=>o.key===key);
+  if(opt) opt.apply();
+  lm.pendingDecision = null;
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+
+function commitLiveMatchResult(){
+  const lm = state.liveMatch;
+  if(!lm) return;
+  const season = state.season;
+  const roundIdx = lm.roundIdx;
+  const round = season.calendar[roundIdx];
+
+  lm.fx.hg = lm.hg; lm.fx.ag = lm.ag;
+  applyFixtureResult(season.standings, lm.fx);
+
+  round.forEach(other=>{
+    if(other === lm.fx || other.played) return;
+    other.hg = simulateGoals(season.strengths[other.home], season.strengths[other.away], true);
+    other.ag = simulateGoals(season.strengths[other.away], season.strengths[other.home], false);
+    applyFixtureResult(season.standings, other);
+  });
+
+  season.resultsByRound.push(round);
+  finishRoundBookkeeping(roundIdx);
+
+  state.liveMatch = null;
+  showScreen('season');
+  renderSeason();
+}
+
+function renderLiveMatch(){
+  const lm = state.liveMatch;
+  if(!lm) return;
+
+  document.getElementById('live-home-name').textContent = lm.homeName;
+  document.getElementById('live-away-name').textContent = lm.awayName;
+  document.getElementById('live-score').textContent = `${lm.hg} - ${lm.ag}`;
+  document.getElementById('live-minute').textContent = lm.finished ? 'Terminé' : `${lm.minute}'`;
+  document.getElementById('live-competition-label').textContent = `${state.league} - Journée ${lm.roundIdx+1}`;
+
+  const ticker = document.getElementById('live-ticker');
+  ticker.innerHTML = lm.events.slice().reverse().map(ev=>`
+    <div class="live-event is-${ev.type}">
+      <div class="live-event-minute">${ev.minute}'</div>
+      <div class="live-event-text">${ev.text}</div>
+    </div>
+  `).join('');
+
+  const controls = document.getElementById('live-controls');
+  const decisionPanel = document.getElementById('live-decision');
+  const endPanel = document.getElementById('live-endpanel');
+
+  if(lm.pendingDecision){
+    controls.style.display = 'none';
+    decisionPanel.style.display = '';
+    endPanel.style.display = 'none';
+    document.getElementById('live-decision-title').textContent = lm.pendingDecision.title;
+    document.getElementById('live-decision-text').textContent = lm.pendingDecision.text;
+    document.getElementById('live-decision-options').innerHTML = lm.pendingDecision.options.map(o=>`
+      <button class="live-decision-option" data-key="${o.key}">${o.label}</button>
+    `).join('');
+  } else if(lm.finished){
+    controls.style.display = 'none';
+    decisionPanel.style.display = 'none';
+    endPanel.style.display = 'flex';
+  } else {
+    controls.style.display = '';
+    decisionPanel.style.display = 'none';
+    endPanel.style.display = 'none';
+    document.getElementById('btn-live-playpause').textContent = lm.playing ? 'Pause' : 'Reprendre';
+    document.querySelectorAll('.live-speed-btn').forEach(btn=>{
+      btn.classList.toggle('is-active', Number(btn.dataset.speed) === lm.speed);
+    });
+  }
 }
 
 function simulateRestOfSeason(){
@@ -4294,21 +4802,22 @@ function resolveShadowEuroTiers(playedTier){
   });
 }
 
-// Supercoupe d'UEFA : vainqueur de la Ligue des Champions contre vainqueur
-// de la Ligue Europa. Résolue dès que les deux sont connus, qu'ils soient
-// le fruit de la campagne jouée par le joueur ou d'une simulation fantôme.
-function maybeResolveSuperCup(){
-  const w = state.currentSeasonEuroWinners;
-  if(!w || w.superCupWinner || !w.cl || !w.el) return;
-  const clStr = strengthForAnyClub(w.cl);
-  const elStr = strengthForAnyClub(w.el);
+// Supercoupe d'UEFA : en réalité, elle oppose les vainqueurs de la LDC et
+// de l'Europa League de la saison PRÉCÉDENTE, et se joue juste avant que la
+// nouvelle saison ne démarre - jamais la même saison que celle où ces
+// coupes ont été remportées.
+function resolveSuperCupForNewSeason(){
+  const prev = state.prevSeasonEuroWinners;
+  if(!prev || !prev.cl || !prev.el) return;
+  const clStr = strengthForAnyClub(prev.cl);
+  const elStr = strengthForAnyClub(prev.el);
   let hg = simulateGoals(clStr, elStr, true);
   let ag = simulateGoals(elStr, clStr, false);
   if(hg === ag){
     const pCl = clStr / (clStr + elStr);
     if(Math.random() < pCl) hg++; else ag++;
   }
-  w.superCupWinner = hg > ag ? w.cl : w.el;
+  state.currentSeasonEuroWinners.superCupWinner = hg > ag ? prev.cl : prev.el;
 }
 
 // 8 adversaires différents par club : on prend les 8 premiers tours d'un
@@ -4439,7 +4948,6 @@ function simulateEuroFinalMatch(){
   euro.champion = euro.finalFixture.winner;
   euro.stage = 'done';
   state.currentSeasonEuroWinners[euro.tier] = euro.champion;
-  maybeResolveSuperCup();
 }
 
 // Appelée depuis playMatchday() à chaque journée de championnat, pour
@@ -4710,6 +5218,7 @@ function renderSeason(){
 
   const nextBtn = document.getElementById('btn-next-matchday');
   const simBtn = document.getElementById('btn-sim-rest');
+  const liveBtn = document.getElementById('btn-play-live');
   const backBtn = document.getElementById('btn-back-to-squad');
   const euroToggle = document.getElementById('btn-euro-toggle');
   const nextSeasonBtn = document.getElementById('btn-next-season');
@@ -4722,6 +5231,7 @@ function renderSeason(){
   const euroPlaysItself = euro && ['league','playoff','ro16','qf'].includes(euro.stage);
   if(state.seasonView === 'euro' && euro){
     const euroDone = euro.stage === 'done';
+    liveBtn.style.display = 'none';
     if(euroPlaysItself){
       nextBtn.disabled = true;
       simBtn.disabled = true;
@@ -4738,6 +5248,8 @@ function renderSeason(){
     simBtn.disabled = seasonDone;
     nextBtn.textContent = seasonDone ? 'Saison terminée' : `Journée suivante (${season.currentRound+1}/${season.calendar.length})`;
     simBtn.textContent = 'Simuler la saison';
+    liveBtn.style.display = '';
+    liveBtn.disabled = seasonDone;
   }
 
   const euroFullyDone = !euro || euro.stage === 'done';
@@ -5514,6 +6026,7 @@ async function renderPalmaresScreen(){
 // ============================================================
 document.getElementById('btn-home').addEventListener('click', ()=>{
   if(state.screen !== 'landing'){
+    stopLiveMatchTimer();
     localStorage.removeItem(PENDING_STATE_KEY);
     showScreen('landing');
     renderLanding();
@@ -5521,6 +6034,16 @@ document.getElementById('btn-home').addEventListener('click', ()=>{
   window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('btn-next-matchday').addEventListener('click', handleNextMatchday);
+document.getElementById('btn-play-live').addEventListener('click', startLiveMatchday);
+document.getElementById('btn-live-playpause').addEventListener('click', toggleLivePause);
+document.querySelectorAll('.live-speed-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setLiveSpeed(Number(btn.dataset.speed)));
+});
+document.getElementById('live-decision-options').addEventListener('click', (e)=>{
+  const opt = e.target.closest('.live-decision-option');
+  if(opt) chooseLiveDecision(opt.dataset.key);
+});
+document.getElementById('btn-live-continue').addEventListener('click', commitLiveMatchResult);
 document.getElementById('btn-sim-rest').addEventListener('click', handleSimRest);
 document.getElementById('btn-euro-toggle').addEventListener('click', ()=>{
   state.seasonView = state.seasonView === 'euro' ? 'league' : 'euro';
