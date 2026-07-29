@@ -248,26 +248,34 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
    ================================================================== */
 
 :root{
-  --bg:#080a10;
+  --bg:#0a0e1a;
   --surface:#0d1017;
-  --surface-2:#131826;
-  --border:rgba(255,255,255,.08);
-  --border-2:rgba(255,255,255,.16);
+  --surface-2:#161a24;
+  --border:rgba(255,255,255,.07);
+  --border-2:rgba(255,255,255,.14);
   --text:#f5f6f8;
   --text-dim:#9ea6b8;
   --text-faint:#727c8f;
-  --sans:'Inter','Helvetica Neue',Arial,sans-serif;
+  --sans:'Inter','SF Pro Display','Helvetica Neue',Arial,sans-serif;
 
   --gutter:40px;
   --header-h:76px;
-  --r-sm:6px;
-  --r-md:8px;
-  --r-lg:10px;
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:18px;
 
-  /* club theme - overridden per selection, sensible PSG-ish default */
-  --club-primary:#0B3D91;
-  --club-secondary:#C1121F;
-  --club-accent:#ffffff;
+  /* Palette fixe de l'application (ne dépend plus du club sélectionné) :
+     bleu électrique = sélection / éléments interactifs, rouge = actions
+     importantes (validation de mercato, suppression), vert/orange
+     réservés aux signaux d'amélioration et d'avertissement. Les noms de
+     variable --club-* sont conservés pour ne pas casser les ~200 usages
+     existants dans la feuille de style, mais ne varient plus par club. */
+  --club-primary:#2563EB;
+  --club-secondary:#B91C1C;
+  --club-accent:#3B82F6;
+  --danger:#B91C1C;
+  --success:#22C55E;
+  --warning:#F59E0B;
 
   /* paliers européens - teintes maison plutôt que le bleu/orange/vert
      par défaut de Tailwind, un peu plus riches et moins "dashboard" */
@@ -308,9 +316,8 @@ button{ font-family:inherit; cursor:pointer; }
   z-index:0;
   pointer-events:none;
   background:
-    radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--club-primary) 65%, transparent) 0%, transparent 55%),
-    radial-gradient(circle at 88% 22%, color-mix(in srgb, var(--club-secondary) 58%, transparent) 0%, transparent 55%),
-    var(--bg);
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,255,255,.05) 0%, transparent 60%),
+    linear-gradient(135deg, #0a1330 0%, #141225 32%, #2b0f1c 64%, #4a1420 100%);
 }
 
 .screen{
@@ -476,7 +483,7 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
 }
 .hero-copy h1 .gradient-text{
-  background:linear-gradient(90deg,var(--club-primary),var(--club-secondary),var(--club-accent));
+  background:linear-gradient(90deg, #60A5FA, var(--club-accent));
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   transition:background 1s ease;
@@ -633,9 +640,7 @@ button{ font-family:inherit; cursor:pointer; }
   padding:22px 12px;
   border-radius:var(--r-lg);
   border:1px solid var(--border);
-  background:rgba(6,8,13,.5);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
+  background:var(--surface-2);
   color:var(--text-dim);
   transition:all .18s ease;
 }
@@ -666,9 +671,7 @@ button{ font-family:inherit; cursor:pointer; }
   padding:32px 16px;
   border-radius:var(--r-lg);
   border:1px solid var(--border);
-  background:rgba(6,8,13,.5);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
+  background:var(--surface-2);
   transition:all .18s ease;
 }
 .club-tile:hover{ border-color:var(--border-2); transform:translateY(-3px); }
@@ -1019,7 +1022,7 @@ button{ font-family:inherit; cursor:pointer; }
 .season-sidebar-item.active{
   color:#fff;
   border-color:transparent;
-  background:linear-gradient(135deg, var(--club-primary), var(--club-secondary));
+  background:var(--club-accent);
 }
 .season-placeholder{
   flex:1;
@@ -1298,10 +1301,8 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .col-center .pitch-card{ flex:1; min-height:0; }
 .panel{
-  background:rgba(6,8,13,.68);
-  border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(24px) saturate(140%);
-  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  background:var(--surface-2);
+  border:1px solid var(--border);
   border-radius:var(--r-lg);
   padding:20px 20px 28px;
   flex-shrink:0;
@@ -1342,7 +1343,7 @@ button{ font-family:inherit; cursor:pointer; }
 .mercato-bottombar-end{
   align-items:flex-end;
   text-align:right;
-  background:linear-gradient(135deg, var(--club-primary), var(--club-secondary));
+  background:var(--danger);
   border-color:transparent;
   color:#fff;
 }
@@ -1540,10 +1541,8 @@ button{ font-family:inherit; cursor:pointer; }
 /* ---- pitch ---- */
 .pitch-card{
   height:100%;
-  background:rgba(6,8,13,.6);
-  border:1px solid rgba(255,255,255,.09);
-  backdrop-filter:blur(24px) saturate(140%);
-  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  background:var(--surface-2);
+  border:1px solid var(--border);
   border-radius:var(--r-lg);
   padding:16px;
   display:flex;
@@ -1986,7 +1985,7 @@ button{ font-family:inherit; cursor:pointer; }
 .pantheon-nav-item.active{
   color:#fff;
   border-color:transparent;
-  background:linear-gradient(135deg, var(--club-primary), var(--club-secondary));
+  background:var(--club-accent);
 }
 .pantheon-nav-item.active .pantheon-nav-icon{ color:#fff; }
 .pantheon-nav-expand{ position:relative; }
@@ -2193,7 +2192,7 @@ button{ font-family:inherit; cursor:pointer; }
   border:1px solid var(--border);
   border-left:3px solid var(--border-2);
 }
-.pantheon-row:nth-child(1){ border-left-color:#FACC15; }
+.pantheon-row:nth-child(1){ border-left-color:#FACC15; box-shadow:0 0 24px -8px rgba(250,204,21,.35); }
 .pantheon-row:nth-child(2){ border-left-color:#CBD5E1; }
 .pantheon-row:nth-child(3){ border-left-color:#C9834A; }
 .pantheon-row.pantheon-me{
@@ -3587,13 +3586,10 @@ const state = {
 };
 
 function applyClubTheme(club){
-  const root = document.documentElement.style;
-  root.setProperty('--club-primary', club.primary);
-  root.setProperty('--club-secondary', club.secondary);
-  // Volontairement fixe : seuls le fond et le maillot changent avec le
-  // club (2 couleurs, primaire + secondaire) - tous les textes/infos qui
-  // s'appuyaient sur une 3e couleur d'accent restent désormais en blanc.
-  root.setProperty('--club-accent', '#ffffff');
+  // Le nouveau design system utilise une palette fixe (bleu/rouge/vert/
+  // orange) sur toute l'application, qui ne varie plus selon le club
+  // sélectionné - conservé comme point d'extension au cas où un usage
+  // ponctuel du crest/nom du club serait encore nécessaire ailleurs.
 }
 
 function toast(msg){
