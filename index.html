@@ -1269,9 +1269,12 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .fx-events .live-event{ padding:7px 12px; font-size:12px; }
 .fx-row.fx-me{ background:color-mix(in srgb, var(--club-accent) 14%, transparent); }
-.fx-row.euro-cl{ border-left:3px solid var(--zone-cl); }
-.fx-row.euro-el{ border-left:3px solid var(--zone-el); }
-.fx-row.euro-ecl{ border-left:3px solid var(--zone-ecl); }
+.fx-row.euro-cl{ border:1px solid color-mix(in srgb, var(--zone-cl) 45%, transparent); background:color-mix(in srgb, var(--zone-cl) 12%, transparent); }
+.fx-row.euro-cl.fx-me{ background:color-mix(in srgb, var(--zone-cl) 22%, transparent); }
+.fx-row.euro-el{ border:1px solid color-mix(in srgb, var(--zone-el) 45%, transparent); background:color-mix(in srgb, var(--zone-el) 12%, transparent); }
+.fx-row.euro-el.fx-me{ background:color-mix(in srgb, var(--zone-el) 22%, transparent); }
+.fx-row.euro-ecl{ border:1px solid color-mix(in srgb, var(--zone-ecl) 45%, transparent); background:color-mix(in srgb, var(--zone-ecl) 12%, transparent); }
+.fx-row.euro-ecl.fx-me{ background:color-mix(in srgb, var(--zone-ecl) 22%, transparent); }
 .fx-home{ text-align:right; color:var(--text-dim); }
 .fx-away{ text-align:left; color:var(--text-dim); }
 .fx-row.fx-me .fx-home, .fx-row.fx-me .fx-away{ color:var(--text); font-weight:600; }
@@ -2167,16 +2170,21 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:var(--r-md);
   padding:14px;
   box-shadow:0 12px 28px -16px rgba(0,0,0,.6);
-  transition:transform .15s ease, opacity .15s ease;
+  transition:transform .15s ease, opacity .15s ease, filter .15s ease;
 }
 .achv-card.is-unlocked:hover{ transform:translateY(-2px); }
-.achv-card.is-locked{ opacity:.4; }
-.achv-icon{ font-size:24px; margin-bottom:6px; line-height:1; }
+.achv-card.is-locked{ opacity:.5; filter:grayscale(1); }
+.achv-card-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:6px;
+}
+.achv-icon{ font-size:22px; line-height:1; flex-shrink:0; }
 .achv-name{
   font-family:var(--bn-bold);
   font-size:14px;
   color:var(--text);
-  margin-bottom:4px;
 }
 .achv-card.is-locked .achv-name{ color:var(--text-faint); }
 .achv-desc{
@@ -2899,6 +2907,9 @@ button{ font-family:inherit; cursor:pointer; }
         <button class="season-btn season-btn-primary" id="btn-save-profile" style="margin-top:18px">Enregistrer</button>
         <div class="pseudo-hint" id="pseudo-hint"></div>
       </div>
+
+      <div class="section-label">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
+      <div class="achv-grid" id="achv-grid"></div>
     </div>
   </section>
 
@@ -2913,9 +2924,6 @@ button{ font-family:inherit; cursor:pointer; }
       </div>
 
       <div class="account-stats" id="account-stats"></div>
-
-      <div class="section-label">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
-      <div class="achv-grid" id="achv-grid"></div>
 
       <div class="section-label">Saisons jouées</div>
       <div class="account-history" id="account-history"></div>
@@ -3060,6 +3068,7 @@ button{ font-family:inherit; cursor:pointer; }
   <div class="pelouse-modal-overlay" id="season-resume-overlay" style="display:none">
     <div class="pelouse-modal" style="max-width:660px">
       <h2>Match terminé</h2>
+      <div class="season-event-context" id="season-resume-context" style="display:none"></div>
       <p>Un événement a interrompu la simulation. Comment souhaitez-vous continuer ?</p>
       <div class="pelouse-modal-actions" style="justify-content:stretch; gap:10px;">
         <button class="draft-btn" id="btn-resume-bulk-sim" style="flex:1; width:auto;">Continuer la simulation</button>
@@ -6263,7 +6272,7 @@ const SEASON_EVENT_BUILDERS = [
     };
   },
   function trophyPriorityEvent(roundIdx){
-    if(!state.euro || state.euro.stage === 'done') return null;
+    if(!state.euro || state.euro.stage === 'done' || state.euro.currentRound < 1) return null;
     return {
       title:'Tout pour un trophée',
       text:'Deux compétitions deviennent prioritaires. Où mettre l\'accent ?',
@@ -6485,10 +6494,10 @@ function renderSeasonEventModal(){
   const ctxEl = document.getElementById('season-event-context');
   const round = state.season.calendar[pending.roundIdx];
   const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
-  if(myFx && myFx.hg !== undefined && myFx.hg !== null){
+  if(myFx){
     const homeName = clubNameById(myFx.home);
     const awayName = clubNameById(myFx.away);
-    ctxEl.innerHTML = `<span class="l">Après la journée ${pending.roundIdx+1}</span><span class="score">${homeName} ${myFx.hg} - ${myFx.ag} ${awayName}</span>`;
+    ctxEl.innerHTML = `<span class="l">Journée ${pending.roundIdx+1}</span><span class="score">${homeName} - ${awayName}</span>`;
     ctxEl.style.display = 'flex';
   } else {
     ctxEl.style.display = 'none';
@@ -6534,6 +6543,17 @@ function resolveSeasonEvent(optionKey){
 
   if(mode === 'bulk'){
     state.pendingBulkResume = true;
+    const resumeCtxEl = document.getElementById('season-resume-context');
+    const round = state.season.calendar[pending.roundIdx];
+    const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
+    if(myFx && myFx.hg !== undefined && myFx.hg !== null){
+      const homeName = clubNameById(myFx.home);
+      const awayName = clubNameById(myFx.away);
+      resumeCtxEl.innerHTML = `<span class="l">Journée ${pending.roundIdx+1}</span><span class="score">${homeName} ${myFx.hg} - ${myFx.ag} ${awayName}</span>`;
+      resumeCtxEl.style.display = 'flex';
+    } else {
+      resumeCtxEl.style.display = 'none';
+    }
     document.getElementById('season-resume-overlay').style.display = 'flex';
   }
 }
@@ -7865,11 +7885,32 @@ function playableClubNames(){
   const clubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false);
   return Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
 }
+// Le club favori est une simple préférence d'affichage (Palmarès, Panthéon)
+// - contrairement au club qu'on dirige, il n'a pas besoin de données
+// d'effectif complètes, donc pas de filtre "playable" ici : la liste doit
+// couvrir les 5 championnats en entier.
+function allClubNames(){
+  const clubs = Object.values(LEAGUES).flat();
+  return Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
+}
+
+// Retrouve un club par son nom (les listes/formulaires travaillent en
+// noms affichables, pas en id) - utilisé pour appliquer les couleurs du
+// club favori comme thème du site en dehors d'une partie active.
+function findClubByName(name){
+  if(!name) return null;
+  return Object.values(LEAGUES).flat().find(c => c.name === name) || null;
+}
+function applyFavoriteClubTheme(name){
+  const club = findClubByName(name);
+  if(club) applyClubTheme(club);
+}
 
 function populateFavoriteClubOptions(){
   const current = (state.session && state.session.user.user_metadata && state.session.user.user_metadata.favorite_club) || '';
-  populateDropdownOptions('profile-favorite-club-menu', playableClubNames(), 'Aucun');
+  populateDropdownOptions('profile-favorite-club-menu', allClubNames(), 'Aucun');
   setDropdownValue('profile-favorite-club-toggle', 'profile-favorite-club-label', 'profile-favorite-club-menu', current);
+  applyFavoriteClubTheme(current);
 }
 
 // Propose de compléter le profil (pseudo, date de naissance, genre, club
@@ -7885,7 +7926,7 @@ function maybeShowOnboarding(afterCb){
 }
 
 function populateOnboardingClubOptions(){
-  populateDropdownOptions('onboarding-favorite-club-menu', playableClubNames(), 'Aucun');
+  populateDropdownOptions('onboarding-favorite-club-menu', allClubNames(), 'Aucun');
 }
 
 function showOnboardingModal(afterCb){
@@ -8535,8 +8576,10 @@ function renderAchievementsGrid(){
         const unlocked = state.unlockedAchievements.includes(a.id);
         return `
           <div class="achv-card ${unlocked?'is-unlocked':'is-locked'}" title="${unlocked ? a.desc : 'Succès verrouillé'}">
-            <div class="achv-icon">${unlocked ? a.icon : '🔒'}</div>
-            <div class="achv-name">${unlocked ? a.name : '???'}</div>
+            <div class="achv-card-head">
+              <div class="achv-icon">${unlocked ? a.icon : '🔒'}</div>
+              <div class="achv-name">${unlocked ? a.name : '???'}</div>
+            </div>
             <div class="achv-desc">${unlocked ? a.desc : 'Succès verrouillé'}</div>
           </div>
         `;
@@ -8709,13 +8752,13 @@ async function renderAccountScreen(){
   setDropdownValue('profile-gender-toggle', 'profile-gender-label', 'profile-gender-menu', meta.gender || '');
   populateFavoriteClubOptions();
   document.getElementById('pseudo-hint').textContent = '';
+  renderAchievementsGrid();
 }
 
 async function renderPalmaresScreen(){
   if(!state.session){ showProfileModal(renderPalmaresScreen, 'viewPalmares'); return; }
   document.getElementById('account-stats').innerHTML = `<div class="hand-empty">Chargement…</div>`;
   document.getElementById('account-history').innerHTML = '';
-  renderAchievementsGrid();
 
   const { data: history, error } = await sbClient
     .from('career_history')
@@ -8729,7 +8772,6 @@ async function renderPalmaresScreen(){
   }
 
   evaluateHistoryAchievements(history);
-  renderAchievementsGrid();
 
   const trophies = countTrophies(history);
   const totalScore = history.reduce((n,r)=> n + (r.score ? r.score.total : 0), 0);
@@ -8900,9 +8942,9 @@ setupCustomSelect('pf-club-dropdown', 'pf-club-toggle', 'pf-club-menu', null, (v
   renderPantheonScreen();
 });
 setupCustomSelect('profile-gender-dropdown', 'profile-gender-toggle', 'profile-gender-menu', 'profile-gender-label');
-setupCustomSelect('profile-favorite-club-dropdown', 'profile-favorite-club-toggle', 'profile-favorite-club-menu', 'profile-favorite-club-label');
+setupCustomSelect('profile-favorite-club-dropdown', 'profile-favorite-club-toggle', 'profile-favorite-club-menu', 'profile-favorite-club-label', applyFavoriteClubTheme);
 setupCustomSelect('onboarding-gender-dropdown', 'onboarding-gender-toggle', 'onboarding-gender-menu', 'onboarding-gender-label');
-setupCustomSelect('onboarding-favorite-club-dropdown', 'onboarding-favorite-club-toggle', 'onboarding-favorite-club-menu', 'onboarding-favorite-club-label');
+setupCustomSelect('onboarding-favorite-club-dropdown', 'onboarding-favorite-club-toggle', 'onboarding-favorite-club-menu', 'onboarding-favorite-club-label', applyFavoriteClubTheme);
 setupCustomSelect('formation-dropdown', 'formation-toggle', 'formation-menu', 'formation-label', (value)=>{
   if(value) changeFormation(value);
 });
