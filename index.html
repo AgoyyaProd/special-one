@@ -9212,4 +9212,59 @@ function applyPelouse(id){
     // dans sizePitch) - la pelouse s'affiche donc pile comme fournie,
     // sans recadrage ni déformation. Le clip-path reprend les coordonnées
     // exactes du trapèze dessiné dans le SVG d'origine. Ça s'applique à la
-    // couche "pitch-grass" (pas #pitch lui-même) pour que
+    // couche "pitch-grass" (pas #pitch lui-même) pour que les maillots,
+    // eux, restent libres de déborder légèrement du trapèze sans être
+    // rognés.
+    grass.style.clipPath = 'polygon(11.9% 0%, 88.1% 0%, 99.8% 100%, 0.2% 100%)';
+    grass.style.backgroundImage = `url('${p.dataUri}')`;
+    grass.style.backgroundSize = '100% 100%';
+    grass.style.backgroundPosition = 'center';
+    grass.style.backgroundRepeat = 'no-repeat';
+    grass.style.backgroundColor = 'transparent';
+    grass.style.border = 'none';
+    // Les lignes dessinées en CSS (médiane, surfaces, rond central) ne
+    // servent plus non plus - la pelouse se suffit à elle-même.
+    ['.pitch-halfway', '.pitch-circle', '.pitch-line'].forEach(sel=>{
+      pitch.querySelectorAll(sel).forEach(el=>{ el.style.visibility = 'hidden'; });
+    });
+  }
+  state.pelouseId = id;
+}
+function openPelouseModal(){
+  renderPelouseGrid();
+  document.getElementById('btn-confirm-pelouse').disabled = true;
+  document.getElementById('pelouse-modal-overlay').style.display = 'flex';
+}
+function closePelouseModal(){
+  document.getElementById('pelouse-modal-overlay').style.display = 'none';
+}
+document.getElementById('btn-confirm-pelouse').addEventListener('click', ()=>{
+  if(!state.pendingPelouseId) return;
+  applyPelouse(state.pendingPelouseId);
+  closePelouseModal();
+  startDraft();
+});
+
+primeCrestCache();
+window.addEventListener('pagehide', saveSnapshotNow);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnapshotNow(); });
+
+// Ne jamais écraser le hash au démarrage s'il contient un retour de
+// connexion OAuth (#access_token=...) - sinon Supabase perd le jeton avant
+// de pouvoir l'analyser, et la connexion Google échoue silencieusement.
+// Dans ce cas, on laisse initAuth() gérer la restauration une fois la
+// session détectée.
+const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
+if(isOAuthCallbackHash){
+  renderLanding();
+} else {
+  // Simple rechargement de page (ou réouverture) : on restaure la partie
+  // en cours si une sauvegarde existe, sinon écran d'accueil normal.
+  const snap = restoreGameStateSnapshot();
+  routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
+}
+
+</script>
+
+</body>
+</html>
