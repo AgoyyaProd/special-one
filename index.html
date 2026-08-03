@@ -528,7 +528,8 @@ button{ font-family:inherit; cursor:pointer; }
   transition:transform .18s ease, border-color .3s ease;
 }
 .gm-btn-secondary:hover{ transform:translateY(-2px); border-color:var(--club-accent); }
-#btn-resume-save-desc{ display:block; font-size:12px; opacity:.65; font-weight:400; margin-top:2px; }
+#btn-resume-save-desc{ display:block; font-size:11px; opacity:.65; font-weight:400; margin-top:1px; line-height:1.2; }
+#btn-resume-save{ padding-top:clamp(10px,1.4vw,13px); padding-bottom:clamp(10px,1.4vw,13px); }
 
 /* deux cartes espacées, entièrement visibles, jamais rognées */
 .hero-cards-wrap{
@@ -1365,6 +1366,7 @@ button{ font-family:inherit; cursor:pointer; }
   margin:0 0 24px;
 }
 #season-event-title.is-rare{ color:#f5d36b; }
+#injury-alert-title{ color:#ff6b6b; }
 .season-event-context{
   display:flex;
   align-items:center;
@@ -3105,6 +3107,17 @@ button{ font-family:inherit; cursor:pointer; }
     </div>
   </div>
 
+  <div class="pelouse-modal-overlay" id="injury-alert-overlay" style="display:none">
+    <div class="pelouse-modal" style="max-width:520px">
+      <h2 id="injury-alert-title">Blessure</h2>
+      <div class="season-event-context" id="injury-alert-context" style="display:none"></div>
+      <p id="injury-alert-text"></p>
+      <div class="pelouse-modal-actions">
+        <button class="draft-btn" id="btn-injury-alert-squad" style="width:100%;">Aller à l'effectif</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 
@@ -3832,6 +3845,7 @@ const state = {
   pendingBulkResume:false,
   _pendingRevealRoundIdx:null,
   _pendingImpactCheck:null,
+  _pendingInjuryAlert:null,
   seasonModifiers:[],
   usedSeasonEventKeys:[],
   rareSeasonEventUsed:false,
@@ -5157,6 +5171,14 @@ function playMatchday(mode){
   season.resultsByRound.push(round);
   finishRoundBookkeeping(roundIdx);
   if(myFx) updateStreaksAndFatigue(myFx);
+
+  const injuryEvent = myFx ? findInjuryOrRedAlert(myFx) : null;
+  if(injuryEvent){
+    renderSeason();
+    showInjuryAlert(injuryEvent, myFx, roundIdx);
+    return;
+  }
+
   const eventFired = maybeTriggerSeasonEvent(roundIdx, mode || 'single');
   if(eventFired) state._pendingRevealRoundIdx = roundIdx;
   checkImmediateEventImpact(myFx, roundIdx, eventFired);
@@ -6527,6 +6549,35 @@ function updateStreaksAndFatigue(fx){
 // déclenche que si aucun nouvel événement ne vient d'interrompre la
 // simulation sur cette même journée (sinon le résultat lui-même est
 // encore masqué en attendant cette nouvelle décision).
+// Détecte une blessure ou un carton rouge touchant VOTRE club dans un
+// match simulé instantanément (journée par journée ou simulation groupée
+// de la saison - pas les matchs joués en direct, qui ont déjà leur propre
+// gestion via le fil d'événements et le panneau "Changement").
+function findInjuryOrRedAlert(fx){
+  if(!fx || !fx.events) return null;
+  const mySide = fx.home === state.club.id ? 'home' : 'away';
+  return fx.events.find(ev => ev.side === mySide && (ev.type === 'red' || ev.type === 'injury')) || null;
+}
+
+function showInjuryAlert(ev, fx, roundIdx){
+  state._pendingInjuryAlert = { event: ev, roundIdx };
+  const isRed = ev.type === 'red';
+  document.getElementById('injury-alert-title').textContent = isRed ? 'Carton rouge' : 'Blessure';
+  document.getElementById('injury-alert-text').textContent = isRed
+    ? `${ev.player} a été exclu à la ${ev.minute}e minute. Il sera suspendu pour le prochain match.`
+    : `${ev.player} s'est blessé à la ${ev.minute}e minute et pourrait être indisponible pour les prochains matchs.`;
+  const ctxEl = document.getElementById('injury-alert-context');
+  if(fx && fx.hg !== undefined && fx.hg !== null){
+    const homeName = clubNameById(fx.home);
+    const awayName = clubNameById(fx.away);
+    ctxEl.innerHTML = `<span class="l">Journée ${roundIdx+1}</span><span class="score">${homeName} ${fx.hg} - ${fx.ag} ${awayName}</span>`;
+    ctxEl.style.display = 'flex';
+  } else {
+    ctxEl.style.display = 'none';
+  }
+  document.getElementById('injury-alert-overlay').style.display = 'flex';
+}
+
 function checkImmediateEventImpact(fx, roundIdx, newEventFired){
   const check = state._pendingImpactCheck;
   if(!check || check.roundIdx !== roundIdx) return;
@@ -7064,7 +7115,7 @@ function simulateRestOfSeason(){
   if(!season) return;
   while(season.currentRound < season.calendar.length){
     playMatchday('bulk');
-    if(state.pendingSeasonEvent) return;
+    if(state.pendingSeasonEvent || state._pendingInjuryAlert) return;
   }
 }
 
@@ -9026,6 +9077,12 @@ document.getElementById('btn-resume-manual').addEventListener('click', ()=>{
   });
 });
 document.getElementById('btn-next-season').addEventListener('click', startTransferWindow);
+document.getElementById('btn-injury-alert-squad').addEventListener('click', ()=>{
+  document.getElementById('injury-alert-overlay').style.display = 'none';
+  state._pendingInjuryAlert = null;
+  showScreen('game');
+  renderGame();
+});
 document.getElementById('btn-back-to-squad').addEventListener('click', ()=>{
   showScreen('game');
   renderGame();
