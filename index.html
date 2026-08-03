@@ -3813,6 +3813,8 @@ const state = {
   transfer:null,
   pendingSeasonEvent:null,
   pendingBulkResume:false,
+  _pendingRevealRoundIdx:null,
+  _pendingImpactCheck:null,
   seasonModifiers:[],
   usedSeasonEventKeys:[],
   rareSeasonEventUsed:false,
@@ -4834,17 +4836,19 @@ function estimateClubStrength(club){
 // Bonus/malus posés par un événement "Saison" (ex : coup de fatigue,
 // retour d'un cadre...). Chaque entrée s'applique jusqu'à une journée
 // donnée puis est purgée automatiquement.
-function addSeasonModifier(delta, untilRound, label){
-  state.seasonModifiers.push({ delta, untilRound, label });
+function addSeasonModifier(delta, untilRound, label, scope){
+  state.seasonModifiers.push({ delta, untilRound, label, scope: scope || 'all' });
 }
 function pruneSeasonModifiers(roundIdx){
   state.seasonModifiers = state.seasonModifiers.filter(m => m.untilRound >= roundIdx);
 }
-function activeSeasonModifierTotal(){
-  return state.seasonModifiers.reduce((sum,m)=>sum + m.delta, 0);
+function activeSeasonModifierTotal(context){
+  return state.seasonModifiers
+    .filter(m => m.scope === 'all' || m.scope === context)
+    .reduce((sum,m)=>sum + m.delta, 0);
 }
 
-function myTeamStrength(){
+function myTeamStrength(context){
   const filled = state.slots.filter(s=>s.player);
   const available = filled.filter(s=>!isPlayerUnavailable(s.player));
   const missingCount = filled.length - available.length;
@@ -4853,7 +4857,7 @@ function myTeamStrength(){
   const base = notes.reduce((a,b)=>a+b,0) / notes.length;
   // Jouer avec des absences perturbe l'équipe au-delà de la simple moyenne
   // des présents - ce n'est pas juste "un joueur en moins dans la moyenne".
-  return Math.round(base - missingCount * 1.5 + activeSeasonModifierTotal());
+  return Math.round(base - missingCount * 1.5 + activeSeasonModifierTotal(context));
 }
 
 // La force du club du joueur doit être recalculée à chaque match (elle
@@ -4861,7 +4865,7 @@ function myTeamStrength(){
 // valeur mise en cache en début de saison, eux ne changent pas en cours
 // de route dans ce moteur.
 function currentClubStrength(clubId, season){
-  if(clubId === state.club.id) return myTeamStrength();
+  if(clubId === state.club.id) return myTeamStrength('league');
   return season.strengths[clubId];
 }
 
@@ -4977,8 +4981,8 @@ function simulateCupStage(stageKey){
   const cup = state.season.cup;
   const fixtures = cup.bracket[stageKey];
   fixtures.forEach(fx=>{
-    const homeStr = fx.home === state.club.id ? myTeamStrength() : estimateClubStrength(state.season.clubsById[fx.home]);
-    const awayStr = fx.away === state.club.id ? myTeamStrength() : estimateClubStrength(state.season.clubsById[fx.away]);
+    const homeStr = fx.home === state.club.id ? myTeamStrength('league') : estimateClubStrength(state.season.clubsById[fx.home]);
+    const awayStr = fx.away === state.club.id ? myTeamStrength('league') : estimateClubStrength(state.season.clubsById[fx.away]);
     let hg = simulateGoals(homeStr, awayStr, true);
     let ag = simulateGoals(awayStr, homeStr, false);
     if(hg === ag){
@@ -5013,7 +5017,7 @@ function enterSeason(){
   const league = LEAGUES[state.league];
   const opponents = shuffleArr(league.filter(c=>c.id !== state.club.id));
   const clubIds = [state.club.id, ...opponents.map(c=>c.id)];
-  const strengths = { [state.club.id]: myTeamStrength() };
+  const strengths = { [state.club.id]: myTeamStrength('league') };
   opponents.forEach(c=>{ strengths[c.id] = estimateClubStrength(c); });
 
   const calendar = buildCalendar(clubIds);
@@ -5122,8 +5126,10 @@ function playMatchday(mode){
   season.resultsByRound.push(round);
   finishRoundBookkeeping(roundIdx);
   if(myFx) updateStreaksAndFatigue(myFx);
+  const eventFired = maybeTriggerSeasonEvent(roundIdx, mode || 'single');
+  if(eventFired) state._pendingRevealRoundIdx = roundIdx;
+  checkImmediateEventImpact(myFx, roundIdx, eventFired);
   renderSeason();
-  maybeTriggerSeasonEvent(roundIdx, mode || 'single');
 }
 
 // ============================================================
@@ -5209,7 +5215,7 @@ function startLiveEuroMatchday(euroFx, roundIdx, tier){
   const amHome = euroFx.home === state.club.id;
   state.careerStats.liveEuroMatchesPlayed++;
   unlockAchievement('euro_live_night');
-  const strengthOf = id => id === state.club.id ? myTeamStrength() : euro.strengths[id];
+  const strengthOf = id => id === state.club.id ? myTeamStrength('euro') : euro.strengths[id];
   state.liveMatch = {
     fx: euroFx, roundIdx, isEuro:true, euroTier: tier,
     homeId: euroFx.home, awayId: euroFx.away,
@@ -6209,6 +6215,8 @@ const SEASON_EVENT_BUILDERS = [
     const oppName = opp ? opp.name : 'un adversaire coriace';
     return {
       title:'Préparation du choc',
+      immediate:true,
+      contextRoundIdx: roundIdx+1,
       text:`${oppName} approche à la prochaine journée, un morceau nettement au-dessus de la moyenne. Comment préparer l'échéance ?`,
       options:[
         { key:'specific', label:'Préparation spécifique', apply(){
@@ -6263,6 +6271,7 @@ const SEASON_EVENT_BUILDERS = [
     const name = player.nom;
     return {
       title:'Retour d\'un cadre',
+      immediate:true,
       text:`${name} revient de blessure/suspension. Comment le réintégrer ?`,
       options:[
         { key:'starter', label:'Titulaire', apply(){
@@ -6289,13 +6298,16 @@ const SEASON_EVENT_BUILDERS = [
       text:'Deux compétitions deviennent prioritaires. Où mettre l\'accent ?',
       options:[
         { key:'league', label:'Miser sur le championnat', apply(){
-          addSeasonModifier(3, roundIdx+3, 'Priorité championnat');
+          addSeasonModifier(3, roundIdx+3, 'Priorité championnat', 'league');
+          addSeasonModifier(-2, roundIdx+3, 'Moins de temps consacré à l\'Europe', 'euro');
         }},
         { key:'europe', label:'L\'Europe', apply(){
-          addSeasonModifier(-2, roundIdx+3, 'Priorité Europe');
+          addSeasonModifier(3, roundIdx+3, 'Priorité Europe', 'euro');
+          addSeasonModifier(-2, roundIdx+3, 'Moins de temps consacré au championnat', 'league');
         }},
         { key:'balance', label:'Équilibrer', apply(){
-          addSeasonModifier(1, roundIdx+3, 'Répartition équilibrée entre compétitions');
+          addSeasonModifier(1, roundIdx+3, 'Répartition équilibrée entre compétitions', 'league');
+          addSeasonModifier(1, roundIdx+3, 'Répartition équilibrée entre compétitions', 'euro');
         }}
       ]
     };
@@ -6322,6 +6334,8 @@ const SEASON_EVENT_BUILDERS = [
   function videoAnalysisEvent(roundIdx){
     return {
       title:'Analyse vidéo',
+      immediate:true,
+      contextRoundIdx: roundIdx+1,
       text:'Le staff détecte une faiblesse récurrente chez l\'adversaire. Comment réagir ?',
       options:[
         { key:'fix', label:'Corriger', apply(){
@@ -6337,8 +6351,9 @@ const SEASON_EVENT_BUILDERS = [
     };
   },
   function surpriseTeamEvent(roundIdx){
+    if(roundIdx < 5) return null; // pas de sens avant d'avoir un minimum d'historique de classement
     const season = state.season;
-    const round = season.calendar[roundIdx];
+    const round = season.calendar[roundIdx+1];
     const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
     if(!myFx) return null;
     const oppId = myFx.home === state.club.id ? myFx.away : myFx.home;
@@ -6350,6 +6365,8 @@ const SEASON_EVENT_BUILDERS = [
     if(!oppRow || !isTopHalf || !isWeak) return null;
     return {
       title:'Équipe surprise',
+      immediate:true,
+      contextRoundIdx: roundIdx+1,
       text:`${oppRow.name} réalise une excellente saison au vu de son effectif. Comment aborder la confrontation ?`,
       options:[
         { key:'cautious', label:'Rester sur ses gardes', apply(){
@@ -6406,6 +6423,7 @@ const SEASON_EVENT_BUILDERS = [
   function staffGambleEvent(roundIdx){
     return {
       rare:true,
+      immediate:true,
       title:'Le pari du staff',
       text:'Votre adjoint propose une évolution tactique importante. Tenter le coup ?',
       options:[
@@ -6443,6 +6461,7 @@ const SEASON_EVENT_BUILDERS = [
   function surpriseSystemEvent(roundIdx){
     return {
       rare:true,
+      immediate:true,
       title:'L\'effet de surprise',
       text:'Vous avez l\'occasion de préparer un système inédit pour surprendre l\'adversaire. Tenter le changement ?',
       options:[
@@ -6468,6 +6487,26 @@ function updateStreaksAndFatigue(fx){
   state.fatigueLevel = Math.min(10, state.fatigueLevel + 1);
   if(state.winStreak >= 5) unlockAchievement('five_wins');
   if(state.lossStreak >= 5) unlockAchievement('five_losses');
+}
+
+// Pour les événements de saison marqués "impact immédiat" : dès la fin du
+// match concerné par la décision, on indique si le pari a payé ou non -
+// jugé sur le résultat de ce match précis (victoire/nul/défaite), pas
+// seulement sur le tirage aléatoire interne au modificateur. Ne se
+// déclenche que si aucun nouvel événement ne vient d'interrompre la
+// simulation sur cette même journée (sinon le résultat lui-même est
+// encore masqué en attendant cette nouvelle décision).
+function checkImmediateEventImpact(fx, roundIdx, newEventFired){
+  const check = state._pendingImpactCheck;
+  if(!check || check.roundIdx !== roundIdx) return;
+  state._pendingImpactCheck = null;
+  if(newEventFired || !fx) return; // résultat encore masqué par une nouvelle décision en attente
+  const won = (fx.home===state.club.id && fx.hg>fx.ag) || (fx.away===state.club.id && fx.ag>fx.hg);
+  const lost = (fx.home===state.club.id && fx.hg<fx.ag) || (fx.away===state.club.id && fx.ag<fx.hg);
+  const verdict = won ? 'décision payante ✅' : lost ? 'décision qui n\'a pas payé ❌' : 'résultat mitigé ➖';
+  const homeName = clubNameById(fx.home);
+  const awayName = clubNameById(fx.away);
+  toast(`${check.title} : ${verdict} (${homeName} ${fx.hg} - ${fx.ag} ${awayName})`);
 }
 
 // Se déclenche après qu'une journée a été bouclée. Renvoie true si un
@@ -6509,12 +6548,13 @@ function renderSeasonEventModal(){
   titleEl.classList.toggle('is-rare', !!decision.rare);
 
   const ctxEl = document.getElementById('season-event-context');
-  const round = state.season.calendar[pending.roundIdx];
+  const ctxRoundIdx = decision.contextRoundIdx !== undefined ? decision.contextRoundIdx : pending.roundIdx;
+  const round = state.season.calendar[ctxRoundIdx];
   const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
   if(myFx){
     const homeName = clubNameById(myFx.home);
     const awayName = clubNameById(myFx.away);
-    ctxEl.innerHTML = `<span class="l">Journée ${pending.roundIdx+1}</span><span class="score">${homeName} - ${awayName}</span>`;
+    ctxEl.innerHTML = `<span class="l">Journée ${ctxRoundIdx+1}</span><span class="score">${homeName} - ${awayName}</span>`;
     ctxEl.style.display = 'flex';
   } else {
     ctxEl.style.display = 'none';
@@ -6541,6 +6581,11 @@ function resolveSeasonEvent(optionKey){
   const unavailBefore = Object.keys(state.unavailable).length;
   opt.apply();
   if(pending.decision.title === 'Crise du staff') unlockAchievement('crisis_manager');
+  if(pending.decision.immediate){
+    const checkRoundIdx = pending.decision.contextRoundIdx !== undefined ? pending.decision.contextRoundIdx : pending.roundIdx+1;
+    state._pendingImpactCheck = { title: pending.decision.title, roundIdx: checkRoundIdx };
+  }
+  if(state._pendingRevealRoundIdx === pending.roundIdx) state._pendingRevealRoundIdx = null;
   closeSeasonEventModal();
   const mode = pending.mode;
   state.pendingSeasonEvent = null;
@@ -6750,8 +6795,10 @@ function commitLiveMatchResult(){
 
   state.liveMatch = null;
   showScreen('season');
+  const eventFired = maybeTriggerSeasonEvent(roundIdx, 'single');
+  if(eventFired) state._pendingRevealRoundIdx = roundIdx;
+  checkImmediateEventImpact(lm.fx, roundIdx, eventFired);
   renderSeason();
-  maybeTriggerSeasonEvent(roundIdx, 'single');
 }
 
 // Pendant du commit ci-dessus, pour un match de phase de ligue européenne
@@ -6783,8 +6830,8 @@ function commitLiveEuroMatchResult(){
   const euroRoundResults = [];
   euroRound.forEach(fx=>{
     if(fx === lm.fx){ euroRoundResults.push(fx); return; }
-    const hs = fx.home === state.club.id ? myTeamStrength() : euro.strengths[fx.home];
-    const as = fx.away === state.club.id ? myTeamStrength() : euro.strengths[fx.away];
+    const hs = fx.home === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.home];
+    const as = fx.away === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.away];
     fx.played = true;
     fx.hg = simulateGoals(hs, as, true);
     fx.ag = simulateGoals(as, hs, false);
@@ -6825,8 +6872,10 @@ function commitLiveEuroMatchResult(){
 
   state.liveMatch = null;
   showScreen('season');
+  const eventFired = maybeTriggerSeasonEvent(roundIdx, 'single');
+  if(eventFired) state._pendingRevealRoundIdx = roundIdx;
+  checkImmediateEventImpact(myDomFx, roundIdx, eventFired);
   renderSeason();
-  maybeTriggerSeasonEvent(roundIdx, 'single');
 }
 
 // Panneau "Changement" accessible à tout moment pendant un match en
@@ -7198,7 +7247,7 @@ function leagueOfClub(id){
 }
 
 function strengthForAnyClub(id){
-  if(id === state.club.id) return myTeamStrength();
+  if(id === state.club.id) return myTeamStrength('euro');
   for(const clubs of Object.values(LEAGUES)){
     const club = clubs.find(c=>c.id===id);
     if(club) return estimateClubStrength(club);
@@ -7275,7 +7324,7 @@ function buildEuroCompetitionObject(tier){
   const participants = buildEuroParticipants(tier);
   const strengths = {};
   participants.forEach(c=>{
-    strengths[c.id] = c.id === state.club.id ? myTeamStrength() : estimateClubStrength(c);
+    strengths[c.id] = c.id === state.club.id ? myTeamStrength('euro') : estimateClubStrength(c);
   });
   const calendar = buildEuroLeaguePhase(participants);
   return {
@@ -7308,8 +7357,8 @@ function sortedEuroStandings(){
 
 function playEuroSingleMatch(fx, euro){
   euro = euro || state.euro;
-  const homeStr = fx.home === state.club.id ? myTeamStrength() : euro.strengths[fx.home];
-  const awayStr = fx.away === state.club.id ? myTeamStrength() : euro.strengths[fx.away];
+  const homeStr = fx.home === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.home];
+  const awayStr = fx.away === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.away];
   let hg = simulateGoals(homeStr, awayStr, true);
   let ag = simulateGoals(awayStr, homeStr, false);
   if(hg === ag){
@@ -7326,8 +7375,8 @@ function simulateEuroLeagueRound(euro, domesticRoundIdx){
   const round = euro.calendar[euro.currentRound];
   const roundResults = [];
   round.forEach(fx=>{
-    const homeStr = fx.home === state.club.id ? myTeamStrength() : euro.strengths[fx.home];
-    const awayStr = fx.away === state.club.id ? myTeamStrength() : euro.strengths[fx.away];
+    const homeStr = fx.home === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.home];
+    const awayStr = fx.away === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.away];
     const hg = simulateGoals(homeStr, awayStr, true);
     const ag = simulateGoals(awayStr, homeStr, false);
     fx.played = true; fx.hg = hg; fx.ag = ag;
@@ -7565,7 +7614,14 @@ function renderLeaguePanels(){
 
   const timeline = [];
   season.resultsByRound.forEach((round, ri)=>{
-    timeline.push({ type:'league', roundIdx:ri, label:`Journée ${ri+1}`, matches:round });
+    if(ri === state._pendingRevealRoundIdx){
+      // Une décision est en attente à propos de cette journée - on ne
+      // révèle son résultat qu'une fois le choix fait, pas avant.
+      const hiddenRound = round.map(fx => ({ ...fx, hg:undefined, ag:undefined }));
+      timeline.push({ type:'league', roundIdx:ri, label:`Journée ${ri+1}`, matches:hiddenRound, upcoming:true });
+    } else {
+      timeline.push({ type:'league', roundIdx:ri, label:`Journée ${ri+1}`, matches:round });
+    }
   });
   // Journées de championnat pas encore jouées : le calendrier complet est
   // déjà connu (aller-retour), donc on peut l'afficher dès le début.
@@ -8587,7 +8643,7 @@ function evaluateHistoryAchievements(history){
 function averageLeagueStrengthExcludingMe(){
   const season = state.season;
   const ids = Object.keys(season.strengths).filter(id=>id!==state.club.id);
-  if(!ids.length) return myTeamStrength();
+  if(!ids.length) return myTeamStrength('league');
   return ids.reduce((sum,id)=>sum+season.strengths[id],0) / ids.length;
 }
 
@@ -8657,7 +8713,7 @@ function recordSeasonIfNeeded(){
     if(state.euro.tier === 'el') unlockAchievement('europa_master');
     if(state.euro.tier === 'ecl') unlockAchievement('conference_king');
   }
-  if(myPos <= 5 && myTeamStrength() < averageLeagueStrengthExcludingMe()) unlockAchievement('underdog');
+  if(myPos <= 5 && myTeamStrength('league') < averageLeagueStrengthExcludingMe()) unlockAchievement('underdog');
 
   // Sauvegarde en base réservée aux comptes connectés - mais on ne bloque
   // JAMAIS la progression (le mercato, la saison suivante...) avec une
