@@ -7466,6 +7466,7 @@ function renderLeagueSwitchRow(){
     btn.addEventListener('click', ()=>{
       state.standingsLeagueView = btn.dataset.league;
       state.seasonView = 'league';
+      state._resultsScrollRound = -1;
       renderSeason();
     });
   });
@@ -7639,7 +7640,7 @@ function renderEuroCompetitionBlock(euro, tierClass, isPlayed){
   if(!euro.resultsByRound.length){
     resultsEl.innerHTML += `<div class="hand-empty">Aucun match joué pour l'instant - les rencontres démarrent autour de la 10e journée de championnat.</div>`;
   } else {
-    resultsEl.innerHTML += euro.resultsByRound.slice().reverse().map(entry=>`
+    resultsEl.innerHTML += euro.resultsByRound.map(entry=>`
       <div class="rd-heading ${tierClass}-text">${entry.label}</div>
       ${entry.matches.map(fx=>{
         const home = euro.clubsById[fx.home];
@@ -7663,6 +7664,11 @@ function renderEuroPanels(){
   const supercupBanner = document.getElementById('supercup-banner');
   table.innerHTML = '';
   resultsEl.innerHTML = '';
+  // #results-list est partagé avec la vue championnat, qui le fait défiler
+  // automatiquement pour suivre la progression - sans ce reset, la vue
+  // Europe hérite de ce défilement et semble démarrer par la dernière
+  // journée plutôt que la première.
+  resultsEl.scrollTop = 0;
 
   // Supercoupe d'Europe : uniquement montrée sur les onglets LDC et Europa
   // (ce sont les deux compétitions concernées), jamais sur Conférence.
