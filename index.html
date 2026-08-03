@@ -515,6 +515,20 @@ button{ font-family:inherit; cursor:pointer; }
   opacity:.35; cursor:not-allowed; transform:none;
   background:var(--text);
 }
+.landing-cta-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+.gm-btn-secondary{
+  font-family:var(--bn-regular);
+  font-size:clamp(15px, 2vw, 22px);
+  letter-spacing:0;
+  color:var(--text);
+  background:transparent;
+  border:1px solid var(--border-2);
+  padding:clamp(14px,2vw,19px) clamp(26px,4vw,44px);
+  border-radius:var(--r-lg);
+  transition:transform .18s ease, border-color .3s ease;
+}
+.gm-btn-secondary:hover{ transform:translateY(-2px); border-color:var(--club-accent); }
+#btn-resume-save-desc{ display:block; font-size:12px; opacity:.65; font-weight:400; margin-top:2px; }
 
 /* deux cartes espacées, entièrement visibles, jamais rognées */
 .hero-cards-wrap{
@@ -2591,7 +2605,10 @@ button{ font-family:inherit; cursor:pointer; }
         <div class="hero-copy">
           <h1>Créez<br>le club<br><span class="gradient-text">ultime.</span></h1>
           <p>Mélangez les plus grandes générations de votre club favori. Composez le XI parfait. Simulez la saison idéale.</p>
-          <button class="gm-btn-primary" id="btn-start">Commencer</button>
+          <div class="landing-cta-row" id="landing-cta-row">
+            <button class="gm-btn-primary" id="btn-resume-save" style="display:none">Continuer <span id="btn-resume-save-desc"></span></button>
+            <button class="gm-btn-primary" id="btn-start">Commencer</button>
+          </div>
         </div>
         <div class="hero-cards-wrap">
           <div class="hero-card-slot" id="cardSlot1"></div>
@@ -3989,6 +4006,20 @@ function renderLanding(){
   const club = THEME_PREVIEW_CLUBS[state.themePreviewIdx];
   applyClubTheme(club);
   paintHeroCards(club, false);
+
+  const resumeBtn = document.getElementById('btn-resume-save');
+  const startBtn = document.getElementById('btn-start');
+  const pending = peekPendingSave();
+  if(pending){
+    resumeBtn.style.display = '';
+    document.getElementById('btn-resume-save-desc').textContent = pendingSaveDescription(pending);
+    startBtn.classList.add('gm-btn-secondary');
+    startBtn.classList.remove('gm-btn-primary');
+  } else {
+    resumeBtn.style.display = 'none';
+    startBtn.classList.add('gm-btn-primary');
+    startBtn.classList.remove('gm-btn-secondary');
+  }
 
   if(landingTimer) clearInterval(landingTimer);
   landingTimer = setInterval(()=>{
@@ -8127,7 +8158,15 @@ async function initAuth(){
     // (partie continuée depuis un autre appareil), on bascule dessus.
     const winner = await reconcileGameStateAfterLogin();
     if(winner && (winner.season || winner.club)){
-      routeToRestoredScreen(winner, { retryRecordSeason:false, fallbackAccount:false });
+      if(state.screen === 'landing'){
+        // L'utilisateur est sur l'écran de choix (Continuer / Commencer) -
+        // on ne bascule pas automatiquement, on se contente de rafraîchir
+        // ce que "Continuer" reprendra au cas où le compte a une
+        // sauvegarde plus récente que celle de ce navigateur.
+        renderLanding();
+      } else {
+        routeToRestoredScreen(winner, { retryRecordSeason:false, fallbackAccount:false });
+      }
     }
   }
   sbClient.auth.onAuthStateChange((event, session)=>{
@@ -8220,6 +8259,27 @@ async function submitAuthForm(){
 }
 
 const PENDING_STATE_KEY = 'specialone_pending_game_state';
+
+// Vérifie s'il existe une sauvegarde reprenable SANS l'appliquer à state -
+// utilisé pour décider d'afficher "Continuer" sur l'écran d'accueil, sans
+// polluer l'état si le joueur choisit finalement "Commencer" à la place.
+function peekPendingSave(){
+  const raw = localStorage.getItem(PENDING_STATE_KEY);
+  if(!raw) return null;
+  try {
+    const snap = JSON.parse(raw);
+    return (snap && (snap.season || snap.club)) ? snap : null;
+  } catch(e){ return null; }
+}
+function pendingSaveDescription(snap){
+  if(!snap) return '';
+  if(snap.club && snap.club.name){
+    return snap.season
+      ? `${snap.club.name} - Saison ${snap.seasonNumber || 1}`
+      : `${snap.club.name} - Draft en cours`;
+  }
+  return 'Partie en cours';
+}
 
 // Sauvegarde continue de la partie en cours dans localStorage - pour que
 // recharger la page (ou revenir d'une redirection Google) ne remette jamais
@@ -9224,6 +9284,11 @@ document.getElementById('profile-password').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ submitAuthForm(); }
 });
 initAuth();
+document.getElementById('btn-resume-save').addEventListener('click', ()=>{
+  stopLandingRotation();
+  const snap = restoreGameStateSnapshot();
+  routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
+});
 document.getElementById('btn-start').addEventListener('click', ()=>{
   stopLandingRotation();
   showScreen('select');
@@ -9311,13 +9376,20 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnap
 // Dans ce cas, on laisse initAuth() gérer la restauration une fois la
 // session détectée.
 const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
+const bootHash = location.hash.replace('#','');
 if(isOAuthCallbackHash){
   renderLanding();
-} else {
-  // Simple rechargement de page (ou réouverture) : on restaure la partie
-  // en cours si une sauvegarde existe, sinon écran d'accueil normal.
+} else if(bootHash && bootHash !== 'landing'){
+  // Rechargement en pleine partie (le hash pointe déjà vers un écran
+  // précis, ex: #season) : on restaure directement sans repasser par le
+  // choix de l'accueil, pour que F5 reste transparent en cours de partie.
   const snap = restoreGameStateSnapshot();
   routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
+} else {
+  // Première visite (ou retour explicite à la racine) : l'écran d'accueil
+  // laisse le choix entre reprendre la sauvegarde existante ou repartir
+  // de zéro, plutôt que de basculer automatiquement dans l'ancienne partie.
+  renderLanding();
 }
 
 </script>
