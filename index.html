@@ -1366,6 +1366,17 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .season-event-context .l{ color:var(--text-faint); font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
 .season-event-context .score{ font-family:var(--bn-bold); color:var(--text); font-size:14px; }
+.season-resume-outcome{
+  background:color-mix(in srgb, var(--club-accent) 10%, transparent);
+  border-left:3px solid var(--club-accent);
+  border-radius:2px var(--r-sm) var(--r-sm) 2px;
+  padding:9px 14px;
+  margin:0 0 14px;
+  font-family:var(--sans);
+  font-size:13px;
+  color:var(--text-dim);
+}
+.season-resume-outcome:empty{ display:none; }
 .live-subs-list{ display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto; margin-bottom:18px; }
 .live-subs-row{
   display:flex; align-items:center; justify-content:space-between;
@@ -3068,6 +3079,7 @@ button{ font-family:inherit; cursor:pointer; }
     <div class="pelouse-modal" style="max-width:660px">
       <h2>Match terminé</h2>
       <div class="season-event-context" id="season-resume-context" style="display:none"></div>
+      <p id="season-resume-outcome" class="season-resume-outcome"></p>
       <p>Un événement a interrompu la simulation. Comment souhaitez-vous continuer ?</p>
       <div class="pelouse-modal-actions" style="justify-content:stretch; gap:10px;">
         <button class="draft-btn" id="btn-resume-bulk-sim" style="flex:1; width:auto;">Continuer la simulation</button>
@@ -6326,13 +6338,19 @@ const SEASON_EVENT_BUILDERS = [
   },
   function surpriseTeamEvent(roundIdx){
     const season = state.season;
+    const round = season.calendar[roundIdx];
+    const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
+    if(!myFx) return null;
+    const oppId = myFx.home === state.club.id ? myFx.away : myFx.home;
     const standing = sortedStandings();
-    const weakInTop = standing.slice(0, Math.max(1, Math.floor(standing.length/2)))
-      .find(s => s.id !== state.club.id && (season.strengths[s.id]||70) < averageLeagueStrength() - 4);
-    if(!weakInTop) return null;
+    const oppRank = standing.findIndex(s => s.id === oppId);
+    const oppRow = oppRank >= 0 ? standing[oppRank] : null;
+    const isTopHalf = oppRank >= 0 && oppRank < Math.max(1, Math.floor(standing.length/2));
+    const isWeak = oppRow && (season.strengths[oppId]||70) < averageLeagueStrength() - 4;
+    if(!oppRow || !isTopHalf || !isWeak) return null;
     return {
       title:'Équipe surprise',
-      text:`${weakInTop.name} réalise une excellente saison au vu de son effectif. Comment aborder la confrontation ?`,
+      text:`${oppRow.name} réalise une excellente saison au vu de son effectif. Comment aborder la confrontation ?`,
       options:[
         { key:'cautious', label:'Rester sur ses gardes', apply(){
           addSeasonModifier(2, roundIdx+1, 'Adversaire pris au sérieux malgré son effectif modeste');
@@ -6532,12 +6550,13 @@ function resolveSeasonEvent(optionKey){
   // n'avait aucune confirmation à l'écran, on ne savait jamais si le pari
   // avait payé ou non.
   const newMods = state.seasonModifiers.slice(modsBefore);
+  let outcomeMsg;
   if(newMods.length){
-    toast(newMods.map(m=>`${m.label} (${m.delta>=0?'+':''}${m.delta} pendant ${Math.max(1, m.untilRound - pending.roundIdx)}j)`).join(' · '));
+    outcomeMsg = newMods.map(m=>`${m.label} (${m.delta>=0?'+':''}${m.delta} pendant ${Math.max(1, m.untilRound - pending.roundIdx)}j)`).join(' · ');
   } else if(Object.keys(state.unavailable).length > unavailBefore){
-    toast('Un joueur est désormais indisponible suite à cette décision.');
+    outcomeMsg = 'Un joueur est désormais indisponible suite à cette décision.';
   } else {
-    toast('Décision prise - aucun effet mesurable cette fois.');
+    outcomeMsg = 'Décision prise - aucun effet mesurable cette fois.';
   }
 
   if(mode === 'bulk'){
@@ -6553,7 +6572,15 @@ function resolveSeasonEvent(optionKey){
     } else {
       resumeCtxEl.style.display = 'none';
     }
+    // Le résultat du choix se lit directement dans cette même fenêtre -
+    // plus besoin d'un toast séparé, qui apparaissait assombri derrière la
+    // modale (elles se superposaient : toast en z-index 50, modale en 300).
+    document.getElementById('season-resume-outcome').textContent = outcomeMsg;
     document.getElementById('season-resume-overlay').style.display = 'flex';
+  } else {
+    // En mode journée par journée, aucune fenêtre ne s'ouvre juste après :
+    // un toast classique convient, rien ne peut le recouvrir ici.
+    toast(outcomeMsg);
   }
 }
 function advanceLiveMoment(lm){
@@ -7985,6 +8012,7 @@ async function saveOnboarding(){
     if(error){ hint.textContent = `Erreur : ${error.message}`; return; }
     state.session.user = data.user;
     updateAccountMenuLabel();
+    applyFavoriteClubTheme(data.user.user_metadata.favorite_club);
     closeOnboardingModal();
   } finally {
     btn.disabled = false;
@@ -8014,6 +8042,7 @@ async function saveProfile(){
     if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
     state.session.user = data.user;
     updateAccountMenuLabel();
+    applyFavoriteClubTheme(data.user.user_metadata.favorite_club);
     document.getElementById('account-profile-name').textContent = pantheonDisplayName();
 
     // Répercute le nouveau pseudo sur les saisons déjà enregistrées, pour
@@ -8036,6 +8065,7 @@ async function initAuth(){
   state.session = data.session;
   updateAccountMenuLabel();
   if(state.session){
+    applyFavoriteClubTheme(state.session.user.user_metadata && state.session.user.user_metadata.favorite_club);
     // Session déjà active au chargement (retour sur le site) : si le
     // compte a une sauvegarde plus récente que celle de ce navigateur
     // (partie continuée depuis un autre appareil), on bascule dessus.
@@ -8047,6 +8077,7 @@ async function initAuth(){
   sbClient.auth.onAuthStateChange((event, session)=>{
     state.session = session;
     updateAccountMenuLabel();
+    if(session) applyFavoriteClubTheme(session.user.user_metadata && session.user.user_metadata.favorite_club);
     if(session && state.pendingAfterProfile){
       document.getElementById('profile-modal').style.display = 'none';
       const cb = state.pendingAfterProfile;
@@ -9181,59 +9212,4 @@ function applyPelouse(id){
     // dans sizePitch) - la pelouse s'affiche donc pile comme fournie,
     // sans recadrage ni déformation. Le clip-path reprend les coordonnées
     // exactes du trapèze dessiné dans le SVG d'origine. Ça s'applique à la
-    // couche "pitch-grass" (pas #pitch lui-même) pour que les maillots,
-    // eux, restent libres de déborder légèrement du trapèze sans être
-    // rognés.
-    grass.style.clipPath = 'polygon(11.9% 0%, 88.1% 0%, 99.8% 100%, 0.2% 100%)';
-    grass.style.backgroundImage = `url('${p.dataUri}')`;
-    grass.style.backgroundSize = '100% 100%';
-    grass.style.backgroundPosition = 'center';
-    grass.style.backgroundRepeat = 'no-repeat';
-    grass.style.backgroundColor = 'transparent';
-    grass.style.border = 'none';
-    // Les lignes dessinées en CSS (médiane, surfaces, rond central) ne
-    // servent plus non plus - la pelouse se suffit à elle-même.
-    ['.pitch-halfway', '.pitch-circle', '.pitch-line'].forEach(sel=>{
-      pitch.querySelectorAll(sel).forEach(el=>{ el.style.visibility = 'hidden'; });
-    });
-  }
-  state.pelouseId = id;
-}
-function openPelouseModal(){
-  renderPelouseGrid();
-  document.getElementById('btn-confirm-pelouse').disabled = true;
-  document.getElementById('pelouse-modal-overlay').style.display = 'flex';
-}
-function closePelouseModal(){
-  document.getElementById('pelouse-modal-overlay').style.display = 'none';
-}
-document.getElementById('btn-confirm-pelouse').addEventListener('click', ()=>{
-  if(!state.pendingPelouseId) return;
-  applyPelouse(state.pendingPelouseId);
-  closePelouseModal();
-  startDraft();
-});
-
-primeCrestCache();
-window.addEventListener('pagehide', saveSnapshotNow);
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnapshotNow(); });
-
-// Ne jamais écraser le hash au démarrage s'il contient un retour de
-// connexion OAuth (#access_token=...) - sinon Supabase perd le jeton avant
-// de pouvoir l'analyser, et la connexion Google échoue silencieusement.
-// Dans ce cas, on laisse initAuth() gérer la restauration une fois la
-// session détectée.
-const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
-if(isOAuthCallbackHash){
-  renderLanding();
-} else {
-  // Simple rechargement de page (ou réouverture) : on restaure la partie
-  // en cours si une sauvegarde existe, sinon écran d'accueil normal.
-  const snap = restoreGameStateSnapshot();
-  routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
-}
-
-</script>
-
-</body>
-</html>
+    // couche "pitch-grass" (pas #pitch lui-même) pour que
