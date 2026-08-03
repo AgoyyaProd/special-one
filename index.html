@@ -2233,7 +2233,6 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:20px 22px;
   margin-bottom:24px;
-  overflow:hidden;
 }
 .profile-card::before{
   content:'';
@@ -7664,11 +7663,6 @@ function renderEuroPanels(){
   const supercupBanner = document.getElementById('supercup-banner');
   table.innerHTML = '';
   resultsEl.innerHTML = '';
-  // #results-list est partagé avec la vue championnat, qui le fait défiler
-  // automatiquement pour suivre la progression - sans ce reset, la vue
-  // Europe hérite de ce défilement et semble démarrer par la dernière
-  // journée plutôt que la première.
-  resultsEl.scrollTop = 0;
 
   // Supercoupe d'Europe : uniquement montrée sur les onglets LDC et Europa
   // (ce sont les deux compétitions concernées), jamais sur Conférence.
@@ -7690,23 +7684,35 @@ function renderEuroPanels(){
     </div>
   ` : '';
 
+  let roundCount = 0;
   if(euro && viewTier === euro.tier){
     renderEuroCompetitionBlock(euro, tierClass, true);
     resultsEl.innerHTML = supercupResultHTML + resultsEl.innerHTML;
-    return;
+    roundCount = euro.resultsByRound.length;
+  } else {
+    const shadow = state.shadowEuro && state.shadowEuro[viewTier];
+    if(shadow){
+      renderEuroCompetitionBlock(shadow, tierClass, false);
+      resultsEl.innerHTML = supercupResultHTML + resultsEl.innerHTML;
+      roundCount = shadow.resultsByRound.length;
+    } else {
+      table.innerHTML = `<div class="hand-empty">Vous ne disputez pas la ${EURO_LABELS[viewTier]} cette saison.</div>`;
+      resultsEl.innerHTML = supercupResultHTML || `<div class="hand-empty">Compétition non disputée par votre club cette saison.</div>`;
+    }
   }
 
-  // Compétition que le joueur ne dispute pas cette saison : elle se joue
-  // en parallèle (calendrier propre, classement qui se remplit au fil des
-  // journées) - on affiche son état d'avancement réel, pas juste son
-  // vainqueur final connu d'avance.
-  const shadow = state.shadowEuro && state.shadowEuro[viewTier];
-  if(shadow){
-    renderEuroCompetitionBlock(shadow, tierClass, false);
-    resultsEl.innerHTML = supercupResultHTML + resultsEl.innerHTML;
-  } else {
-    table.innerHTML = `<div class="hand-empty">Vous ne disputez pas la ${EURO_LABELS[viewTier]} cette saison.</div>`;
-    resultsEl.innerHTML = supercupResultHTML || `<div class="hand-empty">Compétition non disputée par votre club cette saison.</div>`;
+  // Même logique que pour le championnat : on rejoint automatiquement la
+  // dernière journée jouée, mais seulement quand cette compétition a
+  // réellement avancé depuis le dernier rendu de cet onglet précis (pas à
+  // chaque rafraîchissement, ni quand on revient dessus sans nouveau match).
+  const trackKey = 'euro-' + viewTier;
+  if(state._resultsScrollTrack !== trackKey || state._resultsScrollRound !== roundCount){
+    state._resultsScrollTrack = trackKey;
+    state._resultsScrollRound = roundCount;
+    const headings = resultsEl.querySelectorAll('.rd-heading');
+    const last = headings[headings.length-1];
+    if(last) last.scrollIntoView({ block:'start' });
+    else resultsEl.scrollTop = 0;
   }
 }
 
