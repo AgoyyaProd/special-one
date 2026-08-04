@@ -2474,14 +2474,6 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:28px;
   position:relative;
-  overflow:hidden;
-}
-.modal-box::before{
-  content:'';
-  position:absolute;
-  top:0; left:0;
-  width:40px; height:3px;
-  background:var(--club-accent);
 }
 .modal-close{
   position:absolute;
@@ -3031,7 +3023,7 @@ button{ font-family:inherit; cursor:pointer; }
     <div class="modal-box">
       <button class="modal-close" id="onboarding-modal-close" aria-label="Fermer" title="Fermer">&times;</button>
       <div class="modal-text" style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:4px;">Complète ton profil</div>
-      <div class="modal-text">Facultatif, mais ça personnalise ton expérience et ton profil au Palmarès.</div>
+      <div class="modal-text">Ça personnalise ton expérience et ton profil au Palmarès.</div>
       <div class="pseudo-hint" id="onboarding-hint"></div>
       <div class="profile-field" style="margin-top:12px">
         <label for="onboarding-pseudo">Pseudo public</label>
@@ -3068,7 +3060,6 @@ button{ font-family:inherit; cursor:pointer; }
         </div>
       </div>
       <button class="season-btn season-btn-primary" id="btn-onboarding-save" style="margin-top:16px; width:100%">Enregistrer</button>
-      <button class="modal-skip" id="btn-onboarding-skip">Plus tard</button>
     </div>
   </div>
 
@@ -5206,19 +5197,6 @@ function startLiveMatchday(){
   if(!season || season.currentRound >= season.calendar.length) return;
   const roundIdx = season.currentRound;
 
-  // Si votre campagne européenne a un match de phase de ligue prévu cette
-  // même journée, c'est celui-là qu'on joue en direct - le championnat de
-  // cette semaine-là est résolu instantanément en parallèle, comme pour
-  // n'importe quel soir de coupe d'Europe.
-  const euro = state.euro;
-  if(euro && euro.stage === 'league' && euro.schedule.leaguePhase[euro.currentRound] === roundIdx){
-    const euroFx = euro.calendar[euro.currentRound].find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(euroFx){
-      startLiveEuroMatchday(euroFx, roundIdx, euro.tier);
-      return;
-    }
-  }
-
   const round = season.calendar[roundIdx];
   const myFixture = round.find(fx => fx.home === state.club.id || fx.away === state.club.id);
   if(!myFixture){
@@ -6934,29 +6912,16 @@ function commitLiveEuroMatchResult(){
     unlockAchievement('playoff_team');
   }
 
-  // La journée de championnat de cette même semaine se joue en parallèle,
-  // résolue instantanément.
-  const season = state.season;
-  const domRound = season.calendar[roundIdx];
-  domRound.forEach(fx=>{
-    const hs = currentClubStrength(fx.home, season);
-    const as = currentClubStrength(fx.away, season);
-    fx.hg = simulateGoals(hs, as, true);
-    fx.ag = simulateGoals(as, hs, false);
-    fx.events = simulateMatchEvents(fx.home, fx.away, fx.hg, fx.ag);
-    applyFixtureResult(season.standings, fx);
-  });
-  season.resultsByRound.push(domRound);
-  finishRoundBookkeeping(roundIdx, true);
-  const myDomFx = domRound.find(fx => fx.home === state.club.id || fx.away === state.club.id);
-  if(myDomFx) updateStreaksAndFatigue(myDomFx);
+  // Le championnat n'est jamais touché ici - un match d'Europe joué en
+  // direct est un match à part entière, pas un remplacement du match de
+  // championnat de la même semaine (dans la vraie vie, une équipe ne joue
+  // jamais deux matchs en même temps). Le championnat suit son propre
+  // cours via "Jouer en direct" / "Journée suivante" / "Simuler la
+  // saison", indépendamment.
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
 
   state.liveMatch = null;
   showScreen('season');
-  const eventFired = maybeTriggerSeasonEvent(roundIdx, 'single');
-  if(eventFired) state._pendingRevealRoundIdx = roundIdx;
-  checkImmediateEventImpact(myDomFx, roundIdx, eventFired);
   renderSeason();
 }
 
@@ -7523,12 +7488,15 @@ function simulateEuroFinalMatch(euro){
 // intercaler les rencontres européennes programmées (comme la coupe).
 function tickOneEuroCompetition(euro, roundIdx){
   if(!euro) return;
-  // Pour VOTRE compétition, les quarts (et ce qui suit) se jouent après la
-  // fin du championnat plutôt qu'à une journée fixe - pour que la finale
-  // tombe juste après la dernière journée plutôt que des semaines avant.
-  // Les compétitions fantômes gardent leur enchaînement automatique normal.
+  // Pour VOTRE compétition, aucune étape ne se joue plus automatiquement au
+  // fil des journées de championnat - dans la vraie vie, une équipe ne
+  // joue jamais deux matchs en même temps. Toute votre coupe d'Europe se
+  // joue désormais via l'onglet Europe (en direct ou instantanément),
+  // indépendamment du calendrier du championnat. Les compétitions
+  // fantômes gardent leur enchaînement automatique normal.
   const isPlayed = euro === state.euro;
-  const stopStages = isPlayed ? ['qf','sf','final','done'] : ['sf','final','done'];
+  if(isPlayed) return;
+  const stopStages = ['sf','final','done'];
   if(stopStages.includes(euro.stage)) return;
   const sch = euro.schedule;
   if(euro.stage === 'league'){
@@ -7570,7 +7538,13 @@ function tickEuroForRound(roundIdx){
 function playEuroMatchday(){
   const euro = state.euro;
   if(!euro) return;
-  if(euro.stage === 'qf'){
+  if(euro.stage === 'league'){
+    simulateEuroLeagueRound(euro, euro.schedule.leaguePhase[euro.currentRound]);
+  } else if(euro.stage === 'playoff'){
+    simulateEuroPlayoff(euro, euro.schedule.playoff);
+  } else if(euro.stage === 'ro16'){
+    simulateEuroKO(euro, 'ro16','qf','Huitièmes de finale', euro.schedule.ro16);
+  } else if(euro.stage === 'qf'){
     simulateEuroKO(euro, 'qf','sf','Quarts de finale', Infinity);
   } else if(euro.stage === 'sf'){
     simulateEuroKO(euro, 'sf','final','Demi-finales', Infinity);
@@ -7583,9 +7557,10 @@ function playEuroMatchday(){
 function simulateRestOfEuro(){
   const euro = state.euro;
   if(!euro) return;
-  while(euro.stage !== 'done'){
-    if(euro.stage === 'qf' || euro.stage === 'sf' || euro.stage === 'final') playEuroMatchday();
-    else break; // les étapes antérieures se jouent via le championnat
+  let guard = 0;
+  while(euro.stage !== 'done' && guard < 20){
+    playEuroMatchday();
+    guard++;
   }
 }
 
@@ -7952,21 +7927,14 @@ function renderSeason(){
     });
   }
 
-  const euroPlaysItself = euro && ['league','playoff','ro16'].includes(euro.stage);
   if(state.seasonView === 'euro' && euro){
     const euroDone = euro.stage === 'done';
-    liveBtn.style.display = 'none';
-    if(euroPlaysItself){
-      nextBtn.disabled = true;
-      simBtn.disabled = true;
-      nextBtn.textContent = `${EURO_STAGE_LABEL[euro.stage]} - se joue avec le championnat`;
-      simBtn.textContent = 'Simuler la campagne';
-    } else {
-      nextBtn.disabled = euroDone;
-      simBtn.disabled = euroDone;
-      nextBtn.textContent = euroDone ? 'Campagne terminée' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}`;
-      simBtn.textContent = 'Simuler la campagne';
-    }
+    liveBtn.style.display = euro.stage === 'league' ? '' : 'none';
+    liveBtn.disabled = euroDone;
+    nextBtn.disabled = euroDone;
+    simBtn.disabled = euroDone;
+    nextBtn.textContent = euroDone ? 'Campagne terminée' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}`;
+    simBtn.textContent = 'Simuler la campagne';
   } else {
     nextBtn.disabled = seasonDone;
     simBtn.disabled = seasonDone;
@@ -9038,7 +9006,15 @@ document.getElementById('btn-home').addEventListener('click', ()=>{
   window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('btn-next-matchday').addEventListener('click', handleNextMatchday);
-document.getElementById('btn-play-live').addEventListener('click', startLiveMatchday);
+document.getElementById('btn-play-live').addEventListener('click', ()=>{
+  const euro = state.euro;
+  if(state.seasonView === 'euro' && euro && euro.stage === 'league'){
+    const euroFx = euro.calendar[euro.currentRound].find(fx => fx.home === state.club.id || fx.away === state.club.id);
+    if(euroFx) startLiveEuroMatchday(euroFx, euro.schedule.leaguePhase[euro.currentRound], euro.tier);
+  } else {
+    startLiveMatchday();
+  }
+});
 document.getElementById('btn-live-playpause').addEventListener('click', toggleLivePause);
 document.querySelectorAll('.live-speed-btn').forEach(btn=>{
   btn.addEventListener('click', ()=> setLiveSpeed(Number(btn.dataset.speed)));
@@ -9332,7 +9308,6 @@ document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape' && document.getElementById('onboarding-modal').style.display === 'flex') skipOnboarding();
 });
 document.getElementById('onboarding-modal-close').addEventListener('click', skipOnboarding);
-document.getElementById('btn-onboarding-skip').addEventListener('click', skipOnboarding);
 document.getElementById('btn-onboarding-save').addEventListener('click', saveOnboarding);
 document.getElementById('onboarding-modal').addEventListener('click', (e)=>{
   if(e.target.id === 'onboarding-modal') skipOnboarding();
