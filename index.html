@@ -2178,6 +2178,22 @@ button{ font-family:inherit; cursor:pointer; }
   margin-bottom:32px;
 }
 .achv-grid{ margin-bottom:32px; }
+.achv-load-error{
+  background:rgba(220,60,60,.1);
+  border:1px solid rgba(220,60,60,.35);
+  border-radius:var(--r-md);
+  padding:14px 18px;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:#ff9a9a;
+  line-height:1.6;
+}
+.achv-load-error code{
+  background:rgba(0,0,0,.3);
+  padding:1px 5px;
+  border-radius:4px;
+  color:#ffd0d0;
+}
 .achv-cat-label{
   font-family:var(--sans);
   font-size:11px;
@@ -8809,16 +8825,20 @@ let ACHIEVEMENT_TIER_ASSETS = {};
 async function loadAchievementDefs(){
   try {
     const res = await fetch('achievements.json');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     ACHIEVEMENT_DEFS = data.achievements || [];
     ACHIEVEMENT_TIERS = data.tiers || ACHIEVEMENT_TIERS;
     ACHIEVEMENT_TIER_ASSETS = data.tierAssets || {};
+    achievementLoadError = null;
   } catch(e){
     console.error('Impossible de charger achievements.json :', e);
     ACHIEVEMENT_DEFS = [];
+    achievementLoadError = e.message || 'Erreur inconnue';
   }
   renderAchievementsGrid();
 }
+let achievementLoadError = null;
 
 function getAchievementDef(id){ return ACHIEVEMENT_DEFS.find(a=>a.id===id); }
 
@@ -8910,7 +8930,16 @@ function averageLeagueStrengthExcludingMe(){
 
 function renderAchievementsGrid(){
   const grid = document.getElementById('achv-grid');
-  if(!grid || !ACHIEVEMENT_DEFS.length) return;
+  if(!grid) return;
+  if(!ACHIEVEMENT_DEFS.length){
+    document.getElementById('achv-count').textContent = '0';
+    document.getElementById('achv-total').textContent = '0';
+    grid.innerHTML = `<div class="achv-load-error">
+      ⚠️ Impossible de charger la liste des succès (achievements.json)${achievementLoadError ? ' — ' + achievementLoadError : ''}.<br>
+      Vérifiez que <code>achievements.json</code> et le dossier <code>assets/tiers/</code> sont bien déposés au même endroit qu'<code>index.html</code>.
+    </div>`;
+    return;
+  }
   const unlockedCount = ACHIEVEMENT_DEFS.filter(a=>isAchievementMaxed(a) || state.achievementProgress[a.id]).length;
   document.getElementById('achv-count').textContent = ACHIEVEMENT_DEFS.filter(a=>{
     const prog = state.achievementProgress[a.id];
