@@ -2188,37 +2188,70 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .achv-cat-label:first-child{ margin-top:0; }
 .achv-cat-row{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+  display:flex;
+  flex-direction:column;
   gap:10px;
 }
 .achv-card{
-  background:rgba(8,10,15,.7);
+  display:flex;
+  align-items:stretch;
+  min-height:76px;
   border-radius:var(--r-md);
-  padding:14px;
+  overflow:hidden;
+  background-color:#14161c;
+  background-image:linear-gradient(90deg, #14161c 0%, #14161c 22%, #23262e 100%);
+  background-size:cover;
+  background-position:center;
   box-shadow:0 12px 28px -16px rgba(0,0,0,.6);
   transition:transform .15s ease, opacity .15s ease, filter .15s ease;
 }
 .achv-card.is-unlocked:hover{ transform:translateY(-2px); }
-.achv-card.is-locked{ opacity:.5; filter:grayscale(1); }
-.achv-card-head{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:6px;
+.achv-card.is-locked{ filter:grayscale(1); opacity:.55; }
+.achv-card.is-hidden{ opacity:.4; }
+.achv-icon{
+  flex:0 0 68px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px;
+  background:rgba(0,0,0,.32);
 }
-.achv-icon{ font-size:22px; line-height:1; flex-shrink:0; }
+.achv-body{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:8px 18px;
+}
 .achv-name{
   font-family:var(--bn-bold);
-  font-size:14px;
-  color:var(--text);
+  font-size:16px;
+  color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.45);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.achv-card.is-locked .achv-name{ color:var(--text-faint); }
-.achv-desc{
+.achv-sub{
   font-family:var(--sans);
   font-size:11.5px;
-  color:var(--text-dim);
-  line-height:1.4;
+  color:rgba(255,255,255,.82);
+  margin-top:2px;
+}
+.achv-divider{
+  flex:0 0 1px;
+  background:rgba(255,255,255,.45);
+  margin:14px 0;
+}
+.achv-condition{
+  flex:1.3 1 auto;
+  min-width:0;
+  display:flex; align-items:center;
+  padding:8px 18px;
+  font-family:var(--sans);
+  font-size:12px;
+  color:rgba(255,255,255,.9);
+  line-height:1.35;
+}
+@media (max-width:640px){
+  .achv-card{ flex-wrap:wrap; min-height:auto; }
+  .achv-divider{ display:none; }
+  .achv-condition{ flex:1 1 100%; padding-top:0; }
 }
 .account-history{
   display:flex;
@@ -3843,14 +3876,32 @@ const state = {
   winStreak:0,
   lossStreak:0,
   fatigueLevel:0,
-  unlockedAchievements:[],
+  achievementProgress:{},
   careerStats:{
     decisionsTotal:0,
     mercatoWindowsTotal:0,
     liveEuroMatchesPlayed:0,
     maxWinStreak:0,
-    maxLossStreak:0
+    maxLossStreak:0,
+    positiveImpactDecisions:0,
+    successfulAdaptations:0,
+    lateDecisionWins:0,
+    riskyChoiceWins:0,
+    injuriesAvoided:0,
+    redCardsAvoided:0,
+    impactSubsTotal:0,
+    fatigueEventsHandled:0,
+    matchesPlayed:0,
+    matchesWon:0,
+    trophiesWon:0,
+    draftPicksTotal:0,
+    completeSquadsBuilt:0,
+    decisiveDraftPicks:0,
+    profile:{ aggressive:0, defensive:0, balanced:0 }
   },
+  seasonInjuryCount:0,
+  seasonRedCardCount:0,
+  seasonFormationChanged:false,
   standingsLeagueView:null,
   otherLeagueStandings:null,
   pendingAfterProfile:null,
@@ -4391,11 +4442,26 @@ function placeSelected(slotId){
   state.usedNames.add(playerKey(card.player));
   state.hand = [];
   state.selectedUid = null;
+  bumpTieredCounter('draftPicksTotal');
 
   if(phase()==='complete'){
     toast('Effectif complet ! Prêt à lancer la saison.');
+    bumpTieredCounter('completeSquadsBuilt');
+    checkSquadBuildAchievements();
   }
   renderGame();
+}
+
+// "Équipe de rêve" (onze titulaire entièrement noté 90+) et "Galactiques"
+// (plusieurs joueurs d'exception dans le même effectif, faute de disposer
+// d'un vrai statut "Ballon d'Or" dans les données, on utilise une note
+// exceptionnelle comme équivalent) - vérifiés dès que l'effectif est
+// complet.
+function checkSquadBuildAchievements(){
+  const starters = state.slots.filter(s=>s.player);
+  if(starters.length === 11 && starters.every(s=>s.player.note >= 90)) unlockAchievement('equipe_de_reve');
+  const exceptional = starters.filter(s=>s.player.note >= 95).length;
+  if(exceptional >= 2) unlockAchievement('galactiques');
 }
 
 function changeFormation(key){
@@ -4732,9 +4798,7 @@ function resolveTransferPick(uid){
 function endTransferWindow(){
   const swapsUsed = state.transfer ? state.transfer.count : 0;
   state.careerStats.mercatoWindowsTotal++;
-  if(swapsUsed >= 3) unlockAchievement('full_window');
-  if(swapsUsed === 0) unlockAchievement('status_quo');
-  if(state.careerStats.mercatoWindowsTotal >= 10) unlockAchievement('master_builder');
+  if(swapsUsed > 0) bumpTieredCounter('draftPicksTotal', swapsUsed);
   state.transfer = null;
   state.hand = [];
   state.selectedUid = null;
@@ -5028,6 +5092,10 @@ function simulateCupStage(stageKey){
     fx.played = true; fx.hg = hg; fx.ag = ag;
     fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
     fx.winner = hg > ag ? fx.home : fx.away;
+    if(fx.home === state.club.id || fx.away === state.club.id){
+      trackMatchResult(fx);
+      if(stageKey === 'final' && fx.winner === state.club.id) checkUnderdogGoalscorer(fx);
+    }
   });
   cup.results.push({ stage:stageKey, roundIdx:cup.matchdayFor[stageKey], fixtures:fixtures.map(f=>({...f})) });
 
@@ -5036,6 +5104,17 @@ function simulateCupStage(stageKey){
   else if(stageKey==='qf'){ cup.bracket.sf = pairUp(winners); cup.stage = 'sf'; }
   else if(stageKey==='sf'){ cup.bracket.final = pairUp(winners); cup.stage = 'final'; }
   else if(stageKey==='final'){ cup.stage = 'done'; cup.champion = winners[0]; }
+}
+
+// "Le Pari Payant" : un joueur nettement moins bien noté que la moyenne
+// de l'effectif devient décisif (buteur) lors d'une finale remportée.
+function checkUnderdogGoalscorer(fx){
+  const filled = state.slots.filter(s=>s.player);
+  if(!filled.length) return;
+  const avgNote = filled.reduce((sum,s)=>sum+s.player.note,0) / filled.length;
+  const scorerNames = (fx.events||[]).filter(e=>e.type==='goal' && e.side===(fx.home===state.club.id?'home':'away')).map(e=>e.scorer).filter(Boolean);
+  const underdog = filled.find(s => scorerNames.includes(s.player.nom) && s.player.note <= avgNote - 12);
+  if(underdog) unlockAchievement('le_pari_payant');
 }
 
 const CUP_STAGE_LABEL = { r16:'Coupe - 8èmes de finale', qf:'Coupe - Quarts de finale', sf:'Coupe - Demi-finales', final:'Coupe - Finale' };
@@ -5081,12 +5160,10 @@ function enterSeason(){
   initShadowEuroCompetitions(euroTier);
   resolveSuperCupForNewSeason();
 
-  if(state.club.id === 'srfc') unlockAchievement('red_and_black');
-  if(euroTier) unlockAchievement('continental');
-  if(state.prevSeasonStanding && state.prevSeasonStanding.length){
-    const lastIdx = state.prevSeasonStanding.findIndex(s=>s.id===state.club.id);
-    if(lastIdx === state.prevSeasonStanding.length - 1) unlockAchievement('rock_bottom');
-  }
+  state.seasonInjuryCount = 0;
+  state.seasonRedCardCount = 0;
+  state.seasonFormationChanged = false;
+  if(euroTier) unlockAchievement('premier_voyage_europeen');
 
   showScreen('season');
   renderSeason();
@@ -5158,6 +5235,7 @@ function playMatchday(mode){
     fx.events = simulateMatchEvents(fx.home, fx.away, fx.hg, fx.ag);
     applyFixtureResult(season.standings, fx);
   });
+  if(myFx) trackMatchResult(myFx);
 
   season.resultsByRound.push(round);
   finishRoundBookkeeping(roundIdx);
@@ -5226,6 +5304,12 @@ function startLiveMatchday(){
     subsUsed:0,
     sentOffPlayers:[],
     injuredPlayers:[],
+    _decisionsThisMatch:[],
+    _riskyChoicesThisMatch:0,
+    _hadLateDecision:false,
+    _maxDeficit:0,
+    _injuryAvoided:false,
+    _redCardAvoided:false,
     eventFilter:'all',
     scorers:[],
     maxDecisions:3,
@@ -5245,7 +5329,6 @@ function startLiveEuroMatchday(euroFx, roundIdx, tier){
   const euro = state.euro;
   const amHome = euroFx.home === state.club.id;
   state.careerStats.liveEuroMatchesPlayed++;
-  unlockAchievement('euro_live_night');
   const strengthOf = id => id === state.club.id ? myTeamStrength('euro') : euro.strengths[id];
   state.liveMatch = {
     fx: euroFx, roundIdx, isEuro:true, euroTier: tier,
@@ -5268,6 +5351,12 @@ function startLiveEuroMatchday(euroFx, roundIdx, tier){
     subsUsed:0,
     sentOffPlayers:[],
     injuredPlayers:[],
+    _decisionsThisMatch:[],
+    _riskyChoicesThisMatch:0,
+    _hadLateDecision:false,
+    _maxDeficit:0,
+    _injuryAvoided:false,
+    _redCardAvoided:false,
     eventFilter:'all',
     scorers:[],
     maxDecisions:3,
@@ -5615,7 +5704,7 @@ const LIVE_DECISION_BUILDERS = [
       title:'Moment clé',
       text:'Score serré, le match peut basculer. Quelle consigne transmettre à l\'équipe ?',
       options:[
-        { key:'attack', label:'Attaquer', apply(){
+        { key:'attack', label:'Attaquer', risky:true, apply(){
           lm[myModKey(lm)] += 7; lm[oppModKey(lm)] += 2;
           pushLiveEvent(lm, lm.minute, 'decision', 'Vous demandez à votre équipe de prendre le jeu à son compte.', mySide);
         }},
@@ -5637,7 +5726,7 @@ const LIVE_DECISION_BUILDERS = [
       title:'Money Time',
       text:'La 75e minute est passée. Quelle consigne donner pour la fin de match ?',
       options:[
-        { key:'push', label:'Tout pour gagner', apply(){
+        { key:'push', label:'Tout pour gagner', risky:true, apply(){
           lm[myModKey(lm)] += 8; lm[oppModKey(lm)] += 4;
           pushLiveEvent(lm, lm.minute, 'decision', "Vous envoyez tout le monde à l'attaque.", mySide);
         }},
@@ -5696,6 +5785,8 @@ const LIVE_DECISION_BUILDERS = [
           if(player && Math.random() < 0.1){
             setPlayerUnavailable(player, 1, 'injury', lm.roundIdx);
             pushLiveEvent(lm, lm.minute, 'injury', `Examen d'après-match : ${name} sera absent 1 match.`, mySide);
+          } else if(incoming){
+            lm._injuryAvoided = true;
           }
         }}
       ]
@@ -5709,7 +5800,7 @@ const LIVE_DECISION_BUILDERS = [
       title:'Sur le fil',
       text:`${name} est déjà averti. Comment gérer le risque de carton rouge ?`,
       options:[
-        { key:'risk', label:'Le laisser', apply(){
+        { key:'risk', label:'Le laisser', risky:true, apply(){
           if(Math.random() < 0.28){
             lm[myModKey(lm)] -= 10;
             pushLiveEvent(lm, lm.minute, 'red', `Deuxième carton jaune pour ${name} ! Votre équipe termine à dix.`, mySide);
@@ -5740,6 +5831,7 @@ const LIVE_DECISION_BUILDERS = [
           const incoming = performLiveSubstitution(lm, player);
           if(incoming){
             pushLiveEvent(lm, lm.minute, 'sub', `Changement : ${incoming.nom} remplace ${name}, préservé d'un carton.`, mySide);
+            lm._redCardAvoided = true;
           } else {
             lm[myModKey(lm)] -= 2;
             pushLiveEvent(lm, lm.minute, 'decision', `${name} est préservé mais aucun remplaçant n'est disponible.`, mySide);
@@ -6377,6 +6469,7 @@ const SEASON_EVENT_BUILDERS = [
         }},
         { key:'system', label:'Changer de système', apply(){
           addSeasonModifier(1, roundIdx+2, 'Système ajusté après analyse vidéo');
+          state.seasonFormationChanged = true;
         }}
       ]
     };
@@ -6516,8 +6609,6 @@ function updateStreaksAndFatigue(fx){
   else if(lost){ state.lossStreak++; state.winStreak = 0; }
   else { state.winStreak = 0; state.lossStreak = 0; }
   state.fatigueLevel = Math.min(10, state.fatigueLevel + 1);
-  if(state.winStreak >= 5) unlockAchievement('five_wins');
-  if(state.lossStreak >= 5) unlockAchievement('five_losses');
 }
 
 // Pour les événements de saison marqués "impact immédiat" : dès la fin du
@@ -6590,7 +6681,6 @@ function maybeTriggerSeasonEvent(roundIdx, mode){
   state.usedSeasonEventKeys.push(chosen.fn.name);
   if(chosen.decision.rare){
     state.rareSeasonEventUsed = true;
-    unlockAchievement('lucky');
   }
   state.pendingSeasonEvent = { decision: chosen.decision, roundIdx, mode: mode || 'single' };
   renderSeasonEventModal();
@@ -6640,7 +6730,7 @@ function resolveSeasonEvent(optionKey){
   const modsBefore = state.seasonModifiers.length;
   const unavailBefore = Object.keys(state.unavailable).length;
   opt.apply();
-  if(pending.decision.title === 'Crise du staff') unlockAchievement('crisis_manager');
+  if(pending.decision.title === 'Coup de fatigue collectif') bumpTieredCounter('fatigueEventsHandled');
   if(pending.decision.immediate){
     const checkRoundIdx = pending.decision.contextRoundIdx !== undefined ? pending.decision.contextRoundIdx : pending.roundIdx+1;
     state._pendingImpactCheck = { title: pending.decision.title, roundIdx: checkRoundIdx };
@@ -6745,6 +6835,10 @@ function advanceLiveMoment(lm){
 
   if(Math.random() < convert){
     if(homeHasChance) lm.hg++; else lm.ag++;
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    const myScore = mySide === 'home' ? lm.hg : lm.ag;
+    const oppScore = mySide === 'home' ? lm.ag : lm.hg;
+    lm._maxDeficit = Math.max(lm._maxDeficit||0, oppScore - myScore);
     const scoringClubId = homeHasChance ? lm.homeId : lm.awayId;
     const pool = clubPlayerPool(scoringClubId);
     const scorer = pickWeightedPlayer(pool, 'scorer', null);
@@ -6804,30 +6898,115 @@ function setLiveSpeed(speed){
   renderLiveMatch();
 }
 
+function checkBalancedProfile(){
+  const p = state.careerStats.profile;
+  if(!p) return;
+  const total = p.aggressive + p.defensive + p.balanced;
+  if(total < 150) return;
+  const values = [p.aggressive, p.defensive, p.balanced];
+  const min = Math.min(...values), max = Math.max(...values);
+  if(min > 0 && min/max >= 0.6) unlockAchievement('imprevisible');
+}
+
 function chooseLiveDecision(key){
   const lm = state.liveMatch;
   if(!lm || !lm.pendingDecision) return;
-  const opt = lm.pendingDecision.options.find(o=>o.key===key);
+  const decision = lm.pendingDecision;
+  const opt = decision.options.find(o=>o.key===key);
+  const myKey = myModKey(lm), oppKey = oppModKey(lm);
+  const before = { my: lm[myKey], opp: lm[oppKey] };
   if(opt) opt.apply();
+  const after = { my: lm[myKey], opp: lm[oppKey] };
+  const netImpact = (after.my - before.my) - (after.opp - before.opp);
+  const positive = netImpact >= 0;
+
+  lm._decisionsThisMatch.push({ title: decision.title, key, risky: !!(opt && opt.risky), positive });
+  if(opt && opt.risky) lm._riskyChoicesThisMatch++;
+  if(lm.minute >= 75) lm._hadLateDecision = true;
+  if(decision.title === 'Adaptation adverse' && positive) bumpTieredCounter('successfulAdaptations');
+  if(positive) bumpTieredCounter('positiveImpactDecisions');
+
+  // Profil de coach (Imprévisible) : classement grossier du style de la
+  // décision d'après le libellé choisi, pour repérer un usage équilibré
+  // des trois grandes familles de choix sur la durée.
+  const lbl = (opt && opt.label || '').toLowerCase();
+  const profileKey = /attaqu|press|risqu|tout pour|laisser|intensifi/.test(lbl) ? 'aggressive'
+    : /défend|tenir|calmer|prudent|gérer|remplacer|soigner/.test(lbl) ? 'defensive'
+    : 'balanced';
+  state.careerStats.profile = state.careerStats.profile || { aggressive:0, defensive:0, balanced:0 };
+  state.careerStats.profile[profileKey]++;
+  checkBalancedProfile();
+
   lm.pendingDecision = null;
-  state.careerStats.decisionsTotal++;
-  if(state.careerStats.decisionsTotal >= 50) unlockAchievement('decision_maker');
+  bumpTieredCounter('decisionsTotal');
+  unlockAchievement('premieres_consignes');
   renderLiveMatch();
   resumeLiveMatch();
 }
 
-// Passe en revue le fil d'événements d'un match joué en direct pour les
-// succès qui dépendent du déroulé (but tardif, victoire à dix, joker
-// gagnant) - partagé entre le commit domestique et le commit européen.
+// Suivi partagé pour TOUT match terminé de votre club (en direct ou
+// simulé instantanément) : matchs joués/gagnés, premher succès liés au
+// score final, et suivi saison blessure/carton rouge.
+function trackMatchResult(fx){
+  if(!fx || fx.hg === undefined || fx.hg === null) return;
+  const mySide = fx.home === state.club.id ? 'home' : 'away';
+  const myScore = mySide === 'home' ? fx.hg : fx.ag;
+  const oppScore = mySide === 'home' ? fx.ag : fx.hg;
+  const won = myScore > oppScore;
+
+  bumpTieredCounter('matchesPlayed');
+  if(won){
+    bumpTieredCounter('matchesWon');
+    unlockAchievement('premiere_victoire');
+    const scoredThisMatch = (fx.events||[]).some(e=>e.type==='goal' && e.side===mySide && e.scorer);
+    if(scoredThisMatch) bumpTieredCounter('decisiveDraftPicks');
+  }
+  if(oppScore === 0){
+    unlockAchievement('verrouille');
+    if(won) unlockAchievement('le_mur');
+  }
+  if(myScore >= 6) unlockAchievement('festival_offensif');
+
+  (fx.events||[]).forEach(ev=>{
+    if(ev.side !== mySide) return;
+    if(ev.type === 'injury') state.seasonInjuryCount = (state.seasonInjuryCount||0) + 1;
+    if(ev.type === 'red') state.seasonRedCardCount = (state.seasonRedCardCount||0) + 1;
+  });
+}
+
+// Passe en revue le fil d'événements et le déroulé d'un match joué en
+// direct pour les succès qui dépendent spécifiquement des décisions
+// prises et de la progression du score (comeback, choix risqués...) -
+// des mécaniques qui n'existent que pour un match joué en direct.
 function checkLiveMatchAchievements(lm, won){
   const mySide = isMyTeamHome(lm) ? 'home' : 'away';
-  if(lm.events.some(e=>e.type==='goal' && e.side===mySide && e.minute>=90)) unlockAchievement('money_time');
-  const wentDown = lm.events.some(e=>e.type==='red' && e.side===mySide);
-  if(wentDown && won) unlockAchievement('ten_men');
+  const myGoals = lm.events.filter(e=>e.type==='goal' && e.side===mySide);
+
+  const lateGoal = myGoals.find(e=>e.minute>=90);
+  if(lateGoal && won) unlockAchievement('a_la_derniere_seconde');
+  if(lateGoal && won && state.season && lm.roundIdx === state.season.calendar.length-1){
+    const standing = sortedStandings();
+    const myPos = standing.findIndex(s=>s.id===state.club.id) + 1;
+    if(myPos === 1) unlockAchievement('le_destin');
+  }
+
+  if(won && (lm._maxDeficit||0) >= 2) unlockAchievement('remontada');
+  if(won && (lm._maxDeficit||0) >= 3) unlockAchievement('le_miracle');
+
+  if(won && (lm._riskyChoicesThisMatch||0) >= 3) unlockAchievement('ca_passe');
+  if(won && lm._decisionsThisMatch.some(d=>d.risky)) bumpTieredCounter('riskyChoiceWins');
+  if(won && lm._hadLateDecision) bumpTieredCounter('lateDecisionWins');
+
+  if(lm._decisionsThisMatch.length > 0 && lm._decisionsThisMatch.every(d=>d.positive)){
+    unlockAchievement('coaching_parfait');
+  }
+
+  if(lm._injuryAvoided) bumpTieredCounter('injuriesAvoided');
+  if(lm._redCardAvoided) bumpTieredCounter('redCardsAvoided');
+
   const subs = lm.events.filter(e=>e.type==='sub' && e.side===mySide && e.in);
-  const goals = lm.events.filter(e=>e.type==='goal' && e.side===mySide);
-  const impact = subs.some(s => goals.some(g => g.minute >= s.minute && (g.scorer===s.in || g.assist===s.in)));
-  if(impact) unlockAchievement('impact_sub');
+  const impact = subs.some(s => myGoals.some(g => g.minute >= s.minute && (g.scorer===s.in || g.assist===s.in)));
+  if(impact) bumpTieredCounter('impactSubsTotal');
 }
 
 function commitLiveMatchResult(){
@@ -6851,6 +7030,7 @@ function commitLiveMatchResult(){
   season.resultsByRound.push(round);
   finishRoundBookkeeping(roundIdx);
   updateStreaksAndFatigue(lm.fx);
+  trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
 
   state.liveMatch = null;
@@ -6902,14 +7082,12 @@ function commitLiveEuroMatchResult(){
   euro.resultsByRound.push({ label:`Phase de ligue - J${euro.currentRound+1}`, matches:euroRoundResults, roundIdx });
   euro.currentRound++;
   if(euro.currentRound >= euro.calendar.length){
-    checkEuroLeaguePhaseAchievements(euro);
     const ranked = sortedEuroStandingsFor(euro);
     // Barrages : 9/10 vs 23/24, 11/12 vs 21/22, 13/14 vs 19/20, 15/16 vs 17/18
     const pairIdx = [[8,23],[9,22],[10,21],[11,20],[12,19],[13,18],[14,17],[15,16]];
     euro.playoffPairs = pairIdx.map(([a,b])=>({ home:ranked[a].id, away:ranked[b].id, played:false }));
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
-    unlockAchievement('playoff_team');
   }
 
   // Le championnat n'est jamais touché ici - un match d'Europe joué en
@@ -6918,6 +7096,7 @@ function commitLiveEuroMatchResult(){
   // jamais deux matchs en même temps). Le championnat suit son propre
   // cours via "Jouer en direct" / "Journée suivante" / "Simuler la
   // saison", indépendamment.
+  trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
 
   state.liveMatch = null;
@@ -7415,6 +7594,7 @@ function playEuroSingleMatch(fx, euro){
   fx.played = true; fx.hg = hg; fx.ag = ag;
   fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
   fx.winner = hg > ag ? fx.home : fx.away;
+  if(euro === state.euro && (fx.home === state.club.id || fx.away === state.club.id)) trackMatchResult(fx);
   return fx;
 }
 
@@ -7437,18 +7617,17 @@ function simulateEuroLeagueRound(euro, domesticRoundIdx){
     if(hg > ag){ home.w++; home.pts += 3; away.l++; }
     else if(hg < ag){ away.w++; away.pts += 3; home.l++; }
     else { home.d++; away.d++; home.pts++; away.pts++; }
+    if(euro === state.euro && (fx.home === state.club.id || fx.away === state.club.id)) trackMatchResult(fx);
   });
   euro.resultsByRound.push({ label:`Phase de ligue - J${euro.currentRound+1}`, matches:roundResults, roundIdx:domesticRoundIdx });
   euro.currentRound++;
   if(euro.currentRound >= euro.calendar.length){
-    if(euro === state.euro) checkEuroLeaguePhaseAchievements(euro);
     const ranked = sortedEuroStandingsFor(euro);
     // Barrages : 9/10 vs 23/24, 11/12 vs 21/22, 13/14 vs 19/20, 15/16 vs 17/18
     const pairIdx = [[8,23],[9,22],[10,21],[11,20],[12,19],[13,18],[14,17],[15,16]];
     euro.playoffPairs = pairIdx.map(([a,b])=>({ home:ranked[a].id, away:ranked[b].id, played:false }));
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
-    if(euro === state.euro) unlockAchievement('playoff_team');
   }
 }
 
@@ -7482,6 +7661,7 @@ function simulateEuroFinalMatch(euro){
   euro.champion = euro.finalFixture.winner;
   euro.stage = 'done';
   state.currentSeasonEuroWinners[euro.tier] = euro.champion;
+  if(euro === state.euro && euro.champion === state.club.id) checkUnderdogGoalscorer(euro.finalFixture);
 }
 
 // Appelée depuis playMatchday() à chaque journée de championnat, pour
@@ -8335,7 +8515,10 @@ function snapshotGameState(){
     transfer: state.transfer,
     standingsLeagueView: state.standingsLeagueView,
     otherLeagues: state.otherLeagues,
-    unlockedAchievements: state.unlockedAchievements,
+    achievementProgress: state.achievementProgress,
+    seasonInjuryCount: state.seasonInjuryCount,
+    seasonRedCardCount: state.seasonRedCardCount,
+    seasonFormationChanged: state.seasonFormationChanged,
     rareSeasonEventUsed: state.rareSeasonEventUsed,
     careerStats: state.careerStats
   };
@@ -8615,110 +8798,109 @@ function finalizeSeasonEuroWinners(){
 
 
 // ============================================================
-// SUCCÈS DU COACH
+// SUCCÈS DU COACH (v2) - définitions chargées depuis achievements.json,
+// servi à côté du HTML plutôt qu'intégré dedans (fichier plus léger,
+// plus facile à faire évoluer sans toucher au code).
 // ============================================================
-// Deux familles : les succès "live" (déclenchés en cours de partie via
-// unlockAchievement, dès que la condition est remplie) et les succès
-// "history" (qui ont besoin de comparer plusieurs saisons entre elles -
-// ils sont recalculés à partir de career_history à chaque affichage du
-// Palmarès, dans evaluateHistoryAchievements). Les compteurs nécessaires
-// vivent dans state.careerStats et suivent la même sauvegarde
-// locale/serveur que le reste de la partie.
-const ACHIEVEMENTS = [
-  // --- Carrière (historique, plusieurs saisons) ---
-  { id:'first_season', cat:'Carrière', name:'Premier pas', desc:'Terminez votre première saison.', icon:'🎬', kind:'history' },
-  { id:'veteran', cat:'Carrière', name:'Vétéran', desc:'Terminez 5 saisons.', icon:'📘', kind:'history' },
-  { id:'legend', cat:'Carrière', name:'Légende', desc:'Terminez 10 saisons.', icon:'📜', kind:'history' },
-  { id:'globetrotter', cat:'Carrière', name:'Globe-trotter', desc:'Dirigez 3 clubs différents.', icon:'🧳', kind:'history' },
-  { id:'loyal', cat:'Carrière', name:'Fidèle au poste', desc:'5 saisons consécutives au même club.', icon:'🪑', kind:'history' },
+let ACHIEVEMENT_DEFS = [];
+let ACHIEVEMENT_TIERS = ['Apprenti','Confirmé','Expert','Élite','Légendaire'];
+let ACHIEVEMENT_TIER_ASSETS = {};
 
-  // --- Championnat ---
-  { id:'champion', cat:'Championnat', name:'Champion', desc:'Remportez le titre de champion.', icon:'🏆', kind:'live' },
-  { id:'back_to_back', cat:'Championnat', name:'Bis repetita', desc:'Champion lors de 2 saisons différentes.', icon:'🥇', kind:'history' },
-  { id:'invincible', cat:'Championnat', name:'Invincible', desc:'Une saison de championnat sans défaite.', icon:'🛡️', kind:'live' },
-  { id:'steamroller', cat:'Championnat', name:'Rouleau compresseur', desc:'90 buts marqués en une saison.', icon:'💥', kind:'live' },
-  { id:'fortress', cat:'Championnat', name:'Muraille', desc:'Moins de 20 buts encaissés en une saison.', icon:'🧱', kind:'live' },
-  { id:'podium', cat:'Championnat', name:'Sur le podium', desc:'Terminez dans le top 3 sans être champion.', icon:'🥉', kind:'live' },
+async function loadAchievementDefs(){
+  try {
+    const res = await fetch('achievements.json');
+    const data = await res.json();
+    ACHIEVEMENT_DEFS = data.achievements || [];
+    ACHIEVEMENT_TIERS = data.tiers || ACHIEVEMENT_TIERS;
+    ACHIEVEMENT_TIER_ASSETS = data.tierAssets || {};
+  } catch(e){
+    console.error('Impossible de charger achievements.json :', e);
+    ACHIEVEMENT_DEFS = [];
+  }
+  renderAchievementsGrid();
+}
 
-  // --- Coupe nationale ---
-  { id:'cup_winner', cat:'Coupe nationale', name:'Vainqueur de la Coupe', desc:'Remportez la Coupe Nationale.', icon:'🏅', kind:'live' },
-  { id:'national_double', cat:'Coupe nationale', name:'Doublé national', desc:'Championnat et Coupe la même saison.', icon:'🎽', kind:'live' },
+function getAchievementDef(id){ return ACHIEVEMENT_DEFS.find(a=>a.id===id); }
 
-  // --- Coupe d'Europe ---
-  { id:'continental', cat:"Coupe d'Europe", name:'Continental', desc:"Qualifiez-vous pour une coupe d'Europe.", icon:'🌍', kind:'live' },
-  { id:'euro_live_night', cat:"Coupe d'Europe", name:'Nuit européenne', desc:'Jouez un match de phase de ligue en direct.', icon:'🌃', kind:'live' },
-  { id:'playoff_team', cat:"Coupe d'Europe", name:'Barragiste', desc:"Atteignez les barrages de votre coupe d'Europe.", icon:'🎯', kind:'live' },
-  { id:'perfect_group', cat:"Coupe d'Europe", name:'Phase de ligue parfaite', desc:'8 victoires en 8 matchs de phase de ligue.', icon:'💯', kind:'live' },
-  { id:'king_of_europe', cat:"Coupe d'Europe", name:"Sur le toit de l'Europe", desc:'Remportez la Ligue des Champions.', icon:'👑', kind:'live' },
-  { id:'europa_master', cat:"Coupe d'Europe", name:"Maître de l'Europa", desc:'Remportez la Ligue Europa.', icon:'🔶', kind:'live' },
-  { id:'conference_king', cat:"Coupe d'Europe", name:'Roi de la Conférence', desc:'Remportez la Ligue Conférence.', icon:'🟢', kind:'live' },
-  { id:'treble_continental', cat:"Coupe d'Europe", name:'Triplé continental', desc:"Remportez les 3 coupes d'Europe au fil de votre carrière.", icon:'🎖️', kind:'history' },
-  { id:'supercup', cat:"Coupe d'Europe", name:"Supercoupe d'Europe", desc:'Remportez la Supercoupe d\'Europe.', icon:'✨', kind:'live' },
-
-  // --- Mercato ---
-  { id:'full_window', cat:'Mercato', name:'Recrutement complet', desc:'Utilisez vos 3 échanges lors d\'un même mercato.', icon:'📝', kind:'live' },
-  { id:'status_quo', cat:'Mercato', name:'Confiance totale', desc:'Bouclez un mercato sans effectuer aucun échange.', icon:'🤝', kind:'live' },
-  { id:'master_builder', cat:'Mercato', name:'Grand bâtisseur', desc:'Bouclez 10 fenêtres de mercato.', icon:'🏗️', kind:'live' },
-
-  // --- Match en direct ---
-  { id:'money_time', cat:'Match en direct', name:'Money Time', desc:'Marquez après la 90e minute.', icon:'⏱️', kind:'live' },
-  { id:'ten_men', cat:'Match en direct', name:'Dix contre onze', desc:'Gagnez un match terminé en infériorité numérique.', icon:'🔟', kind:'live' },
-  { id:'decision_maker', cat:'Match en direct', name:'Décideur', desc:'Prenez 50 décisions de banc de touche.', icon:'🧠', kind:'live' },
-  { id:'impact_sub', cat:'Match en direct', name:'Joker gagnant', desc:'Un remplaçant marque ou délivre une passe décisive après son entrée.', icon:'🃏', kind:'live' },
-
-  // --- Vie de coach ---
-  { id:'lucky', cat:'Vie de coach', name:'Chanceux', desc:'Déclenchez un événement rare.', icon:'⭐', kind:'live' },
-  { id:'crisis_manager', cat:'Vie de coach', name:'Gestion de crise', desc:'Traversez une crise du staff.', icon:'🧯', kind:'live' },
-  { id:'underdog', cat:'Vie de coach', name:'Petit Poucet', desc:'Terminez dans le top 5 avec un effectif plus faible que la moyenne de la ligue.', icon:'🐭', kind:'live' },
-
-  // --- Séries ---
-  { id:'five_wins', cat:'Séries', name:'Cinq de suite', desc:'5 victoires consécutives.', icon:'🔥', kind:'live' },
-  { id:'five_losses', cat:'Séries', name:'Traversée du désert', desc:'5 défaites consécutives.', icon:'🌵', kind:'live' },
-
-  // --- Fun ---
-  { id:'red_and_black', cat:'Fun', name:'Rouge et Noir', desc:'Dirigez le Stade Rennais.', icon:'⚫', kind:'live' },
-  { id:'rock_bottom', cat:'Fun', name:'Dernier de la classe', desc:'Terminez une saison à la dernière place... et restez en poste.', icon:'🙈', kind:'live' }
-];
-
+// Succès simples : un seul déblocage, tout ou rien.
 function unlockAchievement(id){
-  if(state.unlockedAchievements.includes(id)) return;
-  const def = ACHIEVEMENTS.find(a=>a.id===id);
-  if(!def) return;
-  state.unlockedAchievements.push(id);
-  toast(`🏆 Succès débloqué : ${def.name}`);
+  const def = getAchievementDef(id);
+  if(!def || def.kind !== 'simple') return;
+  const prog = state.achievementProgress[id];
+  if(prog && prog.unlocked) return;
+  state.achievementProgress[id] = { unlocked:true, unlockedAt: Date.now() };
+  toast(`🏆 Succès débloqué : ${def.name} (${def.grade})`);
   scheduleSaveSnapshot();
 }
 
+// Succès à palier : incrémente un compteur de carrière et vérifie si un
+// nouveau palier (Apprenti → Légendaire) vient d'être franchi pour tous
+// les succès qui suivent ce compteur.
+function bumpTieredCounter(counterKey, delta){
+  delta = (delta === undefined) ? 1 : delta;
+  state.careerStats[counterKey] = (state.careerStats[counterKey]||0) + delta;
+  const value = state.careerStats[counterKey];
+  ACHIEVEMENT_DEFS.filter(a=>a.kind==='tiered' && a.counter===counterKey).forEach(def=>{
+    const prog = state.achievementProgress[def.id] || { tier:0 };
+    let newTier = prog.tier || 0;
+    for(let i=def.thresholds.length-1;i>=0;i--){
+      if(value >= def.thresholds[i]){ newTier = i+1; break; }
+    }
+    if(newTier > (prog.tier||0)){
+      state.achievementProgress[def.id] = { tier:newTier, unlockedAt: Date.now() };
+      toast(`🏆 ${def.name} : palier ${ACHIEVEMENT_TIERS[newTier-1]} atteint !`);
+      scheduleSaveSnapshot();
+      checkCoachTotalAndSpecialOne();
+    }
+  });
+}
+
+function achievementTierLabel(id){
+  const prog = state.achievementProgress[id];
+  return prog && prog.tier ? ACHIEVEMENT_TIERS[prog.tier-1] : null;
+}
+function isAchievementMaxed(def){
+  if(def.kind === 'tiered'){
+    const prog = state.achievementProgress[def.id];
+    return !!(prog && prog.tier >= def.thresholds.length);
+  }
+  const prog = state.achievementProgress[def.id];
+  return !!(prog && prog.unlocked);
+}
+
+// "Coach Total" (rang Légendaire sur les 15 badges à palier) et "Le
+// Special One" (tout débloqué au rang maximal) se recalculent après
+// chaque palier franchi, puisqu'ils dépendent de l'état de tous les
+// autres succès.
+function checkCoachTotalAndSpecialOne(){
+  const tieredDefs = ACHIEVEMENT_DEFS.filter(a=>a.kind==='tiered');
+  if(tieredDefs.length && tieredDefs.every(d=>isAchievementMaxed(d))){
+    unlockAchievement('coach_total');
+  }
+  const others = ACHIEVEMENT_DEFS.filter(a=>a.id!=='le_special_one');
+  if(others.length && others.every(d=>isAchievementMaxed(d))){
+    unlockAchievement('le_special_one');
+  }
+}
+
 // Recalcule les succès qui nécessitent de comparer plusieurs saisons entre
-// elles (nombre de saisons, clubs différents, fidélité, doublés...) à
-// partir des lignes career_history du joueur. Appelée à chaque affichage
-// du Palmarès.
+// elles (palmarès entier) à partir des lignes career_history du joueur.
+// Appelée à chaque affichage du Palmarès.
 function evaluateHistoryAchievements(history){
   if(!history || !history.length) return;
   const sorted = history.slice().sort((a,b)=>a.season_number-b.season_number);
-  if(sorted.length >= 1) unlockAchievement('first_season');
-  if(sorted.length >= 5) unlockAchievement('veteran');
-  if(sorted.length >= 10) unlockAchievement('legend');
-
-  const distinctClubs = new Set(sorted.map(r=>r.club));
-  if(distinctClubs.size >= 3) unlockAchievement('globetrotter');
-
-  let streak = 1, bestStreak = 1;
-  for(let i=1;i<sorted.length;i++){
-    if(sorted[i].club === sorted[i-1].club) streak++; else streak = 1;
-    bestStreak = Math.max(bestStreak, streak);
-  }
-  if(bestStreak >= 5) unlockAchievement('loyal');
-
-  const titles = sorted.filter(r=>r.is_champion).length;
-  if(titles >= 2) unlockAchievement('back_to_back');
 
   const wonTiers = new Set(sorted.filter(r=>r.euro_result && r.euro_result.won).map(r=>r.euro_result.tier));
-  if(wonTiers.has('cl') && wonTiers.has('el') && wonTiers.has('ecl')) unlockAchievement('treble_continental');
+  if(wonTiers.has('cl') && wonTiers.has('el') && wonTiers.has('ecl')) unlockAchievement('empereur_deurope');
+
+  let streak = 0, bestStreak = 0;
+  sorted.forEach(r=>{
+    if(r.is_champion) streak++; else streak = 0;
+    bestStreak = Math.max(bestStreak, streak);
+  });
+  if(bestStreak >= 3) unlockAchievement('jamais_deux_sans_trois');
 }
 
-// Compare la force de l'effectif du joueur à la moyenne de la ligue - pour
-// "Petit Poucet" (top 5 avec un effectif plus faible que la moyenne).
 function averageLeagueStrengthExcludingMe(){
   const season = state.season;
   const ids = Object.keys(season.strengths).filter(id=>id!==state.club.id);
@@ -8726,44 +8908,76 @@ function averageLeagueStrengthExcludingMe(){
   return ids.reduce((sum,id)=>sum+season.strengths[id],0) / ids.length;
 }
 
-// "Phase de ligue parfaite" : 8 victoires en 8 matchs de phase de ligue
-// européenne pour VOTRE club.
-function checkEuroLeaguePhaseAchievements(euro){
-  let wins = 0, total = 0;
-  euro.resultsByRound.forEach(r=>{
-    const myFx = r.matches.find(m=>m.home===state.club.id || m.away===state.club.id);
-    if(!myFx) return;
-    total++;
-    const won = myFx.home===state.club.id ? myFx.hg>myFx.ag : myFx.ag>myFx.hg;
-    if(won) wins++;
-  });
-  if(total>=8 && wins>=8) unlockAchievement('perfect_group');
-}
-
 function renderAchievementsGrid(){
   const grid = document.getElementById('achv-grid');
-  if(!grid) return;
-  document.getElementById('achv-count').textContent = state.unlockedAchievements.length;
-  document.getElementById('achv-total').textContent = ACHIEVEMENTS.length;
+  if(!grid || !ACHIEVEMENT_DEFS.length) return;
+  const unlockedCount = ACHIEVEMENT_DEFS.filter(a=>isAchievementMaxed(a) || state.achievementProgress[a.id]).length;
+  document.getElementById('achv-count').textContent = ACHIEVEMENT_DEFS.filter(a=>{
+    const prog = state.achievementProgress[a.id];
+    return prog && (prog.unlocked || (prog.tier||0) > 0);
+  }).length;
+  document.getElementById('achv-total').textContent = ACHIEVEMENT_DEFS.length;
   const cats = [];
-  ACHIEVEMENTS.forEach(a=>{ if(!cats.includes(a.cat)) cats.push(a.cat); });
+  ACHIEVEMENT_DEFS.forEach(a=>{ if(!cats.includes(a.category)) cats.push(a.category); });
   grid.innerHTML = cats.map(cat => `
     <div class="achv-cat-label">${cat}</div>
     <div class="achv-cat-row">
-      ${ACHIEVEMENTS.filter(a=>a.cat===cat).map(a=>{
-        const unlocked = state.unlockedAchievements.includes(a.id);
-        return `
-          <div class="achv-card ${unlocked?'is-unlocked':'is-locked'}" title="${unlocked ? a.desc : 'Succès verrouillé'}">
-            <div class="achv-card-head">
-              <div class="achv-icon">${unlocked ? a.icon : '🔒'}</div>
-              <div class="achv-name">${unlocked ? a.name : '???'}</div>
-            </div>
-            <div class="achv-desc">${unlocked ? a.desc : 'Succès verrouillé'}</div>
-          </div>
-        `;
-      }).join('')}
+      ${ACHIEVEMENT_DEFS.filter(a=>a.category===cat).map(a=>renderAchievementCardHTML(a)).join('')}
     </div>
   `).join('');
+}
+
+function renderAchievementCardHTML(def){
+  const prog = state.achievementProgress[def.id] || {};
+  if(def.kind === 'tiered'){
+    const tier = prog.tier || 0;
+    const started = tier > 0;
+    const tierName = started ? ACHIEVEMENT_TIERS[tier-1] : null;
+    const bgUrl = started ? ACHIEVEMENT_TIER_ASSETS[tierName] : null;
+    const nextThreshold = def.thresholds[tier] !== undefined ? def.thresholds[tier] : null;
+    const value = state.careerStats[def.counter] || 0;
+    const progressLabel = nextThreshold !== null
+      ? `${value}/${nextThreshold}`
+      : `${value} (maximum atteint)`;
+    return `
+      <div class="achv-card ${started?'is-unlocked':'is-locked'}" ${bgUrl?`style="background-image:url('${bgUrl}')"`:''} title="${def.condition}">
+        <div class="achv-icon">${started ? def.icon : '🔒'}</div>
+        <div class="achv-body">
+          <div class="achv-name">${started ? def.name : '???'}</div>
+          <div class="achv-sub">${def.category}${started ? ' - Palier ' + tierName : ''}</div>
+        </div>
+        <div class="achv-divider"></div>
+        <div class="achv-condition">${started ? def.condition + ` (${progressLabel})` : 'Succès verrouillé'}</div>
+      </div>
+    `;
+  }
+  const unlocked = !!prog.unlocked;
+  const bgUrl = unlocked ? ACHIEVEMENT_TIER_ASSETS[def.grade] : null;
+  const dateLabel = unlocked ? new Date(prog.unlockedAt).toLocaleDateString('fr-FR') : '';
+  if(def.hidden && !unlocked){
+    return `
+      <div class="achv-card is-locked is-hidden" title="Succès caché">
+        <div class="achv-icon">🔒</div>
+        <div class="achv-body">
+          <div class="achv-name">???</div>
+          <div class="achv-sub">${def.category}</div>
+        </div>
+        <div class="achv-divider"></div>
+        <div class="achv-condition">Succès caché</div>
+      </div>
+    `;
+  }
+  return `
+    <div class="achv-card ${unlocked?'is-unlocked':'is-locked'}" ${bgUrl?`style="background-image:url('${bgUrl}')"`:''} title="${def.condition}">
+      <div class="achv-icon">${unlocked ? def.icon : '🔒'}</div>
+      <div class="achv-body">
+        <div class="achv-name">${unlocked ? def.name : '???'}</div>
+        <div class="achv-sub">${def.category}${unlocked ? ' - ' + dateLabel : ''}</div>
+      </div>
+      <div class="achv-divider"></div>
+      <div class="achv-condition">${unlocked ? def.condition : 'Succès verrouillé'}</div>
+    </div>
+  `;
 }
 
 function recordSeasonIfNeeded(){
@@ -8778,21 +8992,28 @@ function recordSeasonIfNeeded(){
   const myPos = standing.findIndex(s=>s.id===state.club.id) + 1;
   const cupWon = !!(state.season.cup && state.season.cup.champion === state.club.id);
   const superCupWon = !!(state.currentSeasonEuroWinners && state.currentSeasonEuroWinners.superCupWinner === state.club.id);
+  const euroWon = !!(state.euro && state.euro.champion === state.club.id);
 
-  if(myPos === 1) unlockAchievement('champion');
-  if(myPos <= 3 && myPos > 1) unlockAchievement('podium');
-  if(myRow && myRow.l === 0) unlockAchievement('invincible');
-  if(myRow && myRow.gf >= 90) unlockAchievement('steamroller');
-  if(myRow && myRow.ga < 20) unlockAchievement('fortress');
-  if(cupWon) unlockAchievement('cup_winner');
-  if(myPos === 1 && cupWon) unlockAchievement('national_double');
-  if(superCupWon) unlockAchievement('supercup');
-  if(state.euro && state.euro.champion === state.club.id){
-    if(state.euro.tier === 'cl') unlockAchievement('king_of_europe');
-    if(state.euro.tier === 'el') unlockAchievement('europa_master');
-    if(state.euro.tier === 'ecl') unlockAchievement('conference_king');
+  let trophiesThisSeason = 0;
+  if(myPos === 1) trophiesThisSeason++;
+  if(cupWon) trophiesThisSeason++;
+  if(euroWon) trophiesThisSeason++;
+  if(superCupWon) trophiesThisSeason++;
+  if(trophiesThisSeason > 0) bumpTieredCounter('trophiesWon', trophiesThisSeason);
+  if(trophiesThisSeason > 0) unlockAchievement('premier_trophee');
+
+  if(myRow && myRow.l === 0) unlockAchievement('invincible_simple');
+  if(myRow && myRow.p > 0 && myRow.w === myRow.p) unlockAchievement('saison_parfaite');
+  if(myPos === 1 && cupWon && euroWon) unlockAchievement('le_triple');
+  if(state.seasonInjuryCount === 0) unlockAchievement('aucun_regret');
+  if(state.seasonRedCardCount === 0) unlockAchievement('discipline_parfaite');
+  if(state.euro && euroWon){
+    unlockAchievement('roi_deurope');
+    if(state.euro.tier === 'el') unlockAchievement('vainqueur_europa_league');
+    if(state.euro.tier === 'ecl') unlockAchievement('vainqueur_ligue_conference');
   }
-  if(myPos <= 5 && myTeamStrength('league') < averageLeagueStrengthExcludingMe()) unlockAchievement('underdog');
+  if(state.seasonFormationChanged === false) unlockAchievement('jamais_panique');
+  checkCoachTotalAndSpecialOne();
 
   // Sauvegarde en base réservée aux comptes connectés - mais on ne bloque
   // JAMAIS la progression (le mercato, la saison suivante...) avec une
@@ -9316,6 +9537,7 @@ document.getElementById('profile-password').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ submitAuthForm(); }
 });
 initAuth();
+loadAchievementDefs();
 document.getElementById('btn-resume-save').addEventListener('click', ()=>{
   stopLandingRotation();
   const snap = restoreGameStateSnapshot();
