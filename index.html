@@ -1190,6 +1190,13 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .fx-row.fx-cup.fx-me{ background:rgba(203,213,225,.16); }
 
+.rd-heading.rd-supercup{ color:#A78BFA; }
+.fx-row.fx-supercup{
+  border:1px solid rgba(167,139,250,.4);
+  background:rgba(167,139,250,.1);
+}
+.fx-row.fx-supercup.fx-me{ background:rgba(167,139,250,.18); }
+
 .rd-heading.euro-cl-text{ color:var(--zone-cl); }
 .rd-heading.euro-el-text{ color:var(--zone-el); }
 .rd-heading.euro-ecl-text{ color:var(--zone-ecl); }
@@ -2228,9 +2235,10 @@ button{ font-family:inherit; cursor:pointer; }
   flex:0 0 84px;
   display:flex; align-items:center; justify-content:center;
   font-size:38px;
+  line-height:1;
 }
 .achv-body{
-  flex:1 1 auto;
+  flex:0 0 280px;
   min-width:0;
   display:flex; flex-direction:column; justify-content:center;
   padding:8px 18px 8px 28px;
@@ -2254,7 +2262,7 @@ button{ font-family:inherit; cursor:pointer; }
   margin:14px 0;
 }
 .achv-condition{
-  flex:1.3 1 auto;
+  flex:1 1 auto;
   min-width:0;
   display:flex; align-items:center;
   padding:8px 18px;
@@ -3877,6 +3885,8 @@ const state = {
   seasonNumber:1,
   prevSeasonStanding:null,
   prevSeasonCupWinner:null,
+  prevSeasonCupFinalist:null,
+  domesticSuperCup:null,
   prevSeasonEuroWinners:null,
   currentSeasonEuroWinners:null,
   transfer:null,
@@ -5118,7 +5128,12 @@ function simulateCupStage(stageKey){
   if(stageKey==='r16'){ cup.bracket.qf = pairUp(winners); cup.stage = 'qf'; }
   else if(stageKey==='qf'){ cup.bracket.sf = pairUp(winners); cup.stage = 'sf'; }
   else if(stageKey==='sf'){ cup.bracket.final = pairUp(winners); cup.stage = 'final'; }
-  else if(stageKey==='final'){ cup.stage = 'done'; cup.champion = winners[0]; }
+  else if(stageKey==='final'){
+    cup.stage = 'done';
+    cup.champion = winners[0];
+    const finalFx = fixtures[0];
+    cup.finalist = finalFx.winner === finalFx.home ? finalFx.away : finalFx.home;
+  }
 }
 
 // "Le Pari Payant" : un joueur nettement moins bien noté que la moyenne
@@ -5174,6 +5189,7 @@ function enterSeason(){
   state.currentSeasonEuroWinners = { cl:null, el:null, ecl:null, superCupWinner:null };
   initShadowEuroCompetitions(euroTier);
   resolveSuperCupForNewSeason();
+  resolveDomesticSuperCupForNewSeason();
 
   state.seasonInjuryCount = 0;
   state.seasonRedCardCount = 0;
@@ -5219,12 +5235,20 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick){
   if(season.currentRound >= season.calendar.length){
     state.prevSeasonStanding = sortedStandings();
     state.prevSeasonCupWinner = season.cup ? season.cup.champion : null;
+    state.prevSeasonCupFinalist = season.cup ? season.cup.finalist : null;
     // Le championnat vient de se terminer : votre coupe d'Europe (si elle
     // en est aux quarts, en attente depuis la mi-saison) enchaîne
-    // immédiatement quarts + demies + finale, pour arriver "Terminé" en
-    // même temps que les compétitions fantômes plutôt que d'attendre des
-    // clics manuels dans l'onglet Europe.
+    // immédiatement finale, pour arriver "Terminé" en même temps que les
+    // compétitions fantômes plutôt que d'attendre des clics manuels dans
+    // l'onglet Europe. Seules LDC et Conférence attendent la fin du
+    // championnat pour leur finale - la Ligue Europa se joue avant la
+    // dernière journée et est donc déjà terminée à ce stade.
     if(state.euro && state.euro.stage !== 'done') simulateRestOfEuro();
+    if(state.shadowEuro){
+      Object.values(state.shadowEuro).forEach(euro=>{
+        if(euro.stage === 'final') simulateEuroFinalMatch(euro);
+      });
+    }
   }
 }
 
@@ -6321,8 +6345,8 @@ const SEASON_EVENT_BUILDERS = [
           state.fatigueLevel = Math.max(0, state.fatigueLevel - 3);
         }},
         { key:'test', label:'Tester', apply(){
-          if(Math.random() < 0.5){ addSeasonModifier(4, roundIdx+2, 'Série de victoires - pari réussi'); }
-          else { addSeasonModifier(-2, roundIdx+2, 'Série de victoires - pari manqué'); }
+          if(Math.random() < 0.5){ addSeasonModifier(4, roundIdx+2, 'Test payant, le groupe répond bien'); }
+          else { addSeasonModifier(-2, roundIdx+2, 'Test qui perturbe les automatismes'); }
         }}
       ]
     };
@@ -6567,8 +6591,8 @@ const SEASON_EVENT_BUILDERS = [
       text:'Votre adjoint propose une évolution tactique importante. Tenter le coup ?',
       options:[
         { key:'accept', label:'Accepter', apply(){
-          if(Math.random() < 0.5){ addSeasonModifier(6, roundIdx+3, 'Pari du staff réussi'); }
-          else { addSeasonModifier(-4, roundIdx+3, 'Pari du staff manqué'); }
+          if(Math.random() < 0.5){ addSeasonModifier(6, roundIdx+3, 'Nouveau système payant'); }
+          else { addSeasonModifier(-4, roundIdx+3, 'Nouveau système qui déstabilise l\'équipe'); }
         }},
         { key:'refuse', label:'Refuser', apply(){
           addSeasonModifier(0, roundIdx+1, 'Statu quo tactique');
@@ -6605,8 +6629,8 @@ const SEASON_EVENT_BUILDERS = [
       text:'Vous avez l\'occasion de préparer un système inédit pour surprendre l\'adversaire. Tenter le changement ?',
       options:[
         { key:'change', label:'Changer', apply(){
-          if(Math.random() < 0.5){ addSeasonModifier(5, roundIdx+1, 'Effet de surprise réussi'); }
-          else { addSeasonModifier(-3, roundIdx+1, 'Effet de surprise raté'); }
+          if(Math.random() < 0.5){ addSeasonModifier(5, roundIdx+1, 'Nouveau système qui surprend l\'adversaire'); }
+          else { addSeasonModifier(-3, roundIdx+1, 'Nouveau système pas encore rodé'); }
         }},
         { key:'keep', label:'Conserver', apply(){
           addSeasonModifier(0, roundIdx+1, 'Système habituel conservé');
@@ -6762,7 +6786,7 @@ function resolveSeasonEvent(optionKey){
   const newMods = state.seasonModifiers.slice(modsBefore);
   let outcomeMsg;
   if(newMods.length){
-    outcomeMsg = newMods.map(m=>`${m.label} (${m.delta>=0?'+':''}${m.delta} pendant ${Math.max(1, m.untilRound - pending.roundIdx)}j)`).join(' · ');
+    outcomeMsg = newMods.map(m=>`${m.label} (${m.delta>=0?'+':''}${m.delta} sur les ${Math.max(1, m.untilRound - pending.roundIdx)} prochaines journées)`).join(' · ');
   } else if(Object.keys(state.unavailable).length > unavailBefore){
     outcomeMsg = 'Un joueur est désormais indisponible suite à cette décision.';
   } else {
@@ -7100,9 +7124,10 @@ function commitLiveEuroMatchResult(){
     const ranked = sortedEuroStandingsFor(euro);
     // Barrages : 9/10 vs 23/24, 11/12 vs 21/22, 13/14 vs 19/20, 15/16 vs 17/18
     const pairIdx = [[8,23],[9,22],[10,21],[11,20],[12,19],[13,18],[14,17],[15,16]];
-    euro.playoffPairs = pairIdx.map(([a,b])=>({ home:ranked[a].id, away:ranked[b].id, played:false }));
+    euro.playoffTies = pairIdx.map(([a,b])=>({ teamA:ranked[a].id, teamB:ranked[b].id, leg1:null, leg2:null, winner:null, aggA:null, aggB:null, wentToPenalties:false, penaltyScore:null, extraTimeScore:null }));
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
+    euro.legPending = 'leg1';
   }
 
   // Le championnat n'est jamais touché ici - un match d'Europe joué en
@@ -7524,6 +7549,74 @@ function initShadowEuroCompetitions(playedTier){
 // de l'Europa League de la saison PRÉCÉDENTE, et se joue juste avant que la
 // nouvelle saison ne démarre - jamais la même saison que celle où ces
 // coupes ont été remportées.
+// Trophée d'ouverture de saison, propre à chaque championnat - opposant le
+// champion en titre au vainqueur de la coupe nationale (ou, pour l'Italie
+// et l'Espagne, un Final Four avec aussi le dauphin et le finaliste de
+// coupe). Se joue juste après la Supercoupe d'Europe, donc avant le début
+// du championnat.
+const DOMESTIC_SUPER_CUP_NAME = {
+  'Ligue 1': 'Trophée des Champions',
+  'Premier League': 'FA Community Shield',
+  'Bundesliga': 'DFL-Supercup',
+  'Serie A': 'Supercoppa Italiana',
+  'La Liga': 'Supercopa de España'
+};
+const DOMESTIC_SUPER_CUP_FORMAT = {
+  'Ligue 1': 'duel',
+  'Premier League': 'duel',
+  'Bundesliga': 'duel',
+  'Serie A': 'finalfour',
+  'La Liga': 'finalfour'
+};
+
+function playDomesticSuperCupDuel(a, b){
+  const sa = strengthForAnyClub(a), sb = strengthForAnyClub(b);
+  let hg = simulateGoals(sa, sb, true), ag = simulateGoals(sb, sa, false);
+  if(hg === ag){
+    if(Math.random() < sa/(sa+sb)) hg++; else ag++;
+  }
+  return { home:a, away:b, hg, ag, winner: hg>ag ? a : b };
+}
+
+function resolveDomesticSuperCupForNewSeason(){
+  state.domesticSuperCup = null;
+  if(!state.prevSeasonStanding || !state.prevSeasonStanding.length) return; // pas de saison précédente
+  const format = DOMESTIC_SUPER_CUP_FORMAT[state.league] || 'duel';
+  const name = DOMESTIC_SUPER_CUP_NAME[state.league] || 'Trophée des Champions';
+  const standing = state.prevSeasonStanding;
+  const champion = standing[0].id;
+  const runnerUp = standing[1] ? standing[1].id : null;
+  const cupWinner = state.prevSeasonCupWinner;
+  const cupFinalist = state.prevSeasonCupFinalist;
+
+  if(format === 'duel'){
+    // Si le même club a remporté le championnat et la coupe, le dauphin du
+    // championnat prend sa place face au champion.
+    let other = (cupWinner && cupWinner !== champion) ? cupWinner : runnerUp;
+    if(!other || other === champion) return;
+    const final = playDomesticSuperCupDuel(champion, other);
+    state.domesticSuperCup = { format, name, final, champion: final.winner };
+  } else {
+    // Final Four : champion, dauphin, vainqueur et finaliste de coupe - en
+    // complétant avec les places suivantes du championnat en cas de
+    // doublon (ex : le champion a aussi remporté la coupe).
+    const pool = [champion, runnerUp, cupWinner, cupFinalist];
+    const unique = [];
+    pool.forEach(id => { if(id && !unique.includes(id)) unique.push(id); });
+    let i = 2;
+    while(unique.length < 4 && i < standing.length){
+      if(!unique.includes(standing[i].id)) unique.push(standing[i].id);
+      i++;
+    }
+    if(unique.length < 4) return;
+    const [a,b,c,d] = unique;
+    const semi1 = playDomesticSuperCupDuel(a, d);
+    const semi2 = playDomesticSuperCupDuel(b, c);
+    const final = playDomesticSuperCupDuel(semi1.winner, semi2.winner);
+    state.domesticSuperCup = { format, name, semis:[semi1, semi2], final, champion: final.winner };
+  }
+}
+
 function resolveSuperCupForNewSeason(){
   const prev = state.prevSeasonEuroWinners;
   if(!prev || !prev.cl || !prev.el) return;
@@ -7555,10 +7648,76 @@ function scheduleEuroStages(totalRounds){
   const leaguePhase = [];
   let md = startMd;
   for(let i=0;i<8;i++){ leaguePhase.push(Math.min(totalRounds-1, md)); md += step; }
-  const playoff = Math.min(totalRounds-1, leaguePhase[7] + step);
-  const ro16 = Math.min(totalRounds-1, playoff + step);
-  const qf = Math.min(totalRounds-1, ro16 + step);
-  return { leaguePhase, playoff, ro16, qf };
+  // Barrages/8es/quarts/demies passent en aller-retour à partir des
+  // barrages, sur des journées fixes plutôt que dérivées de la phase de
+  // ligue - clampées si jamais le championnat compte moins de 33 journées.
+  const clamp = n => Math.min(totalRounds-1, n);
+  return {
+    leaguePhase,
+    playoffLeg1: clamp(21), playoffLeg2: clamp(22),   // après J22 / après J23
+    ro16Leg1: clamp(24), ro16Leg2: clamp(25),          // après J25 / après J26
+    qfLeg1: clamp(27), qfLeg2: clamp(28),              // après J28 / après J29
+    sfLeg1: clamp(30), sfLeg2: clamp(31)               // après J31 / après J32
+  };
+}
+
+// Résout une confrontation aller-retour : prolongation (30 min, faible
+// probabilité de but) puis tirs au but si toujours à égalité après cumul
+// des deux manches.
+function resolveAggregateTie(strengthA, strengthB){
+  const etA = Math.random() < 0.32 ? (Math.random() < 0.25 ? 2 : 1) : 0;
+  const etB = Math.random() < 0.32 ? (Math.random() < 0.25 ? 2 : 1) : 0;
+  if(etA !== etB) return { winner: etA>etB?'A':'B', extraTimeScore:`${etA}-${etB}`, wentToPenalties:false };
+  let pA = 3 + Math.floor(Math.random()*3);
+  let pB = 3 + Math.floor(Math.random()*3);
+  if(pA === pB){
+    if(Math.random() < strengthA/(strengthA+strengthB)) pA++; else pB++;
+  }
+  return { winner: pA>pB?'A':'B', wentToPenalties:true, penaltyScore:`${pA}-${pB}`, extraTimeScore: etA===etB ? `${etA}-${etB}` : null };
+}
+
+function euroStrengthOf(euro, id){
+  return id === state.club.id ? myTeamStrength('euro') : euro.strengths[id];
+}
+
+function buildKnockoutTies(teamIds, randomDraw){
+  const pairs = pairUp(randomDraw ? shuffleArr(teamIds) : teamIds);
+  return pairs.map(p => ({ teamA:p.home, teamB:p.away, leg1:null, leg2:null, winner:null, aggA:null, aggB:null, wentToPenalties:false, penaltyScore:null, extraTimeScore:null }));
+}
+
+// Joue la manche aller de toutes les confrontations d'un tour.
+function playKnockoutLeg1(euro, ties){
+  ties.forEach(tie=>{
+    const sA = euroStrengthOf(euro, tie.teamA), sB = euroStrengthOf(euro, tie.teamB);
+    const hg = simulateGoals(sA, sB, true);
+    const ag = simulateGoals(sB, sA, false);
+    tie.leg1 = { home:tie.teamA, away:tie.teamB, hg, ag, played:true, events: simulateMatchEvents(tie.teamA, tie.teamB, hg, ag) };
+    if(euro === state.euro && (tie.teamA === state.club.id || tie.teamB === state.club.id)) trackMatchResult(tie.leg1);
+  });
+}
+
+// Joue la manche retour, calcule le cumul et tranche via prolongation /
+// tirs au but si nécessaire.
+function playKnockoutLeg2(euro, ties){
+  ties.forEach(tie=>{
+    const sA = euroStrengthOf(euro, tie.teamA), sB = euroStrengthOf(euro, tie.teamB);
+    const hg = simulateGoals(sB, sA, true);
+    const ag = simulateGoals(sA, sB, false);
+    tie.leg2 = { home:tie.teamB, away:tie.teamA, hg, ag, played:true, events: simulateMatchEvents(tie.teamB, tie.teamA, hg, ag) };
+    if(euro === state.euro && (tie.teamA === state.club.id || tie.teamB === state.club.id)) trackMatchResult(tie.leg2);
+    const aggA = tie.leg1.hg + tie.leg2.ag;
+    const aggB = tie.leg1.ag + tie.leg2.hg;
+    tie.aggA = aggA; tie.aggB = aggB;
+    if(aggA !== aggB){
+      tie.winner = aggA > aggB ? tie.teamA : tie.teamB;
+    } else {
+      const result = resolveAggregateTie(sA, sB);
+      tie.wentToPenalties = result.wentToPenalties;
+      tie.penaltyScore = result.penaltyScore;
+      tie.extraTimeScore = result.extraTimeScore;
+      tie.winner = result.winner === 'A' ? tie.teamA : tie.teamB;
+    }
+  });
 }
 
 function buildEuroCompetitionObject(tier){
@@ -7578,7 +7737,8 @@ function buildEuroCompetitionObject(tier){
     resultsByRound: [],
     schedule: scheduleEuroStages(state.season.calendar.length),
     stage: 'league', // league -> playoff -> ro16 -> qf -> sf -> final -> done
-    playoffPairs: [], ro16Pairs: [], qfPairs: [], sfPairs: [], finalFixture: null,
+    legPending: null, // 'leg1' | 'leg2' | null - où en est le tour à élimination en cours
+    playoffTies: [], ro16Ties: [], qfTies: [], sfTies: [], finalFixture: null,
     champion: null
   };
 }
@@ -7640,33 +7800,37 @@ function simulateEuroLeagueRound(euro, domesticRoundIdx){
     const ranked = sortedEuroStandingsFor(euro);
     // Barrages : 9/10 vs 23/24, 11/12 vs 21/22, 13/14 vs 19/20, 15/16 vs 17/18
     const pairIdx = [[8,23],[9,22],[10,21],[11,20],[12,19],[13,18],[14,17],[15,16]];
-    euro.playoffPairs = pairIdx.map(([a,b])=>({ home:ranked[a].id, away:ranked[b].id, played:false }));
+    euro.playoffTies = pairIdx.map(([a,b])=>({ teamA:ranked[a].id, teamB:ranked[b].id, leg1:null, leg2:null, winner:null, aggA:null, aggB:null, wentToPenalties:false, penaltyScore:null, extraTimeScore:null }));
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
+    euro.legPending = 'leg1';
   }
 }
 
-function simulateEuroPlayoff(euro, roundIdx){
-  euro.playoffPairs.forEach(fx=>playEuroSingleMatch(fx, euro));
-  euro.resultsByRound.push({ label:'Barrages', matches:euro.playoffPairs.map(f=>({...f})), roundIdx });
-  const winners = euro.playoffPairs.map(f=>f.winner);
-  const ro16Clubs = shuffleArr([...euro.directQualifiers, ...winners]);
-  euro.ro16Pairs = pairUp(ro16Clubs);
-  euro.stage = 'ro16';
-}
-
-function simulateEuroKO(euro, stage, nextStage, label, roundIdx){
-  const key = stage === 'ro16' ? 'ro16Pairs' : stage === 'qf' ? 'qfPairs' : 'sfPairs';
-  euro[key].forEach(fx=>playEuroSingleMatch(fx, euro));
-  euro.resultsByRound.push({ label, matches:euro[key].map(f=>({...f})), roundIdx });
-  const winners = euro[key].map(f=>f.winner);
-  if(nextStage === 'final'){
-    euro.finalFixture = { home:winners[0], away:winners[1], played:false };
+// Joue la manche demandée (aller ou retour) du tour à élimination en
+// cours, pour n'importe quel tour (barrages, 8es, quarts, demies) - avance
+// automatiquement au tour suivant une fois le cumul aller-retour tranché.
+function simulateEuroKnockoutLeg(euro, stage, nextStage, label){
+  const key = stage + 'Ties';
+  const ties = euro[key];
+  if(euro.legPending === 'leg1'){
+    playKnockoutLeg1(euro, ties);
+    euro.resultsByRound.push({ label:`${label} - Aller`, matches: ties.map(t=>({...t.leg1})), roundIdx: state.season ? state.season.currentRound-1 : Infinity });
+    euro.legPending = 'leg2';
   } else {
-    const nextKey = nextStage === 'qf' ? 'qfPairs' : 'sfPairs';
-    euro[nextKey] = pairUp(shuffleArr(winners));
+    playKnockoutLeg2(euro, ties);
+    euro.resultsByRound.push({ label:`${label} - Retour`, matches: ties.map(t=>({...t.leg2})), roundIdx: state.season ? state.season.currentRound-1 : Infinity });
+    let winners = ties.map(t=>t.winner);
+    if(stage === 'playoff') winners = [...euro.directQualifiers, ...winners];
+    if(nextStage === 'final'){
+      euro.finalFixture = { home:winners[0], away:winners[1], played:false };
+      euro.legPending = null;
+    } else {
+      euro[nextStage + 'Ties'] = buildKnockoutTies(winners, true);
+      euro.legPending = 'leg1';
+    }
+    euro.stage = nextStage;
   }
-  euro.stage = nextStage;
 }
 
 function simulateEuroFinalMatch(euro){
@@ -7691,18 +7855,24 @@ function tickOneEuroCompetition(euro, roundIdx){
   // fantômes gardent leur enchaînement automatique normal.
   const isPlayed = euro === state.euro;
   if(isPlayed) return;
-  const stopStages = ['sf','final','done'];
-  if(stopStages.includes(euro.stage)) return;
+  if(euro.stage === 'final' || euro.stage === 'done') return;
   const sch = euro.schedule;
   if(euro.stage === 'league'){
     const target = sch.leaguePhase[euro.currentRound];
     if(target === roundIdx) simulateEuroLeagueRound(euro, roundIdx);
-  } else if(euro.stage === 'playoff' && sch.playoff === roundIdx){
-    simulateEuroPlayoff(euro, roundIdx);
-  } else if(euro.stage === 'ro16' && sch.ro16 === roundIdx){
-    simulateEuroKO(euro, 'ro16','qf','Huitièmes de finale', roundIdx);
-  } else if(euro.stage === 'qf' && sch.qf === roundIdx){
-    simulateEuroKO(euro, 'qf','sf','Quarts de finale', roundIdx);
+    return;
+  }
+  const stageAnchors = { playoff:[sch.playoffLeg1, sch.playoffLeg2], ro16:[sch.ro16Leg1, sch.ro16Leg2], qf:[sch.qfLeg1, sch.qfLeg2], sf:[sch.sfLeg1, sch.sfLeg2] };
+  const nextStageOf = { playoff:'ro16', ro16:'qf', qf:'sf', sf:'final' };
+  const labelOf = { playoff:'Barrages', ro16:'Huitièmes de finale', qf:'Quarts de finale', sf:'Demi-finales' };
+  const anchors = stageAnchors[euro.stage];
+  if(!anchors) return;
+  const expectedRound = euro.legPending === 'leg1' ? anchors[0] : anchors[1];
+  if(expectedRound === roundIdx){
+    simulateEuroKnockoutLeg(euro, euro.stage, nextStageOf[euro.stage], labelOf[euro.stage]);
+    // L'Europa League se joue avant la dernière journée de championnat -
+    // pas besoin d'attendre la fin de saison comme LDC et Conférence.
+    if(euro.stage === 'final' && euro.tier === 'el') simulateEuroFinalMatch(euro);
   }
 }
 
@@ -7718,10 +7888,6 @@ function tickEuroForRound(roundIdx){
   if(state.shadowEuro){
     Object.values(state.shadowEuro).forEach(euro=>{
       tickOneEuroCompetition(euro, roundIdx);
-      while(euro.stage === 'sf' || euro.stage === 'final'){
-        if(euro.stage === 'sf') simulateEuroKO(euro, 'sf','final','Demi-finales', Infinity);
-        else simulateEuroFinalMatch(euro);
-      }
     });
   }
 }
@@ -7733,20 +7899,17 @@ function tickEuroForRound(roundIdx){
 function playEuroMatchday(){
   const euro = state.euro;
   if(!euro) return;
-  if(euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length){
+  const seasonOver = !state.season || state.season.currentRound >= state.season.calendar.length;
+  if(euro.stage === 'final' && euro.tier !== 'el' && !seasonOver){
     toast('La finale se jouera une fois le championnat terminé.');
     return;
   }
+  const nextStageOf = { playoff:'ro16', ro16:'qf', qf:'sf', sf:'final' };
+  const labelOf = { playoff:'Barrages', ro16:'Huitièmes de finale', qf:'Quarts de finale', sf:'Demi-finales' };
   if(euro.stage === 'league'){
     simulateEuroLeagueRound(euro, euro.schedule.leaguePhase[euro.currentRound]);
-  } else if(euro.stage === 'playoff'){
-    simulateEuroPlayoff(euro, euro.schedule.playoff);
-  } else if(euro.stage === 'ro16'){
-    simulateEuroKO(euro, 'ro16','qf','Huitièmes de finale', euro.schedule.ro16);
-  } else if(euro.stage === 'qf'){
-    simulateEuroKO(euro, 'qf','sf','Quarts de finale', Infinity);
-  } else if(euro.stage === 'sf'){
-    simulateEuroKO(euro, 'sf','final','Demi-finales', Infinity);
+  } else if(nextStageOf[euro.stage]){
+    simulateEuroKnockoutLeg(euro, euro.stage, nextStageOf[euro.stage], labelOf[euro.stage]);
   } else if(euro.stage === 'final'){
     simulateEuroFinalMatch(euro);
   }
@@ -7758,7 +7921,8 @@ function simulateRestOfEuro(){
   if(!euro) return;
   let guard = 0;
   while(euro.stage !== 'done' && guard < 20){
-    if(euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length) break;
+    const seasonOver = !state.season || state.season.currentRound >= state.season.calendar.length;
+    if(euro.stage === 'final' && euro.tier !== 'el' && !seasonOver) break;
     playEuroMatchday();
     guard++;
   }
@@ -7910,6 +8074,15 @@ function renderLeaguePanels(){
       }
     }
   }
+  if(state.domesticSuperCup){
+    const sc = state.domesticSuperCup;
+    if(sc.format === 'duel'){
+      timeline.push({ type:'supercup', roundIdx:-1, label:sc.name, matches:[sc.final] });
+    } else {
+      timeline.push({ type:'supercup', roundIdx:-1, label:`${sc.name} - Demi-finales`, matches:sc.semis });
+      timeline.push({ type:'supercup', roundIdx:-0.5, label:`${sc.name} - Finale`, matches:[sc.final] });
+    }
+  }
   timeline.sort((a,b)=>a.roundIdx - b.roundIdx);
 
   function resolveClub(id){
@@ -7920,12 +8093,12 @@ function renderLeaguePanels(){
     resultsEl.innerHTML = `<div class="hand-empty">Aucun match joué. Lancez la première journée.</div>`;
   } else {
     const renderEntry = entry => `
-      <div class="rd-heading ${entry.type==='cup'?'rd-cup':''} ${entry.type.startsWith('euro-')?entry.type+'-text':''}" data-upcoming="${entry.upcoming ? '1' : '0'}">${entry.label}${entry.upcoming ? ' <span class="rd-upcoming-tag">à venir</span>' : ''}</div>
+      <div class="rd-heading ${entry.type==='cup'?'rd-cup':''} ${entry.type==='supercup'?'rd-supercup':''} ${entry.type.startsWith('euro-')?entry.type+'-text':''}" data-upcoming="${entry.upcoming ? '1' : '0'}">${entry.label}${entry.upcoming ? ' <span class="rd-upcoming-tag">à venir</span>' : ''}</div>
       ${entry.matches.map(fx=>{
         const home = resolveClub(fx.home);
         const away = resolveClub(fx.away);
         const isMe = fx.home===state.club.id || fx.away===state.club.id;
-        const extraClasses = `${isMe?'fx-me':''} ${entry.type==='cup'?'fx-cup':''} ${entry.type.startsWith('euro-')?entry.type:''}`;
+        const extraClasses = `${isMe?'fx-me':''} ${entry.type==='cup'?'fx-cup':''} ${entry.type==='supercup'?'fx-supercup':''} ${entry.type.startsWith('euro-')?entry.type:''}`;
         return renderFixtureBlock(fx, home.name, away.name, extraClasses, home, away);
       }).join('')}
     `;
@@ -8140,12 +8313,14 @@ function renderSeason(){
 
   if(state.seasonView === 'euro' && euro){
     const euroDone = euro.stage === 'done';
-    const waitingForSeasonEnd = euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length;
+    const seasonOver = !state.season || state.season.currentRound >= state.season.calendar.length;
+    const waitingForSeasonEnd = euro.stage === 'final' && euro.tier !== 'el' && !seasonOver;
     liveBtn.style.display = euro.stage === 'league' ? '' : 'none';
     liveBtn.disabled = euroDone;
     nextBtn.disabled = euroDone || waitingForSeasonEnd;
     simBtn.disabled = euroDone || waitingForSeasonEnd;
-    nextBtn.textContent = euroDone ? 'Campagne terminée' : waitingForSeasonEnd ? 'Finale - après le championnat' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}`;
+    const legSuffix = euro.legPending ? ` (${euro.legPending === 'leg1' ? 'Aller' : 'Retour'})` : '';
+    nextBtn.textContent = euroDone ? 'Campagne terminée' : waitingForSeasonEnd ? 'Finale - après le championnat' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}${legSuffix}`;
     simBtn.textContent = 'Simuler la campagne';
   } else {
     nextBtn.disabled = seasonDone;
@@ -8542,6 +8717,8 @@ function snapshotGameState(){
     seasonNumber: state.seasonNumber,
     prevSeasonStanding: state.prevSeasonStanding,
     prevSeasonCupWinner: state.prevSeasonCupWinner,
+    prevSeasonCupFinalist: state.prevSeasonCupFinalist,
+    domesticSuperCup: state.domesticSuperCup,
     prevSeasonEuroWinners: state.prevSeasonEuroWinners,
     currentSeasonEuroWinners: state.currentSeasonEuroWinners,
     transfer: state.transfer,
