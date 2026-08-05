@@ -7734,6 +7734,10 @@ function tickEuroForRound(roundIdx){
 function playEuroMatchday(){
   const euro = state.euro;
   if(!euro) return;
+  if(euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length){
+    toast('La finale se jouera une fois le championnat terminé.');
+    return;
+  }
   if(euro.stage === 'league'){
     simulateEuroLeagueRound(euro, euro.schedule.leaguePhase[euro.currentRound]);
   } else if(euro.stage === 'playoff'){
@@ -7755,6 +7759,7 @@ function simulateRestOfEuro(){
   if(!euro) return;
   let guard = 0;
   while(euro.stage !== 'done' && guard < 20){
+    if(euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length) break;
     playEuroMatchday();
     guard++;
   }
@@ -7972,16 +7977,26 @@ function renderEuroCompetitionBlock(euro, tierClass, isPlayed){
     </div>
   `;
 
-  if(!euro.resultsByRound.length){
-    resultsEl.innerHTML += `<div class="hand-empty">Aucun match joué pour l'instant - les rencontres démarrent autour de la 10e journée de championnat.</div>`;
+  const playedRoundIdxs = new Set(euro.resultsByRound.map(e=>e.roundIdx));
+  const upcomingLeagueRounds = [];
+  if(euro.stage === 'league'){
+    for(let ri = euro.currentRound; ri < euro.calendar.length; ri++){
+      upcomingLeagueRounds.push({ label:`Phase de ligue - J${ri+1}`, matches:euro.calendar[ri], upcoming:true });
+    }
+  }
+
+  if(!euro.resultsByRound.length && !upcomingLeagueRounds.length){
+    resultsEl.innerHTML += `<div class="hand-empty">Compétition pas encore programmée.</div>`;
   } else {
-    resultsEl.innerHTML += euro.resultsByRound.map(entry=>`
-      <div class="rd-heading ${tierClass}-text">${entry.label}</div>
+    const allEntries = euro.resultsByRound.concat(upcomingLeagueRounds);
+    resultsEl.innerHTML += allEntries.map(entry=>`
+      <div class="rd-heading ${tierClass}-text" data-upcoming="${entry.upcoming ? '1' : '0'}">${entry.label}${entry.upcoming ? ' <span class="rd-upcoming-tag">à venir</span>' : ''}</div>
       ${entry.matches.map(fx=>{
         const home = euro.clubsById[fx.home];
         const away = euro.clubsById[fx.away];
         const isMe = fx.home===state.club.id || fx.away===state.club.id;
-        return renderFixtureBlock(fx, home.name, away.name, `${isMe?'fx-me':''} ${tierClass}`, home, away);
+        const displayFx = entry.upcoming ? { ...fx, hg:undefined, ag:undefined } : fx;
+        return renderFixtureBlock(displayFx, home.name, away.name, `${isMe?'fx-me':''} ${tierClass}`, home, away);
       }).join('')}
     `).join('');
   }
@@ -8046,7 +8061,8 @@ function renderEuroPanels(){
     state._resultsScrollTrack = trackKey;
     state._resultsScrollRound = roundCount;
     const headings = resultsEl.querySelectorAll('.rd-heading');
-    const last = headings[headings.length-1];
+    let last = null;
+    headings.forEach(h=>{ if(h.dataset.upcoming === '0') last = h; });
     if(last) last.scrollIntoView({ block:'start' });
     else resultsEl.scrollTop = 0;
   }
@@ -8125,11 +8141,12 @@ function renderSeason(){
 
   if(state.seasonView === 'euro' && euro){
     const euroDone = euro.stage === 'done';
+    const waitingForSeasonEnd = euro.stage === 'final' && euro === state.euro && state.season && state.season.currentRound < state.season.calendar.length;
     liveBtn.style.display = euro.stage === 'league' ? '' : 'none';
     liveBtn.disabled = euroDone;
-    nextBtn.disabled = euroDone;
-    simBtn.disabled = euroDone;
-    nextBtn.textContent = euroDone ? 'Campagne terminée' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}`;
+    nextBtn.disabled = euroDone || waitingForSeasonEnd;
+    simBtn.disabled = euroDone || waitingForSeasonEnd;
+    nextBtn.textContent = euroDone ? 'Campagne terminée' : waitingForSeasonEnd ? 'Finale - après le championnat' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}`;
     simBtn.textContent = 'Simuler la campagne';
   } else {
     nextBtn.disabled = seasonDone;
@@ -8948,12 +8965,19 @@ function renderAchievementsGrid(){
   document.getElementById('achv-total').textContent = ACHIEVEMENT_DEFS.length;
   const cats = [];
   ACHIEVEMENT_DEFS.forEach(a=>{ if(!cats.includes(a.category)) cats.push(a.category); });
-  grid.innerHTML = cats.map(cat => `
-    <div class="achv-cat-label">${cat}</div>
-    <div class="achv-cat-row">
-      ${ACHIEVEMENT_DEFS.filter(a=>a.category===cat).map(a=>renderAchievementCardHTML(a)).join('')}
-    </div>
-  `).join('');
+  grid.innerHTML = cats.map(cat => {
+    // Les succès cachés restent entièrement invisibles (pas même un "???")
+    // tant qu'ils ne sont pas débloqués - et si une catégorie entière n'a
+    // rien à montrer pour l'instant, on n'affiche pas son intitulé non plus.
+    const visible = ACHIEVEMENT_DEFS.filter(a => a.category===cat && !(a.hidden && !isAchievementMaxed(a)));
+    if(!visible.length) return '';
+    return `
+      <div class="achv-cat-label">${cat}</div>
+      <div class="achv-cat-row">
+        ${visible.map(a=>renderAchievementCardHTML(a)).join('')}
+      </div>
+    `;
+  }).join('');
 }
 
 function renderAchievementCardHTML(def){
