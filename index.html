@@ -2851,8 +2851,10 @@ button{ font-family:inherit; cursor:pointer; }
         <div class="season-controls">
           <button class="season-btn season-btn-ghost" id="btn-back-to-squad">Retour à l'effectif</button>
           <button class="season-btn" id="btn-play-live">Jouer en direct</button>
+          <button class="season-btn" id="btn-play-live-euro" style="display:none">Jouer votre match d'Europe</button>
           <button class="season-btn" id="btn-next-matchday">Journée suivante</button>
-          <button class="season-btn season-btn-primary" id="btn-sim-rest">Simuler la saison</button>
+          <button class="season-btn" id="btn-euro-step" style="display:none">Jouer : étape suivante</button>
+          <button class="season-btn season-btn-primary" id="btn-sim-rest" style="display:none">Simuler la campagne</button>
           <button class="season-btn season-btn-primary" id="btn-next-season" style="display:none">Mercato → Saison suivante</button>
         </div>
       </div>
@@ -5253,7 +5255,7 @@ function applyFixtureResult(standings, fx){
 
 // Tout ce qui doit se passer une fois une journée entièrement résolue :
 // coupe, Europe, et fin de saison - partagé lui aussi entre les deux modes.
-function finishRoundBookkeeping(roundIdx, skipEuroTick){
+function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
   const season = state.season;
   season.currentRound++;
   tickOtherLeagues();
@@ -5267,7 +5269,7 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick){
     if(cup.stage==='final' && md.final===roundIdx) simulateCupStage('final');
   }
 
-  if(!skipEuroTick) tickEuroForRound(roundIdx);
+  if(!skipEuroTick) tickEuroForRound(roundIdx, skipPlayedEuroTick);
 
   if(season.currentRound >= season.calendar.length){
     state.prevSeasonStanding = sortedStandings();
@@ -7104,7 +7106,7 @@ function commitLiveMatchResult(){
   });
 
   season.resultsByRound.push(round);
-  finishRoundBookkeeping(roundIdx);
+  finishRoundBookkeeping(roundIdx, false, true);
   updateStreaksAndFatigue(lm.fx);
   trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
@@ -7891,14 +7893,6 @@ function simulateEuroFinalMatch(euro){
 // intercaler les rencontres européennes programmées (comme la coupe).
 function tickOneEuroCompetition(euro, roundIdx){
   if(!euro) return;
-  // Pour VOTRE compétition, aucune étape ne se joue plus automatiquement au
-  // fil des journées de championnat - dans la vraie vie, une équipe ne
-  // joue jamais deux matchs en même temps. Toute votre coupe d'Europe se
-  // joue désormais via l'onglet Europe (en direct ou instantanément),
-  // indépendamment du calendrier du championnat. Les compétitions
-  // fantômes gardent leur enchaînement automatique normal.
-  const isPlayed = euro === state.euro;
-  if(isPlayed) return;
   if(euro.stage === 'final' || euro.stage === 'done') return;
   const sch = euro.schedule;
   if(euro.stage === 'league'){
@@ -7927,8 +7921,14 @@ function tickOneEuroCompetition(euro, roundIdx){
 // (non disputées par le joueur) enchaînent automatiquement demies et
 // finale dès qu'elles y arrivent, puisqu'aucune interaction du joueur
 // n'y est nécessaire.
-function tickEuroForRound(roundIdx){
-  tickOneEuroCompetition(state.euro, roundIdx);
+function tickEuroForRound(roundIdx, skipPlayed){
+  // En simulation instantanée (Journée suivante / Simuler la saison),
+  // votre compétition avance au même rythme que les fantômes - dans ce
+  // cas personne ne "joue" rien en direct, ce n'est que le temps qui
+  // passe. Seul un match de championnat joué EN DIRECT met votre
+  // compétition européenne en pause pour cette journée précise, pour ne
+  // jamais faire jouer votre équipe deux matchs à la fois sous vos yeux.
+  if(!skipPlayed) tickOneEuroCompetition(state.euro, roundIdx);
   if(state.shadowEuro){
     Object.values(state.shadowEuro).forEach(euro=>{
       tickOneEuroCompetition(euro, roundIdx);
@@ -7973,13 +7973,15 @@ function simulateRestOfEuro(){
 }
 
 function handleNextMatchday(){
-  if(state.seasonView === 'euro') playEuroMatchday();
-  else playMatchday();
+  playMatchday();
+}
+
+function handleEuroStep(){
+  playEuroMatchday();
 }
 
 function handleSimRest(){
-  if(state.seasonView === 'euro') simulateRestOfEuro();
-  else simulateRestOfSeason();
+  simulateRestOfEuro();
 }
 
 function euroTrophyBadgesHtml(clubId, euroFullyDone){
@@ -8342,6 +8344,8 @@ function renderSeason(){
   const nextBtn = document.getElementById('btn-next-matchday');
   const simBtn = document.getElementById('btn-sim-rest');
   const liveBtn = document.getElementById('btn-play-live');
+  const euroLiveBtn = document.getElementById('btn-play-live-euro');
+  const euroStepBtn = document.getElementById('btn-euro-step');
   const backBtn = document.getElementById('btn-back-to-squad');
   const nextSeasonBtn = document.getElementById('btn-next-season');
   backBtn.disabled = false;
@@ -8356,24 +8360,45 @@ function renderSeason(){
     });
   }
 
-  if(state.seasonView === 'euro' && euro){
-    const euroDone = euro.stage === 'done';
-    const seasonOver = !state.season || state.season.currentRound >= state.season.calendar.length;
-    const waitingForSeasonEnd = euro.stage === 'final' && euro.tier !== 'el' && !seasonOver;
-    liveBtn.style.display = euro.stage === 'league' ? '' : 'none';
-    liveBtn.disabled = euroDone;
-    nextBtn.disabled = euroDone || waitingForSeasonEnd;
-    simBtn.disabled = euroDone || waitingForSeasonEnd;
-    const legSuffix = euro.legPending ? ` (${euro.legPending === 'leg1' ? 'Aller' : 'Retour'})` : '';
-    nextBtn.textContent = euroDone ? 'Campagne terminée' : waitingForSeasonEnd ? 'Finale - après le championnat' : `Jouer : ${EURO_STAGE_LABEL[euro.stage]}${legSuffix}`;
-    simBtn.textContent = 'Simuler la campagne';
+  // L'onglet Europe est purement consultatif (classement + calendrier) -
+  // aucun bouton pour jouer ou simuler quoi que ce soit ne s'y affiche.
+  // Toute action (championnat ou Europe) se fait depuis l'onglet Ligue 1.
+  const onEuroTab = state.seasonView === 'euro';
+  if(onEuroTab){
+    liveBtn.style.display = 'none';
+    euroLiveBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    simBtn.style.display = 'none';
+    euroStepBtn.style.display = 'none';
   } else {
-    nextBtn.disabled = seasonDone;
-    simBtn.disabled = seasonDone;
-    nextBtn.textContent = seasonDone ? 'Saison terminée' : `Journée suivante (${season.currentRound+1}/${season.calendar.length})`;
-    simBtn.textContent = 'Simuler la saison';
     liveBtn.style.display = '';
     liveBtn.disabled = seasonDone;
+
+    if(euro && euro.stage === 'league'){
+      euroLiveBtn.style.display = '';
+      euroLiveBtn.disabled = false;
+    } else {
+      euroLiveBtn.style.display = 'none';
+    }
+
+    nextBtn.style.display = '';
+    nextBtn.disabled = seasonDone;
+    nextBtn.textContent = seasonDone ? 'Saison terminée' : `Journée suivante (${season.currentRound+1}/${season.calendar.length})`;
+
+    if(euro && euro.stage !== 'done'){
+      const seasonOver = !state.season || state.season.currentRound >= state.season.calendar.length;
+      const waitingForSeasonEnd = euro.stage === 'final' && euro.tier !== 'el' && !seasonOver;
+      simBtn.style.display = '';
+      simBtn.disabled = waitingForSeasonEnd;
+      simBtn.textContent = waitingForSeasonEnd ? 'Finale - après le championnat' : 'Simuler la campagne';
+      const legSuffix = euro.legPending ? ` (${euro.legPending === 'leg1' ? 'Aller' : 'Retour'})` : '';
+      euroStepBtn.style.display = '';
+      euroStepBtn.disabled = waitingForSeasonEnd;
+      euroStepBtn.textContent = `Jouer : ${EURO_STAGE_LABEL[euro.stage]}${legSuffix}`;
+    } else {
+      simBtn.style.display = 'none';
+      euroStepBtn.style.display = 'none';
+    }
   }
 
   const euroFullyDone = !euro || euro.stage === 'done';
@@ -9529,14 +9554,15 @@ document.getElementById('btn-home').addEventListener('click', ()=>{
   window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('btn-next-matchday').addEventListener('click', handleNextMatchday);
+document.getElementById('btn-euro-step').addEventListener('click', handleEuroStep);
 document.getElementById('btn-play-live').addEventListener('click', ()=>{
+  startLiveMatchday();
+});
+document.getElementById('btn-play-live-euro').addEventListener('click', ()=>{
   const euro = state.euro;
-  if(state.seasonView === 'euro' && euro && euro.stage === 'league'){
-    const euroFx = euro.calendar[euro.currentRound].find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(euroFx) startLiveEuroMatchday(euroFx, euro.schedule.leaguePhase[euro.currentRound], euro.tier);
-  } else {
-    startLiveMatchday();
-  }
+  if(!euro || euro.stage !== 'league') return;
+  const euroFx = euro.calendar[euro.currentRound].find(fx => fx.home === state.club.id || fx.away === state.club.id);
+  if(euroFx) startLiveEuroMatchday(euroFx, euro.schedule.leaguePhase[euro.currentRound], euro.tier);
 });
 document.getElementById('btn-live-playpause').addEventListener('click', toggleLivePause);
 document.querySelectorAll('.live-speed-btn').forEach(btn=>{
