@@ -1233,6 +1233,7 @@ button{ font-family:inherit; cursor:pointer; }
 .st-badge-c3{ background:var(--zone-el); color:#fff; }
 .st-badge-c4{ background:var(--zone-ecl); color:#fff; }
 .st-badge-sc{ background:var(--zone-sc); color:#241a3d; }
+.st-badge-tc{ background:#A78BFA; color:#241a3d; }
 .st-num{ text-align:center; font-variant-numeric:tabular-nums; font-weight:600; }
 .st-pts{ font-family:var(--bn-bold); font-size:15px; color:var(--text); text-align:center; font-variant-numeric:tabular-nums; }
 
@@ -1982,6 +1983,41 @@ button{ font-family:inherit; cursor:pointer; }
   z-index:50;
 }
 .gm-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+#achv-popup-container{
+  position:fixed;
+  top:calc(var(--header-h) + 16px);
+  right:16px;
+  z-index:400;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:none;
+  width:min(560px, calc(100vw - 32px));
+}
+.achv-popup-toast{
+  opacity:0;
+  transform:translateX(24px);
+  transition:opacity .35s ease, transform .35s ease;
+  box-shadow:0 16px 36px -12px rgba(0,0,0,.7);
+  border-radius:var(--r-md);
+  overflow:hidden;
+}
+.achv-popup-toast.show{ opacity:1; transform:translateX(0); }
+.achv-popup-toast .achv-popup-label{
+  background:#0a0d13;
+  color:#f5d36b;
+  font-family:var(--sans);
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:6px 14px;
+  text-align:center;
+}
+.achv-popup-toast .achv-card{
+  box-shadow:none;
+  border-radius:0;
+}
 
 /* ============================= RESPONSIVE ============================= */
 
@@ -3120,6 +3156,7 @@ button{ font-family:inherit; cursor:pointer; }
   </div>
 
   <div class="gm-toast" id="toast"></div>
+  <div id="achv-popup-container"></div>
 
   <div class="pelouse-modal-overlay" id="pelouse-modal-overlay" style="display:none">
     <div class="pelouse-modal">
@@ -7561,6 +7598,13 @@ const DOMESTIC_SUPER_CUP_NAME = {
   'Serie A': 'Supercoppa Italiana',
   'La Liga': 'Supercopa de España'
 };
+const DOMESTIC_SUPER_CUP_BADGE = {
+  'Ligue 1': 'TC',
+  'Premier League': 'CS',
+  'Bundesliga': 'SU',
+  'Serie A': 'SI',
+  'La Liga': 'SE'
+};
 const DOMESTIC_SUPER_CUP_FORMAT = {
   'Ligue 1': 'duel',
   'Premier League': 'duel',
@@ -7595,7 +7639,7 @@ function resolveDomesticSuperCupForNewSeason(){
     let other = (cupWinner && cupWinner !== champion) ? cupWinner : runnerUp;
     if(!other || other === champion) return;
     const final = playDomesticSuperCupDuel(champion, other);
-    state.domesticSuperCup = { format, name, final, champion: final.winner };
+    state.domesticSuperCup = { format, name, badge: DOMESTIC_SUPER_CUP_BADGE[state.league] || 'TC', final, champion: final.winner };
   } else {
     // Final Four : champion, dauphin, vainqueur et finaliste de coupe - en
     // complétant avec les places suivantes du championnat en cas de
@@ -7613,7 +7657,7 @@ function resolveDomesticSuperCupForNewSeason(){
     const semi1 = playDomesticSuperCupDuel(a, d);
     const semi2 = playDomesticSuperCupDuel(b, c);
     const final = playDomesticSuperCupDuel(semi1.winner, semi2.winner);
-    state.domesticSuperCup = { format, name, semis:[semi1, semi2], final, champion: final.winner };
+    state.domesticSuperCup = { format, name, badge: DOMESTIC_SUPER_CUP_BADGE[state.league] || 'TC', semis:[semi1, semi2], final, champion: final.winner };
   }
 }
 
@@ -7998,7 +8042,7 @@ function renderLeaguePanels(){
   const rows = standingArr.map((s,i)=>`
     <div class="st-row ${(isOwnLeague && s.id===state.club.id)?'st-me':''} ${zoneMap[s.id]||''}">
       <div class="st-pos">${i+1}</div>
-      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
+      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${isOwnLeague && state.domesticSuperCup && state.domesticSuperCup.champion===s.id ? ` <span class="st-badge st-badge-tc" title="Vainqueur du ${state.domesticSuperCup.name}">${state.domesticSuperCup.badge}</span>` : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
       <div class="st-num">${s.d}</div>
@@ -8024,6 +8068,7 @@ function renderLeaguePanels(){
       <span class="st-legend-item"><span class="st-badge st-badge-c3">C3</span>Ligue Europa</span>
       <span class="st-legend-item"><span class="st-badge st-badge-c4">C4</span>Ligue Conférence</span>
       <span class="st-legend-item"><span class="st-badge st-badge-sc">SC</span>Supercoupe d'Europe</span>
+      ${isOwnLeague && state.domesticSuperCup ? `<span class="st-legend-item"><span class="st-badge st-badge-tc">${state.domesticSuperCup.badge}</span>${state.domesticSuperCup.name}</span>` : ''}
     </div>
   `;
 
@@ -9016,6 +9061,7 @@ let ACHIEVEMENT_TIERS = ['Apprenti','Confirmé','Expert','Élite','Légendaire']
 let ACHIEVEMENT_TIER_ASSETS = {};
 
 async function loadAchievementDefs(){
+  achievementDefsLoading = true;
   try {
     const res = await fetch('achievements.json');
     if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -9029,20 +9075,43 @@ async function loadAchievementDefs(){
     ACHIEVEMENT_DEFS = [];
     achievementLoadError = e.message || 'Erreur inconnue';
   }
+  achievementDefsLoading = false;
   renderAchievementsGrid();
 }
 let achievementLoadError = null;
+let achievementDefsLoading = true;
 
 function getAchievementDef(id){ return ACHIEVEMENT_DEFS.find(a=>a.id===id); }
 
 // Succès simples : un seul déblocage, tout ou rien.
+// Affiche un succès obtenu directement sur l'écran de jeu, avec la même
+// carte que sur la page dédiée (icône, dégradé du palier, condition) -
+// glisse depuis le coin supérieur droit et se referme seule après
+// quelques secondes. Plusieurs déblocages simultanés s'empilent.
+let achvPopupQueue = 0;
+function showAchievementPopup(id, label){
+  const def = getAchievementDef(id);
+  if(!def) return;
+  const container = document.getElementById('achv-popup-container');
+  if(!container) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'achv-popup-toast';
+  wrapper.innerHTML = `<div class="achv-popup-label">🏆 ${label}</div>${renderAchievementCardHTML(def)}`;
+  container.appendChild(wrapper);
+  requestAnimationFrame(()=> requestAnimationFrame(()=> wrapper.classList.add('show')));
+  setTimeout(()=>{
+    wrapper.classList.remove('show');
+    setTimeout(()=> wrapper.remove(), 400);
+  }, 5000);
+}
+
 function unlockAchievement(id){
   const def = getAchievementDef(id);
   if(!def || def.kind !== 'simple') return;
   const prog = state.achievementProgress[id];
   if(prog && prog.unlocked) return;
   state.achievementProgress[id] = { unlocked:true, unlockedAt: Date.now() };
-  toast(`🏆 Succès débloqué : ${def.name} (${def.grade})`);
+  showAchievementPopup(id, 'Succès débloqué');
   scheduleSaveSnapshot();
 }
 
@@ -9061,7 +9130,7 @@ function bumpTieredCounter(counterKey, delta){
     }
     if(newTier > (prog.tier||0)){
       state.achievementProgress[def.id] = { tier:newTier, unlockedAt: Date.now() };
-      toast(`🏆 ${def.name} : palier ${ACHIEVEMENT_TIERS[newTier-1]} atteint !`);
+      showAchievementPopup(def.id, `Palier ${ACHIEVEMENT_TIERS[newTier-1]} atteint`);
       scheduleSaveSnapshot();
       checkCoachTotalAndSpecialOne();
     }
@@ -9125,12 +9194,16 @@ function renderAchievementsGrid(){
   const grid = document.getElementById('achv-grid');
   if(!grid) return;
   if(!ACHIEVEMENT_DEFS.length){
-    document.getElementById('achv-count').textContent = '0';
-    document.getElementById('achv-total').textContent = '0';
-    grid.innerHTML = `<div class="achv-load-error">
-      ⚠️ Impossible de charger la liste des succès (achievements.json)${achievementLoadError ? ' — ' + achievementLoadError : ''}.<br>
-      Vérifiez que <code>achievements.json</code> et le dossier <code>assets/tiers/</code> sont bien déposés au même endroit qu'<code>index.html</code>.
-    </div>`;
+    document.getElementById('achv-count').textContent = '…';
+    document.getElementById('achv-total').textContent = '…';
+    if(achievementDefsLoading){
+      grid.innerHTML = `<div class="hand-empty">Chargement des succès…</div>`;
+    } else {
+      grid.innerHTML = `<div class="achv-load-error">
+        ⚠️ Impossible de charger la liste des succès (achievements.json)${achievementLoadError ? ' — ' + achievementLoadError : ''}.<br>
+        Vérifiez que <code>achievements.json</code> et le dossier <code>assets/tiers/</code> sont bien déposés au même endroit qu'<code>index.html</code>.
+      </div>`;
+    }
     return;
   }
   const unlockedCount = ACHIEVEMENT_DEFS.filter(a=>isAchievementMaxed(a) || state.achievementProgress[a.id]).length;
