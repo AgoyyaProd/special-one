@@ -8044,7 +8044,7 @@ function renderLeaguePanels(){
   const rows = standingArr.map((s,i)=>`
     <div class="st-row ${(isOwnLeague && s.id===state.club.id)?'st-me':''} ${zoneMap[s.id]||''}">
       <div class="st-pos">${i+1}</div>
-      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${isOwnLeague && state.domesticSuperCup && state.domesticSuperCup.champion===s.id ? ` <span class="st-badge st-badge-tc" title="Vainqueur du ${state.domesticSuperCup.name}">${state.domesticSuperCup.badge}</span>` : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
+      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${isOwnLeague && state.domesticSuperCup && state.domesticSuperCup.champion===s.id ? ` <span class="st-badge st-badge-tc" title="Vainqueur du ${state.domesticSuperCup.name}">${state.domesticSuperCup.badge || DOMESTIC_SUPER_CUP_BADGE[state.league] || 'TC'}</span>` : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
       <div class="st-num">${s.d}</div>
@@ -8070,7 +8070,7 @@ function renderLeaguePanels(){
       <span class="st-legend-item"><span class="st-badge st-badge-c3">C3</span>Ligue Europa</span>
       <span class="st-legend-item"><span class="st-badge st-badge-c4">C4</span>Ligue Conférence</span>
       <span class="st-legend-item"><span class="st-badge st-badge-sc">SC</span>Supercoupe d'Europe</span>
-      ${isOwnLeague && state.domesticSuperCup ? `<span class="st-legend-item"><span class="st-badge st-badge-tc">${state.domesticSuperCup.badge}</span>${state.domesticSuperCup.name}</span>` : ''}
+      ${isOwnLeague && state.domesticSuperCup ? `<span class="st-legend-item"><span class="st-badge st-badge-tc">${state.domesticSuperCup.badge || DOMESTIC_SUPER_CUP_BADGE[state.league] || 'TC'}</span>${state.domesticSuperCup.name}</span>` : ''}
     </div>
   `;
 
