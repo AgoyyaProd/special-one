@@ -1,0 +1,356 @@
+Club,Saison,Numero,Joueur,Nationalite,Postes,Note
+Manchester United,2004-2005,10,Ruud van Nistelrooy,Netherlands,BU,95
+Manchester United,2004-2005,11,Ryan Giggs,Wales,MG,92
+Manchester United,2004-2005,18,Paul Scholes,England,MC,92
+Manchester United,2004-2005,5,Rio Ferdinand,England,DC,92
+Manchester United,2004-2005,16,Roy Keane,Republic of Ireland,MC,91
+Manchester United,2004-2005,1,Tim Howard,United States,G,89
+Manchester United,2004-2005,7,C. Ronaldo,Portugal,MD,88
+Manchester United,2004-2005,8,Wayne Rooney,England,BU,87
+Manchester United,2004-2005,9,Louis Saha,France,BU,86
+Manchester United,2004-2005,27,Mikael Silvestre,France,DC,85
+Manchester United,2004-2005,22,John O'Shea,Republic of Ireland,DG|DC|DD,84
+Manchester United,2004-2005,13,Roy Carroll,Northern Ireland,G,84
+Manchester United,2004-2005,6,Wes Brown,England,DC,83
+Manchester United,2004-2005,15,Kleberson,Brazil,MC,83
+Manchester United,2004-2005,2,Gary Neville,England,DD,82
+Manchester United,2004-2005,4,Gabriel Heinze,Argentina,DG,82
+Manchester United,2004-2005,14,Alan Smith,England,BU,82
+Manchester United,2004-2005,3,Phil Neville,England,DG,80
+Manchester United,2004-2005,19,Eric Djemba-Djemba,Cameroon,MC,79
+Manchester United,2004-2005,25,Quinton Fortune,South Africa,MG,75
+Manchester United,2004-2005,24,Darren Fletcher,Scotland,MD|MDC,75
+Manchester United,2005-2006,8,Wayne Rooney,England,BU,93
+Manchester United,2005-2006,5,Rio Ferdinand,England,DC,91
+Manchester United,2005-2006,10,Ruud van Nistelrooy,Netherlands,BU,91
+Manchester United,2005-2006,7,C. Ronaldo,Portugal,MD,91
+Manchester United,2005-2006,18,Paul Scholes,England,MC,87
+Manchester United,2005-2006,19,Edwin Van der Sar,Netherlands,G,86
+Manchester United,2005-2006,20,Ole Gunnar Solskjaer,Norway,BU,85
+Manchester United,2005-2006,22,John O'Shea,Republic of Ireland,DG|DC|DD,84
+Manchester United,2005-2006,9,Louis Saha,France,BU,84
+Manchester United,2005-2006,27,Mikael Silvestre,France,DC,84
+Manchester United,2005-2006,4,Gabriel Heinze,Argentina,DG,84
+Manchester United,2005-2006,1,Tim Howard,United States,G,84
+Manchester United,2005-2006,16,Roy Keane,Republic of Ireland,MC,82
+Manchester United,2005-2006,11,Ryan Giggs,Wales,MG,82
+Manchester United,2005-2006,6,Wes Brown,England,DC,82
+Manchester United,2005-2006,13,Park Ji-Sung,Republic of Korea,MOC,82
+Manchester United,2005-2006,2,Gary Neville,England,DD,79
+Manchester United,2005-2006,14,Alan Smith,England,BU,78
+Manchester United,2005-2006,23,Kieran Richardson,England,MG,77
+Manchester United,2006-2007,8,Wayne Rooney,England,BU,92
+Manchester United,2006-2007,5,Rio Ferdinand,England,DC,87
+Manchester United,2006-2007,7,Cristiano Ronaldo,Portugal,MD|BU,87
+Manchester United,2006-2007,1,Edwin Van der Sar,Netherlands,G,87
+Manchester United,2006-2007,18,Paul Scholes,England,MC,86
+Manchester United,2006-2007,11,Ryan Giggs,Wales,MG,84
+Manchester United,2006-2007,4,Gabriel Heinze,Argentina,DG,84
+Manchester United,2006-2007,9,Louis Saha,France,BU,83
+Manchester United,2006-2007,27,Mikael Silvestre,France,DC,82
+Manchester United,2006-2007,16,Michael Carrick,England,MC,82
+Manchester United,2006-2007,2,Gary Neville,England,DD,81
+Manchester United,2006-2007,22,John O'Shea,Republic of Ireland,DG|DC|DD,80
+Manchester United,2006-2007,6,Wes Brown,England,DC,79
+Manchester United,2006-2007,14,Alan Smith,England,BU,79
+Manchester United,2006-2007,13,Park Ji-Sung,Republic of Korea,MOC,79
+Manchester United,2006-2007,15,Nemanja Vidic,Serbia,DC,79
+Manchester United,2006-2007,3,Patrice Evra,France,DG,78
+Manchester United,2007-2008,7,Cristiano Ronaldo,Portugal,MD|BU,91
+Manchester United,2007-2008,10,Wayne Rooney,England,BU,90
+Manchester United,2007-2008,5,Rio Ferdinand,England,DC,87
+Manchester United,2007-2008,32,Carlos Tevez,Argentina,BU,87
+Manchester United,2007-2008,11,Ryan Giggs,Wales,MG,86
+Manchester United,2007-2008,15,Nemanja Vidic,Serbia,DC,85
+Manchester United,2007-2008,18,Paul Scholes,England,MC,84
+Manchester United,2007-2008,1,Edwin van der Sar,Netherlands,G,84
+Manchester United,2007-2008,16,Michael Carrick,England,MC,83
+Manchester United,2007-2008,17,Nani,Cape Verde,MG,82
+Manchester United,2007-2008,8,Anderson,Brazil,MOC|MC,82
+Manchester United,2007-2008,9,Louis Saha,France,BU,81
+Manchester United,2007-2008,2,Gary Neville,England,DD,80
+Manchester United,2007-2008,4,Owen Hargreaves,England,MDC,80
+Manchester United,2007-2008,6,Wes Brown,England,DC,79
+Manchester United,2007-2008,3,Patrice Evra,France,DG,78
+Manchester United,2008-2009,7,Cristiano Ronaldo,Portugal,MD|BU,91
+Manchester United,2008-2009,5,Rio Ferdinand,England,DC,87
+Manchester United,2008-2009,10,Wayne Rooney,England,BU,87
+Manchester United,2008-2009,9,Dimitar Berbatov,Bulgaria,BU,86
+Manchester United,2008-2009,15,Nemanja Vidic,Serbia,DC,86
+Manchester United,2008-2009,18,Paul Scholes,England,MC,85
+Manchester United,2008-2009,1,Edwin van der Sar,Netherlands,G,85
+Manchester United,2008-2009,32,Carlos Tevez,Argentina,BU,85
+Manchester United,2008-2009,3,Patrice Evra,France,DG,84
+Manchester United,2008-2009,4,Owen Hargreaves,England,MDC,83
+Manchester United,2008-2009,16,Michael Carrick,England,MC,83
+Manchester United,2008-2009,11,Ryan Giggs,Wales,MG,82
+Manchester United,2008-2009,8,Anderson,Brazil,MOC|MC,82
+Manchester United,2008-2009,17,Nani,Portugal,MG,81
+Manchester United,2008-2009,6,Wes Brown,England,DC,80
+Manchester United,2008-2009,2,Gary Neville,England,DD,79
+Manchester United,2009-2010,15,Nemanja Vidic,Serbia,DC,88
+Manchester United,2009-2010,10,Wayne Rooney,England,BU,87
+Manchester United,2009-2010,5,Rio Ferdinand,England,DC,86
+Manchester United,2009-2010,9,Dimitar Berbatov,Bulgaria,BU,85
+Manchester United,2009-2010,18,Paul Scholes,England,MC,84
+Manchester United,2009-2010,16,Michael Carrick,England,MC,84
+Manchester United,2009-2010,3,Patrice Evra,France,DG,84
+Manchester United,2009-2010,11,Ryan Giggs,Wales,MG,83
+Manchester United,2009-2010,1,Edwin van der Sar,Netherlands,G,83
+Manchester United,2009-2010,4,Owen Hargreaves,England,MDC,82
+Manchester United,2009-2010,17,Nani,Portugal,MG,81
+Manchester United,2009-2010,25,Antonio Valencia,Ecuador,MD|DD,81
+Manchester United,2009-2010,22,John O'Shea,Republic of Ireland,DG|DC|DD,80
+Manchester United,2009-2010,13,Ji-Sung Park,Republic of Korea,MD,80
+Manchester United,2009-2010,8,Anderson,Brazil,MOC|MC,80
+Manchester United,2009-2010,7,Michael Owen,England,BU,79
+Manchester United,2010-2011,20,Javier Hernandez,Mexico,BU,78
+Manchester United,2010-2011,10,Wayne Rooney,England,BU,87
+Manchester United,2010-2011,5,Rio Ferdinand,England,DC,84
+Manchester United,2010-2011,15,Nemanja Vidic,Serbia,DC,88
+Manchester United,2010-2011,18,Paul Scholes,England,MC,83
+Manchester United,2010-2011,16,Michael Carrick,England,MC,82
+Manchester United,2010-2011,3,Patrice Evra,France,DG,84
+Manchester United,2010-2011,11,Ryan Giggs,Wales,MG,82
+Manchester United,2010-2011,1,Edwin van der Sar,Netherlands,G,84
+Manchester United,2010-2011,17,Nani,Portugal,MG,84
+Manchester United,2010-2011,25,Antonio Valencia,Ecuador,MD|DD,83
+Manchester United,2010-2011,22,John O'Shea,Republic of Ireland,DG|DC|DD,78
+Manchester United,2010-2011,13,Ji-Sung Park,Republic of Korea,MD,80
+Manchester United,2010-2011,8,Anderson,Brazil,MOC|MC,79
+Manchester United,2010-2011,6,Jonny Evans,Northern Ireland,DC,76
+Manchester United,2010-2011,21,Rafael,Brazil,DD,78
+Manchester United,2011-2012,10,Wayne Rooney,England,BU,88
+Manchester United,2011-2012,15,Nemanja Vidic,Serbia,DC,89
+Manchester United,2011-2012,5,Rio Ferdinand,England,DC,83
+Manchester United,2011-2012,16,Michael Carrick,England,MC,82
+Manchester United,2011-2012,3,Patrice Evra,France,DG,85
+Manchester United,2011-2012,11,Ryan Giggs,Wales,MG,81
+Manchester United,2011-2012,1,David De Gea,Spain,G,79
+Manchester United,2011-2012,17,Nani,Portugal,MG,86
+Manchester United,2011-2012,25,Antonio Valencia,Ecuador,MD|DD,82
+Manchester United,2011-2012,4,Phil Jones,England,DC,76
+Manchester United,2011-2012,6,Jonny Evans,Northern Ireland,DC,78
+Manchester United,2011-2012,21,Rafael,Brazil,DD,79
+Manchester United,2011-2012,8,Anderson,Brazil,MOC|MC,79
+Manchester United,2011-2012,20,Javier Hernandez,Mexico,BU,80
+Manchester United,2011-2012,14,Chris Smalling,England,DC,76
+Manchester United,2012-2013,10,Wayne Rooney,England,BU,87
+Manchester United,2012-2013,15,Nemanja Vidic,Serbia,DC,87
+Manchester United,2012-2013,16,Michael Carrick,England,MC,83
+Manchester United,2012-2013,3,Patrice Evra,France,DG,84
+Manchester United,2012-2013,1,David De Gea,Spain,G,81
+Manchester United,2012-2013,17,Nani,Portugal,MG,84
+Manchester United,2012-2013,25,Antonio Valencia,Ecuador,MD|DD,83
+Manchester United,2012-2013,21,Rafael,Brazil,DD,80
+Manchester United,2012-2013,8,Anderson,Brazil,MOC|MC,78
+Manchester United,2012-2013,20,Robin van Persie,Netherlands,BU,90
+Manchester United,2012-2013,14,Chris Smalling,England,DC,78
+Manchester United,2012-2013,4,Phil Jones,England,DC,79
+Manchester United,2012-2013,6,Jonny Evans,Northern Ireland,DC,80
+Manchester United,2012-2013,31,Nick Powell,England,MOC,71
+Manchester United,2012-2013,18,Ashley Young,England,MG|DD,82
+Manchester United,2012-2013,27,Alexander Buttner,Netherlands,DG,74
+Manchester United,2013-2014,10,Wayne Rooney,England,BU,88
+Manchester United,2013-2014,20,Robin van Persie,Netherlands,BU,89
+Manchester United,2013-2014,16,Michael Carrick,England,MC,83
+Manchester United,2013-2014,1,David De Gea,Spain,G,83
+Manchester United,2013-2014,17,Nani,Portugal,MG,82
+Manchester United,2013-2014,25,Antonio Valencia,Ecuador,MD|DD,82
+Manchester United,2013-2014,21,Rafael,Brazil,DD,80
+Manchester United,2013-2014,18,Ashley Young,England,MG|DD,80
+Manchester United,2013-2014,14,Chris Smalling,England,DC,79
+Manchester United,2013-2014,4,Phil Jones,England,DC,79
+Manchester United,2013-2014,6,Jonny Evans,Northern Ireland,DC,80
+Manchester United,2013-2014,3,Patrice Evra,France,DG,81
+Manchester United,2013-2014,27,Alexander Buttner,Netherlands,DG,74
+Manchester United,2013-2014,26,Wilfried Zaha,England,MG,74
+Manchester United,2013-2014,8,Juan Mata,Spain,MOC,86
+Manchester United,2013-2014,31,Marouane Fellaini,Belgium,MC,79
+Manchester United,2014-2015,10,Wayne Rooney,England,BU,87
+Manchester United,2014-2015,1,David De Gea,Spain,G,87
+Manchester United,2014-2015,20,Robin van Persie,Netherlands,BU,85
+Manchester United,2014-2015,8,Juan Mata,Spain,MOC,85
+Manchester United,2014-2015,6,Angel Di Maria,Argentina,MG,87
+Manchester United,2014-2015,17,Daley Blind,Netherlands,DG|DC,78
+Manchester United,2014-2015,4,Phil Jones,England,DC,79
+Manchester United,2014-2015,5,Marcos Rojo,Argentina,DC,79
+Manchester United,2014-2015,3,Luke Shaw,England,DG,76
+Manchester United,2014-2015,27,Marouane Fellaini,Belgium,MC,80
+Manchester United,2014-2015,21,Ander Herrera,Spain,MC,80
+Manchester United,2014-2015,25,Antonio Valencia,Ecuador,MD|DD,81
+Manchester United,2014-2015,18,Ashley Young,England,MG|DD,77
+Manchester United,2014-2015,24,Darren Fletcher,Scotland,MD|MDC,76
+Manchester United,2014-2015,31,Chris Smalling,England,DC,80
+Manchester United,2015-2016,1,David De Gea,Spain,G,90
+Manchester United,2015-2016,20,Anthony Martial,France,MG|BU,79
+Manchester United,2015-2016,6,Wayne Rooney,England,BU,85
+Manchester United,2015-2016,27,Marouane Fellaini,Belgium,MC,80
+Manchester United,2015-2016,17,Daley Blind,Netherlands,DG|DC,80
+Manchester United,2015-2016,21,Ander Herrera,Spain,MC,79
+Manchester United,2015-2016,3,Luke Shaw,England,DG,78
+Manchester United,2015-2016,4,Phil Jones,England,DC,78
+Manchester United,2015-2016,5,Marcos Rojo,Argentina,DC,78
+Manchester United,2015-2016,15,Bastian Schweinsteiger,Germany,MC,84
+Manchester United,2015-2016,31,Chris Smalling,England,DC,82
+Manchester United,2015-2016,25,Antonio Valencia,Ecuador,MD|DD,79
+Manchester United,2015-2016,19,Sergio Romero,Argentina,G,78
+Manchester United,2015-2016,8,Juan Mata,Spain,MOC,83
+Manchester United,2015-2016,7,Memphis Depay,Netherlands,MG,79
+Manchester United,2015-2016,30,Morgan Schneiderlin,France,MDC,79
+Manchester United,2016-2017,1,David De Gea,Spain,G,90
+Manchester United,2016-2017,9,Zlatan Ibrahimovic,Sweden,BU,89
+Manchester United,2016-2017,20,Anthony Martial,France,MG|BU,82
+Manchester United,2016-2017,6,Paul Pogba,France,MC,88
+Manchester United,2016-2017,27,Marouane Fellaini,Belgium,MC,80
+Manchester United,2016-2017,17,Daley Blind,Netherlands,DG|DC,80
+Manchester United,2016-2017,21,Ander Herrera,Spain,MC,80
+Manchester United,2016-2017,23,Luke Shaw,England,DG,78
+Manchester United,2016-2017,4,Phil Jones,England,DC,79
+Manchester United,2016-2017,5,Marcos Rojo,Argentina,DC,78
+Manchester United,2016-2017,31,Chris Smalling,England,DC,82
+Manchester United,2016-2017,25,Antonio Valencia,Ecuador,MD|DD,79
+Manchester United,2016-2017,19,Sergio Romero,Argentina,G,78
+Manchester United,2016-2017,8,Juan Mata,Spain,MOC,83
+Manchester United,2016-2017,11,Henrikh Mkhitaryan,Armenia,MG,84
+Manchester United,2017-2018,1,David De Gea,Spain,G,91
+Manchester United,2017-2018,9,Romelu Lukaku,Belgium,BU,84
+Manchester United,2017-2018,6,Paul Pogba,France,MC,87
+Manchester United,2017-2018,19,Alexis Sanchez,Chile,MG,88
+Manchester United,2017-2018,27,Marouane Fellaini,Belgium,MC,80
+Manchester United,2017-2018,17,Daley Blind,Netherlands,DG|DC,78
+Manchester United,2017-2018,23,Luke Shaw,England,DG,76
+Manchester United,2017-2018,4,Phil Jones,England,DC,80
+Manchester United,2017-2018,5,Marcos Rojo,Argentina,DC,76
+Manchester United,2017-2018,12,Chris Smalling,England,DC,81
+Manchester United,2017-2018,25,Antonio Valencia,Ecuador,MD|DD,80
+Manchester United,2017-2018,3,Eric Bailly,Ivory Coast,DC,81
+Manchester United,2017-2018,22,Henrikh Mkhitaryan,Armenia,MG,82
+Manchester United,2017-2018,15,Andreas Pereira,Brazil,MC,74
+Manchester United,2017-2018,21,Ander Herrera,Spain,MC,80
+Manchester United,2017-2018,2,Victor Lindelof,Sweden,DC,78
+Manchester United,2018-2019,1,David De Gea,Spain,G,90
+Manchester United,2018-2019,9,Romelu Lukaku,Belgium,BU,82
+Manchester United,2018-2019,6,Paul Pogba,France,MC,87
+Manchester United,2018-2019,7,Alexis Sanchez,Chile,MG,85
+Manchester United,2018-2019,27,Marouane Fellaini,Belgium,MC,79
+Manchester United,2018-2019,23,Luke Shaw,England,DG,77
+Manchester United,2018-2019,4,Phil Jones,England,DC,79
+Manchester United,2018-2019,12,Chris Smalling,England,DC,80
+Manchester United,2018-2019,25,Antonio Valencia,Ecuador,MD|DD,79
+Manchester United,2018-2019,3,Eric Bailly,Ivory Coast,DC,80
+Manchester United,2018-2019,21,Ander Herrera,Spain,MC,79
+Manchester United,2018-2019,2,Victor Lindelof,Sweden,DC,79
+Manchester United,2018-2019,18,Ashley Young,England,MG|DD,80
+Manchester United,2018-2019,20,Diogo Dalot,Portugal,DD,71
+Manchester United,2018-2019,22,Fred,Brazil,MDC,79
+Manchester United,2018-2019,10,Marcus Rashford,England,BU|MG,78
+Manchester United,2019-2020,1,David De Gea,Spain,G,88
+Manchester United,2019-2020,10,Marcus Rashford,England,BU|MG,81
+Manchester United,2019-2020,6,Paul Pogba,France,MC,87
+Manchester United,2019-2020,18,Bruno Fernandes,Portugal,MOC,84
+Manchester United,2019-2020,25,Odion Ighalo,Nigeria,BU,74
+Manchester United,2019-2020,23,Luke Shaw,England,DG,78
+Manchester United,2019-2020,4,Phil Jones,England,DC,76
+Manchester United,2019-2020,12,Chris Smalling,England,DC,78
+Manchester United,2019-2020,21,Daniel James,Wales,MD,76
+Manchester United,2019-2020,3,Eric Bailly,Ivory Coast,DC,79
+Manchester United,2019-2020,2,Victor Lindelof,Sweden,DC,81
+Manchester United,2019-2020,20,Diogo Dalot,Portugal,DD,75
+Manchester United,2019-2020,22,Fred,Brazil,MDC,79
+Manchester United,2019-2020,39,Scott McTominay,Scotland,MC,77
+Manchester United,2019-2020,29,Aaron Wan-Bissaka,England,DD,79
+Manchester United,2020-2021,1,David De Gea,Spain,G,87
+Manchester United,2020-2021,10,Marcus Rashford,England,BU|MG,84
+Manchester United,2020-2021,6,Paul Pogba,France,MC,87
+Manchester United,2020-2021,18,Bruno Fernandes,Portugal,MOC,87
+Manchester United,2020-2021,9,Edinson Cavani,Uruguay,BU,85
+Manchester United,2020-2021,23,Luke Shaw,England,DG,82
+Manchester United,2020-2021,19,Harry Maguire,England,DC,84
+Manchester United,2020-2021,21,Daniel James,Wales,MD,76
+Manchester United,2020-2021,2,Victor Lindelof,Sweden,DC,81
+Manchester United,2020-2021,20,Diogo Dalot,Portugal,DD,76
+Manchester United,2020-2021,39,Scott McTominay,Scotland,MC,79
+Manchester United,2020-2021,29,Aaron Wan-Bissaka,England,DD,81
+Manchester United,2020-2021,17,Fred,Brazil,MDC,79
+Manchester United,2020-2021,27,Alex Telles,Brazil,DG,80
+Manchester United,2020-2021,15,Eric Bailly,Ivory Coast,DC,79
+Manchester United,2020-2021,11,Mason Greenwood,England,BU,80
+Manchester United,2021-2022,1,David De Gea,Spain,G,84
+Manchester United,2021-2022,7,Cristiano Ronaldo,Portugal,MD|BU,91
+Manchester United,2021-2022,6,Paul Pogba,France,MC,85
+Manchester United,2021-2022,18,Bruno Fernandes,Portugal,MOC,88
+Manchester United,2021-2022,23,Luke Shaw,England,DG,82
+Manchester United,2021-2022,19,Harry Maguire,England,DC,83
+Manchester United,2021-2022,2,Victor Lindelof,Sweden,DC,80
+Manchester United,2021-2022,39,Scott McTominay,Scotland,MC,79
+Manchester United,2021-2022,29,Aaron Wan-Bissaka,England,DD,81
+Manchester United,2021-2022,17,Fred,Brazil,MDC,79
+Manchester United,2021-2022,27,Alex Telles,Brazil,DG,79
+Manchester United,2021-2022,11,Mason Greenwood,England,BU,82
+Manchester United,2021-2022,10,Marcus Rashford,England,BU|MG,83
+Manchester United,2021-2022,21,Jadon Sancho,England,MD,84
+Manchester United,2021-2022,9,Edinson Cavani,Uruguay,BU,84
+Manchester United,2021-2022,44,Raphael Varane,France,DC,86
+Manchester United,2022-2023,1,David De Gea,Spain,G,84
+Manchester United,2022-2023,18,Casemiro,Brazil,MDC,89
+Manchester United,2022-2023,6,Lisandro Martinez,Argentina,DC,82
+Manchester United,2022-2023,8,Bruno Fernandes,Portugal,MOC,87
+Manchester United,2022-2023,23,Luke Shaw,England,DG,83
+Manchester United,2022-2023,19,Raphael Varane,France,DC,85
+Manchester United,2022-2023,39,Scott McTominay,Scotland,MC,79
+Manchester United,2022-2023,29,Aaron Wan-Bissaka,England,DD,79
+Manchester United,2022-2023,17,Fred,Brazil,MDC,79
+Manchester United,2022-2023,10,Marcus Rashford,England,BU|MG,85
+Manchester United,2022-2023,25,Jadon Sancho,England,MD,80
+Manchester United,2022-2023,9,Anthony Martial,France,MG|BU,78
+Manchester United,2022-2023,21,Antony,Brazil,MD,81
+Manchester United,2022-2023,2,Victor Lindelof,Sweden,DC,79
+Manchester United,2022-2023,27,Christian Eriksen,Denmark,MC,84
+Manchester United,2022-2023,37,Marcel Sabitzer,Austria,MC,82
+Manchester United,2023-2024,1,Andre Onana,Cameroon,G,83
+Manchester United,2023-2024,18,Casemiro,Brazil,MDC,87
+Manchester United,2023-2024,6,Lisandro Martinez,Argentina,DC,82
+Manchester United,2023-2024,8,Bruno Fernandes,Portugal,MOC,87
+Manchester United,2023-2024,23,Luke Shaw,England,DG,83
+Manchester United,2023-2024,19,Raphael Varane,France,DC,83
+Manchester United,2023-2024,39,Scott McTominay,Scotland,MC,78
+Manchester United,2023-2024,29,Aaron Wan-Bissaka,England,DD,78
+Manchester United,2023-2024,10,Marcus Rashford,England,BU|MG,84
+Manchester United,2023-2024,25,Jadon Sancho,England,MD,78
+Manchester United,2023-2024,9,Rasmus Hojlund,Denmark,BU,76
+Manchester United,2023-2024,21,Antony,Brazil,MD,79
+Manchester United,2023-2024,2,Victor Lindelof,Sweden,DC,78
+Manchester United,2023-2024,4,Sofyan Amrabat,Morocco,MDC,79
+Manchester United,2023-2024,15,Sergio Reguilon,Spain,DG,76
+Manchester United,2024-2025,1,Andre Onana,Cameroon,G,82
+Manchester United,2024-2025,8,Bruno Fernandes,Portugal,MOC,87
+Manchester United,2024-2025,6,Lisandro Martinez,Argentina,DC,82
+Manchester United,2024-2025,19,Raphael Varane,France,DC,81
+Manchester United,2024-2025,23,Luke Shaw,England,DG,82
+Manchester United,2024-2025,10,Rasmus Hojlund,Denmark,BU,78
+Manchester United,2024-2025,21,Alejandro Garnacho,Argentina,MG,79
+Manchester United,2024-2025,9,Joshua Zirkzee,Netherlands,BU,77
+Manchester United,2024-2025,14,Christian Eriksen,Denmark,MC,82
+Manchester United,2024-2025,39,Scott McTominay,Scotland,MC,76
+Manchester United,2024-2025,5,Noussair Mazraoui,Morocco,DD,78
+Manchester United,2024-2025,25,Manuel Ugarte,Uruguay,MDC,79
+Manchester United,2024-2025,2,Victor Lindelof,Sweden,DC,77
+Manchester United,2024-2025,44,Kobbie Mainoo,England,MC,76
+Manchester United,2024-2025,34,Leny Yoro,France,DC,74
+Manchester United,2024-2025,7,Mason Mount,England,MOC,78
+Manchester United,2025-2026,1,Andre Onana,Cameroon,G,81
+Manchester United,2025-2026,8,Bruno Fernandes,Portugal,MOC,88
+Manchester United,2025-2026,6,Lisandro Martinez,Argentina,DC,81
+Manchester United,2025-2026,5,Matthijs de Ligt,Netherlands,DC,82
+Manchester United,2025-2026,23,Luke Shaw,England,DG,80
+Manchester United,2025-2026,15,Benjamin Sesko,Slovenia,BU,79
+Manchester United,2025-2026,10,Bryan Mbeumo,Cameroon,MD,83
+Manchester United,2025-2026,50,Matheus Cunha,Brazil,BU,82
+Manchester United,2025-2026,21,Alejandro Garnacho,Argentina,MG,79
+Manchester United,2025-2026,25,Manuel Ugarte,Uruguay,MDC,79
+Manchester United,2025-2026,4,Leny Yoro,France,DC,76
+Manchester United,2025-2026,44,Kobbie Mainoo,England,MC,78
+Manchester United,2025-2026,2,Noussair Mazraoui,Morocco,DD,78
+Manchester United,2025-2026,27,Diogo Dalot,Portugal,DD,79
+Manchester United,2025-2026,7,Mason Mount,England,MOC,76
