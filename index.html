@@ -3522,15 +3522,16 @@ function fitPosition(cardEl){
   if(!posEl || !spans.length) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
   const refSize = 100 * (cardWidth / PC_FIGMA_WIDTH);
-  // 2 lignes doivent tenir dans la même hauteur de boîte qu'une seule avant -
-  // on part donc d'une taille de base plus petite avant même de tester la
-  // largeur, sinon les 2 lignes débordent verticalement de la carte.
-  const baseSize = spans.length > 1 ? refSize * 0.6 : refSize;
-  posEl.style.fontSize = baseSize + 'px';
+  // La boîte va jusqu'en bas de la carte (top:77.68% -> bottom:0) : elle a
+  // largement la hauteur pour 2 lignes, même à la même taille qu'une seule.
+  // On part donc toujours de la même référence que le cas 1 ligne - seule
+  // la largeur (la ligne la plus longue des 1 ou 2) doit éventuellement
+  // forcer une réduction, jamais le nombre de lignes en lui-même.
+  posEl.style.fontSize = refSize + 'px';
   const boxWidth = posEl.getBoundingClientRect().width;
   const widestSpanWidth = spans.reduce((max,s)=>Math.max(max, s.getBoundingClientRect().width), 0);
   if(boxWidth > 0 && widestSpanWidth > boxWidth){
-    posEl.style.fontSize = (baseSize * (boxWidth / widestSpanWidth) * 0.97) + 'px';
+    posEl.style.fontSize = (refSize * (boxWidth / widestSpanWidth) * 0.97) + 'px';
   }
 }
 
@@ -5147,33 +5148,9 @@ function initStandings(clubs){
 
 // Simule les 4 autres championnats EN PARALLÈLE de la saison du joueur,
 // journée par journée, plutôt qu'une saison entière jouée d'un coup au
-// moment où on consulte l'onglet.
-// Coupe nationale légère pour un championnat non joué (juste de quoi
-// avoir un vainqueur et un finaliste pour alimenter son trophée
-// d'ouverture de la saison suivante) - résolue instantanément, sans
-// journées ni affichage, contrairement à votre propre coupe.
-function simulateQuickCupWinner(clubIds, strengths){
-  let remaining = shuffleArr(clubIds.slice());
-  let size = 1;
-  while(size*2 <= remaining.length) size *= 2;
-  remaining = remaining.slice(0, size);
-  if(remaining.length < 2) return { champion: remaining[0]||null, finalist:null };
-  let finalist = null;
-  while(remaining.length > 1){
-    const pairs = pairUp(remaining);
-    const winners = pairs.map(p=>{
-      const sa = strengths[p.home], sb = strengths[p.away];
-      let hg = simulateGoals(sa, sb, true), ag = simulateGoals(sb, sa, false);
-      if(hg === ag){ if(Math.random() < sa/(sa+sb)) hg++; else ag++; }
-      return hg > ag ? p.home : p.away;
-    });
-    if(remaining.length === 2){
-      finalist = winners[0] === pairs[0].home ? pairs[0].away : pairs[0].home;
-    }
-    remaining = winners;
-  }
-  return { champion: remaining[0], finalist };
-}
+// moment où on consulte l'onglet. Idem pour leur coupe nationale (voir
+// tickOtherLeagues), simulée au même rythme que la vôtre plutôt
+// qu'instantanément.
 
 function initOtherLeagues(){
   state.otherLeagues = {};
@@ -5182,11 +5159,18 @@ function initOtherLeagues(){
     const clubs = LEAGUES[leagueName];
     const strengths = {};
     clubs.forEach(c=>{ strengths[c.id] = estimateClubStrength(c); });
+    const calendar = buildCalendar(shuffleArr(clubs).map(c=>c.id));
     state.otherLeagues[leagueName] = {
+      clubsById: Object.fromEntries(clubs.map(c=>[c.id, c])),
       strengths,
-      calendar: buildCalendar(shuffleArr(clubs).map(c=>c.id)),
+      calendar,
       currentRound: 0,
-      standings: initStandings(clubs)
+      standings: initStandings(clubs),
+      resultsByRound: [],
+      // Vraie coupe nationale simulée journée par journée en arrière-plan,
+      // au même format que la vôtre (16 clubs, mêmes journées relatives) -
+      // plus une simulation instantanée déconnectée du calendrier.
+      cup: initCup(clubs, calendar.length)
     };
   });
 }
@@ -5195,16 +5179,21 @@ function initOtherLeagues(){
 // saison que celle atteinte par le joueur - les championnats n'ont pas
 // forcément le même nombre de journées (34 pour 18 clubs, 38 pour 20),
 // donc on se cale sur une progression relative plutôt qu'un round exact.
+// Fait aussi progresser leur coupe nationale aux mêmes journées relatives
+// que la vôtre, et conserve chaque journée jouée (résultats détaillés,
+// pas seulement le classement agrégé) pour un affichage type "Résultats".
 function tickOtherLeagues(){
   if(!state.otherLeagues || !state.season) return;
   const myFraction = state.season.currentRound / state.season.calendar.length;
   Object.values(state.otherLeagues).forEach(lg=>{
     const targetRound = Math.min(lg.calendar.length, Math.round(myFraction * lg.calendar.length));
     while(lg.currentRound < targetRound){
-      const round = lg.calendar[lg.currentRound];
+      const roundIdx = lg.currentRound;
+      const round = lg.calendar[roundIdx];
       round.forEach(fx=>{
         const hg = simulateGoals(lg.strengths[fx.home], lg.strengths[fx.away], true);
         const ag = simulateGoals(lg.strengths[fx.away], lg.strengths[fx.home], false);
+        fx.played = true; fx.hg = hg; fx.ag = ag;
         const home = lg.standings[fx.home];
         const away = lg.standings[fx.away];
         home.p++; away.p++;
@@ -5214,7 +5203,16 @@ function tickOtherLeagues(){
         else if(hg < ag){ away.w++; away.pts += 3; home.l++; }
         else { home.d++; away.d++; home.pts++; away.pts++; }
       });
+      lg.resultsByRound.push(round);
       lg.currentRound++;
+
+      if(lg.cup){
+        const md = lg.cup.matchdayFor;
+        if(lg.cup.stage==='r16' && md.r16===roundIdx) simulateCupStageFor(lg.cup, lg.strengths);
+        if(lg.cup.stage==='qf' && md.qf===roundIdx) simulateCupStageFor(lg.cup, lg.strengths);
+        if(lg.cup.stage==='sf' && md.sf===roundIdx) simulateCupStageFor(lg.cup, lg.strengths);
+        if(lg.cup.stage==='final' && md.final===roundIdx) simulateCupStageFor(lg.cup, lg.strengths);
+      }
     }
   });
 }
@@ -5225,6 +5223,28 @@ function getOtherLeagueStandings(leagueName){
   return Object.values(lg.standings).sort((a,b)=>
     b.pts - a.pts || (b.gf-b.ga) - (a.gf-a.ga) || b.gf - a.gf
   );
+}
+
+// Récupère, pour un championnat non joué donné, tous les matchs européens
+// (votre propre coupe d'Europe ET les 2 compétitions "fantômes") qui
+// impliquent au moins un club de ce championnat - pour les faire figurer
+// dans son onglet Résultats au même titre que ses matchs de championnat et
+// de coupe nationale.
+function euroEntriesForLeague(leagueName){
+  const clubIds = new Set((LEAGUES[leagueName]||[]).map(c=>c.id));
+  const entries = [];
+  function collect(euro){
+    if(!euro) return;
+    euro.resultsByRound.forEach(er=>{
+      const matches = er.matches.filter(m => clubIds.has(m.home) || clubIds.has(m.away));
+      if(matches.length){
+        entries.push({ type:`euro-${euro.tier}`, roundIdx:er.roundIdx, label:`${EURO_LABELS[euro.tier]} - ${er.label}`, matches });
+      }
+    });
+  }
+  collect(state.euro);
+  if(state.shadowEuro) Object.values(state.shadowEuro).forEach(collect);
+  return entries;
 }
 
 function shuffleArr(arr){
@@ -5244,9 +5264,17 @@ function pairUp(clubIds){
   return pairs;
 }
 
-function initCup(league, totalRounds){
-  const others = league.filter(c=>c.id !== state.club.id).map(c=>c.id);
-  const clubs16 = shuffleArr([state.club.id, ...shuffleArr(others).slice(0,15)]);
+function initCup(league, totalRounds, forcedClubId){
+  // Sans forcedClubId (championnats non joués en direct), on pioche 16
+  // clubs au hasard dans le championnat plutôt que d'y forcer le club du
+  // joueur - il n'y en a pas.
+  let clubs16;
+  if(forcedClubId){
+    const others = league.filter(c=>c.id !== forcedClubId).map(c=>c.id);
+    clubs16 = shuffleArr([forcedClubId, ...shuffleArr(others).slice(0,15)]);
+  } else {
+    clubs16 = shuffleArr(league.map(c=>c.id)).slice(0,16);
+  }
 
   // 1er tour (huitièmes) entre la 23e et la 24e journée - en attendant
   // d'avoir davantage de tours à placer plus tôt dans la saison.
@@ -5265,12 +5293,17 @@ function initCup(league, totalRounds){
   };
 }
 
-function simulateCupStage(stageKey){
-  const cup = state.season.cup;
+// Généralisée pour marcher aussi bien pour votre propre coupe (avec suivi
+// des succès et fil d'événements détaillé pour vos matchs) que pour la
+// coupe "de fond" d'un championnat non joué (mêmes règles/format, juste
+// sans club du joueur dedans). `strengths` fournit la force de chaque
+// club hors de votre propre équipe (déjà gérée via myTeamStrength).
+function simulateCupStageFor(cup, strengths){
+  const stageKey = cup.stage;
   const fixtures = cup.bracket[stageKey];
   fixtures.forEach(fx=>{
-    const homeStr = fx.home === state.club.id ? myTeamStrength('league') : estimateClubStrength(state.season.clubsById[fx.home]);
-    const awayStr = fx.away === state.club.id ? myTeamStrength('league') : estimateClubStrength(state.season.clubsById[fx.away]);
+    const homeStr = fx.home === state.club.id ? myTeamStrength('league') : strengths[fx.home];
+    const awayStr = fx.away === state.club.id ? myTeamStrength('league') : strengths[fx.away];
     let hg = simulateGoals(homeStr, awayStr, true);
     let ag = simulateGoals(awayStr, homeStr, false);
     if(hg === ag){
@@ -5337,7 +5370,7 @@ function enterSeason(){
     currentRound: 0,
     standings: initStandings(league),
     resultsByRound: [],
-    cup: initCup(league, calendar.length)
+    cup: initCup(league, calendar.length, state.club.id)
   };
   state.euro = null;
   state.standingsLeagueView = state.league;
@@ -5393,10 +5426,10 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
   const cup = season.cup;
   if(cup){
     const md = cup.matchdayFor;
-    if(cup.stage==='r16' && md.r16===roundIdx) simulateCupStage('r16');
-    if(cup.stage==='qf' && md.qf===roundIdx) simulateCupStage('qf');
-    if(cup.stage==='sf' && md.sf===roundIdx) simulateCupStage('sf');
-    if(cup.stage==='final' && md.final===roundIdx) simulateCupStage('final');
+    if(cup.stage==='r16' && md.r16===roundIdx) simulateCupStageFor(cup, season.strengths);
+    if(cup.stage==='qf' && md.qf===roundIdx) simulateCupStageFor(cup, season.strengths);
+    if(cup.stage==='sf' && md.sf===roundIdx) simulateCupStageFor(cup, season.strengths);
+    if(cup.stage==='final' && md.final===roundIdx) simulateCupStageFor(cup, season.strengths);
   }
 
   if(!skipEuroTick) tickEuroForRound(roundIdx, skipPlayedEuroTick);
@@ -5405,16 +5438,20 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
     state.prevSeasonStanding = sortedStandings();
     state.prevSeasonCupWinner = season.cup ? season.cup.champion : null;
     state.prevSeasonCupFinalist = season.cup ? season.cup.finalist : null;
-    // Les championnats non joués n'ont pas de vraie coupe nationale
-    // simulée au fil de la saison (juste un classement en arrière-plan) -
-    // on leur simule une coupe légère ici, uniquement pour alimenter leur
-    // propre trophée d'ouverture de la saison suivante.
+    // Les championnats non joués ont désormais leur propre coupe nationale
+    // simulée journée par journée tout au long de la saison (voir
+    // tickOtherLeagues/initOtherLeagues) - on récupère simplement son
+    // vainqueur réel ici, plus besoin d'une simulation instantanée
+    // déconnectée du calendrier.
     state.prevOtherLeaguesData = {};
     if(state.otherLeagues){
       Object.entries(state.otherLeagues).forEach(([leagueName, lg])=>{
         const standing = Object.values(lg.standings).slice().sort((a,b)=> b.pts-a.pts || (b.gf-b.ga)-(a.gf-a.ga));
-        const cupResult = simulateQuickCupWinner(Object.keys(lg.standings), lg.strengths);
-        state.prevOtherLeaguesData[leagueName] = { standing, cupWinner: cupResult.champion, cupFinalist: cupResult.finalist };
+        state.prevOtherLeaguesData[leagueName] = {
+          standing,
+          cupWinner: lg.cup ? lg.cup.champion : null,
+          cupFinalist: lg.cup ? lg.cup.finalist : null
+        };
       });
     }
     // Le championnat vient de se terminer : votre coupe d'Europe (si elle
@@ -8378,6 +8415,9 @@ function renderLeaguePanels(){
   const viewLeague = state.standingsLeagueView || state.league;
   const isOwnLeague = viewLeague === state.league;
   const viewedSuperCup = isOwnLeague ? state.domesticSuperCup : (state.otherDomesticSuperCups && state.otherDomesticSuperCups[viewLeague]);
+  const viewedCupChampion = isOwnLeague
+    ? (season.cup ? season.cup.champion : null)
+    : (state.otherLeagues && state.otherLeagues[viewLeague] && state.otherLeagues[viewLeague].cup ? state.otherLeagues[viewLeague].cup.champion : null);
 
   renderLeagueSwitchRow();
   document.getElementById('supercup-banner').style.display = 'none';
@@ -8402,7 +8442,7 @@ function renderLeaguePanels(){
   const rows = standingArr.map((s,i)=>`
     <div class="st-row ${(isOwnLeague && s.id===state.club.id)?'st-me':''} ${zoneMap[s.id]||''}">
       <div class="st-pos">${i+1}</div>
-      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${isOwnLeague && season.cup && season.cup.champion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${viewedSuperCup && viewedSuperCup.champion===s.id ? ` <span class="st-badge st-badge-tc" title="Vainqueur du ${viewedSuperCup.name}">${viewedSuperCup.badge || DOMESTIC_SUPER_CUP_BADGE[viewLeague] || 'TC'}</span>` : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
+      <div class="st-name">${s.name}${i===0 && (isOwnLeague ? seasonDone : true) ? ' <span class="st-badge st-badge-champ" title="Champion">C</span>' : ''}${viewedCupChampion===s.id ? ' <span class="st-badge st-badge-cup" title="Vainqueur de la Coupe Nationale">CN</span>' : ''}${viewedSuperCup && viewedSuperCup.champion===s.id ? ` <span class="st-badge st-badge-tc" title="Vainqueur du ${viewedSuperCup.name}">${viewedSuperCup.badge || DOMESTIC_SUPER_CUP_BADGE[viewLeague] || 'TC'}</span>` : ''}${euroTrophyBadgesHtml(s.id, euroFullyDone)}</div>
       <div class="st-num">${s.p}</div>
       <div class="st-num">${s.w}</div>
       <div class="st-num">${s.d}</div>
@@ -8434,7 +8474,66 @@ function renderLeaguePanels(){
 
   const resultsEl = document.getElementById('results-list');
   if(!isOwnLeague){
-    resultsEl.innerHTML = `<div class="hand-empty">${viewLeague} est simulé automatiquement par l'IA - voici son classement final, sans détail match par match.</div>`;
+    const lg = state.otherLeagues && state.otherLeagues[viewLeague];
+    if(!lg){
+      resultsEl.innerHTML = `<div class="hand-empty">${viewLeague} n'est pas encore initialisé.</div>`;
+      return;
+    }
+    const timeline = [];
+    lg.resultsByRound.forEach((round, ri)=>{
+      timeline.push({ type:'league', roundIdx:ri, label:`Journée ${ri+1}`, matches:round });
+    });
+    // Journées pas encore jouées : le calendrier complet est déjà connu
+    // (aller-retour), donc affichable dès le début, comme pour votre ligue.
+    for(let ri=lg.currentRound; ri<lg.calendar.length; ri++){
+      timeline.push({ type:'league', roundIdx:ri, label:`Journée ${ri+1}`, matches:lg.calendar[ri], upcoming:true });
+    }
+    if(lg.cup){
+      lg.cup.results.forEach(cr=>{
+        timeline.push({ type:'cup', roundIdx:cr.roundIdx, label:CUP_STAGE_LABEL[cr.stage], matches:cr.fixtures });
+      });
+      const r16Played = lg.cup.results.some(cr=>cr.stage==='r16');
+      if(!r16Played){
+        timeline.push({ type:'cup', roundIdx:lg.cup.matchdayFor.r16, label:CUP_STAGE_LABEL.r16, matches:lg.cup.bracket.r16, upcoming:true });
+      }
+    }
+    euroEntriesForLeague(viewLeague).forEach(e=>timeline.push(e));
+    if(viewedSuperCup){
+      const sc = viewedSuperCup;
+      if(sc.format === 'duel'){
+        timeline.push({ type:'supercup', roundIdx:-1, label:sc.name, matches:[sc.final] });
+      } else {
+        timeline.push({ type:'supercup', roundIdx:-1, label:`${sc.name} - Demi-finales`, matches:sc.semis });
+        timeline.push({ type:'supercup', roundIdx:-0.5, label:`${sc.name} - Finale`, matches:[sc.final] });
+      }
+    }
+    timeline.sort((a,b)=>a.roundIdx - b.roundIdx);
+
+    function resolveOtherClub(id){
+      if(lg.clubsById[id]) return lg.clubsById[id];
+      if(state.euro && state.euro.clubsById[id]) return state.euro.clubsById[id];
+      if(state.shadowEuro){
+        for(const e of Object.values(state.shadowEuro)){
+          if(e.clubsById[id]) return e.clubsById[id];
+        }
+      }
+      return { name:id };
+    }
+
+    if(!timeline.length){
+      resultsEl.innerHTML = `<div class="hand-empty">Aucun match joué pour le moment.</div>`;
+    } else {
+      const renderEntry = entry => `
+        <div class="rd-heading ${entry.type==='cup'?'rd-cup':''} ${entry.type==='supercup'?'rd-supercup':''} ${entry.type.startsWith('euro-')?entry.type+'-text':''}" data-upcoming="${entry.upcoming ? '1' : '0'}">${entry.label}${entry.upcoming ? ' <span class="rd-upcoming-tag">à venir</span>' : ''}</div>
+        ${entry.matches.map(fx=>{
+          const home = resolveOtherClub(fx.home);
+          const away = resolveOtherClub(fx.away);
+          const extraClasses = `${entry.type==='cup'?'fx-cup':''} ${entry.type==='supercup'?'fx-supercup':''} ${entry.type.startsWith('euro-')?entry.type:''}`;
+          return renderFixtureBlock(fx, home.name, away.name, extraClasses, home, away);
+        }).join('')}
+      `;
+      resultsEl.innerHTML = timeline.map(renderEntry).join('');
+    }
     return;
   }
 
