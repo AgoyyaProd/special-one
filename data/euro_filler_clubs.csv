@@ -1,88 +1,99 @@
 Id,Nom,Force
-eu_benfica,Benfica,86
-eu_porto,FC Porto,85
-eu_sporting,Sporting CP,85
-eu_ajax,Ajax,83
+eu_ajax,Ajax,82
 eu_psv,PSV Eindhoven,83
-eu_brugge,Club Brugge,82
-eu_galatasaray,Galatasaray,83
-eu_fenerbahce,Fenerbahçe,81
-eu_celtic,Celtic,81
-eu_rangers,Rangers,78
-eu_shakhtar,Shakhtar Donetsk,80
-eu_dinamozagreb,Dinamo Zagreb,78
-eu_redstar,Étoile Rouge Belgrade,77
-eu_salzburg,RB Salzbourg,81
-eu_olympiacos,Olympiacos,79
-eu_paok,PAOK,76
-eu_slaviaprague,Slavia Prague,78
-eu_sparta_praha,Sparta Prague,76
-eu_qarabag,Qarabağ,74
-eu_bodo_glimt,Bodø/Glimt,77
-eu_sturm,Sturm Graz,73
-eu_anderlecht,Anderlecht,74
-eu_genk,Genk,72
-eu_az,AZ Alkmaar,73
 eu_feyenoord,Feyenoord,79
+eu_az,AZ Alkmaar,76
+eu_twente,FC Twente,70
+eu_utrecht,FC Utrecht,64
+eu_benfica,Benfica,83
+eu_porto,FC Porto,82
+eu_sporting,Sporting CP,81
 eu_braga,Sporting Braga,75
-eu_vitoria,Vitória SC,70
+eu_vitoria,Vitória SC,68
+eu_brugge,Club Brugge,78
+eu_unionsg,Union Saint-Gilloise,76
+eu_anderlecht,Anderlecht,73
+eu_genk,Genk,71
+eu_sinttruiden,Sint-Truiden,61
+eu_slaviaprague,Slavia Prague,78
+eu_sparta_praha,Sparta Prague,75
+eu_plzen,Viktoria Plzeň,71
+eu_karvina,MFK Karviná,57
+eu_galatasaray,Galatasaray,83
+eu_fenerbahce,Fenerbahçe,79
 eu_besiktas,Beşiktaş,75
-eu_trabzonspor,Trabzonspor,72
-eu_panathinaikos,Panathinaïkos,73
-eu_aek,AEK Athènes,72
-eu_ferencvaros,Ferencváros,70
-eu_maccabi,Maccabi Tel-Aviv,69
-eu_legia,Legia Varsovie,69
-eu_hearts,Heart of Midlothian,68
-eu_aberdeen,Aberdeen,66
-eu_ludogorets,Ludogorets,70
-eu_universitatea,Universitatea Craiova,68
-eu_dinamokyiv,Dynamo Kiev,71
-eu_partizan,Partizan Belgrade,70
-eu_zurich,FC Zürich,68
-eu_youngboys,Young Boys,73
-eu_shamrock,Shamrock Rovers,60
-eu_stpatricks,St Patrick's Athletic,58
-eu_valur,Valur,56
-eu_floratallinn,Flora Tallinn,55
-eu_hjk,HJK Helsinki,60
-eu_lincolnredimps,Lincoln Red Imps,52
-eu_zalgiris,Žalgiris Vilnius,55
-eu_pyunik,Pyunik Erevan,54
-eu_sutjeska,Sutjeska Nikšić,53
-eu_koper,Koper,56
-eu_lechpoznan,Lech Poznań,65
-eu_jagiellonia,Jagiellonia Białystok,62
-eu_slovanbratislava,Slovan Bratislava,64
-eu_zilina,Žilina,59
-eu_sabah,Sabah FK,57
-eu_larne,Larne,52
-eu_omonia,Omónia Nicosie,63
-eu_apoel,APOEL Nicosie,64
-eu_rioave,Rio Ave,60
-eu_twente,FC Twente,68
-eu_unionsg,Union Saint-Gilloise,70
+eu_trabzonspor,Trabzonspor,73
 eu_basaksehir,Başakşehir,66
-eu_stmirren,St Mirren,54
-eu_dnipro,SC Dnipro-1,58
-eu_plzen,Viktoria Plzeň,65
-eu_hajduk,Hajduk Split,62
+eu_bodo_glimt,Bodø/Glimt,79
+eu_molde,Molde,65
+eu_lillestrom,Lillestrøm,60
+eu_olympiacos,Olympiacos,82
+eu_paok,PAOK,78
+eu_aek,AEK Athènes,74
+eu_panathinaikos,Panathinaïkos,73
+eu_ofi_crete,OFI Crète,57
+eu_salzburg,RB Salzbourg,80
+eu_sturm,Sturm Graz,73
+eu_lask,LASK,64
+eu_youngboys,Young Boys,74
+eu_basel,FC Bâle,73
+eu_servette,Servette,61
+eu_zurich,FC Zürich,65
+eu_thun,Thoune,58
+eu_redstar,Étoile Rouge Belgrade,76
+eu_partizan,Partizan Belgrade,70
 eu_vojvodina,Vojvodina,56
-eu_lask,LASK,63
-eu_aris,Aris Thessalonique,61
-eu_servette,Servette,60
-eu_rakow,Raków Częstochowa,64
-eu_fck,FC Copenhague,71
-eu_molde,Molde,62
-eu_malmo,Malmö FF,63
-eu_pafos,Pafos FC,60
-eu_hapoelbs,Hapoël Beer-Sheva,59
-eu_sabail,Sabail FK,52
-eu_levski,Levski Sofia,58
-eu_fcsb,FCSB,61
-eu_debrecen,Debrecen,54
-eu_trnava,Spartak Trnava,56
-eu_kups,KuPS,52
+eu_dinamozagreb,Dinamo Zagreb,77
+eu_hajduk,Hajduk Split,63
+eu_pafos,Pafos FC,76
+eu_apoel,APOEL Nicosie,65
+eu_omonia,Omónia Nicosie,64
+eu_maccabi,Maccabi Tel-Aviv,71
+eu_hapoelbs,Hapoël Beer-Sheva,60
+eu_maccabihaifa,Maccabi Haïfa,68
+eu_rangers,Rangers,77
+eu_celtic,Celtic,75
+eu_hearts,Heart of Midlothian,64
+eu_aberdeen,Aberdeen,61
+eu_stmirren,St Mirren,54
+eu_shakhtar,Shakhtar Donetsk,79
+eu_dinamokyiv,Dynamo Kiev,70
+eu_lechpoznan,Lech Poznań,64
+eu_jagiellonia,Jagiellonia Białystok,62
+eu_rakow,Raków Częstochowa,63
+eu_gornikzabrze,Górnik Zabrze,57
+eu_fck,FC Copenhague,72
+eu_midtjylland,FC Midtjylland,70
+eu_agf,AGF Aarhus,59
+eu_malmo,Malmö FF,64
+eu_mjallby,Mjällby AIF,58
+eu_qarabag,Qarabağ,75
+eu_sabah,Sabah FK,56
+eu_sabail,Sabail FK,51
+eu_fcsb,FCSB,63
+eu_universitatea,Universitatea Craiova,59
+eu_ferencvaros,Ferencváros,70
+eu_debrecen,Debrecen,53
+eu_slovanbratislava,Slovan Bratislava,65
+eu_zilina,Žilina,57
+eu_trnava,Spartak Trnava,55
+eu_ludogorets,Ludogorets,71
+eu_levski,Levski Sofia,57
+eu_kairat,Kairat Almaty,68
+eu_zalgiris,Žalgiris Vilnius,54
+eu_valur,Valur,55
 eu_breidablik,Breiðablik,50
+eu_floratallinn,Flora Tallinn,54
+eu_shamrock,Shamrock Rovers,60
+eu_stpatricks,St Patrick's Athletic,57
 eu_linfield,Linfield,49
-eu_shelbourne,Shelbourne,48
+eu_larne,Larne,51
+eu_rioave,Rio Ave,59
+eu_koper,Koper,55
+eu_pyunik,Pyunik Erevan,53
+eu_sutjeska,Sutjeska Nikšić,52
+eu_hjk,HJK Helsinki,59
+eu_kups,KuPS,51
+eu_lincolnredimps,Lincoln Red Imps,51
+eu_dnipro,SC Dnipro-1,57
+eu_shelbourne,Shelbourne,47
