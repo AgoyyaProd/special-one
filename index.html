@@ -122,7 +122,6 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   position:absolute;
   top:7.81%; left:5.46%; width:20.73%; aspect-ratio:1/1;
   border-radius:999px;
-  border:2px solid rgba(255,255,255,.55);
   z-index:3;
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.5));
 }
@@ -162,6 +161,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   text-shadow:0 1px 4px rgba(0,0,0,.8);
   white-space:nowrap;
   margin-bottom:2px; /* écart réduit entre prénom et nom */
+  text-transform:uppercase; /* les CSV n'imposent plus la casse - forcée ici */
 }
 
 /* calque "Surname" (nom, coupe la plus condensée/grasse) */
@@ -173,6 +173,7 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   white-space:nowrap;
   overflow:visible;
   text-shadow:0 2px 8px rgba(0,0,0,.6);
+  text-transform:uppercase;
 }
 .pc-surname span{ flex-shrink:0; }
 
@@ -223,12 +224,13 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
 .pc-position{
   position:absolute;
   top:77.68%; right:33%; bottom:0; left:7.18%;
-  display:flex; align-items:center;
+  display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
   font-family:var(--card-font-bold); font-weight:600;
   color:#fff; letter-spacing:0.1cqw;
+  line-height:1.08;
   z-index:3;
 }
-.pc-position span{ white-space:nowrap; }
+.pc-position span{ white-space:nowrap; display:block; }
 
 /* calque "Note" (rating, HeadingNow-55Medium) */
 .pc-rating{
@@ -3259,6 +3261,47 @@ button{ font-family:inherit; cursor:pointer; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+// Les CSV d'effectifs mélangent nationalités en français (clubs français,
+// construits à la main) et en anglais (clubs récupérés depuis FifaIndex,
+// source anglophone). FLAG_IMAGES et flagGradients ci-dessous sont indexés
+// en français uniquement - cette table convertit les variantes anglaises
+// (et quelques graphies alternatives) vers la clé française canonique
+// avant tout lookup, pour que le drapeau s'affiche quelle que soit la
+// langue d'origine du CSV.
+const NATIONALITY_ALIASES = {
+  'England':'Angleterre', 'Scotland':'Ecosse', 'Wales':'Pays de Galles',
+  'Northern Ireland':'Irlande du Nord', 'Republic of Ireland':'Irlande',
+  'Spain':'Espagne', 'Germany':'Allemagne', 'Italy':'Italie',
+  'Netherlands':'Pays-Bas', 'Belgium':'Belgique', 'Portugal':'Portugal',
+  'France':'France', 'Switzerland':'Suisse', 'Austria':'Autriche',
+  'Denmark':'Danemark', 'Norway':'Norvege', 'Sweden':'Suede',
+  'Finland':'Finlande', 'Iceland':'Islande', 'Poland':'Pologne',
+  'Czechia':'Tchequie', 'Czech Republic':'Tchequie', 'Slovakia':'Slovaquie',
+  'Slovenia':'Slovenie', 'Croatia':'Croatie', 'Serbia':'Serbie',
+  'Bosnia and Herzegovina':'Bosnie', 'Bosnia':'Bosnie', 'Montenegro':'Montenegro',
+  'Romania':'Roumanie', 'Bulgaria':'Bulgarie', 'Hungary':'Hongrie',
+  'Greece':'Grece', 'Turkey':'Turquie', 'Russia':'Russie', 'Ukraine':'Ukraine',
+  'Belarus':'Bielorussie', 'Georgia':'Georgie', 'Armenia':'Armenie',
+  'Estonia':'Estonie', 'Kosovo':'Kosovo', 'Israel':'Israel',
+  'Brazil':'Bresil', 'Argentina':'Argentine', 'Uruguay':'Uruguay',
+  'Paraguay':'Paraguay', 'Chile':'Chili', 'Colombia':'Colombie',
+  'Ecuador':'Equateur', 'Venezuela':'Venezuela', 'Peru':'Perou',
+  'Mexico':'Mexique', 'Costa Rica':'Costa Rica',
+  'United States':'Etats-Unis', 'Canada':'Canada',
+  'Cameroon':'Cameroun', 'Ivory Coast':"Cote d'Ivoire",
+  'Nigeria':'Nigeria', 'Ghana':'Ghana', 'Senegal':'Senegal', 'Mali':'Mali',
+  'Morocco':'Maroc', 'Algeria':'Algerie', 'Tunisia':'Tunisie', 'Egypt':'Egypte',
+  'Guinea':'Guinee', 'South Africa':'Afrique du Sud', 'Zambia':'Zambie',
+  'Zimbabwe':'Zimbabwe', 'Cape Verde':'Cap-Vert',
+  'Japan':'Japon', 'Republic of Korea':'Coree du Sud', 'South Korea':'Coree du Sud',
+  'China PR':'Chine', 'China':'Chine', 'Australia':'Australie',
+  'New Zealand':'Nouvelle-Zelande', 'Uzbekistan':'Ouzbekistan',
+  'Saudi Arabia':'Arabie saoudite'
+};
+function normalizeNationality(n){
+  return NATIONALITY_ALIASES[n] || n;
+}
+
 const FLAG_IMAGES = {
   'Afrique du Sud': 'data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgNTEyIDUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiBmaWxsPSIjZjBmMGYwIiByPSIyNTYiLz48cGF0aCBkPSJtNzQuOTggNDM3LjAyYy05OS45NzQtOTkuOTc1LTk5Ljk3NC0yNjIuMDY1IDAtMzYyLjA0LS4wMDcuMDExIDE0Ny42MjkgMTgxLjAyIDE0Ny42MjkgMTgxLjAyeiIvPjxwYXRoIGQ9Im0yMjIuNjA5IDI1Ni0xODguNjU2LTEyNy40ODdjLTUuODQ5IDEwLjE2Ny0xMS4wMDcgMjAuNzc5LTE1LjQzOSAzMS43NjNsOTUuNTA5IDk1LjcyNS05NS41MDYgOTUuNzNjNC40MjggMTAuOTc2IDkuNTgxIDIxLjU4MSAxNS40MjYgMzEuNzQxeiIgZmlsbD0iI2ZmZGE0NCIvPjxwYXRoIGQ9Im01MDkuODMzIDIyMi42MDloLTI4Ny4yMzFsLTE0Ny42MjQtMTQ3LjYyNWMtMTUuOTA4IDE1LjkwOC0yOS43MjkgMzMuODk5LTQxLjAyNSA1My41M2wxMjcuMjM5IDEyNy40ODYtMTI3LjI0OSAxMjcuNDdjMTEuMjk2IDE5LjYzNiAyNS4xMjMgMzcuNjMzIDQxLjAzNSA1My41NDVsMTQ3LjYyNC0xNDcuNjI0aDI4Ny4yMzFjMS40MjMtMTAuOTMgMi4xNjctMjIuMDc0IDIuMTY3LTMzLjM5MXMtLjc0NC0yMi40NjEtMi4xNjctMzMuMzkxeiIgZmlsbD0iIzZkYTU0NCIvPjxwYXRoIGQ9Im0xMDAuMTM4IDQ1OS4wNzdjNDMuMTY5IDMzLjE4MiA5Ny4yMDYgNTIuOTIzIDE1NS44NjIgNTIuOTIzIDExOC4yNzkgMCAyMTcuODA1LTgwLjIyMSAyNDcuMTgxLTE4OS4yMTdoLTI2Ni43NDh6IiBmaWxsPSIjMDA1MmI0Ii8+PHBhdGggZD0ibTUwMy4xODEgMTg5LjIxN2MtMjkuMzc2LTEwOC45OTYtMTI4LjkwMi0xODkuMjE3LTI0Ny4xODEtMTg5LjIxNy01OC42NTYgMC0xMTIuNjkzIDE5Ljc0MS0xNTUuODYyIDUyLjkyM2wxMzYuMjk0IDEzNi4yOTR6IiBmaWxsPSIjZDgwMDI3Ii8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PC9zdmc+',
   'Albanie': 'data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgNTEyIDUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiBmaWxsPSIjZDgwMDI3IiByPSIyNTYiLz48cGF0aCBkPSJtNDAwLjY5NiAxOTAuMDA5aC05Mi43MjZjNS43MjQtNS45OTQgOS4yNDctMTQuMTA5IDkuMjQ3LTIzLjA1MiAwLTE4LjQ0MS0xNC45NS0zMy4zOTEtMzMuMzkxLTMzLjM5MS0xMS42MTggMC0yMS44NDUgNS45MzYtMjcuODI2IDE0LjkzNy01Ljk4MS05LjAwMS0xNi4yMDktMTQuOTM3LTI3LjgyNi0xNC45MzctMTguNDQxIDAtMzMuMzkxIDE0Ljk1LTMzLjM5MSAzMy4zOTEgMCA4Ljk0MyAzLjUyMyAxNy4wNTkgOS4yNDcgMjMuMDUyaC05Mi43MjVjMCAyNC41ODkgMjEuNDE3IDQ0LjUyMSA0Ni4wMDQgNDQuNTIxaC0xLjQ4NGMwIDI0LjU5IDE5LjkzMyA0NC41MjMgNDQuNTIzIDQ0LjUyMyAwIDcuOTY0IDIuMDk5IDE1LjQzIDUuNzYzIDIxLjg5NGwtMzYuOTMgMzYuOTMxIDI4LjMzNCAyOC4zMzIgNDAuMTkyLTQwLjE5MWMxLjU3NC41NzcgMy4yMDMgMS4wNCA0Ljg4NSAxLjM1NWwtMjQuMjg3IDU0LjgzNSAzNy42OTUgNDAuNzQ4IDM3LjY5NS00MC43NS0yNC4yODctNTQuODM1YzEuNjgzLS4zMTUgMy4zMTEtLjc3NyA0Ljg4NS0xLjM1NWw0MC4xOTIgNDAuMTkxIDI4LjMzNC0yOC4zMzMtMzYuOTMxLTM2LjkzMWMzLjY2NS02LjQ2MyA1Ljc2NC0xMy45MyA1Ljc2NC0yMS44OTQgMjQuNTg5IDAgNDQuNTIyLTE5LjkzMiA0NC41MjItNDQuNTIzaC0xLjQ4M2MyNC41ODcuMDAyIDQ2LjAwNS0xOS45MjkgNDYuMDA1LTQ0LjUxOHoiLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjxnLz48Zy8+PGcvPjwvc3ZnPg==',
@@ -3450,6 +3493,22 @@ function fitFirstname(cardEl){
 }
 
 // Taille du poste : même principe que le nom - grande taille de référence,
+// Une combinaison de 3+ postes ("MOC - MD - MC - MI") ne rentre plus sur une
+// seule ligne même réduite à l'extrême - on la répartit alors sur 2 lignes
+// (moitié/moitié) plutôt que de la laisser déborder de la carte ou de la
+// rendre illisible. 1 ou 2 postes restent sur une seule ligne comme avant.
+function positionLinesMarkup(poste){
+  const tokens = String(poste||'').split('-').map(s=>s.trim()).filter(Boolean);
+  let lines;
+  if(tokens.length <= 2){
+    lines = [tokens.join(' - ')];
+  } else {
+    const mid = Math.ceil(tokens.length/2);
+    lines = [tokens.slice(0,mid).join(' - '), tokens.slice(mid).join(' - ')];
+  }
+  return lines.map(l=>`<span>${l}</span>`).join('');
+}
+
 // réduite seulement si la combinaison de postes (ex. "AD - BU - MOC") est
 // trop longue pour la carte. Un poste unique ("BU") s'affiche donc bien
 // plus grand qu'une combinaison à 3 postes, au lieu d'une taille fixe
@@ -3459,15 +3518,19 @@ function fitFirstname(cardEl){
 // l'accueil que sur les petites cartes de la draft.
 function fitPosition(cardEl){
   const posEl = cardEl.querySelector('.pc-position');
-  const span = posEl && posEl.querySelector('span');
-  if(!posEl || !span) return;
+  const spans = posEl ? Array.from(posEl.querySelectorAll('span')) : [];
+  if(!posEl || !spans.length) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
   const refSize = 100 * (cardWidth / PC_FIGMA_WIDTH);
-  posEl.style.fontSize = refSize + 'px';
+  // 2 lignes doivent tenir dans la même hauteur de boîte qu'une seule avant -
+  // on part donc d'une taille de base plus petite avant même de tester la
+  // largeur, sinon les 2 lignes débordent verticalement de la carte.
+  const baseSize = spans.length > 1 ? refSize * 0.6 : refSize;
+  posEl.style.fontSize = baseSize + 'px';
   const boxWidth = posEl.getBoundingClientRect().width;
-  const textWidth = span.getBoundingClientRect().width;
-  if(boxWidth > 0 && textWidth > boxWidth){
-    posEl.style.fontSize = (refSize * (boxWidth / textWidth) * 0.97) + 'px';
+  const widestSpanWidth = spans.reduce((max,s)=>Math.max(max, s.getBoundingClientRect().width), 0);
+  if(boxWidth > 0 && widestSpanWidth > boxWidth){
+    posEl.style.fontSize = (baseSize * (boxWidth / widestSpanWidth) * 0.97) + 'px';
   }
 }
 
@@ -3479,10 +3542,11 @@ function formatSaisonShort(saison){
 
 function renderPlayerCard(club, player){
   const uid = ++cardUid;
-  const realFlag = (typeof FLAG_IMAGES !== 'undefined') ? FLAG_IMAGES[player.nationalite] : null;
+  const nat = normalizeNationality(player.nationalite);
+  const realFlag = (typeof FLAG_IMAGES !== 'undefined') ? FLAG_IMAGES[nat] : null;
   const flagStyle = realFlag
     ? `background-image:url('${realFlag}');background-size:cover;background-position:center;`
-    : `background:${flagGradients[player.nationalite] || "linear-gradient(90deg,#888,#ccc)"};`;
+    : `background:${flagGradients[nat] || "linear-gradient(90deg,#888,#ccc)"};`;
 
   return `
     <div class="pc-card" style="--primary:${club.primary};--secondary:${club.secondary};--accent:${club.accent};">
@@ -3506,7 +3570,7 @@ function renderPlayerCard(club, player){
       <div class="pc-number">${player.numero}</div>
       <div class="pc-trigram"><span>${club.trigram}</span></div>
 
-      <div class="pc-position"><span>${player.poste}</span></div>
+      <div class="pc-position">${positionLinesMarkup(player.poste)}</div>
       <div class="pc-rating">${player.note}</div>
     </div>
   `;
@@ -3779,7 +3843,8 @@ const LEAGUES = {
 
 // ---------------------------- REAL CLUB ROSTERS ----------------------------
 // Historical FIFA/FC squad data (2004-2005 -> 2025-2026), one array per club id
-// that has real data. Clubs not listed here fall back to the generic POOL below.
+// that has real data. Populated at boot exclusively by loadAllClubRosters()
+// from the CSVs in /data/ - no data is hardcoded here anymore.
 const CLUB_ROSTERS = {};
 
 // ---------------------------- CSV ROSTER LOADER ----------------------------
@@ -3897,55 +3962,10 @@ const FORMATIONS = {
 };
 
 // ---------------------------- PLAYER POOL ----------------------------
-// Legends spanning eras - rendered inside whichever club shirt you pick.
-const POOL = [
-  { prenom:"GIANLUIGI", nom:"BUFFON", poste:"G", nationalite:"Italie", age:39, saison:"2017-2018", note:91, numero:1 },
-  { prenom:"IKER", nom:"CASILLAS", poste:"G", nationalite:"Espagne", age:28, saison:"2009-2010", note:90, numero:1 },
-  { prenom:"MANUEL", nom:"NEUER", poste:"G", nationalite:"Allemagne", age:29, saison:"2015-2016", note:92, numero:1 },
-  { prenom:"THIBAUT", nom:"COURTOIS", poste:"G", nationalite:"Belgique", age:31, saison:"2023-2024", note:90, numero:1 },
-
-  { prenom:"PAOLO", nom:"MALDINI", poste:"DC - DG", nationalite:"Italie", age:30, saison:"1998-1999", note:91, numero:3 },
-  { prenom:"CARLES", nom:"PUYOL", poste:"DC", nationalite:"Espagne", age:29, saison:"2007-2008", note:89, numero:5 },
-  { prenom:"SERGIO", nom:"RAMOS", poste:"DC", nationalite:"Espagne", age:30, saison:"2016-2017", note:91, numero:4 },
-  { prenom:"THIAGO", nom:"SILVA", poste:"DC", nationalite:"Bresil", age:27, saison:"2012-2013", note:88, numero:2 },
-  { prenom:"FRANZ", nom:"BECKENBAUER", poste:"DC - MC", nationalite:"Allemagne", age:28, saison:"1973-1974", note:92, numero:5 },
-  { prenom:"CAFU", nom:"CAFU", poste:"DD", nationalite:"Bresil", age:28, saison:"1998-1999", note:88, numero:2 },
-  { prenom:"DANI", nom:"ALVES", poste:"DD", nationalite:"Bresil", age:27, saison:"2010-2011", note:89, numero:2 },
-  { prenom:"PHILIPP", nom:"LAHM", poste:"DD - MDC", nationalite:"Allemagne", age:30, saison:"2013-2014", note:90, numero:21 },
-  { prenom:"ROBERTO", nom:"CARLOS", poste:"DG", nationalite:"Bresil", age:25, saison:"1998-1999", note:90, numero:6 },
-  { prenom:"MARCELO", nom:"VIEIRA", poste:"DG", nationalite:"Bresil", age:28, saison:"2016-2017", note:88, numero:12 },
-
-  { prenom:"CLAUDE", nom:"MAKELELE", poste:"MDC", nationalite:"France", age:29, saison:"2002-2003", note:87, numero:4 },
-  { prenom:"SERGIO", nom:"BUSQUETS", poste:"MDC", nationalite:"Espagne", age:26, saison:"2014-2015", note:88, numero:5 },
-  { prenom:"PATRICK", nom:"VIEIRA", poste:"MDC - MC", nationalite:"France", age:27, saison:"2003-2004", note:88, numero:4 },
-  { prenom:"XAVI", nom:"HERNÁNDEZ", poste:"MC", nationalite:"Espagne", age:29, saison:"2009-2010", note:91, numero:6 },
-  { prenom:"ANDREA", nom:"PIRLO", poste:"MC - MDC", nationalite:"Italie", age:32, saison:"2011-2012", note:89, numero:21 },
-  { prenom:"LUKA", nom:"MODRIĆ", poste:"MC - MOC", nationalite:"Croatie", age:32, saison:"2018-2019", note:90, numero:10 },
-  { prenom:"TONI", nom:"KROOS", poste:"MC", nationalite:"Allemagne", age:29, saison:"2019-2020", note:89, numero:8 },
-  { prenom:"ANDRÉS", nom:"INIESTA", poste:"MC - MOC", nationalite:"Espagne", age:26, saison:"2010-2011", note:91, numero:8 },
-  { prenom:"ZINEDINE", nom:"ZIDANE", poste:"MOC", nationalite:"France", age:29, saison:"2001-2002", note:93, numero:5 },
-  { prenom:"KAKÁ", nom:"KAKÁ", poste:"MOC", nationalite:"Bresil", age:25, saison:"2007-2008", note:91, numero:22 },
-  { prenom:"KEVIN", nom:"DE BRUYNE", poste:"MOC - MC", nationalite:"Belgique", age:29, saison:"2020-2021", note:91, numero:17 },
-  { prenom:"JUAN ROMÁN", nom:"RIQUELME", poste:"MOC", nationalite:"Argentine", age:26, saison:"2004-2005", note:87, numero:10 },
-
-  { prenom:"ARJEN", nom:"ROBBEN", poste:"AD - AG", nationalite:"Pays-Bas", age:29, saison:"2013-2014", note:89, numero:10 },
-  { prenom:"DAVID", nom:"BECKHAM", poste:"AD - MC", nationalite:"Angleterre", age:27, saison:"2002-2003", note:87, numero:7 },
-  { prenom:"ÁNGEL", nom:"DI MARÍA", poste:"AD - AG", nationalite:"Argentine", age:26, saison:"2014-2015", note:87, numero:7 },
-  { prenom:"RONALDINHO", nom:"GAÚCHO", poste:"AG - MOC", nationalite:"Bresil", age:26, saison:"2006-2007", note:92, numero:10 },
-  { prenom:"NEYMAR", nom:"NEYMAR", poste:"AG - AD - BU", nationalite:"Bresil", age:24, saison:"2016-2017", note:91, numero:11 },
-  { prenom:"EDEN", nom:"HAZARD", poste:"AG - MOC", nationalite:"Belgique", age:26, saison:"2016-2017", note:90, numero:10 },
-
-  { prenom:"RONALDO", nom:"NAZÁRIO", poste:"BU", nationalite:"Bresil", age:22, saison:"1998-1999", note:94, numero:9 },
-  { prenom:"LIONEL", nom:"MESSI", poste:"BU - AD - AG", nationalite:"Argentine", age:29, saison:"2016-2017", note:97, numero:10 },
-  { prenom:"THIERRY", nom:"HENRY", poste:"BU - AG", nationalite:"France", age:27, saison:"2003-2004", note:94, numero:14 },
-  { prenom:"KYLIAN", nom:"MBAPPÉ", poste:"BU - AG", nationalite:"France", age:25, saison:"2023-2024", note:95, numero:7 },
-  { prenom:"CRISTIANO", nom:"RONALDO", poste:"BU - AG - AD", nationalite:"Portugal", age:32, saison:"2016-2017", note:96, numero:7 },
-  { prenom:"OUSMANE", nom:"DEMBÉLÉ", poste:"BU - AD - MOC", nationalite:"France", age:28, saison:"2025-2026", note:90, numero:10 },
-  { prenom:"ROBERT", nom:"LEWANDOWSKI", poste:"BU", nationalite:"Pologne", age:31, saison:"2019-2020", note:91, numero:9 },
-  { prenom:"ZLATAN", nom:"IBRAHIMOVIĆ", poste:"BU", nationalite:"Suede", age:31, saison:"2012-2013", note:90, numero:10 },
-  { prenom:"MARCO", nom:"VAN BASTEN", poste:"BU", nationalite:"Pays-Bas", age:23, saison:"1987-1988", note:92, numero:9 },
-  { prenom:"LUIS", nom:"SUÁREZ", poste:"BU - AG", nationalite:"Uruguay", age:27, saison:"2014-2015", note:92, numero:9 }
-];
+// No hardcoded fallback data - every club's roster comes exclusively from
+// its CSV in /data/. If a roster hasn't loaded yet, callers below degrade
+// gracefully (skip hero-card rendering / empty draft pool) instead of
+// falling back to any built-in player list.
 
 // ---------------------------- CREST RELIABILITY ----------------------------
 // The hand re-renders very often during a draft. Recreating <img> tags with
@@ -4159,8 +4179,8 @@ function harmonizeSurnameSizes(cardEls){
 function pickHeroPlayers(club){
   const roster = CLUB_ROSTERS[club.id];
   if(!roster || !roster.length){
-    const pair = LANDING_PLAYER_PAIRS[state.themePreviewIdx];
-    return [POOL[pair[0]], POOL[pair[1]]];
+    // Roster CSV not loaded (yet) for this club - no hero cards to show.
+    return [null, null];
   }
   // Two distinct, recognisable, high-rated players from real history
   const sorted = [...roster].sort((a,b)=>b.note-a.note);
@@ -4180,6 +4200,7 @@ function paintHeroCards(club, animate){
   const [p1, p2] = pickHeroPlayers(club);
   const slot1 = document.getElementById('cardSlot1');
   const slot2 = document.getElementById('cardSlot2');
+  if(!p1 || !p2) return; // Roster not loaded yet - leave existing cards as-is.
 
   function swap(){
     slot1.innerHTML = renderPlayerCard(crestClub(club), p1);
@@ -4485,7 +4506,7 @@ function unavailabilityInfo(player){
 
 function activePool(){
   const roster = state.club && CLUB_ROSTERS[state.club.id];
-  return (roster && roster.length) ? roster : POOL;
+  return (roster && roster.length) ? roster : [];
 }
 
 function drawRandom(exclude){
@@ -5609,8 +5630,8 @@ function isMyTeamHome(lm){ return lm.homeId === state.club.id; }
 function myModKey(lm){ return isMyTeamHome(lm) ? 'modHome' : 'modAway'; }
 function oppModKey(lm){ return isMyTeamHome(lm) ? 'modAway' : 'modHome'; }
 
-function randomStarterPlayer(){
-  const starters = state.slots.filter(s=>s.player).map(s=>s.player);
+function randomStarterPlayer(excludeGK){
+  const starters = state.slots.filter(s=>s.player && (!excludeGK || !isGoalkeeper(s.player))).map(s=>s.player);
   if(!starters.length) return null;
   return starters[Math.floor(Math.random() * starters.length)];
 }
@@ -5869,13 +5890,36 @@ function renderFixtureBlock(fx, homeName, awayName, extraClasses, homeClub, away
 // poste si possible, sinon n'importe lequel) prend sa place dans le onze.
 // Renvoie le joueur entrant, ou null si aucun changement n'était possible
 // (banc vide ou 5 changements déjà utilisés).
+// Repli par grande ligne de jeu (gardien / défenseur / milieu / attaquant) -
+// un changement automatique ne doit jamais mélanger les lignes (ex: un
+// attaquant qui "remplace" un défenseur) même quand aucun remplaçant au
+// poste exact n'est disponible sur le banc.
+const POSITION_LINE = {
+  G:'G',
+  DC:'DEF', DD:'DEF', DG:'DEF',
+  MDC:'MID', MC:'MID', MD:'MID', MG:'MID', MOC:'MID',
+  AD:'ATT', AG:'ATT', BU:'ATT'
+};
+function isGoalkeeper(player){
+  return String(player && player.poste || '').split('-').map(s=>s.trim()).includes('G');
+}
+function playerLines(player){
+  return String(player && player.poste || '').split('-').map(s=>s.trim())
+    .map(t=>POSITION_LINE[t]).filter(Boolean);
+}
+function sameLine(playerA, playerB){
+  const linesA = playerLines(playerA);
+  const linesB = playerLines(playerB);
+  return linesA.some(l=>linesB.includes(l));
+}
+
 function performLiveSubstitution(lm, outgoingPlayer){
   lm.subsUsed = lm.subsUsed || 0;
   if(lm.subsUsed >= 5) return null;
   const outSlot = state.slots.find(s => s.player === outgoingPlayer);
   if(!outSlot) return null;
   let benchSlot = state.subs.find(s => s.player && canPlaceInSlot(s.player, outSlot));
-  if(!benchSlot) benchSlot = state.subs.find(s => s.player);
+  if(!benchSlot) benchSlot = state.subs.find(s => s.player && sameLine(s.player, outgoingPlayer));
   if(!benchSlot) return null;
   const incoming = benchSlot.player;
   movePlayer(benchSlot.id, outSlot.id);
@@ -5902,8 +5946,8 @@ function performManualLiveSubstitution(lm, outSlotId, inSlotId){
   return true;
 }
 
-function randomBenchPlayer(){
-  const bench = state.subs.filter(s=>s.player).map(s=>s.player);
+function randomBenchPlayer(excludeGK){
+  const bench = state.subs.filter(s=>s.player && (!excludeGK || !isGoalkeeper(s.player))).map(s=>s.player);
   if(!bench.length) return null;
   return bench[Math.floor(Math.random() * bench.length)];
 }
@@ -5917,7 +5961,7 @@ function performLiveSubstitutionBringIn(lm, incomingPlayer){
   const benchSlot = state.subs.find(s => s.player === incomingPlayer);
   if(!benchSlot) return null;
   let targetSlot = state.slots.find(s => s.player && canPlaceInSlot(incomingPlayer, s));
-  if(!targetSlot) targetSlot = state.slots.find(s => s.player);
+  if(!targetSlot) targetSlot = state.slots.find(s => s.player && sameLine(s.player, incomingPlayer));
   if(!targetSlot) return null;
   const outgoing = targetSlot.player;
   movePlayer(benchSlot.id, targetSlot.id);
@@ -6022,8 +6066,13 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function cardRiskDecision(lm){
-    const player = randomStarterPlayer();
-    const name = player ? player.nom : 'Votre joueur';
+    // Ne doit proposer que pour un joueur réellement averti plus tôt dans
+    // CE match (traqué via lm.cardedPlayers) - jamais un titulaire au
+    // hasard sans carton réel dans le fil d'événements.
+    const carded = (lm.cardedPlayers||[]).filter(p => state.slots.some(s=>s.player===p));
+    if(!carded.length) return null;
+    const player = carded[Math.floor(Math.random()*carded.length)];
+    const name = player.nom;
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
       title:'Sur le fil',
@@ -6096,8 +6145,9 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function playerOnFireDecision(lm){
-    const player = randomStarterPlayer();
-    const name = player ? player.nom : 'Votre joueur';
+    const player = randomStarterPlayer(true); // un gardien ne "domine pas son adversaire direct"
+    if(!player) return null;
+    const name = player.nom;
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
       title:'Joueur en feu',
@@ -6341,6 +6391,10 @@ const LIVE_DECISION_BUILDERS = [
           lm[myModKey(lm)] += 5; lm[oppModKey(lm)] += 2;
           if(Math.random() < 0.2){
             const player = randomStarterPlayer();
+            if(player){
+              lm.cardedPlayers = lm.cardedPlayers || [];
+              if(!lm.cardedPlayers.includes(player)) lm.cardedPlayers.push(player);
+            }
             pushLiveEvent(lm, lm.minute, 'card', `Carton jaune pour ${player ? player.nom : 'un de vos joueurs'} après un duel appuyé.`, mySide);
           } else {
             pushLiveEvent(lm, lm.minute, 'decision', 'Vous intensifiez les duels, l\'arbitre laisse jouer.', mySide);
@@ -6391,7 +6445,7 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function benchPlayerReadyDecision(lm){
-    const player = randomBenchPlayer();
+    const player = randomBenchPlayer(true); // jamais le gardien remplaçant ici
     if(!player) return null;
     const name = player.nom;
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
@@ -6505,8 +6559,17 @@ function returningKeyPlayer(roundIdx){
 
 const SEASON_EVENT_BUILDERS = [
   function congestedFixturesEvent(roundIdx){
+    // Aucune vraie "congestion de calendrier" possible en tout début de
+    // saison, et l'option "Europe" n'a de sens que si le club dispute
+    // encore une coupe d'Europe active cette saison-là - et que sa phase
+    // de ligue a réellement commencé (le calendrier entrelacé ne démarre
+    // les matchs européens qu'à partir d'une des dernières journées de
+    // championnat du mois d'août/septembre, jamais dès la J2).
+    if(roundIdx < 3) return null;
+    if(myClubOutOfEuro() || state.euro.currentRound < 1) return null;
     return {
       title:'Calendrier infernal',
+      contextRoundIdx: roundIdx+1,
       text:'Plusieurs gros matchs rapprochés attendent votre équipe. Comment prioriser ?',
       options:[
         { key:'league', label:'Priorité championnat', apply(){
@@ -6644,7 +6707,7 @@ const SEASON_EVENT_BUILDERS = [
     };
   },
   function trophyPriorityEvent(roundIdx){
-    if(!state.euro || state.euro.stage === 'done' || state.euro.currentRound < 1) return null;
+    if(myClubOutOfEuro() || state.euro.currentRound < 1) return null;
     return {
       title:'Tout pour un trophée',
       text:'Deux compétitions deviennent prioritaires. Où mettre l\'accent ?',
@@ -6756,8 +6819,13 @@ const SEASON_EVENT_BUILDERS = [
   function decisiveMonthEvent(roundIdx){
     const season = state.season;
     if(roundIdx < Math.floor(season.calendar.length * 0.7)) return null;
+    // "Plusieurs matchs à enjeu dans les prochaines semaines" n'a de sens
+    // que s'il reste vraiment plusieurs journées à jouer après celle qui
+    // vient - pas si la saison est en fait quasi (ou totalement) terminée.
+    if(season.calendar.length - (roundIdx+1) < 2) return null;
     return {
       title:'Mois décisif',
+      contextRoundIdx: roundIdx+1,
       text:'Plusieurs matchs à enjeu arrivent dans les prochaines semaines. Comment gérer l\'effectif ?',
       options:[
         { key:'rotate', label:'Rotation', apply(){
@@ -6774,9 +6842,14 @@ const SEASON_EVENT_BUILDERS = [
     };
   },
   function staffGambleEvent(roundIdx){
+    // Un pari tactique majeur du staff n'a pas sa place dans les toutes
+    // premières journées (le staff n'a pas encore assez de recul sur
+    // l'équipe) - on attend au moins la 5e journée.
+    if(roundIdx < 4) return null;
     return {
       rare:true,
       immediate:true,
+      contextRoundIdx: roundIdx+1,
       title:'Le pari du staff',
       text:'Votre adjoint propose une évolution tactique importante. Tenter le coup ?',
       options:[
@@ -6791,9 +6864,10 @@ const SEASON_EVENT_BUILDERS = [
     };
   },
   function doubleCrucialMatchEvent(roundIdx){
-    if(!state.euro || state.euro.stage === 'done' || state.euro.stage === 'league') return null;
+    if(myClubOutOfEuro() || state.euro.stage === 'league') return null;
     return {
       rare:true,
+      contextRoundIdx: roundIdx+1,
       title:'La finale avant l\'heure',
       text:'Deux matchs cruciaux se suivent dans le calendrier. Comment répartir les efforts ?',
       options:[
@@ -7048,7 +7122,18 @@ function advanceLiveMoment(lm){
   }
   if(roll < 0.14){
     const homeCarded = Math.random() < 0.5;
-    pushLiveEvent(lm, lm.minute, 'card', `Carton jaune pour ${homeCarded ? lm.homeName : lm.awayName}.`, homeCarded?'home':'away');
+    const cardedSide = homeCarded ? 'home' : 'away';
+    const myTeamCarded = (homeCarded && lm.homeId === state.club.id) || (!homeCarded && lm.awayId === state.club.id);
+    if(myTeamCarded){
+      const player = randomStarterPlayer();
+      if(player){
+        lm.cardedPlayers = lm.cardedPlayers || [];
+        if(!lm.cardedPlayers.includes(player)) lm.cardedPlayers.push(player);
+        pushLiveEvent(lm, lm.minute, 'card', `Carton jaune pour ${player.nom} (${homeCarded ? lm.homeName : lm.awayName}).`, cardedSide);
+        return;
+      }
+    }
+    pushLiveEvent(lm, lm.minute, 'card', `Carton jaune pour ${homeCarded ? lm.homeName : lm.awayName}.`, cardedSide);
     return;
   }
 
@@ -7209,11 +7294,25 @@ function trackMatchResult(fx){
 // des mécaniques qui n'existent que pour un match joué en direct.
 function checkLiveMatchAchievements(lm, won){
   const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+  const oppSide = mySide === 'home' ? 'away' : 'home';
   const myGoals = lm.events.filter(e=>e.type==='goal' && e.side===mySide);
 
-  const lateGoal = myGoals.find(e=>e.minute>=90);
-  if(lateGoal && won) unlockAchievement('a_la_derniere_seconde');
-  if(lateGoal && won && state.season && lm.roundIdx === state.season.calendar.length-1){
+  // "À la dernière seconde" doit récompenser un but qui fait BASCULER le
+  // résultat après la 90e (score nul ou défavorable juste avant, puis
+  // passage en tête) - pas n'importe quel but marqué tard dans une victoire
+  // déjà acquise (ex: un 5e but à la 90e dans un 5-1 ne compte pas).
+  let myRunning = 0, oppRunning = 0, lateWinningGoal = null;
+  lm.events.forEach(e=>{
+    if(e.type !== 'goal') return;
+    const wasLevelOrBehind = myRunning <= oppRunning;
+    if(e.side === mySide) myRunning++;
+    else if(e.side === oppSide) oppRunning++;
+    if(e.side === mySide && e.minute >= 90 && wasLevelOrBehind && myRunning > oppRunning){
+      lateWinningGoal = e;
+    }
+  });
+  if(lateWinningGoal && won) unlockAchievement('a_la_derniere_seconde');
+  if(lateWinningGoal && won && state.season && lm.roundIdx === state.season.calendar.length-1){
     const standing = sortedStandings();
     const myPos = standing.findIndex(s=>s.id===state.club.id) + 1;
     if(myPos === 1) unlockAchievement('le_destin');
@@ -7526,6 +7625,15 @@ function euroFullyDoneNow(){
   return !euro || euro.stage === 'done';
 }
 
+// Contrairement à euroFullyDoneNow (tournoi entier terminé pour tout le
+// monde), ceci répond à "mon club est-il encore en lice ?" - la
+// compétition continue de progresser (barrages, 8es, quarts...) pour les
+// autres équipes même après l'élimination de mon club.
+function myClubOutOfEuro(){
+  const euro = state.euro;
+  return !euro || euro.stage === 'done' || !!euro.myClubEliminatedAt;
+}
+
 function zoneClassMap(){
   const quotas = EURO_QUOTAS[state.league];
   if(!quotas) return {};
@@ -7568,52 +7676,24 @@ const SEASON1_QUALIFIERS = {
 // Clubs "reste de l'Europe" pour compléter les 36 participants de chaque
 // compétition (nos 5 championnats modélisés n'en fournissent qu'une partie).
 // Force approximative ; ils n'apparaissent que comme adversaires en Europe.
-const EURO_FILLER_CLUBS = [
-  {id:"eu_benfica", name:"Benfica", strength:86},{id:"eu_porto", name:"FC Porto", strength:85},
-  {id:"eu_sporting", name:"Sporting CP", strength:85},{id:"eu_ajax", name:"Ajax", strength:83},
-  {id:"eu_psv", name:"PSV Eindhoven", strength:83},{id:"eu_brugge", name:"Club Brugge", strength:82},
-  {id:"eu_galatasaray", name:"Galatasaray", strength:83},{id:"eu_fenerbahce", name:"Fenerbahçe", strength:81},
-  {id:"eu_celtic", name:"Celtic", strength:81},{id:"eu_rangers", name:"Rangers", strength:78},
-  {id:"eu_shakhtar", name:"Shakhtar Donetsk", strength:80},{id:"eu_dinamozagreb", name:"Dinamo Zagreb", strength:78},
-  {id:"eu_redstar", name:"Étoile Rouge Belgrade", strength:77},{id:"eu_salzburg", name:"RB Salzbourg", strength:81},
-  {id:"eu_olympiacos", name:"Olympiacos", strength:79},{id:"eu_paok", name:"PAOK", strength:76},
-  {id:"eu_slaviaprague", name:"Slavia Prague", strength:78},{id:"eu_sparta_praha", name:"Sparta Prague", strength:76},
-  {id:"eu_qarabag", name:"Qarabağ", strength:74},{id:"eu_bodo_glimt", name:"Bodø/Glimt", strength:77},
-  {id:"eu_sturm", name:"Sturm Graz", strength:73},{id:"eu_anderlecht", name:"Anderlecht", strength:74},
-  {id:"eu_genk", name:"Genk", strength:72},{id:"eu_az", name:"AZ Alkmaar", strength:73},
-  {id:"eu_feyenoord", name:"Feyenoord", strength:79},{id:"eu_braga", name:"Sporting Braga", strength:75},
-  {id:"eu_vitoria", name:"Vitória SC", strength:70},{id:"eu_besiktas", name:"Beşiktaş", strength:75},
-  {id:"eu_trabzonspor", name:"Trabzonspor", strength:72},{id:"eu_panathinaikos", name:"Panathinaïkos", strength:73},
-  {id:"eu_aek", name:"AEK Athènes", strength:72},{id:"eu_ferencvaros", name:"Ferencváros", strength:70},
-  {id:"eu_maccabi", name:"Maccabi Tel-Aviv", strength:69},{id:"eu_legia", name:"Legia Varsovie", strength:69},
-  {id:"eu_hearts", name:"Heart of Midlothian", strength:68},{id:"eu_aberdeen", name:"Aberdeen", strength:66},
-  {id:"eu_ludogorets", name:"Ludogorets", strength:70},{id:"eu_universitatea", name:"Universitatea Craiova", strength:68},
-  {id:"eu_dinamokyiv", name:"Dynamo Kiev", strength:71},{id:"eu_partizan", name:"Partizan Belgrade", strength:70},
-  {id:"eu_zurich", name:"FC Zürich", strength:68},{id:"eu_youngboys", name:"Young Boys", strength:73},
-  {id:"eu_shamrock", name:"Shamrock Rovers", strength:60},{id:"eu_stpatricks", name:"St Patrick's Athletic", strength:58},
-  {id:"eu_valur", name:"Valur", strength:56},{id:"eu_floratallinn", name:"Flora Tallinn", strength:55},
-  {id:"eu_hjk", name:"HJK Helsinki", strength:60},{id:"eu_lincolnredimps", name:"Lincoln Red Imps", strength:52},
-  {id:"eu_zalgiris", name:"Žalgiris Vilnius", strength:55},{id:"eu_pyunik", name:"Pyunik Erevan", strength:54},
-  {id:"eu_sutjeska", name:"Sutjeska Nikšić", strength:53},{id:"eu_koper", name:"Koper", strength:56},
-  {id:"eu_lechpoznan", name:"Lech Poznań", strength:65},{id:"eu_jagiellonia", name:"Jagiellonia Białystok", strength:62},
-  {id:"eu_slovanbratislava", name:"Slovan Bratislava", strength:64},{id:"eu_zilina", name:"Žilina", strength:59},
-  {id:"eu_sabah", name:"Sabah FK", strength:57},{id:"eu_larne", name:"Larne", strength:52},
-  {id:"eu_omonia", name:"Omónia Nicosie", strength:63},{id:"eu_apoel", name:"APOEL Nicosie", strength:64},
-  {id:"eu_rioave", name:"Rio Ave", strength:60},{id:"eu_twente", name:"FC Twente", strength:68},
-  {id:"eu_unionsg", name:"Union Saint-Gilloise", strength:70},{id:"eu_basaksehir", name:"Başakşehir", strength:66},
-  {id:"eu_stmirren", name:"St Mirren", strength:54},{id:"eu_dnipro", name:"SC Dnipro-1", strength:58},
-  {id:"eu_plzen", name:"Viktoria Plzeň", strength:65},{id:"eu_hajduk", name:"Hajduk Split", strength:62},
-  {id:"eu_vojvodina", name:"Vojvodina", strength:56},{id:"eu_lask", name:"LASK", strength:63},
-  {id:"eu_aris", name:"Aris Thessalonique", strength:61},{id:"eu_servette", name:"Servette", strength:60},
-  {id:"eu_rakow", name:"Raków Częstochowa", strength:64},{id:"eu_fck", name:"FC Copenhague", strength:71},
-  {id:"eu_molde", name:"Molde", strength:62},{id:"eu_malmo", name:"Malmö FF", strength:63},
-  {id:"eu_pafos", name:"Pafos FC", strength:60},{id:"eu_hapoelbs", name:"Hapoël Beer-Sheva", strength:59},
-  {id:"eu_sabail", name:"Sabail FK", strength:52},{id:"eu_levski", name:"Levski Sofia", strength:58},
-  {id:"eu_fcsb", name:"FCSB", strength:61},{id:"eu_debrecen", name:"Debrecen", strength:54},
-  {id:"eu_trnava", name:"Spartak Trnava", strength:56},{id:"eu_kups", name:"KuPS", strength:52},
-  {id:"eu_breidablik", name:"Breiðablik", strength:50},{id:"eu_linfield", name:"Linfield", strength:49},
-  {id:"eu_shelbourne", name:"Shelbourne", strength:48}
-];
+// Chargé depuis data/euro_filler_clubs.csv au boot, comme CLUB_ROSTERS - aucune
+// donnée codée en dur ici.
+let EURO_FILLER_CLUBS = [];
+async function loadEuroFillerClubs(){
+  try{
+    const res = await fetch('data/euro_filler_clubs.csv');
+    if(!res.ok) return;
+    const text = await res.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if(lines.length < 2) return;
+    EURO_FILLER_CLUBS = lines.slice(1).map(parseCsvLine).map(cols => {
+      const [id, name, strength] = cols;
+      return { id, name, strength: parseInt(strength, 10) || 70 };
+    });
+  } catch(e){
+    console.warn('Effectif CSV introuvable ou invalide pour euro_filler_clubs', e);
+  }
+}
 
 function euroTierFromRank(quotas, rank){
   if(!quotas) return null;
@@ -7670,10 +7750,21 @@ function computeQualificationMapWithCascade(standing, quotas, cupWinnerId, euroW
 }
 
 function qualifiersForLeagueTier(leagueName, tier){
+  const quotas = EURO_QUOTAS[leagueName];
   if(leagueName === state.league && state.seasonNumber > 1 && state.prevSeasonStanding){
-    const quotas = EURO_QUOTAS[leagueName];
     const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner, state.prevSeasonEuroWinners);
     return state.prevSeasonStanding.filter(s => map[s.id] === tier).map(s=>s.id);
+  }
+  // Idem pour les 4 championnats non joués en direct : dès qu'un
+  // classement simulé existe pour eux (à partir de la 2e saison), on
+  // l'utilise pour les qualifications européennes - sinon ces 4 ligues
+  // restaient bloquées À VIE sur les qualifiés réels 2025-2026
+  // (SEASON1_QUALIFIERS), sans jamais refléter leur progression simulée
+  // en coulisses au fil des saisons.
+  const otherData = leagueName !== state.league && state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
+  if(otherData && otherData.standing){
+    const map = computeQualificationMapWithCascade(otherData.standing, quotas, otherData.cupWinner, state.prevSeasonEuroWinners);
+    return otherData.standing.filter(s => map[s.id] === tier).map(s=>s.id);
   }
   return SEASON1_QUALIFIERS[tier].filter(id => (LEAGUES[leagueName]||[]).some(c=>c.id===id));
 }
@@ -7892,17 +7983,19 @@ function scheduleEuroStages(totalRounds){
 
 // Résout une confrontation aller-retour : prolongation (30 min, faible
 // probabilité de but) puis tirs au but si toujours à égalité après cumul
-// des deux manches.
+// des deux manches. etA/etB (buts en prolongation) sont renvoyés en plus
+// des champs déjà exposés pour que l'appelant puisse les rajouter au
+// score cumulé affiché.
 function resolveAggregateTie(strengthA, strengthB){
   const etA = Math.random() < 0.32 ? (Math.random() < 0.25 ? 2 : 1) : 0;
   const etB = Math.random() < 0.32 ? (Math.random() < 0.25 ? 2 : 1) : 0;
-  if(etA !== etB) return { winner: etA>etB?'A':'B', extraTimeScore:`${etA}-${etB}`, wentToPenalties:false };
+  if(etA !== etB) return { winner: etA>etB?'A':'B', extraTimeScore:`${etA}-${etB}`, wentToPenalties:false, etA, etB };
   let pA = 3 + Math.floor(Math.random()*3);
   let pB = 3 + Math.floor(Math.random()*3);
   if(pA === pB){
     if(Math.random() < strengthA/(strengthA+strengthB)) pA++; else pB++;
   }
-  return { winner: pA>pB?'A':'B', wentToPenalties:true, penaltyScore:`${pA}-${pB}`, extraTimeScore: etA===etB ? `${etA}-${etB}` : null };
+  return { winner: pA>pB?'A':'B', wentToPenalties:true, penaltyScore:`${pA}-${pB}`, extraTimeScore: etA===etB ? `${etA}-${etB}` : null, etA, etB };
 }
 
 function euroStrengthOf(euro, id){
@@ -7945,6 +8038,11 @@ function playKnockoutLeg2(euro, ties){
       tie.penaltyScore = result.penaltyScore;
       tie.extraTimeScore = result.extraTimeScore;
       tie.winner = result.winner === 'A' ? tie.teamA : tie.teamB;
+      // Le cumulé affiché doit inclure les buts de la prolongation, sinon
+      // il reste artificiellement à égalité ("agg 3-3, a.p.") sans que le
+      // vainqueur ne soit lisible dans le score lui-même.
+      tie.aggA += result.etA;
+      tie.aggB += result.etB;
     }
   });
 }
@@ -8033,7 +8131,27 @@ function simulateEuroLeagueRound(euro, domesticRoundIdx){
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
     euro.legPending = 'leg1';
+    // La compétition CONTINUE pour les autres même si mon club, lui, est
+    // éliminé ici (classé 25e-36e, ni qualifié direct ni barragiste) -
+    // sans ce suivi explicite, euro.stage garde de progresser (barrages,
+    // 8es, quarts...) et laisse croire à tort que mon club est toujours
+    // en lice pour des événements comme "Tout pour un trophée".
+    const survivorIds = new Set([...euro.directQualifiers, ...euro.playoffTies.flatMap(t=>[t.teamA,t.teamB])]);
+    if(!survivorIds.has(state.club.id)) euro.myClubEliminatedAt = 'league';
   }
+}
+
+// Le score des tirs au but / de la prolongation est calculé en ordre
+// "équipe A - équipe B" (resolveAggregateTie), alors que l'affichage du
+// match retour se fait en ordre "domicile - extérieur" (= équipe B -
+// équipe A, puisque le retour se joue chez l'équipe B). Sans cette
+// inversion, le score affiché entre parenthèses ne correspond plus à
+// l'ordre home/away du match et peut laisser croire que la mauvaise
+// équipe s'est qualifiée.
+function flipScorePair(scoreStr){
+  if(!scoreStr) return scoreStr;
+  const parts = String(scoreStr).split('-');
+  return parts.length === 2 ? `${parts[1]}-${parts[0]}` : scoreStr;
 }
 
 // Joue la manche demandée (aller ou retour) du tour à élimination en
@@ -8048,9 +8166,16 @@ function simulateEuroKnockoutLeg(euro, stage, nextStage, label){
     euro.legPending = 'leg2';
   } else {
     playKnockoutLeg2(euro, ties);
-    euro.resultsByRound.push({ label:`${label} - Retour`, matches: ties.map(t=>({...t.leg2, aggHome:t.aggB, aggAway:t.aggA, wentToPenalties:t.wentToPenalties, penaltyScore:t.penaltyScore, extraTimeScore:t.extraTimeScore})), roundIdx: state.season ? state.season.currentRound-1 : Infinity });
+    euro.resultsByRound.push({ label:`${label} - Retour`, matches: ties.map(t=>({...t.leg2, aggHome:t.aggB, aggAway:t.aggA, wentToPenalties:t.wentToPenalties, penaltyScore:flipScorePair(t.penaltyScore), extraTimeScore:flipScorePair(t.extraTimeScore)})), roundIdx: state.season ? state.season.currentRound-1 : Infinity });
     let winners = ties.map(t=>t.winner);
     if(stage === 'playoff') winners = [...euro.directQualifiers, ...winners];
+    // Idem qu'en sortie de phase de ligue : marquer explicitement
+    // l'élimination de MON club à ce tour précis, indépendamment de la
+    // progression de la compétition pour les autres équipes.
+    const wasInTies = ties.some(t => t.teamA === state.club.id || t.teamB === state.club.id);
+    if(wasInTies && !winners.includes(state.club.id) && !euro.myClubEliminatedAt){
+      euro.myClubEliminatedAt = stage;
+    }
     if(nextStage === 'final'){
       euro.finalFixture = { home:winners[0], away:winners[1], played:false };
       euro.legPending = null;
@@ -9000,6 +9125,13 @@ function snapshotGameState(){
     seasonRedCardCount: state.seasonRedCardCount,
     seasonFormationChanged: state.seasonFormationChanged,
     rareSeasonEventUsed: state.rareSeasonEventUsed,
+    // Manquaient tous les deux à la sauvegarde : sans ça, un rechargement
+    // en cours de saison remet à zéro l'historique des events déjà tirés
+    // (un même event, ex. "Tout pour un trophée", peut alors retomber
+    // deux fois dans la même saison) et efface les bonus/malus temporaires
+    // en cours issus des choix précédents.
+    usedSeasonEventKeys: state.usedSeasonEventKeys,
+    seasonModifiers: state.seasonModifiers,
     careerStats: state.careerStats
   };
 }
@@ -10146,8 +10278,10 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnap
 // Tout ce qui peut afficher l'écran d'accueil (et donc piocher des joueurs
 // via CLUB_ROSTERS pour l'animation des cartes) doit attendre que les CSV
 // d'effectifs soient chargés - sinon un club qui n'a pas encore de données
-// codées en dur planterait au premier rendu.
-loadAllClubRosters().finally(()=>{
+// codées en dur planterait au premier rendu. Idem pour la liste des clubs
+// de complément européens (EURO_FILLER_CLUBS), nécessaire dès la première
+// simulation de saison.
+Promise.all([loadAllClubRosters(), loadEuroFillerClubs()]).finally(()=>{
   initAuth();
   loadAchievementDefs();
 
