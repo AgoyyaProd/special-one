@@ -5350,7 +5350,13 @@ function enterSeason(){
   if(euroTier) initEuroCompetition(euroTier);
 
   state.currentSeasonEuroWinners = { cl:null, el:null, ecl:null, superCupWinner:null };
-  initShadowEuroCompetitions(euroTier);
+  // Saison 1 : aucun classement simulé n'existe encore pour aucun des 5
+  // championnats, donc les 2 coupes que le joueur ne dispute pas seraient
+  // entièrement composées de clubs de complément faute de vrais qualifiés
+  // - on ne les simule donc pas du tout cette saison-là plutôt que de
+  // produire des compétitions vides de sens.
+  if(state.seasonNumber > 1) initShadowEuroCompetitions(euroTier);
+  else state.shadowEuro = {};
   resolveSuperCupForNewSeason();
   resolveDomesticSuperCupForNewSeason();
 
@@ -7663,15 +7669,10 @@ const EURO_QUOTAS = {
   "Serie A":        { cl:4, el:3, ecl:1 }
 };
 
-// Qualifiés réels de la saison 2025-2026 (classements finaux des 5 grands
-// championnats), utilisés pour amorcer la toute première saison jouée. Les
-// 4 championnats autres que celui du joueur restent figés sur ces clubs
-// pour toutes les saisons suivantes, puisqu'ils ne sont pas simulés.
-const SEASON1_QUALIFIERS = {
-  cl:  ["psg","rcl","losc","ol", "ars","mci","mun","avl","liv","bou", "fcb","rma","vil","atm", "fcb2","bvb","rbl","vfb", "int","nap","rom","com"],
-  el:  ["om","srfc", "sun","bha", "bet","rso", "tsg","b04", "mil","juv","ata"],
-  ecl: ["asm", "che", "ath", "scf", "bol"]
-};
+// Plus aucun amorçage codé en dur : la saison 1 ne fournit aucun qualifié
+// pour aucun des 5 championnats (voir qualifiersForLeagueTier /
+// determineEuroQualification) - l'Europe démarre entièrement à partir des
+// classements simulés dès la saison 2.
 
 // Clubs "reste de l'Europe" pour compléter les 36 participants de chaque
 // compétition (nos 5 championnats modélisés n'en fournissent qu'une partie).
@@ -7749,33 +7750,32 @@ function computeQualificationMapWithCascade(standing, quotas, cupWinnerId, euroW
   return map;
 }
 
+// Aucun repli sur des qualifiés codés en dur : tant qu'aucun classement
+// simulé n'existe pour un championnat donné (systématiquement le cas en
+// saison 1, pour les 5 championnats), il ne fournit simplement aucun
+// qualifié - la compétition européenne de la saison 1 est donc vide pour
+// tout le monde plutôt que basée sur les vraies qualifications 2025-2026.
 function qualifiersForLeagueTier(leagueName, tier){
   const quotas = EURO_QUOTAS[leagueName];
   if(leagueName === state.league && state.seasonNumber > 1 && state.prevSeasonStanding){
     const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner, state.prevSeasonEuroWinners);
     return state.prevSeasonStanding.filter(s => map[s.id] === tier).map(s=>s.id);
   }
-  // Idem pour les 4 championnats non joués en direct : dès qu'un
-  // classement simulé existe pour eux (à partir de la 2e saison), on
-  // l'utilise pour les qualifications européennes - sinon ces 4 ligues
-  // restaient bloquées À VIE sur les qualifiés réels 2025-2026
-  // (SEASON1_QUALIFIERS), sans jamais refléter leur progression simulée
-  // en coulisses au fil des saisons.
   const otherData = leagueName !== state.league && state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
   if(otherData && otherData.standing){
     const map = computeQualificationMapWithCascade(otherData.standing, quotas, otherData.cupWinner, state.prevSeasonEuroWinners);
     return otherData.standing.filter(s => map[s.id] === tier).map(s=>s.id);
   }
-  return SEASON1_QUALIFIERS[tier].filter(id => (LEAGUES[leagueName]||[]).some(c=>c.id===id));
+  return [];
 }
 
+// Aucun amorçage réel codé en dur : la toute première saison ne comporte
+// aucune compétition européenne pour personne (y compris votre propre
+// club) puisqu'il n'existe encore aucun classement simulé pour en décider
+// les qualifiés. La première campagne européenne démarre donc en saison 2,
+// entièrement à partir des classements simulés de la saison 1.
 function determineEuroQualification(){
-  if(state.seasonNumber === 1){
-    for(const t of ['cl','el','ecl']){
-      if(SEASON1_QUALIFIERS[t].includes(state.club.id)) return t;
-    }
-    return null;
-  }
+  if(state.seasonNumber === 1) return null;
   const quotas = EURO_QUOTAS[state.league];
   if(!quotas || !state.prevSeasonStanding) return null;
   const map = computeQualificationMapWithCascade(state.prevSeasonStanding, quotas, state.prevSeasonCupWinner, state.prevSeasonEuroWinners);
