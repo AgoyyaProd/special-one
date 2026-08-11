@@ -1,0 +1,601 @@
+Club,Saison,Numero,Joueur,Nationalite,Postes,Note
+Monaco,2007-2008,18,Frederic Piquionne,France,BU,77
+Monaco,2007-2008,21,Camel Meriem,France,AD,76
+Monaco,2007-2008,2,Sylvain Monsoreau,France,DC,76
+Monaco,2007-2008,9,Jan Koller,Tchequie,BU,75
+Monaco,2007-2008,7,Lucas Bernardi,Argentine,MC,75
+Monaco,2007-2008,4,Francois-Joseph Modesto,France,DC,75
+Monaco,2007-2008,22,Bolivar,Bresil,DC,75
+Monaco,2007-2008,11,Nene,Bresil,MOC,75
+Monaco,2007-2008,10,Jeremy Menez,France,AG,75
+Monaco,2007-2008,5,Diego Perez,Uruguay,MD,74
+Monaco,2007-2008,19,Gonzalo Vargas,Uruguay,BU,74
+Monaco,2007-2008,30,Flavio Roma,Italie,G,73
+Monaco,2007-2008,3,Jeremy Berthod,France,DG,73
+Monaco,2007-2008,17,Serge Gakpe,France,BU,73
+Monaco,2007-2008,6,Jaroslav Plasil,Tchequie,MG,71
+Monaco,2007-2008,23,Jerko Leko,Croatie,MC,70
+Monaco,2007-2008,25,Leandro Cufre,Argentine,DD,68
+Monaco,2007-2008,20,Juan Pablo Pino,Colombie,BU,68
+Monaco,2007-2008,13,Vincent Muratori,France,DG,67
+Monaco,2007-2008,16,Stephane Ruffier,France,G,65
+Monaco,2007-2008,14,Malaury Martin,France,MDC,62
+Monaco,2007-2008,26,Massamba Lo Sambou,Senegal,MDC,57
+Monaco,2007-2008,1,Manuel Vallaurio,France,G,57
+Monaco,2007-2008,24,Cedric Mongongu,RD Congo,MDC,52
+Monaco,2007-2008,27,Arnaud Lescure,France,DC,45
+Monaco,2008-2009,5,Diego Perez,Uruguay,MDC,76
+Monaco,2008-2009,21,Camel Meriem,France,AD,75
+Monaco,2008-2009,8,Freddy Adu,Etats-Unis,BU,75
+Monaco,2008-2009,14,Dario Simic,Croatie,DC,74
+Monaco,2008-2009,4,Francois-Joseph Modesto,France,DC,74
+Monaco,2008-2009,17,Serge Gakpe,France,BU,74
+Monaco,2008-2009,7,Lucas Bernardi,Argentine,MC,73
+Monaco,2008-2009,16,Stephane Ruffier,France,G,73
+Monaco,2008-2009,30,Flavio Roma,Italie,G,72
+Monaco,2008-2009,11,Patrick Muller,Suisse,DC,72
+Monaco,2008-2009,23,Jerko Leko,Croatie,MG,71
+Monaco,2008-2009,18,Alejandro Cesar Alonso,Espagne,MD,71
+Monaco,2008-2009,10,Park Chu-Young,Coree du Sud,BU,71
+Monaco,2008-2009,27,Frederic Nimani N'Galou,France,BU,71
+Monaco,2008-2009,25,Leandro Cufre,Argentine,DG,70
+Monaco,2008-2009,20,Juan Pablo Pino,Colombie,AG,70
+Monaco,2008-2009,2,Cedric Mongongu,RD Congo,DD,69
+Monaco,2008-2009,6,Nikola Pokrivac,Croatie,MDC,69
+Monaco,2008-2009,19,Jean-Jacques Gosso,Cote d'Ivoire,MDC,69
+Monaco,2008-2009,32,Elia Legati,Italie,DC,67
+Monaco,2008-2009,15,Thomas Mangani,France,DC,67
+Monaco,2008-2009,13,Vincent Muratori,France,DG,67
+Monaco,2008-2009,12,Adriano,Bresil,DC,66
+Monaco,2008-2009,28,Djamel Bakar,France,BU,65
+Monaco,2008-2009,22,Alexandre Licata,France,BU,64
+Monaco,2008-2009,34,Torben Joneleit,Allemagne,DC,64
+Monaco,2008-2009,9,Yannick Sagbo,France,BU,63
+Monaco,2008-2009,35,Sani Kaita,Nigeria,MDC,62
+Monaco,2008-2009,26,Yohan Mollo,France,MD,61
+Monaco,2008-2009,31,Kevin Diaz,France,MG,61
+Monaco,2008-2009,29,Distel Zola,France,MDC,60
+Monaco,2008-2009,3,Nicolas Nkoulou,Cameroun,DC,57
+Monaco,2008-2009,1,Yoann Thuram-Ulien,France,G,54
+Monaco,2008-2009,36,Frederic Bulot,France,BU,54
+Monaco,2008-2009,33,Leo Schwechlen,France,DC,48
+Monaco,2009-2010,11,Nene,Bresil,AG,77
+Monaco,2009-2010,16,Stephane Ruffier,France,G,77
+Monaco,2009-2010,28,Sebastien Puygrenier,France,DC,76
+Monaco,2009-2010,22,Mathieu Coutadeur,France,MDC,76
+Monaco,2009-2010,20,Juan Pablo Pino,Colombie,BU,76
+Monaco,2009-2010,9,Eidur Gudjohnsen,Islande,BU,75
+Monaco,2009-2010,14,Dario Simic,Croatie,DC,74
+Monaco,2009-2010,7,Jean-Jacques Gosso,Cote d'Ivoire,MDC,74
+Monaco,2009-2010,4,Francois-Joseph Modesto,France,DD,73
+Monaco,2009-2010,10,Park Chu-Young,Coree du Sud,BU,73
+Monaco,2009-2010,8,Alejandro Alonso,Argentine,AD,73
+Monaco,2009-2010,26,Yohan Mollo,France,AD,73
+Monaco,2009-2010,18,Djimi Traore,Mali,DG,72
+Monaco,2009-2010,2,Cedric Mongongu,RD Congo,DC,72
+Monaco,2009-2010,24,Eduardo Costa,Bresil,MDG,71
+Monaco,2009-2010,19,Patrick Muller,Suisse,DC,71
+Monaco,2009-2010,23,Jerko Leko,Croatie,MDC,71
+Monaco,2009-2010,5,Diego Perez,Uruguay,MDC,70
+Monaco,2009-2010,32,Igor Lolo,Cote d'Ivoire,DC,70
+Monaco,2009-2010,17,Serge Gakpe,Togo,BU,70
+Monaco,2009-2010,27,Frederic Nimani N'Galou,France,BU,70
+Monaco,2009-2010,3,Nicolas Nkoulou,Cameroun,DC,69
+Monaco,2009-2010,13,Vincent Muratori,France,DG,68
+Monaco,2009-2010,12,Adriano,Bresil,DC,67
+Monaco,2009-2010,15,Thomas Mangani,France,DG,67
+Monaco,2009-2010,35,Yannick Sagbo,France,BU,65
+Monaco,2009-2010,25,Lukman Haruna,Nigeria,MC,63
+Monaco,2009-2010,21,Malaury Martin,France,MDC,62
+Monaco,2009-2010,1,Yoann Thuram-Ulien,France,G,62
+Monaco,2009-2010,29,Distel Zola,France,MDC,60
+Monaco,2010-2011,16,Stephane Ruffier,France,G,80
+Monaco,2010-2011,9,Dieumerci Mbokani,RD Congo,BU,78
+Monaco,2010-2011,13,Petter Hansson,Suede,DD,77
+Monaco,2010-2011,28,Sebastien Puygrenier,France,DC,76
+Monaco,2010-2011,10,Park Chu-Young,Coree du Sud,BU,76
+Monaco,2010-2011,20,Mathieu Coutadeur,France,MG,75
+Monaco,2010-2011,4,Cedric Mongongu,RD Congo,DC,74
+Monaco,2010-2011,11,Pierre-Emerick Aubameyang,Gabon,BU,74
+Monaco,2010-2011,3,Nicolas Nkoulou,Cameroun,MD,74
+Monaco,2010-2011,8,Alejandro Alonso,Argentine,AD,73
+Monaco,2010-2011,19,Jean-Jacques Gosso,Cote d'Ivoire,MDC,73
+Monaco,2010-2011,18,Djimi Traore,Mali,DG,72
+Monaco,2010-2011,6,Eduardo Costa,Bresil,MDC,71
+Monaco,2010-2011,32,Igor Lolo,Cote d'Ivoire,DC,71
+Monaco,2010-2011,21,Daniel Niculae,Roumanie,BU,70
+Monaco,2010-2011,17,Serge Gakpe,Togo,AG,70
+Monaco,2010-2011,25,Lukman Haruna,Nigeria,MC,70
+Monaco,2010-2011,23,Vincent Muratori,France,DG,68
+Monaco,2010-2011,7,Chris Malonga,Congo,MOC,68
+Monaco,2010-2011,1,Sebastien Chabbert,France,G,67
+Monaco,2010-2011,12,Adriano,Bresil,DD,67
+Monaco,2010-2011,15,Thomas Mangani,France,DG,66
+Monaco,2010-2011,2,Dennis Appiah,France,DC,63
+Monaco,2010-2011,30,Franck L'Hostis,France,G,61
+Monaco,2010-2011,37,Terence Makengo,France,BU,57
+Monaco,2010-2011,24,Nampalys Mendy,France,MOC,57
+Monaco,2010-2011,31,Loic Dufau,France,MC,55
+Monaco,2010-2011,22,Frederic Bulot,France,BU,55
+Monaco,2010-2011,26,Kevin Malcuit,France,AD,53
+Monaco,2010-2011,27,Romain Padovani,France,MC,52
+Monaco,2011-2012,9,Marama Vahirua,France,BU,73
+Monaco,2011-2012,31,Andreas Wolf,Allemagne,DC,73
+Monaco,2011-2012,39,Nacer Barazite,Pays-Bas,AD,73
+Monaco,2011-2012,36,Georgios Tzavellas,Grece,DG,73
+Monaco,2011-2012,8,Ludovic Giuly,France,AD,72
+Monaco,2011-2012,7,Chris Malonga,Congo,AG,72
+Monaco,2011-2012,38,Alexandros Tziolis,Grece,MDC,71
+Monaco,2011-2012,22,Thorstein Helstad,Norvege,BU,69
+Monaco,2011-2012,6,Stephane Dumont,France,MD,69
+Monaco,2011-2012,32,Nabil Dirar,Maroc,MOC,69
+Monaco,2011-2012,40,Danijel Subasic,Croatie,G,69
+Monaco,2011-2012,21,Gary Kagelmacher,Uruguay,DC,69
+Monaco,2011-2012,12,Adriano,Bresil,DC,68
+Monaco,2011-2012,4,Rabiu Afolabi,Nigeria,DC,67
+Monaco,2011-2012,13,Petter Hansson,Suede,DC,67
+Monaco,2011-2012,28,Edgar Salli,Cameroun,AG,67
+Monaco,2011-2012,1,Sebastien Chabbert,France,G,66
+Monaco,2011-2012,5,Gary Coulibaly,France,MD,66
+Monaco,2011-2012,3,Vincent Muratori,France,DG,65
+Monaco,2011-2012,24,Nampalys Mendy,France,MDC,65
+Monaco,2011-2012,25,Valentin Eysseric,France,MOC,65
+Monaco,2011-2012,27,Frederic Nimani,France,BU,64
+Monaco,2011-2012,30,Johann Carrasso,France,G,64
+Monaco,2011-2012,10,Sambou Yatabare,Mali,MDG,64
+Monaco,2011-2012,2,Dennis Appiah,France,DC,64
+Monaco,2011-2012,18,Valere Germain,France,BU,64
+Monaco,2011-2012,26,Eric Marester,France,DD,62
+Monaco,2011-2012,14,Senah Mango,Togo,DC,60
+Monaco,2011-2012,33,Romain Padovani,France,MDC,60
+Monaco,2011-2012,15,Layvin Kurzawa,France,DG,60
+Monaco,2012-2013,8,Delvin Ndinga,Congo,MC,75
+Monaco,2012-2013,7,Nabil Dirar,Maroc,MD,74
+Monaco,2012-2013,11,Ibrahima Toure,Senegal,BU,74
+Monaco,2012-2013,31,Andreas Wolf,Allemagne,DD,73
+Monaco,2012-2013,10,Emmanuel Riviere,France,BU,73
+Monaco,2012-2013,19,Mounir Obbadi,France,MDG,72
+Monaco,2012-2013,24,Andrea Raggi,Italie,DC,72
+Monaco,2012-2013,10,Nacer Barazite,Pays-Bas,MOC,72
+Monaco,2012-2013,36,Georgios Tzavellas,Grece,DG,72
+Monaco,2012-2013,17,Yannick Carrasco,Belgique,MG,72
+Monaco,2012-2013,9,Sebastian Ribas,Uruguay,BU,71
+Monaco,2012-2013,1,Danijel Subasic,Croatie,G,71
+Monaco,2012-2013,18,Valere Germain,France,AG,71
+Monaco,2012-2013,20,Emir Bajrami,Suede,MD,70
+Monaco,2012-2013,15,Lucas Ocampos,Argentine,MG,70
+Monaco,2012-2013,14,Jakob Poulsen,Danemark,MC,68
+Monaco,2012-2013,6,Stephane Dumont,France,MC,68
+Monaco,2012-2013,4,Carl Medjani,Algerie,DC,68
+Monaco,2012-2013,12,Adriano,Bresil,DC,67
+Monaco,2012-2013,28,Edgar Salli,Cameroun,BU,67
+Monaco,2012-2013,29,Tristan Dingome,France,MG,67
+Monaco,2012-2013,30,Flavio Roma,Italie,G,66
+Monaco,2012-2013,21,Gary Kagelmacher,Uruguay,DG,66
+Monaco,2012-2013,50,Sebastien Chabbert,France,G,64
+Monaco,2012-2013,5,Gary Coulibaly,France,MC,64
+Monaco,2012-2013,23,Nampalys Mendy,France,MDC,64
+Monaco,2012-2013,2,Dennis Appiah,France,DC,64
+Monaco,2012-2013,16,Martin Sourzac,France,G,64
+Monaco,2012-2013,26,Eric Marester,France,DD,62
+Monaco,2012-2013,3,Layvin Kurzawa,France,DG,61
+Monaco,2013-2014,9,Radamel Falcao,Colombie,BU,89
+Monaco,2013-2014,28,Jeremy Toulalan,France,MDC,84
+Monaco,2013-2014,8,Joao Moutinho,Portugal,MC|MOC,83
+Monaco,2013-2014,10,James Rodriguez,Colombie,MOC,83
+Monaco,2013-2014,15,Dimitar Berbatov,Bulgarie,BU,82
+Monaco,2013-2014,5,Aymen Abdennour,Tunisie,DC,81
+Monaco,2013-2014,6,Ricardo Carvalho,Portugal,DC,77
+Monaco,2013-2014,22,Eric Abidal,France,DC,75
+Monaco,2013-2014,1,Danijel Subasic,Croatie,G,75
+Monaco,2013-2014,27,Geoffrey Kondogbia,France,MC,75
+Monaco,2013-2014,19,Mounir Obbadi,Maroc,MC,74
+Monaco,2013-2014,24,Andrea Raggi,Italie,DD,74
+Monaco,2013-2014,21,Elderson,Nigeria,DG,74
+Monaco,2013-2014,18,Valere Germain,France,AD,74
+Monaco,2013-2014,11,Lucas Ocampos,Argentine,AG,74
+Monaco,2013-2014,31,Andreas Wolf,Allemagne,DC,73
+Monaco,2013-2014,7,Nabil Dirar,Maroc,MD,73
+Monaco,2013-2014,29,Emmanuel Riviere,France,BU,73
+Monaco,2013-2014,3,Layvin Kurzawa,France,DG,73
+Monaco,2013-2014,17,Yannick Carrasco,Belgique,MG,73
+Monaco,2013-2014,2,Fabinho,Bresil,DD,73
+Monaco,2013-2014,16,Sergio Romero,Argentine,G,72
+Monaco,2013-2014,27,Delvin Ndinga,Congo,MDC,72
+Monaco,2013-2014,20,Nicolas Isimat-Mirin,France,DC,71
+Monaco,2013-2014,32,Nacer Barazite,Pays-Bas,MOC,70
+Monaco,2013-2014,4,Borja Lopez,Espagne,DC,70
+Monaco,2013-2014,21,Gary Kagelmacher,Uruguay,DC,69
+Monaco,2013-2014,14,Jakob Poulsen,Danemark,MC,67
+Monaco,2013-2014,30,Flavio Roma,Italie,G,66
+Monaco,2013-2014,5,Gary Coulibaly,France,MC,66
+Monaco,2013-2014,36,Chris Malonga,Congo,MG,65
+Monaco,2013-2014,42,Sebastien Chabbert,France,G,64
+Monaco,2013-2014,23,Anthony Martial,France,BU,63
+Monaco,2013-2014,32,Marcel Tisserand,RD Congo,DD,63
+Monaco,2006-2007,32,Gael Givet,France,DC,85
+Monaco,2006-2007,7,Lucas Bernardi,Argentine,MDC,84
+Monaco,2006-2007,20,Marco Di Vaio,Italie,BU,83
+Monaco,2006-2007,9,Jan Koller,Tchequie,BU,83
+Monaco,2006-2007,30,Flavio Roma,Italie,G,79
+Monaco,2006-2007,21,Camel Meriem,France,AG,79
+Monaco,2006-2007,2,Sylvain Monsoreau,France,DC,79
+Monaco,2006-2007,6,Jaroslav Plasil,Tchequie,AD,78
+Monaco,2006-2007,1,Guillaume Warmuz,France,G,76
+Monaco,2006-2007,18,Mohamed Kallon,Sierra Leone,BU,76
+Monaco,2006-2007,15,Yaya Toure,Cote d'Ivoire,MDC|MC,75
+Monaco,2006-2007,4,Francois-Joseph Modesto,France,DD,75
+Monaco,2006-2007,22,Bolivar,Bresil,DC,75
+Monaco,2006-2007,19,Gonzalo Vargas,Uruguay,BU,74
+Monaco,2006-2007,8,Gerard,Espagne,MDC,73
+Monaco,2006-2007,23,Jerko Leko,Croatie,MDC,73
+Monaco,2006-2007,3,Manuel Dos Santos,Cap-Vert,DG,72
+Monaco,2006-2007,10,Jeremy Menez,France,BU,72
+Monaco,2006-2007,11,Sebastien Grax,France,BU,68
+Monaco,2006-2007,5,Diego Perez,Uruguay,MC,68
+Monaco,2006-2007,17,Serge Gakpe,France,AD,64
+Monaco,2006-2007,13,Alexandre Licata,France,MOC,64
+Monaco,2006-2007,26,Massamba Lo Sambou,Senegal,MDC,57
+Monaco,2005-2006,3,Patrice Evra,France,DG|MG,86
+Monaco,2005-2006,30,Flavio Roma,Italie,G,83
+Monaco,2005-2006,9,Ernesto Javier Chevanton,Uruguay,BU,82
+Monaco,2005-2006,19,Sebastien Squillaci,France,DC,82
+Monaco,2005-2006,24,Emmanuel Adebayor,Togo,BU,82
+Monaco,2005-2006,7,Lucas Bernardi,Argentine,MOC,81
+Monaco,2005-2006,32,Gael Givet,France,DC,81
+Monaco,2005-2006,17,Olivier Kapo,France,MG,79
+Monaco,2005-2006,13,Maicon,Bresil,DD,76
+Monaco,2005-2006,21,Camel Meriem,France,MOC,75
+Monaco,2005-2006,15,Andreas Zikos,Grece,MC,75
+Monaco,2005-2006,8,Gerard,Espagne,MC,74
+Monaco,2005-2006,6,Jaroslav Plasil,Tchequie,MC,74
+Monaco,2005-2006,11,Olivier Sorlin,France,MD,73
+Monaco,2005-2006,1,Guillaume Warmuz,France,G,70
+Monaco,2005-2006,14,Toifilou Maoulida,France,AD,70
+Monaco,2005-2006,18,Eric Cubilier,France,DD,69
+Monaco,2005-2006,4,Francois-Joseph Modesto,France,DC,69
+Monaco,2005-2006,5,Diego Perez,Uruguay,MC,69
+Monaco,2005-2006,22,David Gigliotti,France,BU,65
+Monaco,2005-2006,16,Andre Biancarelli,France,G,59
+Monaco,2005-2006,31,Olivier Veigneau,France,DG,50
+Monaco,2005-2006,28,Nicolas Maurice-Belay,France,BU,49
+Monaco,2004-2005,19,Sebastien Squillaci,France,DC,85
+Monaco,2004-2005,9,Javier Pedro Saviola,Argentine,BU,84
+Monaco,2004-2005,18,Shabani Nonda,Congo,BU,84
+Monaco,2004-2005,15,Andreas Zikos,Grece,MDC,84
+Monaco,2004-2005,30,Flavio Roma,Italie,G,83
+Monaco,2004-2005,27,Julien Rodriguez,France,DG,82
+Monaco,2004-2005,10,Ernesto Javier Chevanton,Uruguay,BU,82
+Monaco,2004-2005,3,Patrice Evra,France,MG|DG,82
+Monaco,2004-2005,32,Gael Givet,France,DD,80
+Monaco,2004-2005,7,Lucas Bernardi,Argentine,MG,78
+Monaco,2004-2005,4,Francois-Joseph Modesto,France,DC,78
+Monaco,2004-2005,8,Mohamed Kallon,Sierra Leone,MOC,77
+Monaco,2004-2005,6,Jaroslav Plasil,Tchequie,MC,77
+Monaco,2004-2005,13,Maicon,Bresil,MD,77
+Monaco,2004-2005,21,Pontus Farnerud,Suede,MOC,76
+Monaco,2004-2005,12,Joseph Dayo Oshadogan,Italie,DC,72
+Monaco,2004-2005,35,Hassan El-Fakiri,Norvege,DD,71
+Monaco,2004-2005,5,Diego Perez,Uruguay,MDC,71
+Monaco,2004-2005,25,Souleymane Camara,Senegal,BU,70
+Monaco,2004-2005,24,Emmanuel Adebayor,Togo,BU,70
+Monaco,2004-2005,14,Gregory Lacombe,France,MG,65
+Monaco,2004-2005,1,Fabien Audard,France,G,65
+Monaco,2004-2005,16,Andre Biancarelli,France,G,64
+Monaco,2004-2005,39,Jim Ablancourt,France,DD,62
+Monaco,2004-2005,17,Jimmy Juan,France,MC,55
+Monaco,2014-2015,9,Radamel Falcao,Colombie,BU,86
+Monaco,2014-2015,8,Joao Moutinho,Portugal,MC|MOC,83
+Monaco,2014-2015,28,Jeremy Toulalan,France,MDD,82
+Monaco,2014-2015,10,Dimitar Berbatov,Bulgarie,BU,80
+Monaco,2014-2015,1,Danijel Subasic,Croatie,G,80
+Monaco,2014-2015,5,Aymen Abdennour,Tunisie,DC,78
+Monaco,2014-2015,17,Yannick Carrasco,Belgique,MG,78
+Monaco,2014-2015,16,Maarten Stekelenburg,Pays-Bas,G,77
+Monaco,2014-2015,22,Geoffrey Kondogbia,France,MDG,77
+Monaco,2014-2015,3,Layvin Kurzawa,France,DG,77
+Monaco,2014-2015,6,Ricardo Carvalho,Portugal,DC,76
+Monaco,2014-2015,24,Andrea Raggi,Italie,DC,76
+Monaco,2014-2015,19,Lacina Traore,Cote d'Ivoire,BU,76
+Monaco,2014-2015,11,Lucas Ocampos,Argentine,AG,75
+Monaco,2014-2015,2,Fabinho,Bresil,DD,75
+Monaco,2014-2015,15,Bernardo Silva,Portugal,MD,75
+Monaco,2014-2015,7,Nabil Dirar,Maroc,MD,74
+Monaco,2014-2015,18,Valere Germain,France,BU,74
+Monaco,2014-2015,23,Anthony Martial,France,BU,74
+Monaco,2014-2015,21,Elderson,Nigeria,DG,73
+Monaco,2014-2015,25,Alain Traore,Burkina Faso,MC,72
+Monaco,2014-2015,20,Nicolas Isimat-Mirin,France,DC,72
+Monaco,2014-2015,13,Wallace,Bresil,DD,72
+Monaco,2014-2015,14,Tiemoue Bakayoko,France,MDC,71
+Monaco,2014-2015,4,Borja Lopez,Espagne,DC,70
+Monaco,2014-2015,12,Matheus Thiago de Carvalho,Bresil,AG,67
+Monaco,2014-2015,38,Almamy Toure,Mali,DD,66
+Monaco,2014-2015,35,Dominique Pandor,France,MD,65
+Monaco,2014-2015,50,Martin Sourzac,France,G,64
+Monaco,2014-2015,37,Abdou-Aziz Thiam,France,MDC,62
+Monaco,2014-2015,34,Abdou Diallo,France,DC,62
+Monaco,2015-2016,8,Joao Moutinho,Portugal,MC|MOC,83
+Monaco,2015-2016,28,Jeremy Toulalan,France,MDD,82
+Monaco,2015-2016,1,Danijel Subasic,Croatie,G,81
+Monaco,2015-2016,5,Aymen Abdennour,Tunisie,DD,81
+Monaco,2015-2016,4,Fabio Coentrao,Portugal,DG,80
+Monaco,2015-2016,24,Andrea Raggi,Italie,DC,79
+Monaco,2015-2016,22,Stephan El Shaarawy,Italie,AG,79
+Monaco,2015-2016,10,Bernardo Silva,Portugal,MD,79
+Monaco,2015-2016,6,Ricardo Carvalho,Portugal,DC,78
+Monaco,2015-2016,2,Fabinho,Bresil,DD,78
+Monaco,2015-2016,9,Anthony Martial,France,BU,78
+Monaco,2015-2016,9,Vagner,Bresil,BU,77
+Monaco,2015-2016,5,Jemerson,Bresil,DC,77
+Monaco,2015-2016,17,Ivan Cavaleiro,Portugal,MG,76
+Monaco,2015-2016,7,Nabil Dirar,Maroc,MD,75
+Monaco,2015-2016,21,Elderson,Nigeria,DG,75
+Monaco,2015-2016,19,Lacina Traore,Cote d'Ivoire,BU,75
+Monaco,2015-2016,27,Thomas Lemar,France,MG,74
+Monaco,2015-2016,13,Wallace,Bresil,DC,74
+Monaco,2015-2016,25,Marcos Lopes,Portugal,MOC,73
+Monaco,2015-2016,16,Paul Nardi,France,G,72
+Monaco,2015-2016,11,Guido Carrillo,Argentine,BU,72
+Monaco,2015-2016,14,Tiemoue Bakayoko,France,MDG,72
+Monaco,2015-2016,20,Mario Pasalic,Croatie,MDC,72
+Monaco,2015-2016,12,Fares Bahlouli,France,MOC,70
+Monaco,2015-2016,18,Helder Costa,Portugal,MG,69
+Monaco,2015-2016,38,Almamy Toure,Mali,DD,69
+Monaco,2015-2016,23,Adama Traore,Mali,MC,68
+Monaco,2015-2016,29,Kylian Mbappe,France,AG,65
+Monaco,2016-2017,25,Kamil Glik,Pologne,DC,84
+Monaco,2016-2017,1,Danijel Subasic,Croatie,G,84
+Monaco,2016-2017,10,Bernardo Silva,Portugal,MD,83
+Monaco,2016-2017,8,Joao Moutinho,Portugal,MC|MOC,82
+Monaco,2016-2017,9,Radamel Falcao,Colombie,AD,82
+Monaco,2016-2017,2,Fabinho,Bresil,MOC|MC,81
+Monaco,2016-2017,18,Valere Germain,France,BU,80
+Monaco,2016-2017,27,Thomas Lemar,France,MG,80
+Monaco,2016-2017,19,Djibril Sidibe,France,DD,79
+Monaco,2016-2017,14,Tiemoue Bakayoko,France,MDG|MDC,79
+Monaco,2016-2017,29,Kylian Mbappe,France,BU,79
+Monaco,2016-2017,39,Vagner,Bresil,BU,78
+Monaco,2016-2017,5,Jemerson,Bresil,DC,78
+Monaco,2016-2017,24,Andrea Raggi,Italie,DC,77
+Monaco,2016-2017,7,Nabil Dirar,Maroc,MD,77
+Monaco,2016-2017,23,Benjamin Mendy,France,DG,77
+Monaco,2016-2017,16,Morgan De Sanctis,Italie,G,76
+Monaco,2016-2017,17,Ivan Cavaleiro,Portugal,MG,74
+Monaco,2016-2017,11,Guido Carrillo,Argentine,BU,74
+Monaco,2016-2017,38,Almamy Toure,Mali,DD,74
+Monaco,2016-2017,28,Corentin Jean,France,MD,73
+Monaco,2016-2017,32,Marcel Tisserand,RD Congo,DC,73
+Monaco,2016-2017,26,Gabriel Boschilia,Bresil,MOC,73
+Monaco,2016-2017,21,Elderson,Nigeria,DG,71
+Monaco,2016-2017,20,Adama Traore,Mali,MC,71
+Monaco,2016-2017,12,Fares Bahlouli,France,MOC,70
+Monaco,2016-2017,34,Abdou Diallo,France,DC,69
+Monaco,2017-2018,9,Radamel Falcao,Colombie,BU,85
+Monaco,2017-2018,25,Kamil Glik,Pologne,DC,84
+Monaco,2017-2018,1,Danijel Subasic,Croatie,G,84
+Monaco,2017-2018,2,Fabinho,Bresil,MDC,84
+Monaco,2017-2018,10,Kylian Mbappe,France,BU,84
+Monaco,2017-2018,27,Thomas Lemar,France,MG,83
+Monaco,2017-2018,8,Joao Moutinho,Portugal,MC|MDG,82
+Monaco,2017-2018,14,Keita Balde,Senegal,MD,81
+Monaco,2017-2018,10,Stevan Jovetic,Montenegro,BU,80
+Monaco,2017-2018,5,Jemerson,Bresil,DC,80
+Monaco,2017-2018,19,Djibril Sidibe,France,DD,79
+Monaco,2017-2018,20,Marcos Lopes,Portugal,MD,79
+Monaco,2017-2018,17,Youri Tielemans,Belgique,MOC,79
+Monaco,2017-2018,16,Diego Benaglio,Suisse,G,77
+Monaco,2017-2018,24,Andrea Raggi,Italie,DC,76
+Monaco,2017-2018,4,Terence Kongolo,Pays-Bas,DG,76
+Monaco,2017-2018,18,Soualiho Meite,France,MDC,75
+Monaco,2017-2018,7,Rachid Ghezzal,Algerie,AD,75
+Monaco,2017-2018,11,Guido Carrillo,Argentine,BU,75
+Monaco,2017-2018,42,Lacina Traore,Cote d'Ivoire,BU,74
+Monaco,2017-2018,38,Almamy Toure,Mali,DD,74
+Monaco,2017-2018,6,Jorge,Bresil,DG,74
+Monaco,2017-2018,15,Adama Diakhaby,France,BU,74
+Monaco,2017-2018,26,Gabriel Boschilia,Bresil,MOC,73
+Monaco,2017-2018,28,Adama Traore,Mali,MC,72
+Monaco,2017-2018,35,Kevin N'Doram,France,MDC,70
+Monaco,2018-2019,9,Radamel Falcao,Colombie,BU,84
+Monaco,2018-2019,44,Francesc Fabregas,Espagne,MC,82
+Monaco,2018-2019,27,Ronaldo Aparecido Rodrigues,Bresil,DC,82
+Monaco,2018-2019,25,Kamil Glik,Pologne,DC,82
+Monaco,2018-2019,29,Gelson Martins,Portugal,AD,82
+Monaco,2018-2019,1,Danijel Subasic,Croatie,G,81
+Monaco,2018-2019,7,Marcos Lopes,Portugal,AG,80
+Monaco,2018-2019,10,Stevan Jovetic,Montenegro,BU,79
+Monaco,2018-2019,17,Alexandr Golovin,Russie,MOC,79
+Monaco,2018-2019,15,Adrien Silva,Portugal,MDC,78
+Monaco,2018-2019,19,Djibril Sidibe,France,DD,78
+Monaco,2018-2019,8,Youri Tielemans,Belgique,MC,78
+Monaco,2018-2019,20,Nacer Chadli,Belgique,MG,77
+Monaco,2018-2019,12,William Vainqueur,France,MDC,76
+Monaco,2018-2019,5,Jemerson,Bresil,DG,76
+Monaco,2018-2019,39,Benjamin Henrichs,Allemagne,DD,76
+Monaco,2018-2019,15,Youssef Ait Bennasser,Maroc,MC,76
+Monaco,2018-2019,14,Georges-Kevin Nkoudou,France,MG,75
+Monaco,2018-2019,4,Jean-Eudes Aholou,Cote d'Ivoire,MDC,75
+Monaco,2018-2019,16,Diego Benaglio,Suisse,G,74
+Monaco,2018-2019,24,Andrea Raggi,Italie,DC,74
+Monaco,2018-2019,3,Antonio Barreca,Italie,DG,74
+Monaco,2018-2019,38,Almamy Toure,Mali,DD,74
+Monaco,2018-2019,6,Jorge,Bresil,DG,73
+Monaco,2018-2019,29,Samuel Grandsir,France,MD,73
+Monaco,2018-2019,2,Fode Ballo-Toure,France,DG,72
+Monaco,2018-2019,11,Adama Traore,Mali,MC,71
+Monaco,2019-2020,9,Wissam Ben Yedder,France,BU,84
+Monaco,2019-2020,9,Radamel Falcao,Colombie,BU,82
+Monaco,2019-2020,40,Benjamin Lecomte,France,G,81
+Monaco,2019-2020,11,Gelson Martins,Portugal,AD,81
+Monaco,2019-2020,6,Tiemoue Bakayoko,France,MC|MDC,80
+Monaco,2019-2020,17,Alexandr Golovin,Russie,MC,80
+Monaco,2019-2020,4,Francesc Fabregas,Espagne,MC,78
+Monaco,2019-2020,10,Stevan Jovetic,Montenegro,MOC,78
+Monaco,2019-2020,8,Adrien Silva,Portugal,MC,78
+Monaco,2019-2020,25,Kamil Glik,Pologne,DC,78
+Monaco,2019-2020,1,Danijel Subasic,Croatie,G,78
+Monaco,2019-2020,14,Keita Balde,Senegal,BU,78
+Monaco,2019-2020,20,Islam Slimani,Algerie,BU,78
+Monaco,2019-2020,12,Ruben Aguilar,France,DD,78
+Monaco,2019-2020,27,Ronaldo Aparecido Rodrigues,Bresil,DC,77
+Monaco,2019-2020,3,Guillermo Maripan,Chili,DC,77
+Monaco,2019-2020,7,Henry Onyekuru,Nigeria,MG,77
+Monaco,2019-2020,39,Benjamin Henrichs,Allemagne,DD,76
+Monaco,2019-2020,28,Jorge,Bresil,DG,76
+Monaco,2019-2020,5,Jemerson,Bresil,DC,75
+Monaco,2019-2020,26,Gabriel Boschilia,Bresil,MOC,75
+Monaco,2019-2020,22,Jean-Kevin Augustin,France,BU,75
+Monaco,2019-2020,15,Youssef Ait Bennasser,Maroc,MC,75
+Monaco,2019-2020,16,Diego Benaglio,Suisse,G,74
+Monaco,2019-2020,22,Youssouf Fofana,France,MDC,74
+Monaco,2019-2020,2,Fode Ballo-Toure,France,DG,73
+Monaco,2019-2020,21,Adama Traore,Mali,MC,72
+Monaco,2019-2020,24,Aurelien Tchouameni,France,MC,72
+Monaco,2019-2020,32,Benoit Badiashile,France,DC,72
+Monaco,2020-2021,9,Wissam Ben Yedder,France,BU,84
+Monaco,2020-2021,31,Kevin Volland,Allemagne,AG|BU|MOC,82
+Monaco,2020-2021,40,Benjamin Lecomte,France,G,80
+Monaco,2020-2021,26,Ruben Aguilar,France,DD,79
+Monaco,2020-2021,17,Alexandr Golovin,Russie,MC,79
+Monaco,2020-2021,11,Gelson Martins,Portugal,MG,79
+Monaco,2020-2021,10,Stevan Jovetic,Montenegro,BU,77
+Monaco,2020-2021,31,Nacer Chadli,Belgique,MG,77
+Monaco,2020-2021,29,Djibril Sidibe,France,DC,77
+Monaco,2020-2021,3,Guillermo Maripan,Chili,DC,77
+Monaco,2020-2021,20,Axel Disasi,France,DC,77
+Monaco,2020-2021,27,Krepin Diatta,Senegal,MD|AD,77
+Monaco,2020-2021,8,Aurelien Tchouameni,France,MC,77
+Monaco,2020-2021,22,Youssouf Fofana,France,MC,77
+Monaco,2020-2021,4,Francesc Fabregas,Espagne,MC,76
+Monaco,2020-2021,14,Keita Balde,Senegal,BU,76
+Monaco,2020-2021,28,Jorge,Bresil,DG,76
+Monaco,2020-2021,12,Caio Henrique,Bresil,MG,76
+Monaco,2020-2021,37,Sofiane Diop,France,AD,76
+Monaco,2020-2021,25,Kamil Glik,Pologne,DC,75
+Monaco,2020-2021,6,Jean-Eudes Aholou,Cote d'Ivoire,MDC,75
+Monaco,2020-2021,7,Henry Onyekuru,Nigeria,MG,75
+Monaco,2020-2021,32,Benoit Badiashile,France,DC,75
+Monaco,2020-2021,5,Jemerson,Bresil,DC,73
+Monaco,2020-2021,41,Youssef Ait Bennasser,Maroc,MC,73
+Monaco,2020-2021,2,Fode Ballo-Toure,Senegal,DG,73
+Monaco,2020-2021,36,Adama Traore,Mali,MOC,72
+Monaco,2021-2022,10,Wissam Ben Yedder,France,BU,83
+Monaco,2021-2022,31,Kevin Volland,Allemagne,MOC|BU|AG,81
+Monaco,2021-2022,8,Aurelien Tchouameni,France,MDG,81
+Monaco,2021-2022,17,Alexandr Golovin,Russie,MOC,79
+Monaco,2021-2022,12,Caio Henrique,Bresil,DG,78
+Monaco,2021-2022,26,Ruben Aguilar,France,DD,77
+Monaco,2021-2022,16,Alexander Nubel,Allemagne,G,77
+Monaco,2021-2022,22,Youssouf Fofana,France,MDC|MC,77
+Monaco,2021-2022,6,Axel Disasi,France,DC,76
+Monaco,2021-2022,5,Benoit Badiashile,France,DC,76
+Monaco,2021-2022,2,Vanderson,Bresil,MD,74
+Monaco,2021-2022,3,Guillermo Maripan,Chili,DC,78
+Monaco,2021-2022,37,Sofiane Diop,France,MG,78
+Monaco,2021-2022,19,Djibril Sidibe,France,DD,77
+Monaco,2021-2022,7,Gelson Martins,Portugal,MD,77
+Monaco,2021-2022,4,Francesc Fabregas,Espagne,MC,75
+Monaco,2021-2022,9,Myron Boadu,Pays-Bas,BU,75
+Monaco,2021-2022,11,Jean Lucas,Bresil,MC,75
+Monaco,2021-2022,14,Ismail Jakobs,Allemagne,DG,72
+Monaco,2021-2022,36,Eliot Matazo,Belgique,MC,72
+Monaco,2021-2022,1,Radoslaw Majecki,Pologne,G,71
+Monaco,2021-2022,27,Krepin Diatta,Senegal,MD,75
+Monaco,2021-2022,30,Vito Mannone,Italie,G,70
+Monaco,2021-2022,28,Judilson Mamadu Tuncara Gomes,Guinee-Bissau,MDC,70
+Monaco,2021-2022,15,Harisson Marcelin,France,DC,70
+Monaco,2021-2022,21,Strahinja Pavlovic,Serbie,DC,69
+Monaco,2021-2022,39,Wilson Isidor,France,BU,67
+Monaco,2022-2023,10,Wissam Ben Yedder,France,BU,84
+Monaco,2022-2023,31,Kevin Volland,Allemagne,BU,80
+Monaco,2022-2023,19,Youssouf Fofana,France,MDC|MC,80
+Monaco,2022-2023,17,Alexandr Golovin,Russie,MG,79
+Monaco,2022-2023,6,Axel Disasi,France,DC,79
+Monaco,2022-2023,12,Caio Henrique,Bresil,DG,79
+Monaco,2022-2023,3,Guillermo Maripan,Chili,DC,78
+Monaco,2022-2023,16,Alexander Nubel,Allemagne,G,78
+Monaco,2022-2023,4,Mohamed Camara,Mali,MDG,78
+Monaco,2022-2023,2,Vanderson,Bresil,DD,76
+Monaco,2022-2023,27,Krepin Diatta,Senegal,MD,75
+Monaco,2022-2023,36,Breel Embolo,Suisse,BU,78
+Monaco,2022-2023,26,Ruben Aguilar,France,DD,77
+Monaco,2022-2023,77,Gelson Martins,Portugal,MD,76
+Monaco,2022-2023,18,Takumi Minamino,Japon,MD,75
+Monaco,2022-2023,23,Malang Sarr,France,DC,75
+Monaco,2022-2023,9,Myron Boadu,Pays-Bas,BU,74
+Monaco,2022-2023,14,Ismail Jakobs,Senegal,DG,73
+Monaco,2022-2023,15,Eliot Matazo,Belgique,MDC,73
+Monaco,2022-2023,30,Thomas Didillon,France,G,71
+Monaco,2022-2023,44,Eliesse Ben Seghir,France,BU,71
+Monaco,2022-2023,5,Benoit Badiashile,France,DC,78
+Monaco,2022-2023,7,Sofiane Diop,France,MOC,77
+Monaco,2022-2023,11,Jean Lucas,Bresil,MC,73
+Monaco,2023-2024,10,Wissam Ben Yedder,France,BU,82
+Monaco,2023-2024,17,Alexandr Golovin,Russie,MG,80
+Monaco,2023-2024,19,Youssouf Fofana,France,MDC|MC,80
+Monaco,2023-2024,18,Takumi Minamino,Japon,MOC,79
+Monaco,2023-2024,6,Denis Zakaria,Suisse,MDG,79
+Monaco,2023-2024,99,Wilfried Singo,Cote d'Ivoire,DC,78
+Monaco,2023-2024,2,Vanderson,Bresil,DD,77
+Monaco,2023-2024,5,Thilo Kehrer,Allemagne,DC,76
+Monaco,2023-2024,21,Maghnes Akliouche,France,MD,76
+Monaco,2023-2024,1,Radoslaw Majecki,Pologne,G,75
+Monaco,2023-2024,14,Ismail Jakobs,Senegal,DG,74
+Monaco,2023-2024,12,Caio Henrique,Bresil,DG,78
+Monaco,2023-2024,29,Folarin Balogun,Etats-Unis,BU,78
+Monaco,2023-2024,3,Guillermo Maripan,Chili,DC,77
+Monaco,2023-2024,36,Breel Embolo,Suisse,BU,77
+Monaco,2023-2024,4,Mohamed Camara,Mali,MDC,77
+Monaco,2023-2024,22,Mohammed Salisu,Ghana,DC,76
+Monaco,2023-2024,27,Krepin Diatta,Senegal,MD|AD,75
+Monaco,2023-2024,16,Philipp Kohn,Suisse,G,75
+Monaco,2023-2024,7,Eliesse Ben Seghir,Maroc,BU,73
+Monaco,2024-2025,6,Denis Zakaria,Suisse,MC,81
+Monaco,2024-2025,17,Wilfried Singo,Cote d'Ivoire,DC,80
+Monaco,2024-2025,5,Thilo Kehrer,Allemagne,DC,79
+Monaco,2024-2025,18,Takumi Minamino,Japon,MG,78
+Monaco,2024-2025,11,Maghnes Akliouche,France,MD,78
+Monaco,2024-2025,36,Breel Embolo,Suisse,BU,77
+Monaco,2024-2025,12,Caio Henrique,Bresil,DG,77
+Monaco,2024-2025,16,Philipp Kohn,Suisse,G,77
+Monaco,2024-2025,2,Vanderson,Bresil,DD,77
+Monaco,2024-2025,14,Mika Biereth,Danemark,BU,77
+Monaco,2024-2025,15,Lamine Camara,Senegal,MC,77
+Monaco,2024-2025,10,Alexandr Golovin,Russie,MG|MD,80
+Monaco,2024-2025,8,Ali Al Musrati,Libye,MDC,79
+Monaco,2024-2025,1,Radoslaw Majecki,Pologne,G,77
+Monaco,2024-2025,9,Folarin Balogun,Etats-Unis,BU,77
+Monaco,2024-2025,22,Mohammed Salisu,Ghana,DC,76
+Monaco,2024-2025,4,Jordan Teze,Pays-Bas,DD,76
+Monaco,2024-2025,7,Eliesse Ben Seghir,Maroc,MG,76
+Monaco,2024-2025,27,Krepin Diatta,Senegal,MD|AD,75
+Monaco,2024-2025,13,Christian Mawissa,France,DC,74
+Monaco,2024-2025,88,Soungoutou Magassa,France,DC,73
+Monaco,2024-2025,21,George Ilenikhena,Nigeria,BU,72
+Monaco,2024-2025,20,Kassoum Ouattara,France,DG,72
+Monaco,2025-2026,6,Denis Zakaria,Suisse,DC,81
+Monaco,2025-2026,1,Lukas Hradecky,Finlande,G,80
+Monaco,2025-2026,11,Maghnes Akliouche,France,AD,80
+Monaco,2025-2026,10,Alexandr Golovin,Russie,AG|MD,79
+Monaco,2025-2026,9,Folarin Balogun,Etats-Unis,BU,79
+Monaco,2025-2026,15,Lamine Camara,Senegal,MC,79
+Monaco,2025-2026,5,Thilo Kehrer,Allemagne,DC,78
+Monaco,2025-2026,4,Jordan Teze,Pays-Bas,MD,78
+Monaco,2025-2026,12,Caio Henrique,Bresil,MG,77
+Monaco,2025-2026,13,Christian Mawissa,France,DC,75
+Monaco,2025-2026,23,Aladji Bamba,France,MC,70
+Monaco,2025-2026,3,Eric Dier,Angleterre,DC,78
+Monaco,2025-2026,8,Paul Pogba,France,MC,77
+Monaco,2025-2026,16,Philipp Kohn,Suisse,G,77
+Monaco,2025-2026,2,Vanderson,Bresil,DD,77
+Monaco,2025-2026,14,Mika Biereth,Danemark,BU,77
+Monaco,2025-2026,24,Simon Adingra,Cote d'Ivoire,AG,76
+Monaco,2025-2026,31,Ansu Fati,Espagne,MG,75
+Monaco,2025-2026,25,Wout Faes,Belgique,DC,74
+Monaco,2025-2026,27,Krepin Diatta,Senegal,MD,74
+Monaco,2025-2026,20,Kassoum Ouattara,France,DG,72
+Monaco,2025-2026,28,Mamadou Coulibaly,France,MC,71
+Monaco,2025-2026,17,Stanis Idumbo,Belgique,MG,68
+Monaco,2025-2026,18,Takumi Minamino,Japon,MG,78
+Monaco,2025-2026,22,Mohammed Salisu,Ghana,DC,77
