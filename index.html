@@ -380,20 +380,27 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .gm-logo:hover{ opacity:.8; }
 .gm-account-btn{
+  display:inline-flex;
+  align-items:center;
   font-family:var(--sans);
-  font-size:12.5px;
+  font-size:13px;
   font-weight:600;
   color:var(--text-dim);
-  background:rgba(255,255,255,.06);
+  background:transparent;
   border:1px solid var(--border-2);
-  padding:9px 18px;
+  padding:9px 20px;
   border-radius:999px;
-  transition:all .15s ease;
+  transition:transform .18s ease, border-color .3s ease, color .15s ease;
 }
-.gm-account-btn:hover{ color:var(--text); border-color:rgba(255,255,255,.35); }
+.gm-account-btn:hover{
+  color:var(--text);
+  border-color:var(--club-accent);
+  transform:translateY(-2px);
+}
 .gm-account-menu{ position:relative; }
 .gm-header-actions{ display:flex; align-items:center; gap:10px; }
-.gm-account-menu .gm-account-btn{ max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gm-account-menu .gm-account-btn{ max-width:180px; }
+.gm-account-menu .gm-account-btn span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gm-account-dropdown{
   display:none;
   position:absolute;
@@ -628,6 +635,150 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:700px;
 }
 .howto-row p + p{ margin-top:14px; }
+
+/* ============================= FOOTER ============================= */
+.site-footer{
+  position:relative;
+  z-index:10;
+  width:100%;
+  border-top:1px solid var(--border);
+  background:color-mix(in srgb, var(--surface) 60%, black 10%);
+  padding:56px var(--gutter) 0;
+}
+.site-footer-inner{
+  max-width:1380px;
+  margin:0 auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:48px;
+  justify-content:space-between;
+  padding-bottom:40px;
+}
+.site-footer-brand{ max-width:340px; }
+.site-footer-logo{
+  font-family:var(--bn-bold);
+  font-size:22px;
+  color:var(--text);
+  letter-spacing:.3px;
+}
+.site-footer-tagline{
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.6;
+  color:var(--text-faint);
+  margin:10px 0 0;
+}
+.site-footer-cols{
+  display:flex;
+  flex-wrap:wrap;
+  gap:48px;
+}
+.site-footer-col-title{
+  font-family:var(--bn-bold);
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:14px;
+}
+.site-footer-link{
+  display:block;
+  background:none; border:none; padding:0;
+  font-family:var(--sans);
+  font-size:14px;
+  color:var(--text-dim);
+  cursor:pointer;
+  text-align:left;
+  margin-bottom:10px;
+  transition:color .15s;
+}
+.site-footer-link:hover{ color:var(--club-accent); }
+.site-footer-bottom{
+  max-width:1380px;
+  margin:0 auto;
+  border-top:1px solid var(--border);
+  padding:20px var(--gutter, 0) 28px;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--text-faint);
+  text-align:center;
+}
+@media (max-width:720px){
+  .site-footer-inner{ flex-direction:column; gap:32px; }
+  .site-footer-cols{ gap:32px; }
+}
+
+/* ============================= INFO PAGES (footer) ============================= */
+.info-wrap{
+  max-width:860px;
+  margin:0 auto;
+  padding:56px var(--gutter) 100px;
+}
+/* Beaucoup plus discret que le style .gm-btn-secondary générique (pensé
+   pour les gros CTA) - ici ce n'est qu'une navigation secondaire. */
+#btn-info-back{
+  font-size:12.5px;
+  padding:6px 14px;
+  border-radius:999px;
+}
+#btn-info-back:hover{ transform:none; }
+.info-title{
+  font-family:var(--bn-bold);
+  font-size:clamp(30px, 4vw, 44px);
+  color:var(--text);
+  margin:24px 0 32px;
+}
+.info-content{
+  font-family:var(--sans);
+  font-size:17.5px;
+  line-height:1.8;
+  color:var(--text-dim);
+}
+.info-content h2{
+  font-family:var(--bn-bold);
+  font-size:22px;
+  color:var(--text);
+  margin:36px 0 12px;
+}
+.info-content h2:first-child{ margin-top:0; }
+.info-content h3{
+  font-family:var(--bn-bold);
+  font-size:17px;
+  color:var(--text);
+  margin:24px 0 8px;
+}
+.info-content p{ margin:0 0 14px; }
+.info-content ul, .info-content ol{ margin:0 0 14px; padding-left:22px; }
+.info-content li{ margin-bottom:8px; }
+.info-content a{ color:var(--club-accent); }
+.info-content strong{ color:var(--text); }
+.info-content .info-meta{
+  font-size:13px;
+  color:var(--text-faint);
+  margin-bottom:32px;
+}
+.contact-form{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  max-width:520px;
+  margin-top:28px;
+}
+.contact-field{ display:flex; flex-direction:column; }
+.contact-field label{
+  font-family:var(--sans);
+  font-size:12px;
+  color:var(--text-faint);
+  margin-bottom:8px;
+}
+.contact-textarea{ resize:vertical; min-height:120px; font-family:var(--sans); }
+.contact-form-status{
+  font-family:var(--sans);
+  font-size:13px;
+  min-height:18px;
+}
+.contact-form-status.is-success{ color:#4ade80; }
+.contact-form-status.is-error{ color:#f87171; }
 
 /* ============================= SELECT ============================= */
 .select-wrap{
@@ -2679,6 +2830,11 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
 }
 .modal-input:focus{ outline:none; border-color:var(--club-accent, #fff); }
+/* Le menu déroulant natif d'un <select> s'affiche sur fond blanc côté
+   navigateur, quel que soit le thème de la page - sans cette règle, le
+   texte hérite de la couleur claire prévue pour un fond sombre et devient
+   illisible sur ce fond blanc. */
+select.modal-input option{ color:#111; background:#fff; }
 .modal-divider{
   display:flex;
   align-items:center;
@@ -2708,7 +2864,7 @@ button{ font-family:inherit; cursor:pointer; }
     <div class="gm-header-actions">
       <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
       <div class="gm-account-menu" id="account-menu">
-        <button class="gm-account-btn" id="btn-account-menu-toggle">Se connecter</button>
+        <button class="gm-account-btn" id="btn-account-menu-toggle"><span id="btn-account-menu-toggle-label">Se connecter</span></button>
         <div class="gm-account-dropdown" id="account-dropdown">
           <button class="gm-dropdown-item" id="menu-item-account">Mon compte</button>
           <button class="gm-dropdown-item" id="menu-item-palmares">Palmarès</button>
@@ -2738,43 +2894,44 @@ button{ font-family:inherit; cursor:pointer; }
       </div>
     </div>
 
-    <div class="howto">
-      <div class="howto-inner">
-      <div class="howto-title">Comment ça marche ?</div>
-      <div class="howto-list">
-        <div class="howto-row">
-          <div class="howto-row-head">
-            <div class="howto-num">1</div>
-            <div class="howto-heading">Choisissez votre club</div>
-          </div>
-          <p>Sélectionnez l'un des 5 grands championnats européens (Ligue 1, Premier League, Liga, Bundesliga ou Serie A), puis choisissez votre club parmi ceux qui évoluent dans l'élite. Dès votre choix validé, l'ensemble de l'interface se pare des couleurs et de l'identité du club : fond, accents, cartes, tout s'adapte instantanément pour vous plonger dans son univers.</p>
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-brand">
+          <div class="site-footer-logo">The Special One</div>
+          <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
         </div>
-        <div class="howto-row">
-          <div class="howto-row-head">
-            <div class="howto-num">2</div>
-            <div class="howto-heading">Composez votre système</div>
+        <div class="site-footer-cols">
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Le jeu</div>
+            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
+            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
+            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
           </div>
-          <p>Avant de lancer la draft, choisissez le système tactique qui incarnera votre philosophie de jeu, parmi 8 formations classiques : 4-3-3, 4-4-2, 4-2-3-1, 3-5-2, 3-4-3, 5-3-2 et bien d'autres. Le terrain se redessine aussitôt, plaçant chaque poste à l'endroit exact qu'impose votre formation, prêt à accueillir vos futurs joueurs.</p>
-        </div>
-        <div class="howto-row">
-          <div class="howto-row-head">
-            <div class="howto-num">3</div>
-            <div class="howto-heading">Draftez son histoire</div>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">À propos</div>
+            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="faq">FAQ</button>
+            <button class="site-footer-link" data-info="contact">Contact</button>
           </div>
-          <div class="howto-row-body">
-            <p>C'est le cœur du jeu : à chaque lancement de draft, cinq joueurs sont piochés dans l'historique réel du club, toutes générations confondues. Survolez une carte pour voir apparaître en surbrillance les postes du terrain où elle peut être alignée, cliquez pour la poser, et utilisez vos relances si la main ne vous convient pas.</p>
-            <p>Continuez jusqu'à compléter vos 11 titulaires ainsi que vos remplaçants. Vous pouvez à tout moment reprendre un joueur déjà placé pour ajuster votre composition.</p>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Légal</div>
+            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
+            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
           </div>
-        </div>
-        <div class="howto-row">
-          <div class="howto-row-head">
-            <div class="howto-num">4</div>
-            <div class="howto-heading">Simulez la saison</div>
-          </div>
-          <p>Une fois votre effectif au complet, il ne vous reste qu'à lancer la saison et découvrir comment votre équipe de légende se comporte face aux autres clubs. Cette dernière étape est encore en cours de développement et arrivera prochainement.</p>
         </div>
       </div>
+      <div class="site-footer-bottom">
+        <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
       </div>
+    </footer>
+  </section>
+
+  <!-- ============================ INFO (pages footer) ============================ -->
+  <section id="screen-info" class="screen">
+    <div class="info-wrap">
+      <button class="gm-btn-secondary" id="btn-info-back">&larr; Retour</button>
+      <h1 class="info-title" id="info-title"></h1>
+      <div class="info-content" id="info-content"></div>
     </div>
   </section>
 
@@ -3355,7 +3512,7 @@ const FLAG_IMAGES = {
   'Congo': 'data/flags/republic-of-the-congo.svg',
   'Coree du Sud': 'data/flags/south-korea.svg',
   'Costa Rica': 'data/flags/costa-rica.svg',
-  'Cote d\'Ivoire': 'data/flags/ivory-coast.svg',
+  "Cote d\'Ivoire": 'data/flags/ivory-coast.svg',
   'Croatie': 'data/flags/croatia.svg',
   'Danemark': 'data/flags/denmark.svg',
   'Ecosse': 'data/flags/scotland.svg',
@@ -3372,9 +3529,7 @@ const FLAG_IMAGES = {
   'Guinee-Bissau': 'data/flags/guinea-bissau.svg',
   'Guinee': 'data/flags/guinea.svg',
   'Haiti': 'data/flags/haiti.svg',
-  'Hongrie': 'data/flags/hungary.svg',
   'Indonesie': 'data/flags/indonesia.svg',
-  'Irlande': 'data/flags/ireland.svg',
   'Islande': 'data/flags/iceland.svg',
   'Italie': 'data/flags/italy.svg',
   'Japon': 'data/flags/japan.svg',
@@ -3403,6 +3558,7 @@ const FLAG_IMAGES = {
   'Portugal': 'data/flags/portugal.svg',
   'RD Congo': 'data/flags/democratic-republic-of-congo.svg',
   'Rep. centrafricaine': 'data/flags/central-african-republic.svg',
+  "Rep. d\'Irlande": 'data/flags/ireland.svg',
   'Rep. dominicaine': 'data/flags/dominican-republic.svg',
   'Roumanie': 'data/flags/romania.svg',
   'Russie': 'data/flags/russia.svg',
@@ -3518,46 +3674,51 @@ function fitFirstname(cardEl){
   }
 }
 
-// Taille du poste : même principe que le nom - grande taille de référence,
-// Une combinaison de 3+ postes ("MOC - MD - MC - MI") ne rentre plus sur une
-// seule ligne même réduite à l'extrême - on la répartit alors sur 2 lignes
-// (moitié/moitié) plutôt que de la laisser déborder de la carte ou de la
-// rendre illisible. 1 ou 2 postes restent sur une seule ligne comme avant.
-function positionLinesMarkup(poste){
-  const tokens = String(poste||'').split('-').map(s=>s.trim()).filter(Boolean);
-  let lines;
-  if(tokens.length <= 2){
-    lines = [tokens.join(' - ')];
-  } else {
-    const mid = Math.ceil(tokens.length/2);
-    lines = [tokens.slice(0,mid).join(' - '), tokens.slice(mid).join(' - ')];
-  }
-  return lines.map(l=>`<span>${l}</span>`).join('');
-}
-
-// réduite seulement si la combinaison de postes (ex. "AD - BU - MOC") est
-// trop longue pour la carte. Un poste unique ("BU") s'affiche donc bien
-// plus grand qu'une combinaison à 3 postes, au lieu d'une taille fixe
-// dimensionnée pour le pire cas. La référence est recalculée à partir de
-// la largeur RÉELLE de chaque carte (et non une largeur fixe supposée),
-// pour rester proportionnelle aussi bien sur les grandes cartes de
-// l'accueil que sur les petites cartes de la draft.
+// Taille du poste : essaie TOUJOURS une seule ligne à la même taille de
+// référence que toutes les autres cartes (cohérence visuelle) - ne passe à
+// 2 lignes que si ça ne tient vraiment pas, et ne réduit la police qu'en
+// tout dernier recours si même 2 lignes ne suffisent pas. La référence est
+// recalculée à partir de la largeur RÉELLE de chaque carte (et non une
+// largeur fixe supposée), pour rester proportionnelle aussi bien sur les
+// grandes cartes de l'accueil que sur les petites cartes de la draft.
 function fitPosition(cardEl){
   const posEl = cardEl.querySelector('.pc-position');
-  const spans = posEl ? Array.from(posEl.querySelectorAll('span')) : [];
-  if(!posEl || !spans.length) return;
+  if(!posEl) return;
+  const poste = posEl.dataset.poste || '';
+  const tokens = poste.split('-').map(s=>s.trim()).filter(Boolean);
+  if(!tokens.length) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
   const refSize = 100 * (cardWidth / PC_FIGMA_WIDTH);
-  // La boîte va jusqu'en bas de la carte (top:77.68% -> bottom:0) : elle a
-  // largement la hauteur pour 2 lignes, même à la même taille qu'une seule.
-  // On part donc toujours de la même référence que le cas 1 ligne - seule
-  // la largeur (la ligne la plus longue des 1 ou 2) doit éventuellement
-  // forcer une réduction, jamais le nombre de lignes en lui-même.
+
+  function setLines(lines){
+    posEl.innerHTML = lines.map(l=>`<span>${l}</span>`).join('');
+  }
+  function widestSpanWidth(){
+    return Array.from(posEl.querySelectorAll('span')).reduce((max,s)=>Math.max(max, s.getBoundingClientRect().width), 0);
+  }
+
+  // 1) Une seule ligne, taille de référence identique pour toutes les cartes.
+  setLines([tokens.join(' - ')]);
   posEl.style.fontSize = refSize + 'px';
-  const boxWidth = posEl.getBoundingClientRect().width;
-  const widestSpanWidth = spans.reduce((max,s)=>Math.max(max, s.getBoundingClientRect().width), 0);
-  if(boxWidth > 0 && widestSpanWidth > boxWidth){
-    posEl.style.fontSize = (refSize * (boxWidth / widestSpanWidth) * 0.97) + 'px';
+  let boxWidth = posEl.getBoundingClientRect().width;
+  if(boxWidth > 0 && widestSpanWidth() <= boxWidth) return; // tient très bien, rien d'autre à faire
+
+  // 2) Ne tient pas sur une ligne -> répartition sur 2 lignes (moitié/moitié),
+  // toujours à la MÊME taille de référence (pas de réduction pour l'instant).
+  if(tokens.length > 1){
+    const mid = Math.ceil(tokens.length/2);
+    setLines([tokens.slice(0,mid).join(' - '), tokens.slice(mid).join(' - ')]);
+    boxWidth = posEl.getBoundingClientRect().width;
+    if(boxWidth > 0 && widestSpanWidth() <= boxWidth) return; // tient en 2 lignes à taille normale
+  }
+
+  // 3) Dernier recours : ne tient toujours pas (même en 2 lignes, ex. une
+  // combinaison de postes très longue sur une petite carte) -> réduction
+  // proportionnelle à la ligne actuellement la plus large.
+  boxWidth = posEl.getBoundingClientRect().width;
+  const w = widestSpanWidth();
+  if(boxWidth > 0 && w > boxWidth){
+    posEl.style.fontSize = (refSize * (boxWidth / w) * 0.97) + 'px';
   }
 }
 
@@ -3597,7 +3758,7 @@ function renderPlayerCard(club, player){
       <div class="pc-number">${player.numero}</div>
       <div class="pc-trigram"><span>${club.trigram}</span></div>
 
-      <div class="pc-position">${positionLinesMarkup(player.poste)}</div>
+      <div class="pc-position" data-poste="${player.poste}"><span>${player.poste}</span></div>
       <div class="pc-rating">${player.note}</div>
     </div>
   `;
@@ -4021,6 +4182,7 @@ function primeCrestCache(){
 // ---------------------------- STATE ----------------------------
 const state = {
   screen:"landing",
+  infoPage:null,
   themePreviewIdx:0,
   league:null,
   club:null,
@@ -4140,6 +4302,256 @@ function toast(msg){
   toast._t = setTimeout(()=>el.classList.remove('show'), duration);
 }
 
+// ---------------------------- PAGES D'INFO (footer) ----------------------------
+const INFO_PAGES = {
+  'comment-jouer': {
+    title:'Comment jouer',
+    html:`
+      <h2>1. Choisissez votre club</h2>
+      <p>Sélectionnez l'un des 5 grands championnats européens (Ligue 1, Premier League, La Liga, Bundesliga, Serie A), puis un club parmi ceux marqués comme jouables. Les clubs affichés en grisé avec la mention "Bientôt disponible" n'ont pas encore leur base de données de joueurs constituée - ils arriveront progressivement.</p>
+
+      <h2>2. Composez votre système</h2>
+      <p>Avant la draft, choisissez votre formation tactique parmi plusieurs schémas classiques (4-3-3, 4-4-2, 4-2-3-1, 3-5-2...). Le terrain se redessine aussitôt avec les postes correspondants.</p>
+
+      <h2>3. Draftez votre effectif</h2>
+      <p>À chaque tour, 5 joueurs sont piochés au hasard dans l'historique réel du club, toutes générations confondues (22 saisons, de 2004-2005 à 2025-2026). Cliquez sur une carte pour voir où elle peut être alignée, puis posez-la sur un poste compatible. Vous pouvez relancer la main si elle ne vous convient pas, et réorganiser vos titulaires/remplaçants à tout moment.</p>
+
+      <h2>4. Disputez la saison</h2>
+      <p>Une fois l'effectif complet, la saison démarre : championnat en aller-retour, coupe nationale à élimination directe (16 clubs), trophée d'avant-saison face au vainqueur de la coupe précédente. Chaque match peut être joué en direct (avec de vraies décisions tactiques en cours de match : changements, gestion du score, gestion des cartons...) ou simulé instantanément.</p>
+
+      <h2>5. Qualifiez-vous pour l'Europe</h2>
+      <p>Selon votre classement en fin de saison, vous pouvez viser la Ligue des Champions, la Ligue Europa ou la Ligue Conférence l'année suivante. Certaines places passent par un tour de qualification aller-retour (jouable en direct) avant même le début de la phase de ligue. Consultez la page <button class="site-footer-link" style="display:inline;margin:0" data-info="clubs-europeens">Clubs européens</button> pour le détail complet du système.</p>
+
+      <h2>6. Gérez le mercato</h2>
+      <p>Entre chaque saison, un mercato vous permet d'échanger jusqu'à 3 joueurs de votre effectif (4 en cas de très bons résultats). Un mercato hivernal exceptionnel (1 seul joueur) peut aussi s'ouvrir en cours de saison si le conseil d'administration s'inquiète de vos résultats. Après plusieurs bonnes saisons consécutives, un club légèrement plus huppé que le vôtre peut même venir vous chercher comme entraîneur - à vous d'accepter ou de rester fidèle à votre club.</p>
+
+      <h2>7. Construisez votre carrière</h2>
+      <p>Chaque saison jouée alimente votre Palmarès (trophées, statistiques de carrière) et débloque des succès. Le Panthéon vous permet de comparer votre parcours à celui des autres joueurs.</p>
+    `
+  },
+  'database-joueurs': {
+    title:'Base de données des joueurs',
+    html:`
+      <p class="info-meta">Méthodologie de construction des effectifs historiques.</p>
+      <h2>Une base 100% réelle</h2>
+      <p>Chaque club jouable dispose d'un effectif reconstitué à partir de données réelles couvrant <strong>22 saisons</strong>, de 2004-2005 à 2025-2026. Pour chaque saison, les joueurs réellement présents dans l'effectif du club sont recensés avec leur poste et leur note de l'époque, permettant de piocher aussi bien une légende des années 2000 qu'un titulaire de la saison en cours.</p>
+
+      <h2>Système de multi-postes</h2>
+      <p>Un joueur ayant occupé plusieurs postes différents au cours de sa carrière au club (avec une note d'au moins 75 à chaque fois) est identifié comme polyvalent et peut être aligné sur n'importe lequel de ces postes une fois drafté - par exemple un ailier capable de dépanner en pointe, ou un latéral repositionné plus haut sur le terrain certaines saisons.</p>
+
+      <h2>Clubs disponibles</h2>
+      <p>La construction d'une base de données complète pour un club représente un travail conséquent (recherche saison par saison, nettoyage, harmonisation des postes). Les clubs sont donc ajoutés progressivement. Un club sans base de données encore prête apparaît grisé avec la mention "Bientôt disponible" sur l'écran de sélection plutôt que d'être proposé avec un effectif incomplet.</p>
+
+      <h2>Clubs de complément européens</h2>
+      <p>Pour peupler les coupes d'Europe au-delà des 5 championnats couverts, une liste de clubs "reste de l'Europe" (Portugal, Pays-Bas, Belgique, Turquie, Écosse, pays nordiques et d'Europe de l'Est...) sert d'adversaires, avec une force approximative calibrée sur leur niveau réel récent.</p>
+    `
+  },
+  'clubs-europeens': {
+    title:'Clubs européens',
+    html:`
+      <p class="info-meta">Fonctionnement des qualifications et compétitions européennes.</p>
+      <h2>Qualification par le classement</h2>
+      <p>À la fin de chaque saison, le classement final du championnat détermine les qualifiés européens de la saison suivante : les premières places donnent accès à la Ligue des Champions (phase de ligue directe, ou tour de qualification pour certains championnats selon leur niveau), les places suivantes à la Ligue Europa, puis à la Ligue Conférence.</p>
+
+      <h2>Vainqueurs de coupes</h2>
+      <p>Le vainqueur de la coupe nationale obtient une place en Ligue Europa. Les vainqueurs des coupes d'Europe de la saison précédente (Ligue des Champions, Ligue Europa) sont assurés d'une place en phase de ligue de Ligue des Champions la saison suivante ; le vainqueur de la Ligue Conférence obtient une place en Ligue Europa. En cas de double qualification, seule la meilleure place est conservée et l'autre est redistribuée au club suivant éligible.</p>
+
+      <h2>European Performance Spot (EPS)</h2>
+      <p>Un coefficient de performance est calculé chaque saison pour chaque championnat, à partir des résultats réels de ses clubs engagés en Europe (victoire, nul, défaite, bonus de classement en phase de ligue, bonus de parcours en phase à élimination directe). Les deux championnats les mieux classés sur ce coefficient obtiennent une place supplémentaire en Ligue des Champions la saison suivante.</p>
+
+      <h2>Tours de qualification</h2>
+      <p>Certaines places passent par un tour de qualification aller-retour avant la phase de ligue (tour de Ligue des Champions pour les championnats à coefficient plus faible, barrage systématique pour la Ligue Conférence). Si votre club est concerné, chaque manche se joue en direct comme un vrai match. En cas de défaite, une élimination en tour de Ligue des Champions redescend en Ligue Europa ; une défaite au barrage de Ligue Conférence signifie une saison sans coupe d'Europe.</p>
+
+      <h2>Format des compétitions</h2>
+      <p>Une fois qualifiées, les 3 coupes suivent le format actuel de l'UEFA : phase de ligue à 36 clubs, barrage pour les places 9 à 24, puis 8es, quarts, demies et finale à élimination directe (aller-retour, prolongation et tirs au but en cas d'égalité).</p>
+    `
+  },
+  'a-propos': {
+    title:'À propos du projet',
+    html:`
+      <p><strong>The Special One</strong> est un projet personnel, développé par passion pour le football et les jeux de gestion. L'idée : composer une équipe de légende en piochant des joueurs à travers toute l'histoire récente d'un club, puis vivre une carrière de A à Z - de la draft jusqu'au sommet de l'Europe.</p>
+      <p>Le projet s'inspire de jeux communautaires comme onze-de-reve.fr, en y ajoutant une simulation de saison complète (championnat, coupes nationales, coupes d'Europe, mercatos, progression de carrière).</p>
+      <h2>Avertissement</h2>
+      <p>Ce site est un projet non-officiel, non affilié et non approuvé par l'UEFA, la FIFA, EA Sports, ni par aucun des championnats, clubs ou joueurs mentionnés. Les noms et données réelles sont utilisés à titre purement informatif et non commercial, dans un cadre de fan-projet. Aucune donnée de jeu (FIFA/FC) n'est extraite ou redistribuée : les informations utilisées (compositions d'effectifs, postes, niveaux approximatifs) sont recensées manuellement à partir de sources publiques.</p>
+      <h2>Pas de publicité</h2>
+      <p>Ce site ne diffuse aucune publicité et ne vend aucune donnée à des tiers.</p>
+    `
+  },
+  'faq': {
+    title:'FAQ',
+    html:`
+      <h3>Pourquoi certains clubs ne sont pas disponibles ?</h3>
+      <p>Construire la base de données d'un club (22 saisons de composition d'effectif) demande un vrai travail de recherche. Les clubs sont ajoutés progressivement ; ceux pas encore prêts apparaissent grisés avec la mention "Bientôt disponible".</p>
+
+      <h3>Comment fonctionne le multi-poste ?</h3>
+      <p>Un joueur ayant occupé plusieurs postes avec une note d'au moins 75 au cours de sa carrière au club peut être aligné sur n'importe lequel de ces postes.</p>
+
+      <h3>Ma progression est-elle sauvegardée ?</h3>
+      <p>Oui, si vous créez un compte. Votre carrière (club actuel, effectif, historique de saisons, succès) est alors sauvegardée automatiquement.</p>
+
+      <h3>Je n'ai pas de compte, puis-je quand même jouer ?</h3>
+      <p>Oui, mais votre progression reste locale à votre navigateur et n'apparaîtra pas dans le Panthéon ni le Palmarès en ligne.</p>
+
+      <h3>Comment fonctionne le mercato hivernal ?</h3>
+      <p>Si votre classement en cours de saison sort de la fenêtre de résultats tolérée par le conseil d'administration de votre club (variable selon son standing), un mercato exceptionnel d'un seul joueur peut s'ouvrir entre la 17e et la 20e journée.</p>
+
+      <h3>Un autre club peut me recruter comme entraîneur ?</h3>
+      <p>Oui, après plusieurs bonnes saisons consécutives, un club légèrement au-dessus du vôtre peut vous approcher avant le mercato. Si vous acceptez, vous héritez de son effectif réel puis disposez d'un mercato pour l'améliorer.</p>
+
+      <h3>Un bug ou une suggestion ?</h3>
+      <p>Écrivez-nous via la page <button class="site-footer-link" style="display:inline;margin:0" data-info="contact">Contact</button>.</p>
+    `
+  },
+  'contact': {
+    title:'Contact',
+    html:`
+      <p>Une question, un bug à signaler, une note de joueur qui vous semble fausse, une suggestion, une proposition de partenariat ? Remplissez le formulaire ci-dessous - on y jette un œil dès que possible.</p>
+
+      <form id="contact-form" class="contact-form">
+        <div class="contact-field">
+          <label for="contact-category">Type de message</label>
+          <select id="contact-category" class="modal-input" required>
+            <option value="" disabled selected>Choisissez une catégorie</option>
+            <option value="bug">Signaler un bug</option>
+            <option value="note">Une note de joueur/club me semble fausse</option>
+            <option value="suggestion">Suggestion / idée d'amélioration</option>
+            <option value="partenariat">Partenariat</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="contact-field">
+          <label for="contact-email">Votre email</label>
+          <input type="email" id="contact-email" class="modal-input" required placeholder="vous@exemple.com">
+        </div>
+        <div class="contact-field">
+          <label for="contact-subject">Sujet (optionnel)</label>
+          <input type="text" id="contact-subject" class="modal-input" placeholder="Ex : Chelsea saison 2019-2020, note de Kanté">
+        </div>
+        <div class="contact-field">
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" class="modal-input contact-textarea" required rows="6" placeholder="Décrivez votre bug, votre suggestion, votre idée..."></textarea>
+        </div>
+        <button type="submit" class="gm-btn-primary" id="contact-submit-btn">Envoyer</button>
+        <div id="contact-form-status" class="contact-form-status"></div>
+      </form>
+
+      <p class="info-meta" style="margin-top:32px">Vous préférez l'email direct ? <a href="mailto:contact@specialone.fr">contact@specialone.fr</a></p>
+    `
+  },
+  'conditions': {
+    title:"Conditions d'utilisation",
+    html:`
+      <p class="info-meta">Dernière mise à jour : 2026.</p>
+      <h2>Objet</h2>
+      <p>The Special One est un jeu de gestion sportive gratuit, à but non commercial, mis à disposition tel quel ("as is"). En utilisant ce site, vous acceptez les présentes conditions.</p>
+      <h2>Utilisation du service</h2>
+      <p>Le site est destiné à un usage personnel et de loisir. Toute tentative d'extraction massive de données, d'automatisation abusive ou de perturbation du service est interdite.</p>
+      <h2>Comptes utilisateurs</h2>
+      <p>La création d'un compte permet de sauvegarder votre progression. Vous êtes responsable de la confidentialité de vos identifiants. Un compte peut être suspendu en cas d'usage abusif.</p>
+      <h2>Contenu et propriété intellectuelle</h2>
+      <p>Les noms de championnats, clubs et joueurs réels sont utilisés à titre informatif dans le cadre d'un projet de fan non commercial. Le code, les visuels et les textes propres au site restent la propriété de leur auteur. Aucune garantie n'est donnée quant à l'exactitude des données historiques utilisées.</p>
+      <h2>Disponibilité</h2>
+      <p>Le service est fourni sans garantie de disponibilité continue. Des interruptions, pertes de données ou modifications peuvent survenir sans préavis.</p>
+      <h2>Limitation de responsabilité</h2>
+      <p>L'éditeur ne saurait être tenu responsable des interruptions de service, pertes de données ou dommages indirects liés à l'utilisation du site.</p>
+      <h2>Modification des conditions</h2>
+      <p>Ces conditions peuvent être mises à jour à tout moment. L'utilisation continue du site après modification vaut acceptation des nouvelles conditions.</p>
+      <h2>Contact</h2>
+      <p>Pour toute question : <a href="mailto:contact@specialone.fr">contact@specialone.fr</a></p>
+    `
+  },
+  'confidentialite': {
+    title:'Confidentialité',
+    html:`
+      <p class="info-meta">Dernière mise à jour : 2026.</p>
+      <h2>Données collectées</h2>
+      <p>Si vous créez un compte, nous collectons votre adresse email (authentification), un nom d'affichage optionnel (visible au Palmarès et au Panthéon), ainsi que l'historique de vos saisons jouées (club, résultats, trophées, statistiques). Aucune information sensible n'est demandée.</p>
+      <h2>Utilisation des données</h2>
+      <p>Ces données servent exclusivement à faire fonctionner le jeu : authentification, sauvegarde de votre progression, affichage de votre historique et de votre classement dans le Panthéon. Elles ne sont ni vendues, ni partagées avec des tiers à des fins commerciales.</p>
+      <h2>Stockage local</h2>
+      <p>Si vous jouez sans compte, votre progression est conservée localement dans votre navigateur (stockage local) et n'est jamais transmise à nos serveurs.</p>
+      <h2>Publicité</h2>
+      <p>Ce site ne diffuse aucune publicité et n'utilise aucun traceur publicitaire tiers.</p>
+      <h2>Vos droits</h2>
+      <p>Vous pouvez demander l'accès, la correction ou la suppression de vos données à tout moment en nous contactant à <a href="mailto:contact@specialone.fr">contact@specialone.fr</a>.</p>
+      <h2>Sécurité</h2>
+      <p>Les données de compte sont hébergées via un prestataire tiers sécurisé (Supabase). Des mesures raisonnables sont mises en œuvre pour protéger vos informations, sans garantie absolue de sécurité inhérente à tout service en ligne.</p>
+    `
+  }
+};
+
+function renderInfoPage(){
+  const page = INFO_PAGES[state.infoPage];
+  if(!page) return;
+  document.getElementById('info-title').textContent = page.title;
+  const contentEl = document.getElementById('info-content');
+  contentEl.innerHTML = page.html;
+  contentEl.querySelectorAll('[data-info]').forEach(btn=>{
+    btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
+  });
+  const contactForm = document.getElementById('contact-form');
+  if(contactForm) contactForm.addEventListener('submit', submitContactForm);
+}
+
+const CONTACT_CATEGORY_LABELS = {
+  bug:'Bug', note:'Note incorrecte', suggestion:'Suggestion',
+  partenariat:'Partenariat', autre:'Autre'
+};
+
+async function submitContactForm(e){
+  e.preventDefault();
+  const category = document.getElementById('contact-category').value;
+  const email = document.getElementById('contact-email').value.trim();
+  const subject = document.getElementById('contact-subject').value.trim();
+  const message = document.getElementById('contact-message').value.trim();
+  const statusEl = document.getElementById('contact-form-status');
+  const btn = document.getElementById('contact-submit-btn');
+
+  if(!category || !email || !message){
+    statusEl.textContent = 'Merci de remplir au moins la catégorie, votre email et le message.';
+    statusEl.className = 'contact-form-status is-error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Envoi...';
+  statusEl.textContent = '';
+  statusEl.className = 'contact-form-status';
+
+  try{
+    if(!sbClient) throw new Error('no-client');
+    const { error } = await sbClient.from('contact_messages').insert({
+      category, email, subject: subject || null, message,
+      user_id: state.session ? state.session.user.id : null
+    });
+    if(error) throw error;
+    statusEl.textContent = 'Message envoyé, merci ! Nous reviendrons vers vous si besoin.';
+    statusEl.className = 'contact-form-status is-success';
+    document.getElementById('contact-form').reset();
+  } catch(err){
+    // Repli : si l'enregistrement en base échoue (hors-ligne, Supabase
+    // indisponible...), on ouvre le client mail avec le message pré-rempli
+    // plutôt que de perdre silencieusement la demande.
+    const catLabel = CONTACT_CATEGORY_LABELS[category] || category;
+    const mailSubject = encodeURIComponent(`[${catLabel}] ${subject || 'Contact The Special One'}`);
+    const mailBody = encodeURIComponent(`${message}\n\n---\nEmail : ${email}`);
+    window.location.href = `mailto:contact@specialone.fr?subject=${mailSubject}&body=${mailBody}`;
+    statusEl.textContent = "Envoi impossible pour le moment - ouverture de votre messagerie en repli.";
+    statusEl.className = 'contact-form-status is-error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer';
+  }
+}
+
+function showInfoPage(key){
+  if(!INFO_PAGES[key]) return;
+  state.infoPage = key;
+  renderInfoPage();
+  showScreen('info');
+  window.scrollTo({ top:0 });
+}
+
 // ---------------------------- SCREEN SWITCH ----------------------------
 // Postes de rendu associés à chaque écran, utilisés à la fois pour
 // l'affichage initial et pour la navigation arrière/avant du navigateur.
@@ -4151,7 +4563,8 @@ const SCREEN_RENDERERS = {
   account: ()=>renderAccountScreen(),
   palmares: ()=>renderPalmaresScreen(),
   pantheon: ()=>renderPantheonScreen(),
-  'live-match': ()=>renderLiveMatch()
+  'live-match': ()=>renderLiveMatch(),
+  info: ()=>renderInfoPage()
 };
 
 // Certains écrans exigent un état minimal (un club choisi, une saison en
@@ -4161,6 +4574,7 @@ function canShowScreen(name){
   if(name === 'game') return !!state.club;
   if(name === 'season') return !!state.season;
   if(name === 'live-match') return !!state.liveMatch;
+  if(name === 'info') return !!state.infoPage;
   return true;
 }
 
@@ -9897,7 +10311,7 @@ function pantheonDisplayName(){
 // une fois connecté, "Mon compte" sinon. L'option "Déconnexion" du menu
 // n'a de sens que si une session existe.
 function updateAccountMenuLabel(){
-  const btn = document.getElementById('btn-account-menu-toggle');
+  const btn = document.getElementById('btn-account-menu-toggle-label') || document.getElementById('btn-account-menu-toggle');
   const logoutItem = document.getElementById('menu-item-logout');
   if(!btn || !logoutItem) return;
   if(state.session){
@@ -11047,6 +11461,13 @@ document.getElementById('btn-home').addEventListener('click', ()=>{
   window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('btn-next-matchday').addEventListener('click', handleNextMatchday);
+document.querySelectorAll('.site-footer-link[data-info]').forEach(btn=>{
+  btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
+});
+document.getElementById('btn-info-back').addEventListener('click', ()=>{
+  if(history.length > 1) history.back();
+  else { state.infoPage = null; showScreen('landing'); renderLanding(); }
+});
 document.getElementById('btn-play-live').addEventListener('click', ()=>{
   startLiveMatchday();
 });
