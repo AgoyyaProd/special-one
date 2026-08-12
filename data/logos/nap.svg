@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:ns="http://ns.adobe.com/SaveForWeb/1.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:svg="http://www.w3.org/2000/svg" viewBox="0 0 999.02 999.02">
+  <!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 109)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #01a7e1;
+        stroke-width: 2px;
+      }
+
+      .st1 {
+        fill: #01a7e1;
+      }
+
+      .st2 {
+        fill: #fff;
+        fill-opacity: .99;
+      }
+    </style>
+  </defs>
+  <g id="Ebene_1" inkscape:version="1.4.2 (ebf0e94, 2025-05-08)" sodipodi:docname="SSC Napoli 2025 (white and azure).svg">
+    <sodipodi:namedview id="namedview35" bordercolor="#666666" borderopacity="1" gridtolerance="10" guidetolerance="10" inkscape:current-layer="Ebene_1" inkscape:cx="284.09091" inkscape:cy="250" inkscape:deskcolor="#d1d1d1" inkscape:pagecheckerboard="0" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:showpageshadow="0" inkscape:window-height="987" inkscape:window-maximized="1" inkscape:window-width="1680" inkscape:window-x="-8" inkscape:window-y="-8" inkscape:zoom="0.66" objecttolerance="10" pagecolor="#ffffff" showgrid="false"/>
+    <g id="g2">
+      <circle id="circle1" class="st0" cx="499.51" cy="499.51" r="498.51"/>
+      <g id="g1">
+        <circle id="path1" class="st1" cx="499.51" cy="499.51" r="496.76"/>
+        <g id="g32">
+          <path id="path6" class="st2" d="M499.51,2.76C225.15,2.76,2.76,225.15,2.76,499.51s222.4,496.76,496.76,496.76,496.76-222.4,496.76-496.76S773.87,2.76,499.51,2.76ZM499.51,23.82c127.09,0,246.45,49.5,336.32,139.37,89.87,89.87,139.37,209.23,139.37,336.32s-49.5,246.45-139.37,336.32-209.23,139.37-336.32,139.37-246.45-49.5-336.49-139.37C73.32,745.96,23.82,626.6,23.82,499.51s49.5-246.45,139.37-336.32C253.06,73.32,372.43,23.82,499.51,23.82Z"/>
+          <path id="path17" class="st2" d="M499.51,134.75c-201.16,0-364.76,163.6-364.76,364.76s163.6,364.76,364.76,364.76,364.76-163.6,364.76-364.76-163.6-364.76-364.76-364.76ZM499.51,148.8c193.44,0,350.71,157.28,350.71,350.71s-157.28,350.71-350.71,350.71-350.71-157.28-350.71-350.71S306.07,148.8,499.51,148.8Z"/>
+          <path id="path30" class="st2" d="M292.21,290.8h128.14l208.53,249.26c1.4,1.58,3.86.7,3.86-1.4v-187.29c0-23.87-19.31-43.18-43.18-43.18h-12.81v-17.55h129.89v17.55h-8.6c-21.41,0-38.79,17.38-38.79,38.79v357.91h-17.03l-266.81-319.12c-.7-.88-2.28-.35-2.28.88v246.27c0,25.28,20.54,45.81,45.81,45.81h10.36v15.8h-136.91v-15.8h14.04c21.41,0,38.79-17.38,38.79-38.79v-290.51l-19.48-23.17-7.2-8.6c-5.09-5.97-12.46-9.48-20.19-9.48h-5.79v-17.38h-.35Z"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
