@@ -269,14 +269,14 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   --r-md:12px;
   --r-lg:18px;
 
-  /* Palette fixe de l'application (ne dépend plus du club sélectionné) :
-     bleu électrique = sélection / éléments interactifs, rouge = actions
-     importantes (validation de mercato, suppression), vert/orange
-     réservés aux signaux d'amélioration et d'avertissement. Les noms de
-     variable --club-* sont conservés pour ne pas casser les ~200 usages
-     existants dans la feuille de style, mais ne varient plus par club. */
-  --club-primary:#2563EB;
-  --club-secondary:#B91C1C;
+  /* Fond neutre gris/noir par défaut (hors partie active, ou si aucun
+     club favori n'est défini) - repris dynamiquement en JS par
+     applyClubTheme/applyFavoriteClubTheme dès qu'un club (favori ou en
+     cours de partie) doit teinter le fond. Les noms de variable --club-*
+     sont réutilisés pour l'accent des boutons/éléments interactifs même
+     hors contexte de club, d'où le rester au bleu par défaut pour --club-accent. */
+  --club-primary:#3d434f;
+  --club-secondary:#14161c;
   --club-accent:#3B82F6;
   --danger:#B91C1C;
   --success:#22C55E;
@@ -2857,24 +2857,6 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
   margin:0 30px 18px 0;
 }
-.europe-recap-league{
-  border:1px solid var(--border);
-  border-radius:var(--r-md, 12px);
-  padding:16px 18px;
-  margin-bottom:14px;
-}
-.europe-recap-league-head{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
-.europe-recap-league-name{
-  font-family:var(--sans);
-  font-weight:700;
-  font-size:14.5px;
-  color:var(--text);
-}
 .europe-recap-eps-badge{
   font-family:var(--sans);
   font-size:10.5px;
@@ -2886,25 +2868,55 @@ button{ font-family:inherit; cursor:pointer; }
   padding:3px 9px;
   border-radius:999px;
 }
-.europe-recap-row{
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  padding:5px 0;
+.europe-recap-empty{ color:var(--text-faint); font-style:italic; }
+.europe-recap-section-title{
   font-family:var(--sans);
-  font-size:13.5px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin:22px 0 10px;
 }
-.europe-recap-tier{
+.europe-recap-section-title:first-child{ margin-top:0; }
+.europe-recap-coeffs{
+  border:1px solid var(--border);
+  border-radius:var(--r-md, 12px);
+  overflow:hidden;
+  margin-bottom:6px;
+}
+.europe-recap-coeff-row{
+  padding:11px 16px;
+  border-bottom:1px solid var(--border);
+}
+.europe-recap-coeff-row:last-child{ border-bottom:none; }
+.europe-recap-coeff-row.is-eps{ background:color-mix(in srgb, #f5d36b 10%, transparent); }
+.europe-recap-coeff-line{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-family:var(--sans);
+  font-size:14px;
+}
+.europe-recap-coeff-rank{
   flex-shrink:0;
-  width:118px;
+  width:20px;
+  color:var(--text-faint);
   font-weight:700;
 }
-.europe-recap-tier.tier-cl{ color:var(--zone-cl); }
-.europe-recap-tier.tier-el{ color:var(--zone-el); }
-.europe-recap-tier.tier-ecl{ color:var(--zone-ecl); }
-.europe-recap-clubs{ color:var(--text-dim); }
-.europe-recap-clubs .is-me{ color:var(--text); font-weight:700; }
-.europe-recap-empty{ color:var(--text-faint); font-style:italic; }
+.europe-recap-coeff-league{ flex:1; color:var(--text); font-weight:600; }
+.europe-recap-coeff-value{
+  font-variant-numeric:tabular-nums;
+  color:var(--text-dim);
+  font-weight:700;
+}
+.europe-recap-coeff-beneficiary{
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--text-dim);
+  margin:6px 0 0 32px;
+}
+.europe-recap-coeff-beneficiary strong{ color:var(--text); }
 .modal-skip{
   display:block;
   width:100%;
@@ -4438,6 +4450,7 @@ const state = {
   // club légèrement plus huppé à partir de 2 saisons d'affilée.
   goodSeasonStreak:0,
   pendingPoachingOffer:null,
+  poachingOffersHistory:[],
   winStreak:0,
   lossStreak:0,
   fatigueLevel:0,
@@ -4487,6 +4500,17 @@ function applyClubTheme(club){
   // Le texte et les infos restent fixes en blanc - seuls le fond et les
   // maillots varient avec les 2 couleurs du club.
   root.setProperty('--club-accent', '#ffffff');
+}
+
+// Retire toute couleur de club appliquée en ligne (favori ou partie en
+// cours) - le fond retombe alors sur le dégradé gris/noir neutre défini
+// par défaut dans :root. Utilisé à la déconnexion, pour ne pas garder les
+// couleurs du club favori affichées une fois le compte quitté.
+function resetToDefaultTheme(){
+  const root = document.documentElement.style;
+  root.removeProperty('--club-primary');
+  root.removeProperty('--club-secondary');
+  root.removeProperty('--club-accent');
 }
 
 function toast(msg){
@@ -5111,7 +5135,11 @@ function paintHeroCards(club, animate){
 
 function renderLanding(){
   const club = THEME_PREVIEW_CLUBS[state.themePreviewIdx];
-  applyClubTheme(club);
+  // Ne colore QUE les cartes (voir paintHeroCards/renderPlayerCard, qui
+  // portent leurs propres variables --primary/--secondary locales) - le
+  // fond de la page ne doit PAS suivre cette rotation, sinon il ne reste
+  // jamais fixé sur le dégradé neutre gris/noir (ou la couleur du club
+  // favori) comme voulu : applyClubTheme() n'est plus appelé ici.
   paintHeroCards(club, false);
 
   const resumeBtn = document.getElementById('btn-resume-save');
@@ -5132,7 +5160,6 @@ function renderLanding(){
   landingTimer = setInterval(()=>{
     state.themePreviewIdx = (state.themePreviewIdx + 1) % THEME_PREVIEW_CLUBS.length;
     const next = THEME_PREVIEW_CLUBS[state.themePreviewIdx];
-    applyClubTheme(next);
     paintHeroCards(next, true);
   }, 4500);
 }
@@ -5165,7 +5192,9 @@ function renderSelect(){
   if(!state.league){
     clubGrid.innerHTML = '';
     cta.style.display = 'none';
-    applyClubTheme({primary:"#0B3D91",secondary:"#C1121F",accent:"#F5B700"});
+    // Ne force plus de palette générique ici (avant, bleu/rouge codés en
+    // dur) - le fond reste sur le thème déjà actif (club favori, ou
+    // dégradé neutre gris/noir par défaut), cohérent avec le reste du site.
     return;
   }
 
@@ -6010,14 +6039,27 @@ function estimateClubStrength(club){
 // effectif réel pour un club sans base de données joueurs.
 function findPoachingCandidateClubs(){
   const myStrength = estimateClubStrength(state.club);
+  const proposedBefore = state.poachingOffersHistory || [];
   const allClubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false && c.id !== state.club.id);
-  return allClubs
+  const eligible = allClubs
     .map(c => ({ club:c, strength: estimateClubStrength(c) }))
-    // "Légèrement au-dessus" : +2 à +8 points de force estimée, jamais plus
-    // - un saut trop grand (ex: Lens -> Barcelone) casserait la crédibilité.
-    .filter(({strength}) => strength > myStrength + 1 && strength <= myStrength + 8)
-    .sort((a,b)=> a.strength - b.strength)
+    // "Légèrement au-dessus" : strictement plus fort, jusqu'à +6 points -
+    // jamais un saut extrême (ex: Rennes -> Arsenal, qui à +7 casserait la
+    // crédibilité). Seuil bas volontairement large (n'importe quel club
+    // plus fort, même d'1 point) : les forces réelles des clubs suivis
+    // sont souvent très regroupées (ex: OM/OL/Monaco à seulement +1 de
+    // Rennes) - exiger +2 les excluait systématiquement, ne laissant que
+    // des clubs d'un autre championnat. Seuls les clubs "jouables" (vraie
+    // base de données) sont proposés - les "bientôt disponibles" (Espagne,
+    // Allemagne, Italie pour l'instant) le deviendront automatiquement dès
+    // qu'ils auront une vraie base, sans changement de code nécessaire ici.
+    .filter(({strength}) => strength > myStrength && strength <= myStrength + 6)
     .map(c=>c.club);
+  // Évite de reproposer un club déjà refusé/rejoint dans cette carrière
+  // tant qu'il reste d'autres options - garantit la diversité réclamée
+  // plutôt que de retomber sur le même club à chaque fois.
+  const fresh = eligible.filter(c => !proposedBefore.includes(c.id));
+  return fresh.length ? fresh : eligible;
 }
 
 // Constitue un effectif de départ pour le nouveau club à partir de sa
@@ -6044,11 +6086,39 @@ function autoFillSquadFromClub(club){
   state.subs.forEach(s=>{ s.player = null; });
   const used = new Set();
 
-  // Titulaires d'abord (meilleur joueur dispo compatible avec chaque poste).
-  state.slots.forEach(slot=>{
+  // 1) Postes les plus RARES en premier (le moins de joueurs compatibles
+  // dans l'effectif) plutôt que l'ordre arbitraire du terrain - sinon un
+  // joueur polyvalent (ex: capable de jouer AG ET MOC) peut être "gaspillé"
+  // sur un poste courant avant même que le tour du poste rare n'arrive,
+  // laissant ce dernier vide alors qu'un joueur éligible existait bel et
+  // bien dans l'effectif (typiquement AG/AD, souvent moins fournis).
+  const slotsByScarcity = [...state.slots].sort((a,b)=>{
+    const countA = candidates.filter(p=>compatiblePositions(p).includes(a.label)).length;
+    const countB = candidates.filter(p=>compatiblePositions(p).includes(b.label)).length;
+    return countA - countB;
+  });
+  slotsByScarcity.forEach(slot=>{
     const pick = candidates.find(p => !used.has(playerKey(p)) && compatiblePositions(p).includes(slot.label));
     if(pick){ slot.player = pick; used.add(playerKey(pick)); }
   });
+
+  // 2) Filet de sécurité : un poste encore vide (effectif trop restreint
+  // pour un match exact) est comblé par le meilleur joueur restant de la
+  // MÊME LIGNE (déf/mil/att), plutôt que de laisser un trou dans le onze.
+  state.slots.forEach(slot=>{
+    if(slot.player) return;
+    const line = POSITION_LINE[slot.label];
+    const pick = candidates.find(p => !used.has(playerKey(p)) && playerLines(p).includes(line));
+    if(pick){ slot.player = pick; used.add(playerKey(pick)); }
+  });
+  // 3) Dernier recours (effectif vraiment trop court) : n'importe quel
+  // joueur restant, pour ne jamais partir avec un onze incomplet.
+  state.slots.forEach(slot=>{
+    if(slot.player) return;
+    const pick = candidates.find(p => !used.has(playerKey(p)));
+    if(pick){ slot.player = pick; used.add(playerKey(pick)); }
+  });
+
   // Puis le banc, avec les meilleurs joueurs restants quel que soit leur poste.
   state.subs.forEach(sub=>{
     const pick = candidates.find(p => !used.has(playerKey(p)));
@@ -6068,8 +6138,11 @@ function checkPoachingOfferEligible(){
 
 function showPoachingOfferPopup(){
   const candidates = findPoachingCandidateClubs();
-  const pick = candidates[Math.floor(Math.random() * Math.min(5, candidates.length))];
+  // Aléatoire sur TOUS les candidats éligibles (pas seulement les plus
+  // proches en force) pour maximiser la diversité des offres.
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
   state.pendingPoachingOffer = pick;
+  state.poachingOffersHistory = [...(state.poachingOffersHistory||[]), pick.id];
 
   const titleEl = document.getElementById('season-event-title');
   titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Un club s'intéresse à vous`;
@@ -6354,30 +6427,13 @@ function euroEntriesForLeague(leagueName){
   // Confrontations de qualification (Tour LDC / Barrage Conférence) des
   // clubs de CE championnat - qu'il s'agisse du mien ou d'un autre suivi,
   // pour que le détail apparaisse aussi bien dans mon propre calendrier
-  // que dans celui des 4 autres championnats.
+  // que dans celui des 4 autres championnats. Un club ayant enchaîné
+  // plusieurs tours (Tour 3 -> Barrage) obtient une entrée par tour.
   if(state.euroQualifying){
-    state.euroQualifying.ties.filter(t=>clubIds.has(t.clubId)).forEach(tie=>{
-      const label = tie.competition === 'cl'
-        ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[tie.entryRound]}`
-        : 'Barrage Ligue Conférence';
-      if(tie.leg1){
-        entries.push({ type:'euro-quali', roundIdx:-4, label:`${label} - Aller`, matches:[tie.leg1] });
-      } else {
-        entries.push({ type:'euro-quali', roundIdx:-4, label:`${label} - Aller`, matches:[{ home:tie.clubId, away:tie.opponentId }], upcoming:true });
-      }
-      if(tie.leg2){
-        const leg2Display = {
-          ...tie.leg2,
-          aggHome: tie.aggOpp, aggAway: tie.aggClub,
-          wentToPenalties: tie.wentToPenalties,
-          penaltyScore: flipScorePair(tie.penaltyScore),
-          extraTimeScore: flipScorePair(tie.extraTimeScore)
-        };
-        entries.push({ type:'euro-quali', roundIdx:-3, label:`${label} - Retour`, matches:[leg2Display] });
-      } else if(tie.leg1){
-        entries.push({ type:'euro-quali', roundIdx:-3, label:`${label} - Retour`, matches:[{ home:tie.opponentId, away:tie.clubId }], upcoming:true });
-      }
-    });
+    const clubIdsWithTies = new Set(
+      state.euroQualifying.ties.filter(t=>clubIds.has(t.clubId)).map(t=>t.clubId)
+    );
+    clubIdsWithTies.forEach(cid=>{ entries.push(...qualifyingTimelineEntriesForClub(cid)); });
   }
   return entries;
 }
@@ -6547,7 +6603,7 @@ function enterSeason(){
   if(qualifyingTies.length){
     state.euro = null;
     state.shadowEuro = {};
-    state.euroQualifying = { ties: qualifyingTies, legPending:'leg1' };
+    state.euroQualifying = { ties: qualifyingTies };
   } else {
     state.euroQualifying = null;
     finalizeEuroQualifyingAndEnterEuro();
@@ -6711,8 +6767,8 @@ function startLiveMatchday(){
   // instantanément et on retente ce même clic pour la suite.
   if(hasPendingEuroQualifying()){
     const myTie = myPendingQualifyingTie();
-    const legKey = state.euroQualifying.legPending;
-    if(myTie && !myTie[legKey]){
+    if(myTie){
+      const legKey = !myTie.leg1 ? 'leg1' : 'leg2';
       startLiveQualifyingLeg(myTie, legKey);
     } else {
       bulkResolveEuroQualifyingWave();
@@ -8775,7 +8831,7 @@ function renderLiveMatch(){
   document.getElementById('live-score').textContent = `${lm.hg} - ${lm.ag}`;
   document.getElementById('live-minute').textContent = lm.finished ? 'Terminé' : `${lm.minute}'`;
   document.getElementById('live-competition-label').textContent = lm.isQualifying
-    ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.entryRound]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
+    ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
     : lm.isEuro
       ? `${EURO_LABELS[lm.euroTier]} - Phase de ligue`
       : `${state.league} - Journée ${lm.roundIdx+1}`;
@@ -9139,25 +9195,42 @@ function computeEuropeanQualifications(leagueName, standing, cupWinnerId, euroWi
 // club concerné. Utilisé une fois par saison, avant même que les 3
 // compétitions européennes ne soient construites (leur composition dépend
 // du résultat de ces confrontations).
+// Chaîne réelle des tours de qualification LDC UEFA : un club entrant au
+// tour 3 doit gagner le tour 3 PUIS le barrage pour atteindre la phase de
+// ligue (2 confrontations distinctes, pas une seule) - idem pour un tour 2
+// (tour 2 -> tour 3 -> barrage). Le barrage Conférence, lui, reste
+// toujours à une seule confrontation.
+const CL_QUALIFYING_STAGE_SEQUENCE = {
+  playoff: ['playoff'],
+  round3: ['round3','playoff'],
+  round2: ['round2','round3','playoff']
+};
+
+// Tirage d'un adversaire "reste de l'Europe" pour UNE confrontation de
+// qualification - mutualisé pour être appelable aussi bien à la
+// construction initiale qu'à l'enchaînement automatique d'un tour suivant
+// (ex: Tour 3 gagné -> Barrage), tout en garantissant qu'un même club de
+// complément ne soit jamais tiré deux fois la même saison.
+function drawQualifyingOpponent(){
+  const usedFillers = state.seasonFillerClubsUsed || (state.seasonFillerClubsUsed = new Set());
+  const candidates = shuffleArr(EURO_FILLER_CLUBS).filter(c=>!usedFillers.has(c.id));
+  if(!candidates.length) return null;
+  usedFillers.add(candidates[0].id);
+  return candidates[0];
+}
+
 function buildEuroQualifyingTies(){
   const ties = [];
-  const usedFillers = state.seasonFillerClubsUsed || (state.seasonFillerClubsUsed = new Set());
-  const fillerPool = shuffleArr(EURO_FILLER_CLUBS);
-  let fillerIdx = 0;
-  function drawOpponent(){
-    while(fillerIdx < fillerPool.length){
-      const candidate = fillerPool[fillerIdx++];
-      if(!usedFillers.has(candidate.id)){ usedFillers.add(candidate.id); return candidate; }
-    }
-    return null; // plus aucun adversaire disponible (cas limite) - le club passe directement
-  }
   function makeTie(id, leagueName, competition, entryRound){
     const club = (LEAGUES[leagueName]||[]).find(c=>c.id===id);
     if(!club) return;
-    const opponent = drawOpponent();
+    const stages = competition === 'cl' ? (CL_QUALIFYING_STAGE_SEQUENCE[entryRound] || ['playoff']) : ['playoff'];
+    const [firstStage, ...rest] = stages;
+    const opponent = drawQualifyingOpponent();
     if(!opponent) return;
     ties.push({
-      competition, entryRound, clubId:id, leagueName,
+      competition, stage:firstStage, finalEntryRound:entryRound, remainingStages:rest,
+      clubId:id, leagueName,
       opponentId:opponent.id, opponentName:opponent.name,
       isMine: id === state.club.id,
       leg1:null, leg2:null,
@@ -9207,6 +9280,9 @@ function resolveOneQualifyingLeg(tie, legKey){
 // home/away brut, qui s'inverse entre l'aller et le retour), puis
 // prolongation/tirs au but si toujours à égalité - exactement la même
 // mécanique que les tours à élimination directe post-phase de ligue.
+// Victoire mais tour de qualification suivant à disputer (ex: Tour 3 gagné
+// -> Barrage à venir) : une NOUVELLE confrontation est automatiquement
+// enchaînée plutôt que de considérer la qualification acquise trop tôt.
 function finalizeQualifyingTie(tie, clubStr, oppStr){
   const clubG1 = tie.leg1.home === tie.clubId ? tie.leg1.hg : tie.leg1.ag;
   const oppG1  = tie.leg1.home === tie.clubId ? tie.leg1.ag : tie.leg1.hg;
@@ -9227,26 +9303,55 @@ function finalizeQualifyingTie(tie, clubStr, oppStr){
   tie.aggClub = aggClub; tie.aggOpp = aggOpp;
   tie.won = tie.winner === tie.clubId;
   tie.resolved = true;
+
+  if(tie.won && tie.remainingStages && tie.remainingStages.length && state.euroQualifying){
+    const nextStage = tie.remainingStages[0];
+    const rest = tie.remainingStages.slice(1);
+    const opponent = drawQualifyingOpponent();
+    if(opponent){
+      state.euroQualifying.ties.push({
+        competition: tie.competition, stage: nextStage, finalEntryRound: tie.finalEntryRound, remainingStages: rest,
+        clubId: tie.clubId, leagueName: tie.leagueName,
+        opponentId: opponent.id, opponentName: opponent.name,
+        isMine: tie.clubId === state.club.id,
+        leg1:null, leg2:null,
+        wentToPenalties:false, penaltyScore:null, extraTimeScore:null,
+        aggClub:null, aggOpp:null, winner:null, won:null, resolved:false
+      });
+      if(tie.isMine){
+        toast(`Qualification LDC (${EURO_ENTRY_ROUND_LABEL[tie.stage]}) : victoire ${aggClub}-${aggOpp}${tie.wentToPenalties ? ` (tab ${tie.penaltyScore})` : ''} contre ${tie.opponentName} - direction le ${EURO_ENTRY_ROUND_LABEL[nextStage]} !`);
+      }
+    }
+  }
 }
 
+// Une confrontation est "en attente" tant qu'elle n'est pas résolue - y
+// compris celles enchaînées automatiquement après un tour gagné (ajoutées
+// en cours de saison, voir finalizeQualifyingTie).
 function hasPendingEuroQualifying(){
-  return !!(state.euroQualifying && state.euroQualifying.legPending !== 'done');
+  return !!(state.euroQualifying && state.euroQualifying.ties.some(t=>!t.resolved));
 }
 function myPendingQualifyingTie(){
-  return state.euroQualifying ? state.euroQualifying.ties.find(t=>t.isMine) : null;
+  return state.euroQualifying ? state.euroQualifying.ties.find(t=>t.isMine && !t.resolved) : null;
 }
 
-// Résout d'un coup, en instantané, la manche actuellement en attente pour
-// TOUTES les confrontations restantes (y compris la vôtre, si vous avez
-// choisi de ne pas la jouer en direct) - utilisé par "Journée suivante" et
-// par la simulation en masse.
+// Résout d'un coup, en instantané, TOUTES les confrontations restantes
+// (y compris la vôtre, si vous avez choisi de ne pas la jouer en direct)
+// - en boucle, car gagner un tour peut en enchaîner un nouveau (Tour 3 ->
+// Barrage) qu'il faut alors résoudre à son tour. Utilisé par "Journée
+// suivante" et par la simulation en masse.
 function bulkResolveEuroQualifyingWave(){
   const eq = state.euroQualifying;
-  if(!eq || eq.legPending === 'done') return;
-  const legKey = eq.legPending;
-  eq.ties.forEach(t=>{ if(!t[legKey]) resolveOneQualifyingLeg(t, legKey); });
-  eq.legPending = legKey === 'leg1' ? 'leg2' : 'done';
-  if(eq.legPending === 'done') finalizeEuroQualifyingAndEnterEuro();
+  if(!eq) return;
+  let iterations = 0;
+  while(eq.ties.some(t=>!t.resolved) && iterations < 20){
+    eq.ties.filter(t=>!t.resolved).forEach(t=>{
+      if(!t.leg1) resolveOneQualifyingLeg(t, 'leg1');
+      else if(!t.leg2) resolveOneQualifyingLeg(t, 'leg2');
+    });
+    iterations++;
+  }
+  finalizeEuroQualifyingAndEnterEuro();
 }
 
 // Ouvre l'écran de match en direct pour VOTRE manche (aller ou retour) -
@@ -9291,9 +9396,11 @@ function startLiveQualifyingLeg(tie, legKey){
 }
 
 // Une fois VOTRE manche jouée en direct : enregistre le résultat dans la
-// confrontation, fait avancer (ou termine) le tour de qualification. Les
-// AUTRES confrontations de la même vague (qui ne vous concernent pas) sont
-// résolues instantanément en parallèle, pour que tout avance ensemble.
+// confrontation. Les AUTRES confrontations en attente (qui ne vous
+// concernent pas, y compris celles enchaînées entre-temps) sont résolues
+// instantanément en parallèle. Si votre propre tour suivant s'enchaîne
+// (Tour 3 gagné -> Barrage), la saison reste en pause sur l'Europe et ce
+// nouveau tour sera proposé au prochain clic - sinon, tout est bouclé.
 function commitLiveQualifyingLegResult(){
   const lm = state.liveMatch;
   if(!lm || !lm.isQualifying) return;
@@ -9304,36 +9411,55 @@ function commitLiveQualifyingLegResult(){
   // statistiques/succès (matchs joués, victoires, clean sheet...).
   trackMatchResult(tie[legKey]);
 
-  const eq = state.euroQualifying;
-  eq.ties.forEach(t=>{ if(!t.isMine && !t[legKey]) resolveOneQualifyingLeg(t, legKey); });
-
-  if(legKey === 'leg1'){
-    eq.legPending = 'leg2';
-  } else {
+  if(legKey === 'leg2'){
     const clubStr = myTeamStrength('euro');
     const filler = EURO_FILLER_CLUBS.find(f=>f.id===tie.opponentId);
     finalizeQualifyingTie(tie, clubStr, filler ? filler.strength : 65);
-    eq.legPending = 'done';
-    finalizeEuroQualifyingAndEnterEuro();
   }
+
+  const eq = state.euroQualifying;
+  eq.ties.filter(t=>!t.isMine && !t.resolved).forEach(t=>{
+    if(!t.leg1) resolveOneQualifyingLeg(t, 'leg1');
+    else if(!t.leg2) resolveOneQualifyingLeg(t, 'leg2');
+  });
 
   state.liveMatch = null;
   showScreen('season');
-  renderSeason();
+  if(!hasPendingEuroQualifying()) finalizeEuroQualifyingAndEnterEuro();
+  else renderSeason();
 }
 
-// Toutes les confrontations de qualification sont désormais résolues (2
-// manches chacune) : convertit leurs résultats vers le format attendu par
+// Le club qui a bénéficié d'un enchaînement de tours (Tour 3 -> Barrage)
+// a PLUSIEURS confrontations dans state.euroQualifying.ties, poussées dans
+// l'ordre chronologique - la dernière est donc toujours la plus avancée
+// (celle qui donne le résultat final : qualifié ou éliminé).
+function finalQualifyingTieForClub(clubId){
+  const ties = (state.euroQualifying ? state.euroQualifying.ties : []).filter(t=>t.clubId===clubId);
+  return ties.length ? ties[ties.length-1] : null;
+}
+
+// Toutes les confrontations de qualification sont désormais résolues :
+// convertit le résultat FINAL de chaque club (qualifié ou éliminé, quel
+// que soit le nombre de tours enchaînés) vers le format attendu par
 // qualifiersForLeagueTier/determineEuroQualification (inchangés), PUIS
 // construit enfin les 3 compétitions européennes de la saison - jusque-là
 // bloquées en attente. Message dédié si votre propre club était concerné.
 function finalizeEuroQualifyingAndEnterEuro(){
-  state.clQualifyingResults = (state.euroQualifying ? state.euroQualifying.ties : [])
-    .filter(t=>t.competition==='cl')
-    .map(t=>({ clubId:t.clubId, leagueName:t.leagueName, entryRound:t.entryRound, opponentId:t.opponentId, opponentName:t.opponentName, won:t.won, aggClub:t.aggClub, aggOpp:t.aggOpp, wentToPenalties:t.wentToPenalties, penaltyScore:t.penaltyScore }));
-  state.eclQualifyingResults = (state.euroQualifying ? state.euroQualifying.ties : [])
-    .filter(t=>t.competition==='ecl')
-    .map(t=>({ clubId:t.clubId, leagueName:t.leagueName, opponentId:t.opponentId, opponentName:t.opponentName, won:t.won, aggClub:t.aggClub, aggOpp:t.aggOpp, wentToPenalties:t.wentToPenalties, penaltyScore:t.penaltyScore }));
+  const clubIds = new Set((state.euroQualifying ? state.euroQualifying.ties : []).map(t=>t.clubId));
+  state.clQualifyingResults = [];
+  state.eclQualifyingResults = [];
+  clubIds.forEach(clubId=>{
+    const finalTie = finalQualifyingTieForClub(clubId);
+    if(!finalTie || !finalTie.resolved) return;
+    const record = {
+      clubId, leagueName: finalTie.leagueName, entryRound: finalTie.finalEntryRound, stage: finalTie.stage,
+      opponentId: finalTie.opponentId, opponentName: finalTie.opponentName,
+      won: finalTie.won, aggClub: finalTie.aggClub, aggOpp: finalTie.aggOpp,
+      wentToPenalties: finalTie.wentToPenalties, penaltyScore: finalTie.penaltyScore
+    };
+    if(finalTie.competition === 'cl') state.clQualifyingResults.push(record);
+    else state.eclQualifyingResults.push(record);
+  });
 
   const euroTier = determineEuroQualification();
   if(euroTier) initEuroCompetition(euroTier);
@@ -9343,7 +9469,7 @@ function finalizeEuroQualifyingAndEnterEuro(){
 
   if(state.myClQualifyingResult){
     const q = state.myClQualifyingResult;
-    const roundLabel = EURO_ENTRY_ROUND_LABEL[q.entryRound];
+    const roundLabel = EURO_ENTRY_ROUND_LABEL[q.stage];
     const aggTxt = `${q.aggClub}-${q.aggOpp}${q.wentToPenalties ? ` (tab ${q.penaltyScore})` : ''}`;
     if(q.won) toast(`Qualification LDC (${roundLabel}) : victoire ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous rejoignez la phase de ligue !`);
     else toast(`Qualification LDC (${roundLabel}) : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous êtes reversé en Ligue Europa.`);
@@ -9354,6 +9480,40 @@ function finalizeEuroQualifyingAndEnterEuro(){
     if(q.won) toast(`Barrage Ligue Conférence : victoire ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous rejoignez la phase de championnat !`);
     else toast(`Barrage Ligue Conférence : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous ne disputerez aucune coupe d'Europe cette saison.`);
   }
+}
+
+// Renvoie les entrées de calendrier (aller + retour) pour TOUTES les
+// confrontations d'UN CLUB - un club enchaînant plusieurs tours (Tour 3
+// PUIS Barrage) obtient une entrée par tour, chacune avec son propre
+// roundIdx pour rester dans l'ordre chronologique sans se chevaucher.
+function qualifyingTimelineEntriesForClub(clubId){
+  const entries = [];
+  if(!state.euroQualifying) return entries;
+  const clubTies = state.euroQualifying.ties.filter(t=>t.clubId===clubId);
+  clubTies.forEach((tie, stageIdx)=>{
+    const label = tie.competition === 'cl'
+      ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[tie.stage]}`
+      : 'Barrage Ligue Conférence';
+    const baseIdx = -10 + stageIdx*2; // 2 crans par tour (aller/retour), toujours avant le reste du fil
+    if(tie.leg1){
+      entries.push({ type:'euro-quali', roundIdx:baseIdx, label:`${label} - Aller`, matches:[tie.leg1] });
+    } else {
+      entries.push({ type:'euro-quali', roundIdx:baseIdx, label:`${label} - Aller`, matches:[{ home:tie.clubId, away:tie.opponentId }], upcoming:true });
+    }
+    if(tie.leg2){
+      const leg2Display = {
+        ...tie.leg2,
+        aggHome: tie.aggOpp, aggAway: tie.aggClub,
+        wentToPenalties: tie.wentToPenalties,
+        penaltyScore: flipScorePair(tie.penaltyScore),
+        extraTimeScore: flipScorePair(tie.extraTimeScore)
+      };
+      entries.push({ type:'euro-quali', roundIdx:baseIdx+1, label:`${label} - Retour`, matches:[leg2Display] });
+    } else if(tie.leg1){
+      entries.push({ type:'euro-quali', roundIdx:baseIdx+1, label:`${label} - Retour`, matches:[{ home:tie.opponentId, away:tie.clubId }], upcoming:true });
+    }
+  });
+  return entries;
 }
 
 // Aucun repli sur des qualifiés codés en dur : tant qu'aucun classement
@@ -10388,31 +10548,10 @@ function renderLeaguePanels(){
   // Conférence) - jouées AVANT même que state.euro n'existe (la
   // qualification finale en dépend), elles n'apparaissaient donc jusqu'ici
   // nulle part dans les Résultats. roundIdx très négatif pour rester tout
-  // en haut du fil, avant même la Supercoupe domestique.
-  if(state.euroQualifying){
-    const myTie = state.euroQualifying.ties.find(t=>t.isMine);
-    if(myTie){
-      const label = myTie.competition === 'cl'
-        ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[myTie.entryRound]}`
-        : 'Barrage Ligue Conférence';
-      if(myTie.leg1){
-        timeline.push({ type:'euro-quali', roundIdx:-4, label:`${label} - Aller`, matches:[myTie.leg1] });
-      } else {
-        timeline.push({ type:'euro-quali', roundIdx:-4, label:`${label} - Aller`, matches:[{ home:myTie.clubId, away:myTie.opponentId }], upcoming:true });
-      }
-      if(myTie.leg2){
-        const leg2Display = {
-          ...myTie.leg2,
-          aggHome: myTie.aggOpp, aggAway: myTie.aggClub,
-          wentToPenalties: myTie.wentToPenalties,
-          penaltyScore: flipScorePair(myTie.penaltyScore),
-          extraTimeScore: flipScorePair(myTie.extraTimeScore)
-        };
-        timeline.push({ type:'euro-quali', roundIdx:-3, label:`${label} - Retour`, matches:[leg2Display] });
-      } else if(myTie.leg1){
-        timeline.push({ type:'euro-quali', roundIdx:-3, label:`${label} - Retour`, matches:[{ home:myTie.opponentId, away:myTie.clubId }], upcoming:true });
-      }
-    }
+  // en haut du fil, avant même la Supercoupe domestique. Un enchaînement
+  // de tours (Tour 3 -> Barrage) donne une entrée par tour.
+  if(state.euroQualifying && state.euroQualifying.ties.some(t=>t.isMine)){
+    timeline.push(...qualifyingTimelineEntriesForClub(state.club.id));
   }
   if(state.euro){
     state.euro.resultsByRound.forEach(er=>{
@@ -10677,10 +10816,10 @@ function renderSeason(){
   nextBtn.disabled = seasonDone;
   if(hasPendingEuroQualifying()){
     const myTie = myPendingQualifyingTie();
-    const legTxt = state.euroQualifying.legPending === 'leg1' ? 'Aller' : 'Retour';
+    const legTxt = myTie ? (!myTie.leg1 ? 'Aller' : 'Retour') : '';
     const compTxt = myTie
-      ? (myTie.competition === 'cl' ? `Tour LDC - ${legTxt}` : `Barrage Conférence - ${legTxt}`)
-      : `Qualifs Europe - ${legTxt}`;
+      ? (myTie.competition === 'cl' ? `${EURO_ENTRY_ROUND_LABEL[myTie.stage]} - ${legTxt}` : `Barrage Conférence - ${legTxt}`)
+      : 'Qualifs Europe';
     nextBtn.textContent = compTxt;
     liveBtn.textContent = myTie ? `Jouer en direct (${compTxt})` : 'Résoudre les qualifs';
   } else {
@@ -10936,6 +11075,11 @@ async function initAuth(){
     state.session = session;
     updateAccountMenuLabel();
     if(session) applyFavoriteClubTheme(session.user.user_metadata && session.user.user_metadata.favorite_club);
+    // Session perdue (expiration, déconnexion déclenchée ailleurs) hors
+    // partie active : retombe sur le fond neutre plutôt que de garder les
+    // couleurs du club favori affichées sans compte connecté. Ne touche
+    // jamais au thème d'une partie en cours (state.club déjà choisi).
+    else if(!state.club) resetToDefaultTheme();
     if(session && state.pendingAfterProfile){
       document.getElementById('profile-modal').style.display = 'none';
       const cb = state.pendingAfterProfile;
@@ -11110,6 +11254,7 @@ function snapshotGameState(){
     bonusMercatoAnnounced: state.bonusMercatoAnnounced,
     goodSeasonStreak: state.goodSeasonStreak,
     pendingPoachingOffer: state.pendingPoachingOffer,
+    poachingOffersHistory: state.poachingOffersHistory,
     coachProfile: state.coachProfile,
     careerStats: state.careerStats
   };
@@ -11260,6 +11405,7 @@ async function signOutUser(){
   if(!sbClient) return;
   await sbClient.auth.signOut();
   state.session = null;
+  resetToDefaultTheme();
   showScreen('landing');
 }
 
@@ -11399,66 +11545,70 @@ function finalizeSeasonEuroWinners(){
 // Réutilise exactement le même moteur que la vraie attribution
 // (computeEuropeanQualifications) - ce qui est montré ici EST ce qui sera
 // appliqué au prochain enterSeason(), pas une simple estimation.
-function buildEuropeRecapForLeague(leagueName){
-  let standing, cupWinnerId;
+// Résout classement + vainqueur de coupe d'une association pour la saison
+// qui vient de se terminer - factorisé entre le récap de qualification et
+// la recherche du bénéficiaire EPS ci-dessous.
+function prevSeasonStandingAndCup(leagueName){
   if(leagueName === state.league){
-    standing = state.prevSeasonStanding;
-    cupWinnerId = state.prevSeasonCupWinner;
-  } else {
-    const otherData = state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
-    if(!otherData) return null;
-    standing = otherData.standing;
-    cupWinnerId = otherData.cupWinner;
+    return { standing: state.prevSeasonStanding, cupWinnerId: state.prevSeasonCupWinner };
   }
-  if(!standing || !standing.length) return null;
-  const hasEps = (state.epsLeagues||[]).includes(leagueName);
-  const map = computeEuropeanQualifications(leagueName, standing, cupWinnerId, state.prevSeasonEuroWinners, hasEps);
+  const otherData = state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
+  if(!otherData) return { standing:null, cupWinnerId:null };
+  return { standing: otherData.standing, cupWinnerId: otherData.cupWinner };
+}
 
-  const byTier = { cl:[], el:[], ecl:[] };
-  standing.forEach(s=>{
-    const q = map[s.id];
-    if(q) byTier[q.competition].push({ id:s.id, name:s.name, entryRound:q.entryRound });
-  });
-  return { leagueName, hasEps, byTier };
+// Le club qui bénéficie CONCRÈTEMENT de la place EPS : celui dont la
+// qualification passe en LDC phase de ligue UNIQUEMENT grâce à l'EPS (donc
+// obtenu par comparaison avec/sans EPS sur le même classement), plutôt que
+// de deviner "le 5e" - reste juste même si une autre règle (coupe
+// nationale, vainqueur européen) redistribue les places autrement.
+function findEpsBeneficiary(leagueName){
+  const { standing, cupWinnerId } = prevSeasonStandingAndCup(leagueName);
+  if(!standing || !standing.length) return null;
+  const without = computeEuropeanQualifications(leagueName, standing, cupWinnerId, state.prevSeasonEuroWinners, false);
+  const withEps = computeEuropeanQualifications(leagueName, standing, cupWinnerId, state.prevSeasonEuroWinners, true);
+  for(const s of standing){
+    const before = without[s.id];
+    const after = withEps[s.id];
+    if(after && after.competition==='cl' && after.entryRound==='leaguePhase'
+       && (!before || before.competition!=='cl' || before.entryRound!=='leaguePhase')){
+      return s;
+    }
+  }
+  return null;
+}
+
+// Classement des 5 championnats par coefficient UEFA de la saison, avec le
+// club bénéficiaire de la place EPS affiché juste en dessous des 2
+// meilleurs - c'est le cœur du récap demandé.
+function buildCoefficientsRecapHTML(){
+  const coeffs = computeSeasonUefaCoefficients();
+  const ranked = Object.keys(coeffs).sort((a,b)=> coeffs[b]-coeffs[a]);
+  const rows = ranked.map((leagueName, i)=>{
+    const isEps = (state.epsLeagues||[]).includes(leagueName);
+    const beneficiary = isEps ? findEpsBeneficiary(leagueName) : null;
+    const beneficiaryName = beneficiary
+      ? (beneficiary.id === state.club.id ? `${beneficiary.name} (vous)` : beneficiary.name)
+      : null;
+    return `
+      <div class="europe-recap-coeff-row ${isEps ? 'is-eps' : ''}">
+        <div class="europe-recap-coeff-line">
+          <span class="europe-recap-coeff-rank">${i+1}</span>
+          <span class="europe-recap-coeff-league">${leagueName}</span>
+          <span class="europe-recap-coeff-value">${coeffs[leagueName].toFixed(3)}</span>
+          ${isEps ? '<span class="europe-recap-eps-badge">EPS</span>' : ''}
+        </div>
+        ${beneficiaryName ? `<div class="europe-recap-coeff-beneficiary">Place EPS attribuée à <strong>${beneficiaryName}</strong></div>` : ''}
+      </div>
+    `;
+  }).join('');
+  return `<div class="europe-recap-coeffs">${rows}</div>`;
 }
 
 function showEuropeRecapPopup(){
   const contentEl = document.getElementById('europe-recap-content');
   if(!contentEl) return;
-  const recaps = Object.keys(EURO_SEASON_CONFIG)
-    .map(buildEuropeRecapForLeague)
-    .filter(Boolean);
-
-  if(!recaps.length){
-    contentEl.innerHTML = `<p class="europe-recap-empty">Aucune qualification européenne à annoncer pour l'instant.</p>`;
-  } else {
-    contentEl.innerHTML = recaps.map(r=>{
-      const clubName = id => id === state.club.id
-        ? `<span class="is-me">${clubNameForAnyId(id)} (vous)</span>`
-        : clubNameForAnyId(id);
-      const rowsFor = (tier, label) => {
-        const clubs = r.byTier[tier];
-        if(!clubs.length) return '';
-        const list = clubs.map(c=>{
-          const roundTag = (tier==='cl' && c.entryRound && c.entryRound!=='leaguePhase')
-            ? ` (${EURO_ENTRY_ROUND_LABEL[c.entryRound]})` : '';
-          return `${clubName(c.id)}${roundTag}`;
-        }).join(', ');
-        return `<div class="europe-recap-row"><span class="europe-recap-tier tier-${tier}">${label}</span><span class="europe-recap-clubs">${list}</span></div>`;
-      };
-      return `
-        <div class="europe-recap-league">
-          <div class="europe-recap-league-head">
-            <span class="europe-recap-league-name">${r.leagueName}</span>
-            ${r.hasEps ? '<span class="europe-recap-eps-badge">EPS</span>' : ''}
-          </div>
-          ${rowsFor('cl','Ligue des Champions')}
-          ${rowsFor('el','Ligue Europa')}
-          ${rowsFor('ecl','Ligue Conférence')}
-        </div>
-      `;
-    }).join('');
-  }
+  contentEl.innerHTML = buildCoefficientsRecapHTML();
   document.getElementById('europe-recap-overlay').style.display = 'flex';
 }
 
@@ -12220,9 +12370,12 @@ function renderSeasonTrophiesHTML(){
     // Le barrage/tour de qualification n'est pas encore résolu : la
     // compétition finale n'est pas encore connue, mais ce n'est PAS
     // "pas d'Europe cette saison" - message dédié plutôt que trompeur.
-    const myTie = state.euroQualifying.ties.find(t=>t.isMine);
+    // Priorité à la confrontation encore en attente (mon tour actuel) ;
+    // sinon (tout juste résolu) la plus avancée de la chaîne.
+    const myTies = state.euroQualifying.ties.filter(t=>t.isMine);
+    const myTie = myTies.find(t=>!t.resolved) || myTies[myTies.length-1];
     const label = myTie.competition === 'cl'
-      ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[myTie.entryRound]}`
+      ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[myTie.stage]}`
       : 'Barrage Ligue Conférence';
     rows.push({ label, value: myTie.leg2 ? 'Résultat en cours de traitement' : (myTie.leg1 ? 'Retour à jouer' : 'Aller à jouer') });
   } else {
