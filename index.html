@@ -229,8 +229,9 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   color:#fff; letter-spacing:0.1cqw;
   line-height:1.08;
   z-index:3;
+  overflow:hidden; /* filet de sécurité : jamais de débordement visuel sur le reste de la carte, même si le calcul JS était imprécis */
 }
-.pc-position span{ white-space:nowrap; display:block; }
+.pc-position span{ white-space:nowrap; display:block; max-width:100%; }
 
 /* calque "Note" (rating, HeadingNow-55Medium) */
 .pc-rating{
@@ -390,11 +391,12 @@ button{ font-family:inherit; cursor:pointer; }
   border:1px solid var(--border-2);
   padding:9px 20px;
   border-radius:999px;
-  transition:transform .18s ease, border-color .3s ease, color .15s ease;
+  transition:transform .18s ease, border-color .3s ease, color .15s ease, background .15s ease;
 }
 .gm-account-btn:hover{
-  color:var(--text);
-  border-color:var(--club-accent);
+  color:#111;
+  background:#fff;
+  border-color:#fff;
   transform:translateY(-2px);
 }
 .gm-account-menu{ position:relative; }
@@ -534,9 +536,9 @@ button{ font-family:inherit; cursor:pointer; }
   border:1px solid var(--border-2);
   padding:clamp(14px,2vw,19px) clamp(26px,4vw,44px);
   border-radius:var(--r-lg);
-  transition:transform .18s ease, border-color .3s ease;
+  transition:transform .18s ease, border-color .3s ease, background .15s ease, color .15s ease;
 }
-.gm-btn-secondary:hover{ transform:translateY(-2px); border-color:var(--club-accent); }
+.gm-btn-secondary:hover{ color:#111; background:#fff; border-color:#fff; transform:translateY(-2px); }
 #btn-resume-save-desc{ display:block; font-size:11px; opacity:.65; font-weight:400; margin-top:1px; line-height:1.2; }
 #btn-resume-save{ padding-top:clamp(10px,1.4vw,13px); padding-bottom:clamp(10px,1.4vw,13px); }
 
@@ -714,14 +716,16 @@ button{ font-family:inherit; cursor:pointer; }
   margin:0 auto;
   padding:56px var(--gutter) 100px;
 }
-/* Beaucoup plus discret que le style .gm-btn-secondary générique (pensé
-   pour les gros CTA) - ici ce n'est qu'une navigation secondaire. */
-#btn-info-back{
+/* Beaucoup plus discret que le style .gm-btn-secondary/.gm-btn-primary
+   génériques (pensés pour les gros CTA) - ici ce n'est qu'une navigation
+   secondaire (Retour) ou une action de page interne (Analyser mon profil),
+   donc même petit gabarit que le bouton Retour des pages du footer. */
+#btn-info-back, #btn-coach-quiz-back, #coach-quiz-finish, #coach-quiz-restart{
   font-size:12.5px;
   padding:6px 14px;
   border-radius:999px;
 }
-#btn-info-back:hover{ transform:none; }
+#btn-info-back:hover, #btn-coach-quiz-back:hover{ transform:none; }
 .info-title{
   font-family:var(--bn-bold);
   font-size:clamp(30px, 4vw, 44px);
@@ -779,6 +783,94 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .contact-form-status.is-success{ color:#4ade80; }
 .contact-form-status.is-error{ color:#f87171; }
+
+/* ============================= PROFIL DE COACH (quiz) ============================= */
+.coach-quiz-questions fieldset{
+  border:1px solid var(--border);
+  border-radius:var(--r-md, 12px);
+  padding:18px 20px;
+  margin:0 0 16px;
+}
+.coach-quiz-questions legend{
+  font-family:var(--sans);
+  font-weight:700;
+  color:var(--text);
+  padding:0 6px;
+}
+.coach-quiz-questions label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:var(--sans);
+  font-size:14.5px;
+  font-weight:500;
+  color:var(--text);
+  padding:8px 4px;
+  cursor:pointer;
+  border-radius:8px;
+  transition:background .15s;
+}
+.coach-quiz-questions label:hover{ background:rgba(255,255,255,.06); }
+/* Le rendu natif d'un <input type="radio"> dépend du navigateur/OS et son
+   contour reste souvent trop discret sur un fond sombre (accent-color ne
+   contrôle que le point intérieur, pas le contour à l'état non coché) -
+   on le redessine entièrement pour garantir un bon contraste partout. */
+.coach-quiz-questions input[type="radio"]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:18px; height:18px;
+  border-radius:50%;
+  border:2px solid var(--text-faint);
+  background:transparent;
+  flex-shrink:0;
+  cursor:pointer;
+  position:relative;
+  transition:border-color .15s;
+}
+.coach-quiz-questions label:hover input[type="radio"]{ border-color:var(--text); }
+.coach-quiz-questions input[type="radio"]:checked{ border-color:var(--club-accent, #fff); }
+.coach-quiz-questions input[type="radio"]:checked::after{
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:9px; height:9px;
+  border-radius:50%;
+  background:var(--club-accent, #fff);
+}
+#coach-quiz-finish{ margin:8px 0 12px; }
+.coach-quiz-hr{ border:none; border-top:1px solid var(--border); margin:36px 0 28px; }
+.coach-quiz-result h2{
+  font-family:var(--bn-bold);
+  font-size:28px;
+  color:var(--club-accent, var(--text));
+  margin:0 0 10px;
+}
+.coach-quiz-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px 30px;
+  margin-bottom:8px;
+}
+@media (max-width:650px){ .coach-quiz-grid{ grid-template-columns:1fr; } }
+.coach-quiz-score{ margin:8px 0; font-family:var(--sans); font-size:13.5px; color:var(--text-dim); }
+.coach-quiz-score b{ color:var(--text); }
+.coach-quiz-bar{ height:7px; border-radius:99px; background:rgba(255,255,255,.08); margin-top:5px; overflow:hidden; }
+.coach-quiz-bar-fill{ height:100%; background:var(--club-accent, #fff); }
+#coach-quiz-coaches{ font-family:var(--sans); font-size:15px; color:var(--text-dim); padding-left:22px; }
+#coach-quiz-coaches li{ margin-bottom:8px; }
+#coach-quiz-coaches b{ color:var(--text); }
+#coach-quiz-restart{ margin-top:20px; }
+
+/* Résumé du profil de coach sur la page "Mon compte" */
+.coach-profile-card{ margin-top:22px; }
+.coach-profile-archetype{
+  font-family:var(--bn-bold);
+  font-size:20px;
+  color:var(--club-accent, var(--text));
+  margin:4px 0 10px;
+}
+.coach-profile-coaches{ font-family:var(--sans); font-size:13.5px; color:var(--text-dim); margin-bottom:14px; }
 
 /* ============================= SELECT ============================= */
 .select-wrap{
@@ -938,7 +1030,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 
 .live-shell{
-  max-width:720px;
+  max-width:920px;
   margin:0 auto;
   padding:32px var(--gutter) 60px;
 }
@@ -950,19 +1042,13 @@ button{ font-family:inherit; cursor:pointer; }
   align-items:center;
   justify-content:space-between;
   gap:16px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
+  background:color-mix(in srgb, var(--club-primary) 20%, #0a0d13 80%);
+  border:1px solid color-mix(in srgb, var(--club-accent) 30%, var(--border));
   border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:20px 24px;
   margin-bottom:20px;
   position:relative;
   overflow:hidden;
-}
-.live-scoreboard::before{
-  content:'';
-  position:absolute; top:0; left:0;
-  width:48px; height:3px;
-  background:var(--club-accent);
 }
 .live-team{ flex:1; text-align:left; font-family:var(--sans); font-weight:700; font-size:15px; color:var(--text); }
 .live-team-away{ text-align:right; }
@@ -988,17 +1074,6 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .live-speed-btn.is-active{ color:#0a0d13; background:var(--club-accent); border-color:var(--club-accent); }
 .live-speed-btn:hover{ border-color:var(--club-accent); }
-.live-filter-group{ display:flex; gap:6px; }
-.live-filter-btn{
-  font-family:var(--sans); font-size:12px; font-weight:700;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border-2);
-  background:rgba(255,255,255,.04);
-  color:var(--text-dim);
-}
-.live-filter-btn.is-active{ color:#0a0d13; background:var(--club-accent); border-color:var(--club-accent); }
-.live-filter-btn:hover{ border-color:var(--club-accent); }
 
 .live-decision{
   background:var(--surface-2);
@@ -1047,9 +1122,9 @@ button{ font-family:inherit; cursor:pointer; }
   display:flex;
   align-items:center;
   gap:12px;
-  background:var(--surface-2);
-  border:1px solid rgba(255,255,255,.06);
-  border-left:3px solid var(--border-2);
+  background:color-mix(in srgb, var(--club-primary) 12%, #0a0d13 88%);
+  border:1px solid color-mix(in srgb, var(--club-accent) 18%, rgba(255,255,255,.06));
+  border-left:3px solid var(--club-accent);
   border-radius:2px var(--r-sm) var(--r-sm) 2px;
   padding:10px 14px;
   font-family:var(--sans);
@@ -1191,9 +1266,12 @@ button{ font-family:inherit; cursor:pointer; }
   min-height:0;
 }
 .season-sidebar{
+  /* Masqué temporairement (retiré de la navigation - à réintégrer plus
+     tard avec une meilleure approche) - le HTML/JS reste en place pour
+     pouvoir la restaurer facilement, il suffit de remettre display:flex. */
+  display:none;
   width:170px;
   flex-shrink:0;
-  display:flex;
   flex-direction:column;
   gap:8px;
 }
@@ -2194,7 +2272,8 @@ button{ font-family:inherit; cursor:pointer; }
   background:#0a0d13;
   color:#f5d36b;
   font-family:var(--sans);
-  font-size:11px;
+  font-size:13.5px;
+  font-weight:700;
   letter-spacing:.06em;
   text-transform:uppercase;
   padding:6px 14px;
@@ -2378,11 +2457,11 @@ button{ font-family:inherit; cursor:pointer; }
 .pantheon-nav-icon{ width:16px; height:16px; flex-shrink:0; color:var(--text-faint); }
 .pantheon-nav-item:hover{ color:var(--text); border-color:var(--border-2); }
 .pantheon-nav-item.active{
-  color:#fff;
-  border-color:transparent;
-  background:var(--club-accent);
+  color:var(--text);
+  border-color:var(--club-accent);
+  background:color-mix(in srgb, var(--club-accent) 20%, rgba(255,255,255,.03));
 }
-.pantheon-nav-item.active .pantheon-nav-icon{ color:#fff; }
+.pantheon-nav-item.active .pantheon-nav-icon{ color:var(--club-accent); }
 .pantheon-nav-expand{ position:relative; }
 .pantheon-chevron{ color:var(--text-faint); font-size:16px; line-height:1; }
 .pantheon-nav-expand.open .pantheon-nav-toggle{ color:var(--text); border-color:var(--club-accent); }
@@ -2767,6 +2846,65 @@ button{ font-family:inherit; cursor:pointer; }
   padding:0;
 }
 .modal-close:hover{ color:var(--text); border-color:var(--club-accent); }
+.europe-recap-box{
+  width:min(680px, 92vw);
+  max-height:85vh;
+  overflow-y:auto;
+}
+.europe-recap-title{
+  font-family:var(--bn-bold);
+  font-size:22px;
+  color:var(--text);
+  margin:0 30px 18px 0;
+}
+.europe-recap-league{
+  border:1px solid var(--border);
+  border-radius:var(--r-md, 12px);
+  padding:16px 18px;
+  margin-bottom:14px;
+}
+.europe-recap-league-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.europe-recap-league-name{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:14.5px;
+  color:var(--text);
+}
+.europe-recap-eps-badge{
+  font-family:var(--sans);
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#0a0d13;
+  background:#f5d36b;
+  padding:3px 9px;
+  border-radius:999px;
+}
+.europe-recap-row{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  padding:5px 0;
+  font-family:var(--sans);
+  font-size:13.5px;
+}
+.europe-recap-tier{
+  flex-shrink:0;
+  width:118px;
+  font-weight:700;
+}
+.europe-recap-tier.tier-cl{ color:var(--zone-cl); }
+.europe-recap-tier.tier-el{ color:var(--zone-el); }
+.europe-recap-tier.tier-ecl{ color:var(--zone-ecl); }
+.europe-recap-clubs{ color:var(--text-dim); }
+.europe-recap-clubs .is-me{ color:var(--text); font-weight:700; }
+.europe-recap-empty{ color:var(--text-faint); font-style:italic; }
 .modal-skip{
   display:block;
   width:100%;
@@ -2863,6 +3001,7 @@ select.modal-input option{ color:#111; background:#fff; }
     <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> THE SPECIAL ONE</div>
     <div class="gm-header-actions">
       <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
+      <button class="gm-account-btn" id="btn-coach-quiz">Profil coach</button>
       <div class="gm-account-menu" id="account-menu">
         <button class="gm-account-btn" id="btn-account-menu-toggle"><span id="btn-account-menu-toggle-label">Se connecter</span></button>
         <div class="gm-account-dropdown" id="account-dropdown">
@@ -2932,6 +3071,40 @@ select.modal-input option{ color:#111; background:#fff; }
       <button class="gm-btn-secondary" id="btn-info-back">&larr; Retour</button>
       <h1 class="info-title" id="info-title"></h1>
       <div class="info-content" id="info-content"></div>
+    </div>
+  </section>
+
+  <!-- ============================ PROFIL DE COACH (quiz) ============================ -->
+  <section id="screen-coach-quiz" class="screen">
+    <div class="info-wrap">
+      <button class="gm-btn-secondary" id="btn-coach-quiz-back">&larr; Retour</button>
+      <h1 class="info-title">Quel type de coach es-tu ?</h1>
+      <div class="info-content">
+        <p>20 questions simples pour construire ton profil tactique, managérial et mental - et découvrir à quel grand entraîneur tu ressembles le plus.</p>
+
+        <div id="coach-quiz-questions" class="coach-quiz-questions"></div>
+        <button class="gm-btn-secondary" id="coach-quiz-finish">Analyser mon profil</button>
+
+        <section id="coach-quiz-result" class="coach-quiz-result" hidden>
+          <hr class="coach-quiz-hr">
+          <h2 id="coach-quiz-archetype"></h2>
+          <p id="coach-quiz-intro"></p>
+
+          <h3>Ton profil</h3>
+          <div id="coach-quiz-scores" class="coach-quiz-grid"></div>
+
+          <h3>Style de jeu</h3>
+          <div id="coach-quiz-style" class="coach-quiz-grid"></div>
+
+          <h3>Management & mental</h3>
+          <div id="coach-quiz-management" class="coach-quiz-grid"></div>
+
+          <h3>Coach(s) dont tu es le plus proche</h3>
+          <ol id="coach-quiz-coaches"></ol>
+
+          <button class="gm-btn-secondary" id="coach-quiz-restart">Recommencer le test</button>
+        </section>
+      </div>
     </div>
   </section>
 
@@ -3125,11 +3298,6 @@ select.modal-input option{ color:#111; background:#fff; }
           </div>
           <button class="season-btn" id="btn-live-subs">Changement</button>
         </div>
-        <div class="live-filter-group" id="live-filter-group">
-          <button class="live-filter-btn is-active" data-filter="all">Tous</button>
-          <button class="live-filter-btn" data-filter="home" id="live-filter-home">A</button>
-          <button class="live-filter-btn" data-filter="away" id="live-filter-away">B</button>
-        </div>
       </div>
 
       <div class="live-decision" id="live-decision" style="display:none">
@@ -3210,6 +3378,11 @@ select.modal-input option{ color:#111; background:#fff; }
         </div>
         <button class="season-btn season-btn-primary" id="btn-save-profile" style="margin-top:18px">Enregistrer</button>
         <div class="pseudo-hint" id="pseudo-hint"></div>
+      </div>
+
+      <div class="profile-card coach-profile-card">
+        <div class="profile-card-title">Profil de coach</div>
+        <div id="coach-profile-summary"></div>
       </div>
 
       <div class="section-label">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
@@ -3299,6 +3472,16 @@ select.modal-input option{ color:#111; background:#fff; }
       <div class="modal-divider"><span>ou</span></div>
       <button class="season-btn season-btn-ghost" id="btn-google-auth" style="width:100%">Continuer avec Google</button>
       <button class="modal-skip" id="profile-skip">Continuer sans compte</button>
+    </div>
+  </div>
+
+  <!-- ============================ RÉCAP EUROPÉEN DE FIN DE SAISON ============================ -->
+  <div class="modal-overlay" id="europe-recap-overlay" style="display:none">
+    <div class="modal-box europe-recap-box">
+      <button class="modal-close" id="europe-recap-close" aria-label="Fermer" title="Fermer">&times;</button>
+      <div class="europe-recap-title">Qualifications européennes de la saison prochaine</div>
+      <div class="europe-recap-content" id="europe-recap-content"></div>
+      <button class="season-btn season-btn-primary" id="europe-recap-ok" style="width:100%; margin-top:18px">Compris</button>
     </div>
   </div>
 
@@ -3696,29 +3879,41 @@ function fitPosition(cardEl){
   function widestSpanWidth(){
     return Array.from(posEl.querySelectorAll('span')).reduce((max,s)=>Math.max(max, s.getBoundingClientRect().width), 0);
   }
+  // Marge de sécurité : une case mesurée comme "tenant tout juste" peut
+  // basculer dans le débordement après arrondi du navigateur (ex: 4 postes
+  // sur une petite carte de main de draft) - on se garde toujours un peu
+  // de marge plutôt que de coller au pixel près.
+  const SAFETY = 0.94;
+  function fits(){
+    const boxWidth = posEl.getBoundingClientRect().width;
+    return boxWidth > 0 && widestSpanWidth() <= boxWidth * SAFETY;
+  }
 
   // 1) Une seule ligne, taille de référence identique pour toutes les cartes.
   setLines([tokens.join(' - ')]);
   posEl.style.fontSize = refSize + 'px';
-  let boxWidth = posEl.getBoundingClientRect().width;
-  if(boxWidth > 0 && widestSpanWidth() <= boxWidth) return; // tient très bien, rien d'autre à faire
+  if(fits()) return;
 
   // 2) Ne tient pas sur une ligne -> répartition sur 2 lignes (moitié/moitié),
   // toujours à la MÊME taille de référence (pas de réduction pour l'instant).
   if(tokens.length > 1){
     const mid = Math.ceil(tokens.length/2);
     setLines([tokens.slice(0,mid).join(' - '), tokens.slice(mid).join(' - ')]);
-    boxWidth = posEl.getBoundingClientRect().width;
-    if(boxWidth > 0 && widestSpanWidth() <= boxWidth) return; // tient en 2 lignes à taille normale
+    posEl.style.fontSize = refSize + 'px';
+    if(fits()) return;
   }
 
   // 3) Dernier recours : ne tient toujours pas (même en 2 lignes, ex. une
-  // combinaison de postes très longue sur une petite carte) -> réduction
-  // proportionnelle à la ligne actuellement la plus large.
-  boxWidth = posEl.getBoundingClientRect().width;
-  const w = widestSpanWidth();
-  if(boxWidth > 0 && w > boxWidth){
-    posEl.style.fontSize = (refSize * (boxWidth / w) * 0.97) + 'px';
+  // combinaison de 4 postes sur une petite carte) -> réduction ITÉRATIVE,
+  // re-mesurée à chaque étape (plutôt qu'un calcul en une seule passe, qui
+  // peut mal tomber si l'estimation initiale était trop optimiste).
+  let size = refSize;
+  for(let i=0; i<12 && size > 6; i++){
+    const boxWidth = posEl.getBoundingClientRect().width;
+    const w = widestSpanWidth();
+    if(boxWidth <= 0 || w <= boxWidth * SAFETY) break;
+    size = size * (boxWidth * SAFETY / w);
+    posEl.style.fontSize = size + 'px';
   }
 }
 
@@ -4183,6 +4378,7 @@ function primeCrestCache(){
 const state = {
   screen:"landing",
   infoPage:null,
+  coachProfile:null,
   themePreviewIdx:0,
   league:null,
   club:null,
@@ -4493,6 +4689,238 @@ function renderInfoPage(){
   if(contactForm) contactForm.addEventListener('submit', submitContactForm);
 }
 
+// ---------------------------- PROFIL DE COACH (quiz) ----------------------------
+// Questionnaire à 20 questions déterminant un profil tactique/managérial/
+// mental, comparé à des profils heuristiques de grands entraîneurs réels.
+// Noms préfixés/spécifiques pour ne jamais entrer en collision avec le
+// reste de ce très gros fichier (notamment éviter le nom générique "data").
+const COACH_QUIZ_DATA = {"questions": [{"q": "Ton équipe récupère le ballon. Tu veux d'abord…", "answers": [["Garder le ballon.", {"control": 85, "verticality": 35}], ["Attaquer vite.", {"control": 45, "verticality": 90}], ["Chercher la meilleure passe.", {"control": 65, "creativity": 85}], ["Sécuriser avant d'attaquer.", {"control": 80, "pragmatism": 80}]]}, {"q": "Face à un bloc bas, tu préfères…", "answers": [["Faire circuler.", {"control": 90, "creativity": 55}], ["Jouer dans le dos.", {"verticality": 90, "risk": 75}], ["Provoquer en un contre un.", {"creativity": 90, "risk": 70}], ["Patienter.", {"control": 75, "pragmatism": 85}]]}, {"q": "À la perte du ballon, ton équipe doit…", "answers": [["Presser tout de suite.", {"pressing": 95, "risk": 75}], ["Se replacer vite.", {"pressing": 45, "defense": 85}], ["Fermer les passes courtes.", {"pressing": 75, "defense": 75}], ["Reculer et attendre.", {"pressing": 30, "defense": 95}]]}, {"q": "Tu mènes 1-0 à la 80e. Tu demandes…", "answers": [["De continuer pareil.", {"control": 70, "risk": 55}], ["De chercher le 2-0.", {"risk": 90, "ambition": 90}], ["De fermer le match.", {"pragmatism": 95, "defense": 90}], ["De s'adapter à l'adversaire.", {"adaptability": 95, "game_management": 90}]]}, {"q": "Tu affrontes une équipe plus forte. Tu…", "answers": [["Imposes ton jeu.", {"identity": 90, "ambition": 90}], ["Presses très haut.", {"pressing": 95, "risk": 85}], ["Défends puis contre.", {"defense": 90, "transitions": 90}], ["Changes de plan.", {"adaptability": 95, "pragmatism": 80}]]}, {"q": "Ton système doit être…", "answers": [["Très structuré.", {"discipline": 95, "control": 85}], ["Très agressif.", {"pressing": 90, "risk": 85}], ["Très solide.", {"defense": 95, "pragmatism": 85}], ["Facile à modifier.", {"adaptability": 95, "creativity": 70}]]}, {"q": "Un joueur perd souvent le ballon. Tu préfères…", "answers": [["Lui demander de jouer plus simple.", {"discipline": 85, "pragmatism": 80}], ["Le laisser tenter.", {"creativity": 90, "risk": 80}], ["Changer son rôle.", {"adaptability": 90, "game_management": 75}], ["Le remplacer.", {"pragmatism": 90, "authority": 85}]]}, {"q": "Un jeune arrive dans ton groupe. Tu…", "answers": [["Le fais jouer progressivement.", {"development": 90, "pragmatism": 80}], ["Le titularises s'il est bon.", {"development": 80, "meritocracy": 90}], ["Lui donnes rapidement des responsabilités.", {"development": 85, "ambition": 80}], ["Attends qu'il soit prêt.", {"development": 45, "pragmatism": 90}]]}, {"q": "Dans un vestiaire, tu veux surtout…", "answers": [["De la discipline.", {"authority": 90, "discipline": 95}], ["De la confiance.", {"man_management": 95, "mentality": 85}], ["De la compétition.", {"mentality": 95, "ambition": 90}], ["De l'autonomie.", {"man_management": 85, "adaptability": 85}]]}, {"q": "Après deux défaites, tu…", "answers": [["Reviens aux bases.", {"discipline": 90, "pragmatism": 85}], ["Augmentes l'intensité.", {"mentality": 90, "pressing": 85}], ["Changes plusieurs choses.", {"adaptability": 90, "risk": 70}], ["Protèges le groupe.", {"man_management": 95, "mentality": 85}]]}, {"q": "En fin de match, tu regardes d'abord…", "answers": [["Le contrôle du ballon.", {"control": 90, "game_management": 75}], ["Les espaces à attaquer.", {"verticality": 90, "risk": 75}], ["Les espaces à fermer.", {"defense": 90, "game_management": 85}], ["Le comportement adverse.", {"adaptability": 95, "game_management": 95}]]}, {"q": "Ton équipe doit gagner à tout prix. Tu acceptes…", "answers": [["Plus de risques.", {"risk": 95, "ambition": 95}], ["Un match fermé.", {"pragmatism": 95, "defense": 90}], ["De changer complètement de style.", {"adaptability": 95, "risk": 75}], ["De rester fidèle à ton identité.", {"identity": 95, "discipline": 85}]]}, {"q": "Pour recruter, tu privilégies…", "answers": [["Le niveau technique.", {"creativity": 80, "control": 80}], ["Le physique et l'intensité.", {"pressing": 90, "mentality": 80}], ["Le mental.", {"mentality": 95, "authority": 75}], ["La polyvalence.", {"adaptability": 95, "intelligence": 90}]]}, {"q": "Ton équipe doit avoir une identité…", "answers": [["Très forte.", {"identity": 95, "discipline": 85}], ["Claire mais flexible.", {"identity": 80, "adaptability": 90}], ["Secondaire par rapport au résultat.", {"identity": 45, "pragmatism": 95}], ["Construite autour des joueurs.", {"identity": 70, "man_management": 90}]]}, {"q": "Un match devient très tendu. Tu demandes…", "answers": [["De rester calme.", {"mentality": 90, "game_management": 90}], ["De gagner les duels.", {"mentality": 95, "defense": 85}], ["D'accélérer.", {"risk": 85, "verticality": 85}], ["De contrôler le rythme.", {"control": 90, "game_management": 95}]]}, {"q": "Ton adjoint te propose un changement tactique. Tu…", "answers": [["Le suis s'il est cohérent.", {"intelligence": 85, "adaptability": 75}], ["Le testes immédiatement.", {"risk": 80, "adaptability": 90}], ["Préfères ton plan initial.", {"identity": 90, "discipline": 90}], ["Attends d'avoir plus d'informations.", {"analysis": 95, "pragmatism": 80}]]}, {"q": "Les statistiques disent une chose, ton intuition une autre. Tu…", "answers": [["Suis les statistiques.", {"analysis": 95, "discipline": 80}], ["Suis ton intuition.", {"creativity": 90, "intelligence": 85}], ["Cherches pourquoi elles divergent.", {"analysis": 95, "intelligence": 95}], ["Décides selon le contexte.", {"adaptability": 90, "game_management": 85}]]}, {"q": "Quel objectif te ressemble le plus ?", "answers": [["Dominer les matchs.", {"control": 95, "identity": 85}], ["Gagner des titres.", {"ambition": 100, "pragmatism": 80}], ["Construire une équipe forte.", {"development": 90, "identity": 90}], ["Être capable de battre n'importe qui.", {"adaptability": 95, "mentality": 95}]]}, {"q": "Après un but encaissé à la 88e, tu…", "answers": [["Attaques immédiatement.", {"risk": 95, "verticality": 95}], ["Restes organisé.", {"discipline": 95, "mentality": 90}], ["Changes ton organisation.", {"adaptability": 95, "game_management": 90}], ["Demandes aux cadres de gérer.", {"man_management": 90, "game_management": 95}]]}, {"q": "Quel compliment veux-tu entendre de tes joueurs ?", "answers": [["« On savait toujours quoi faire. »", {"discipline": 95, "tactical": 95}], ["« On n'a jamais lâché. »", {"mentality": 100, "ambition": 90}], ["« Il nous comprend. »", {"man_management": 100, "development": 80}], ["« Il trouve toujours une solution. »", {"adaptability": 100, "creativity": 85}]]}], "dimensions": ["control", "verticality", "pressing", "transitions", "defense", "risk", "adaptability", "discipline", "creativity", "man_management", "development", "pragmatism", "ambition", "mentality", "game_management", "analysis", "intelligence", "tactical", "identity", "authority", "meritocracy"], "labels": {"control": "Contrôle", "verticality": "Verticalité", "pressing": "Pressing", "transitions": "Transitions", "defense": "Solidité défensive", "risk": "Prise de risque", "adaptability": "Adaptabilité", "discipline": "Discipline tactique", "creativity": "Créativité", "man_management": "Gestion humaine", "development": "Développement des jeunes", "pragmatism": "Pragmatisme", "ambition": "Ambition", "mentality": "Mental", "game_management": "Gestion du match", "analysis": "Analyse", "intelligence": "Lecture du jeu", "tactical": "Maîtrise tactique", "identity": "Identité de jeu", "authority": "Autorité", "meritocracy": "Méritocratie"}, "archetypes": {"Le Contrôleur": {"control": 0.3, "discipline": 0.2, "tactical": 0.15, "analysis": 0.1, "identity": 0.1}, "Le Vertical": {"verticality": 0.3, "transitions": 0.22, "risk": 0.18, "ambition": 0.1}, "Le Pressing Machine": {"pressing": 0.32, "transitions": 0.18, "mentality": 0.15, "risk": 0.12}, "Le Pragmatique": {"pragmatism": 0.3, "defense": 0.2, "game_management": 0.2, "risk": -0.1}, "Le Stratège": {"adaptability": 0.25, "analysis": 0.2, "intelligence": 0.2, "game_management": 0.15, "tactical": 0.1}, "Le Gestionnaire": {"man_management": 0.3, "game_management": 0.2, "mentality": 0.15, "adaptability": 0.1}, "Le Bâtisseur": {"development": 0.3, "identity": 0.18, "man_management": 0.15, "analysis": 0.1}, "Le Meneur": {"mentality": 0.28, "man_management": 0.22, "ambition": 0.2, "authority": 0.1}, "Le Risk-Taker": {"risk": 0.35, "ambition": 0.2, "verticality": 0.15, "creativity": 0.12}, "Le Caméléon": {"adaptability": 0.35, "game_management": 0.18, "pragmatism": 0.15, "intelligence": 0.12}, "Le Dogmatique": {"identity": 0.3, "discipline": 0.25, "tactical": 0.18, "control": 0.12}, "Le Créatif": {"creativity": 0.32, "intelligence": 0.2, "risk": 0.15, "adaptability": 0.1}, "Le Défensif": {"defense": 0.35, "pragmatism": 0.2, "discipline": 0.15, "game_management": 0.1}, "Le Développeur": {"development": 0.35, "man_management": 0.2, "adaptability": 0.12, "analysis": 0.1}, "Le Compétiteur": {"mentality": 0.3, "ambition": 0.24, "discipline": 0.12, "pragmatism": 0.1}, "Le Méthodique": {"analysis": 0.3, "discipline": 0.22, "tactical": 0.2, "control": 0.12}, "Le Transformateur": {"adaptability": 0.28, "creativity": 0.18, "risk": 0.15, "development": 0.12}, "Le Manager de stars": {"man_management": 0.3, "authority": 0.18, "game_management": 0.16, "ambition": 0.15}}, "coachRefs": {"Pep Guardiola": {"control": 95, "verticality": 72, "pressing": 88, "transitions": 78, "defense": 65, "risk": 65, "adaptability": 85, "discipline": 94, "creativity": 94, "man_management": 82, "development": 78, "pragmatism": 55, "ambition": 92, "mentality": 82, "game_management": 78, "analysis": 96, "intelligence": 96, "tactical": 98, "identity": 97, "authority": 72, "meritocracy": 70}, "Jürgen Klopp": {"control": 68, "verticality": 94, "pressing": 98, "transitions": 97, "defense": 72, "risk": 88, "adaptability": 82, "discipline": 80, "creativity": 82, "man_management": 95, "development": 78, "pragmatism": 70, "ambition": 94, "mentality": 96, "game_management": 80, "analysis": 85, "intelligence": 86, "tactical": 90, "identity": 95, "authority": 72, "meritocracy": 82}, "Diego Simeone": {"control": 48, "verticality": 65, "pressing": 82, "transitions": 84, "defense": 98, "risk": 35, "adaptability": 80, "discipline": 96, "creativity": 58, "man_management": 93, "development": 68, "pragmatism": 98, "ambition": 95, "mentality": 99, "game_management": 94, "analysis": 84, "intelligence": 88, "tactical": 94, "identity": 97, "authority": 92, "meritocracy": 85}, "Carlo Ancelotti": {"control": 70, "verticality": 72, "pressing": 58, "transitions": 68, "defense": 70, "risk": 62, "adaptability": 98, "discipline": 70, "creativity": 82, "man_management": 99, "development": 65, "pragmatism": 90, "ambition": 91, "mentality": 94, "game_management": 97, "analysis": 80, "intelligence": 94, "tactical": 91, "identity": 68, "authority": 75, "meritocracy": 78}, "José Mourinho": {"control": 55, "verticality": 68, "pressing": 58, "transitions": 82, "defense": 96, "risk": 32, "adaptability": 88, "discipline": 95, "creativity": 62, "man_management": 90, "development": 50, "pragmatism": 99, "ambition": 98, "mentality": 96, "game_management": 96, "analysis": 90, "intelligence": 94, "tactical": 96, "identity": 92, "authority": 94, "meritocracy": 80}, "Arsène Wenger": {"control": 90, "verticality": 76, "pressing": 60, "transitions": 68, "defense": 55, "risk": 70, "adaptability": 82, "discipline": 72, "creativity": 92, "man_management": 88, "development": 98, "pragmatism": 58, "ambition": 88, "mentality": 78, "game_management": 72, "analysis": 78, "intelligence": 94, "tactical": 91, "identity": 90, "authority": 68, "meritocracy": 90}, "Antonio Conte": {"control": 72, "verticality": 88, "pressing": 86, "transitions": 91, "defense": 88, "risk": 72, "adaptability": 72, "discipline": 96, "creativity": 72, "man_management": 86, "development": 62, "pragmatism": 78, "ambition": 97, "mentality": 93, "game_management": 82, "analysis": 88, "intelligence": 90, "tactical": 95, "identity": 94, "authority": 92, "meritocracy": 88}}};
+
+const coachQuizBase = COACH_QUIZ_DATA.coachRefs;
+function blendCoachProfile(a,b,wa=0.5,tweaks={}) {
+  const out={};
+  COACH_QUIZ_DATA.dimensions.forEach(d=>{
+    const av=coachQuizBase[a]?.[d]??50, bv=coachQuizBase[b]?.[d]??50;
+    out[d]=Math.max(0,Math.min(100,Math.round(av*wa+bv*(1-wa)+(tweaks[d]||0))));
+  });
+  return out;
+}
+const coachQuizExtraProfiles = {};
+coachQuizExtraProfiles["Sir Alex Ferguson"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.55,{ambition:8,mentality:8,man_management:7,development:6});
+coachQuizExtraProfiles["Zinédine Zidane"]=blendCoachProfile("Carlo Ancelotti","José Mourinho",.72,{adaptability:4,man_management:5,mentality:5});
+coachQuizExtraProfiles["Luis Enrique"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.55,{verticality:5,pressing:5,risk:5});
+coachQuizExtraProfiles["Mikel Arteta"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.72,{discipline:5,analysis:4,identity:4});
+coachQuizExtraProfiles["Xabi Alonso"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.62,{transitions:7,adaptability:5,development:5});
+coachQuizExtraProfiles["Simone Inzaghi"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.48,{transitions:8,tactical:5,defense:5});
+coachQuizExtraProfiles["Gian Piero Gasperini"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.55,{pressing:8,risk:8,development:8,identity:7});
+coachQuizExtraProfiles["Roberto De Zerbi"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.78,{control:6,creativity:8,risk:10,defense:-10});
+coachQuizExtraProfiles["Maurizio Sarri"]=blendCoachProfile("Pep Guardiola","Antonio Conte",.78,{control:7,identity:8,adaptability:-12,man_management:-10});
+coachQuizExtraProfiles["Luciano Spalletti"]=blendCoachProfile("Pep Guardiola","Carlo Ancelotti",.55,{adaptability:6,creativity:4,tactical:5});
+coachQuizExtraProfiles["Massimiliano Allegri"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.65,{pragmatism:10,defense:8,risk:-10,adaptability:6});
+coachQuizExtraProfiles["Arrigo Sacchi"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.45,{pressing:12,discipline:10,identity:8,analysis:8});
+coachQuizExtraProfiles["Marcello Lippi"]=blendCoachProfile("Antonio Conte","Carlo Ancelotti",.58,{mentality:8,man_management:8,ambition:6});
+coachQuizExtraProfiles["Fabio Capello"]=blendCoachProfile("José Mourinho","Antonio Conte",.70,{defense:8,discipline:7,authority:8,risk:-10});
+coachQuizExtraProfiles["Marcelo Bielsa"]=blendCoachProfile("Jürgen Klopp","Pep Guardiola",.60,{pressing:8,risk:12,transitions:10,identity:8,pragmatism:-15});
+coachQuizExtraProfiles["Mauricio Pochettino"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.62,{pressing:5,development:8,man_management:7});
+coachQuizExtraProfiles["Thomas Tuchel"]=blendCoachProfile("Pep Guardiola","José Mourinho",.58,{adaptability:8,analysis:8,tactical:8,defense:5});
+coachQuizExtraProfiles["Julian Nagelsmann"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.50,{adaptability:10,analysis:10,creativity:5,risk:5});
+coachQuizExtraProfiles["Hansi Flick"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.72,{pressing:7,transitions:8,risk:8});
+coachQuizExtraProfiles["Erik ten Hag"]=blendCoachProfile("Pep Guardiola","Antonio Conte",.72,{development:8,discipline:6});
+coachQuizExtraProfiles["Arne Slot"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.60,{pressing:5,adaptability:6,man_management:5});
+coachQuizExtraProfiles["Rúben Amorim"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.55,{development:10,adaptability:7,identity:6});
+coachQuizExtraProfiles["Unai Emery"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.55,{adaptability:10,analysis:8,game_management:8});
+coachQuizExtraProfiles["Thomas Frank"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.55,{man_management:8,development:7,adaptability:7});
+coachQuizExtraProfiles["Ralph Hasenhüttl"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.65,{pressing:8,risk:8,transitions:8,control:-8});
+coachQuizExtraProfiles["Oliver Glasner"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.50,{transitions:8,defense:7,mentality:6});
+coachQuizExtraProfiles["Claudio Ranieri"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.42,{pragmatism:12,adaptability:10,man_management:9,risk:-12});
+coachQuizExtraProfiles["Didier Deschamps"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.55,{pragmatism:8,mentality:8,man_management:8,defense:6});
+coachQuizExtraProfiles["Vicente del Bosque"]=blendCoachProfile("Pep Guardiola","Carlo Ancelotti",.68,{control:6,man_management:10,pragmatism:5,authority:-8});
+coachQuizExtraProfiles["Jupp Heynckes"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.58,{pressing:6,man_management:6,transitions:6});
+coachQuizExtraProfiles["Ottmar Hitzfeld"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.55,{adaptability:8,man_management:8,game_management:8});
+coachQuizExtraProfiles["Louis van Gaal"]=blendCoachProfile("Pep Guardiola","Antonio Conte",.68,{discipline:10,analysis:8,development:8,authority:8});
+coachQuizExtraProfiles["Bobby Robson"]=blendCoachProfile("Carlo Ancelotti","Jürgen Klopp",.52,{adaptability:10,man_management:10,development:5});
+coachQuizExtraProfiles["Ronald Koeman"]=blendCoachProfile("Pep Guardiola","Carlo Ancelotti",.58,{verticality:5,pragmatism:3});
+coachQuizExtraProfiles["Rudi Garcia"]=blendCoachProfile("Carlo Ancelotti","Jürgen Klopp",.52,{adaptability:6,man_management:5});
+coachQuizExtraProfiles["André Villas-Boas"]=blendCoachProfile("Pep Guardiola","José Mourinho",.62,{analysis:7,pressing:6,identity:5,development:5});
+coachQuizExtraProfiles["Rafa Benítez"]=blendCoachProfile("José Mourinho","Carlo Ancelotti",.58,{analysis:9,defense:7,pragmatism:8,game_management:8});
+coachQuizExtraProfiles["Jorge Sampaoli"]=blendCoachProfile("Jürgen Klopp","Marcelo Bielsa",.55,{pressing:7,risk:8,identity:7,adaptability:-6});
+coachQuizExtraProfiles["Vincenzo Italiano"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.58,{risk:7,creativity:6,pressing:5});
+coachQuizExtraProfiles["Paulo Fonseca"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.62,{control:5,creativity:6,adaptability:5});
+coachQuizExtraProfiles["Nuno Espírito Santo"]=blendCoachProfile("José Mourinho","Antonio Conte",.60,{defense:7,transitions:6,pragmatism:7});
+coachQuizExtraProfiles["José Bordalás"]=blendCoachProfile("José Mourinho","Antonio Conte",.70,{defense:9,pragmatism:10,pressing:4,risk:-10,authority:8});
+coachQuizExtraProfiles["Jorge Jesus"]=blendCoachProfile("Antonio Conte","Jürgen Klopp",.58,{pressing:6,risk:6,identity:7,ambition:6});
+Object.assign(COACH_QUIZ_DATA.coachRefs, coachQuizExtraProfiles);
+
+const coachQuizRecentProfiles = {};
+coachQuizRecentProfiles["Vincent Kompany"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.58,{control:6,pressing:6,verticality:7,development:7,ambition:6});
+coachQuizRecentProfiles["Cesc Fàbregas"]=blendCoachProfile("Pep Guardiola","Carlo Ancelotti",.62,{control:5,creativity:7,analysis:6,development:9,defense:5});
+coachQuizRecentProfiles["Andoni Iraola"]=blendCoachProfile("Jürgen Klopp","Antonio Conte",.62,{pressing:7,transitions:9,adaptability:7,risk:7});
+coachQuizRecentProfiles["Francesco Farioli"]=blendCoachProfile("Pep Guardiola","Carlo Ancelotti",.68,{analysis:8,control:5,adaptability:8,discipline:6});
+coachQuizRecentProfiles["Cristian Chivu"]=blendCoachProfile("Carlo Ancelotti","Antonio Conte",.55,{transitions:7,man_management:7,adaptability:7,defense:5});
+coachQuizRecentProfiles["Peter Bosz"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.78,{control:7,pressing:6,risk:7,identity:8,pragmatism:-8});
+coachQuizRecentProfiles["Sebastian Hoeneß"]=blendCoachProfile("Jürgen Klopp","Pep Guardiola",.58,{development:8,adaptability:8,pressing:5,man_management:6});
+coachQuizRecentProfiles["Julian Schuster"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.55,{adaptability:7,development:8,pragmatism:5});
+coachQuizRecentProfiles["Pierre Sage"]=blendCoachProfile("Carlo Ancelotti","José Mourinho",.55,{pragmatism:8,adaptability:8,man_management:8});
+coachQuizRecentProfiles["Régis Le Bris"]=blendCoachProfile("Carlo Ancelotti","Jürgen Klopp",.55,{adaptability:9,development:7,pragmatism:6});
+coachQuizRecentProfiles["Enzo Maresca"]=blendCoachProfile("Pep Guardiola","Antonio Conte",.72,{control:7,discipline:7,analysis:6,adaptability:5});
+coachQuizRecentProfiles["Kieran McKenna"]=blendCoachProfile("Pep Guardiola","Jürgen Klopp",.60,{development:10,adaptability:7,analysis:7});
+coachQuizRecentProfiles["Eddie Howe"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.52,{pressing:6,transitions:7,man_management:8,development:6});
+coachQuizRecentProfiles["Thiago Motta"]=blendCoachProfile("Pep Guardiola","Antonio Conte",.58,{control:6,creativity:7,adaptability:8,identity:7});
+coachQuizRecentProfiles["Raffaele Palladino"]=blendCoachProfile("Carlo Ancelotti","Antonio Conte",.55,{adaptability:8,creativity:6,defense:5});
+coachQuizRecentProfiles["Okan Buruk"]=blendCoachProfile("Carlo Ancelotti","Antonio Conte",.55,{control:6,transitions:7,adaptability:8,man_management:8,ambition:7});
+coachQuizRecentProfiles["Sérgio Conceição"]=blendCoachProfile("Antonio Conte","José Mourinho",.55,{pressing:7,mentality:9,authority:8,pragmatism:6});
+coachQuizRecentProfiles["Marcelino"]=blendCoachProfile("Carlo Ancelotti","José Mourinho",.58,{adaptability:8,pragmatism:8,defense:6,game_management:7});
+coachQuizRecentProfiles["Manuel Pellegrini"]=blendCoachProfile("Carlo Ancelotti","Pep Guardiola",.65,{control:5,pragmatism:5,man_management:6,adaptability:7});
+coachQuizRecentProfiles["Frank Schmidt"]=blendCoachProfile("Jürgen Klopp","Carlo Ancelotti",.55,{development:8,identity:7,pragmatism:7,man_management:8});
+coachQuizRecentProfiles["Ralph Rangnick"]=blendCoachProfile("Jürgen Klopp","Marcelo Bielsa",.55,{pressing:10,analysis:8,identity:8,development:7,pragmatism:-5});
+Object.assign(COACH_QUIZ_DATA.coachRefs, coachQuizRecentProfiles);
+
+const coachQuizStyleDims = ["control","verticality","pressing","transitions","defense","risk","creativity","identity"];
+const coachQuizManagementDims = ["man_management","development","discipline","mentality","ambition","adaptability","pragmatism","game_management"];
+
+function renderCoachQuizQuestions(){
+  const container = document.getElementById('coach-quiz-questions');
+  if(!container || container.childElementCount) return; // déjà rendu une fois, pas besoin de reconstruire
+  COACH_QUIZ_DATA.questions.forEach((q, i) => {
+    const fieldset = document.createElement('fieldset');
+    fieldset.innerHTML = '<legend><b>' + (i+1) + '. ' + q.q + '</b></legend>';
+    q.answers.forEach((answer, j) => {
+      const label = document.createElement('label');
+      label.innerHTML = '<input type="radio" name="cq' + i + '" value="' + j + '"> ' + answer[0];
+      fieldset.appendChild(label);
+    });
+    container.appendChild(fieldset);
+  });
+}
+
+function calculateCoachProfile(){
+  const sums = {}, counts = {};
+  COACH_QUIZ_DATA.dimensions.forEach(d=>{ sums[d]=0; counts[d]=0; });
+  for(let i=0; i<COACH_QUIZ_DATA.questions.length; i++){
+    const selected = document.querySelector('input[name="cq'+i+'"]:checked');
+    if(!selected){
+      toast('Réponds à la question ' + (i+1) + '.');
+      return null;
+    }
+    const values = COACH_QUIZ_DATA.questions[i].answers[Number(selected.value)][1];
+    Object.entries(values).forEach(([dimension, value])=>{
+      sums[dimension] += value;
+      counts[dimension]++;
+    });
+  }
+  const profile = {};
+  COACH_QUIZ_DATA.dimensions.forEach(d=>{ profile[d] = counts[d] ? Math.round(sums[d]/counts[d]) : 50; });
+  return profile;
+}
+
+function coachArchetypeScore(profile, weights){
+  let total = 0, weight = 0;
+  Object.entries(weights).forEach(([dimension, w])=>{
+    total += profile[dimension] * w;
+    weight += Math.abs(w);
+  });
+  return weight ? total/weight : 0;
+}
+
+function coachSimilarity(profile, coach){
+  let squared = 0;
+  COACH_QUIZ_DATA.dimensions.forEach(d=>{
+    const diff = (profile[d] ?? 50) - (coach[d] ?? 50);
+    squared += diff*diff;
+  });
+  const distance = Math.sqrt(squared / COACH_QUIZ_DATA.dimensions.length);
+  return Math.max(0, Math.min(100, Math.round(100 - distance*1.45)));
+}
+
+function renderCoachScoreBars(profile, dimensions){
+  return dimensions
+    .sort((a,b)=> profile[b]-profile[a])
+    .map(d=>`
+      <div class="coach-quiz-score">
+        <b>${COACH_QUIZ_DATA.labels[d]}</b> : ${profile[d]}/100
+        <div class="coach-quiz-bar"><div class="coach-quiz-bar-fill" style="width:${profile[d]}%"></div></div>
+      </div>
+    `).join('');
+}
+
+// Calcule le résultat complet à partir d'un profil déjà calculé (réutilisé
+// aussi bien pour afficher le résultat juste après le test que pour
+// reconstruire l'affichage à partir d'un profil sauvegardé).
+function buildCoachQuizResult(profile){
+  const archetypeRanking = Object.entries(COACH_QUIZ_DATA.archetypes)
+    .map(([name, weights]) => [name, coachArchetypeScore(profile, weights)])
+    .sort((a,b) => b[1]-a[1]);
+  const coachRanking = Object.entries(COACH_QUIZ_DATA.coachRefs)
+    .map(([name, values]) => [name, coachSimilarity(profile, values)])
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, 5);
+  return { profile, archetype: archetypeRanking[0][0], coaches: coachRanking.map(([name,score])=>({name,score})) };
+}
+
+function renderCoachQuizResultDOM(result){
+  document.getElementById('coach-quiz-archetype').textContent = result.archetype;
+  document.getElementById('coach-quiz-intro').textContent =
+    'Ce profil est calculé à partir de tes choix. Les coachs connus servent uniquement de comparaison.';
+  document.getElementById('coach-quiz-scores').innerHTML = renderCoachScoreBars(result.profile, [...COACH_QUIZ_DATA.dimensions]);
+  document.getElementById('coach-quiz-style').innerHTML = renderCoachScoreBars(result.profile, [...coachQuizStyleDims]);
+  document.getElementById('coach-quiz-management').innerHTML = renderCoachScoreBars(result.profile, [...coachQuizManagementDims]);
+  document.getElementById('coach-quiz-coaches').innerHTML = result.coaches
+    .map(c => `<li><b>${c.name}</b> — ${c.score}% de proximité</li>`).join('');
+  document.getElementById('coach-quiz-result').hidden = false;
+}
+
+// Sauvegarde le résultat sur le compte (si connecté) et localement dans
+// l'état, pour être réaffiché sur la page "Mon compte" sans repasser le
+// test à chaque visite.
+async function saveCoachQuizResult(result){
+  state.coachProfile = result;
+  if(state.session && sbClient){
+    try{
+      await sbClient.auth.updateUser({ data: { coach_profile: result } });
+    } catch(e){
+      console.warn('Impossible de sauvegarder le profil de coach', e);
+    }
+  }
+}
+
+function finishCoachQuiz(){
+  const profile = calculateCoachProfile();
+  if(!profile) return;
+  const result = buildCoachQuizResult(profile);
+  renderCoachQuizResultDOM(result);
+  saveCoachQuizResult(result);
+  document.getElementById('coach-quiz-result').scrollIntoView({ behavior:'smooth' });
+}
+
+function showCoachQuizScreen(){
+  renderCoachQuizQuestions();
+  showScreen('coach-quiz');
+  window.scrollTo({ top:0 });
+}
+
+// Résumé affiché sur la page "Mon compte" - CTA vers le test si aucun
+// résultat n'existe encore, sinon l'archétype + le top 3 coachs proches.
+function renderCoachProfileSummary(){
+  const el = document.getElementById('coach-profile-summary');
+  if(!el) return;
+  const result = state.coachProfile || (state.session && state.session.user.user_metadata && state.session.user.user_metadata.coach_profile) || null;
+  if(!result){
+    el.innerHTML = `
+      <p class="profile-field-hint" style="margin:0 0 14px">Découvre ton profil tactique et managérial en 20 questions, et compare-toi aux plus grands entraîneurs.</p>
+      <button class="season-btn season-btn-primary" id="btn-goto-coach-quiz-from-account">Passer le test</button>
+    `;
+  } else {
+    state.coachProfile = result;
+    el.innerHTML = `
+      <div class="coach-profile-archetype">${result.archetype}</div>
+      <div class="coach-profile-coaches">${result.coaches.slice(0,3).map(c=>`${c.name} (${c.score}%)`).join(' · ')}</div>
+      <button class="season-btn season-btn-ghost" id="btn-goto-coach-quiz-from-account">Refaire le test</button>
+    `;
+  }
+  const btn = document.getElementById('btn-goto-coach-quiz-from-account');
+  if(btn) btn.addEventListener('click', showCoachQuizScreen);
+}
+
 const CONTACT_CATEGORY_LABELS = {
   bug:'Bug', note:'Note incorrecte', suggestion:'Suggestion',
   partenariat:'Partenariat', autre:'Autre'
@@ -4564,7 +4992,8 @@ const SCREEN_RENDERERS = {
   palmares: ()=>renderPalmaresScreen(),
   pantheon: ()=>renderPantheonScreen(),
   'live-match': ()=>renderLiveMatch(),
-  info: ()=>renderInfoPage()
+  info: ()=>renderInfoPage(),
+  'coach-quiz': ()=>renderCoachQuizQuestions()
 };
 
 // Certains écrans exigent un état minimal (un club choisi, une saison en
@@ -8343,8 +8772,6 @@ function renderLiveMatch(){
 
   document.getElementById('live-home-name').textContent = lm.homeName;
   document.getElementById('live-away-name').textContent = lm.awayName;
-  document.getElementById('live-filter-home').textContent = lm.homeTrigram;
-  document.getElementById('live-filter-away').textContent = lm.awayTrigram;
   document.getElementById('live-score').textContent = `${lm.hg} - ${lm.ag}`;
   document.getElementById('live-minute').textContent = lm.finished ? 'Terminé' : `${lm.minute}'`;
   document.getElementById('live-competition-label').textContent = lm.isQualifying
@@ -8380,9 +8807,6 @@ function renderLiveMatch(){
     </div>
 
   `).join('');
-  document.querySelectorAll('.live-filter-btn').forEach(btn=>{
-    btn.classList.toggle('is-active', btn.dataset.filter === filter);
-  });
 
   const controls = document.getElementById('live-controls');
   const decisionPanel = document.getElementById('live-decision');
@@ -10686,6 +11110,7 @@ function snapshotGameState(){
     bonusMercatoAnnounced: state.bonusMercatoAnnounced,
     goodSeasonStreak: state.goodSeasonStreak,
     pendingPoachingOffer: state.pendingPoachingOffer,
+    coachProfile: state.coachProfile,
     careerStats: state.careerStats
   };
 }
@@ -10966,6 +11391,75 @@ function finalizeSeasonEuroWinners(){
   // pour tout le monde (mine + les 2 "fantômes"), sinon le coefficient
   // serait basé sur une saison européenne incomplète.
   state.epsLeagues = determineEpsLeaguesForNextSeason();
+  showEuropeRecapPopup();
+}
+
+// Récapitulatif des qualifications européennes pour LA SAISON SUIVANTE,
+// affiché une fois la saison (championnat + Europe) totalement terminée.
+// Réutilise exactement le même moteur que la vraie attribution
+// (computeEuropeanQualifications) - ce qui est montré ici EST ce qui sera
+// appliqué au prochain enterSeason(), pas une simple estimation.
+function buildEuropeRecapForLeague(leagueName){
+  let standing, cupWinnerId;
+  if(leagueName === state.league){
+    standing = state.prevSeasonStanding;
+    cupWinnerId = state.prevSeasonCupWinner;
+  } else {
+    const otherData = state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
+    if(!otherData) return null;
+    standing = otherData.standing;
+    cupWinnerId = otherData.cupWinner;
+  }
+  if(!standing || !standing.length) return null;
+  const hasEps = (state.epsLeagues||[]).includes(leagueName);
+  const map = computeEuropeanQualifications(leagueName, standing, cupWinnerId, state.prevSeasonEuroWinners, hasEps);
+
+  const byTier = { cl:[], el:[], ecl:[] };
+  standing.forEach(s=>{
+    const q = map[s.id];
+    if(q) byTier[q.competition].push({ id:s.id, name:s.name, entryRound:q.entryRound });
+  });
+  return { leagueName, hasEps, byTier };
+}
+
+function showEuropeRecapPopup(){
+  const contentEl = document.getElementById('europe-recap-content');
+  if(!contentEl) return;
+  const recaps = Object.keys(EURO_SEASON_CONFIG)
+    .map(buildEuropeRecapForLeague)
+    .filter(Boolean);
+
+  if(!recaps.length){
+    contentEl.innerHTML = `<p class="europe-recap-empty">Aucune qualification européenne à annoncer pour l'instant.</p>`;
+  } else {
+    contentEl.innerHTML = recaps.map(r=>{
+      const clubName = id => id === state.club.id
+        ? `<span class="is-me">${clubNameForAnyId(id)} (vous)</span>`
+        : clubNameForAnyId(id);
+      const rowsFor = (tier, label) => {
+        const clubs = r.byTier[tier];
+        if(!clubs.length) return '';
+        const list = clubs.map(c=>{
+          const roundTag = (tier==='cl' && c.entryRound && c.entryRound!=='leaguePhase')
+            ? ` (${EURO_ENTRY_ROUND_LABEL[c.entryRound]})` : '';
+          return `${clubName(c.id)}${roundTag}`;
+        }).join(', ');
+        return `<div class="europe-recap-row"><span class="europe-recap-tier tier-${tier}">${label}</span><span class="europe-recap-clubs">${list}</span></div>`;
+      };
+      return `
+        <div class="europe-recap-league">
+          <div class="europe-recap-league-head">
+            <span class="europe-recap-league-name">${r.leagueName}</span>
+            ${r.hasEps ? '<span class="europe-recap-eps-badge">EPS</span>' : ''}
+          </div>
+          ${rowsFor('cl','Ligue des Champions')}
+          ${rowsFor('el','Ligue Europa')}
+          ${rowsFor('ecl','Ligue Conférence')}
+        </div>
+      `;
+    }).join('');
+  }
+  document.getElementById('europe-recap-overlay').style.display = 'flex';
 }
 
 
@@ -11014,7 +11508,7 @@ function showAchievementPopup(id, label){
   if(!container) return;
   const wrapper = document.createElement('div');
   wrapper.className = 'achv-popup-toast';
-  wrapper.innerHTML = `<div class="achv-popup-label">🏆 ${label}</div>${renderAchievementCardHTML(def)}`;
+  wrapper.innerHTML = `<div class="achv-popup-label">${label}</div>${renderAchievementCardHTML(def)}`;
   container.appendChild(wrapper);
   requestAnimationFrame(()=> requestAnimationFrame(()=> wrapper.classList.add('show')));
   setTimeout(()=>{
@@ -11383,6 +11877,7 @@ async function renderAccountScreen(){
   setDropdownValue('profile-gender-toggle', 'profile-gender-label', 'profile-gender-menu', meta.gender || '');
   populateFavoriteClubOptions();
   document.getElementById('pseudo-hint').textContent = '';
+  renderCoachProfileSummary();
   renderAchievementsGrid();
 }
 
@@ -11468,18 +11963,23 @@ document.getElementById('btn-info-back').addEventListener('click', ()=>{
   if(history.length > 1) history.back();
   else { state.infoPage = null; showScreen('landing'); renderLanding(); }
 });
+document.getElementById('btn-coach-quiz').addEventListener('click', showCoachQuizScreen);
+document.getElementById('btn-coach-quiz-back').addEventListener('click', ()=>{
+  if(history.length > 1) history.back();
+  else { showScreen('landing'); renderLanding(); }
+});
+document.getElementById('coach-quiz-finish').addEventListener('click', finishCoachQuiz);
+document.getElementById('coach-quiz-restart').addEventListener('click', ()=>{
+  document.querySelectorAll('#coach-quiz-questions input[type="radio"]:checked').forEach(r=> r.checked = false);
+  document.getElementById('coach-quiz-result').hidden = true;
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
 document.getElementById('btn-play-live').addEventListener('click', ()=>{
   startLiveMatchday();
 });
 document.getElementById('btn-live-playpause').addEventListener('click', toggleLivePause);
 document.querySelectorAll('.live-speed-btn').forEach(btn=>{
   btn.addEventListener('click', ()=> setLiveSpeed(Number(btn.dataset.speed)));
-});
-document.querySelectorAll('.live-filter-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    if(state.liveMatch) state.liveMatch.eventFilter = btn.dataset.filter;
-    renderLiveMatch();
-  });
 });
 document.getElementById('live-decision-options').addEventListener('click', (e)=>{
   const opt = e.target.closest('.live-decision-option');
@@ -11779,6 +12279,14 @@ document.getElementById('profile-modal-close').addEventListener('click', closePr
 document.getElementById('profile-skip').addEventListener('click', closeProfileModal);
 document.getElementById('profile-modal').addEventListener('click', (e)=>{
   if(e.target.id === 'profile-modal') closeProfileModal();
+});
+function closeEuropeRecapPopup(){
+  document.getElementById('europe-recap-overlay').style.display = 'none';
+}
+document.getElementById('europe-recap-close').addEventListener('click', closeEuropeRecapPopup);
+document.getElementById('europe-recap-ok').addEventListener('click', closeEuropeRecapPopup);
+document.getElementById('europe-recap-overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'europe-recap-overlay') closeEuropeRecapPopup();
 });
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape' && document.getElementById('profile-modal').style.display === 'flex') closeProfileModal();
