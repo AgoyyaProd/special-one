@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1"
+	 id="svg1" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1000 1000"
+	 style="enable-background:new 0 0 1000 1000;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#0E68AC;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<sodipodi:namedview  bordercolor="#000000" borderopacity="0.25" id="namedview1" inkscape:current-layer="layer1" inkscape:cx="135.98485" inkscape:cy="145.07576" inkscape:deskcolor="#d1d1d1" inkscape:document-units="mm" inkscape:pagecheckerboard="0" inkscape:pageopacity="0.0" inkscape:showpageshadow="2" inkscape:window-height="991" inkscape:window-maximized="1" inkscape:window-width="1920" inkscape:window-x="-9" inkscape:window-y="-9" inkscape:zoom="1.32" pagecolor="#ffffff">
+	</sodipodi:namedview>
+<g id="layer1" transform="translate(-58.593151,-132.14816)" inkscape:groupmode="layer" inkscape:label="Layer 1">
+	<g id="g5" transform="translate(0.23977576)">
+	</g>
+	<g id="g9">
+		<circle id="path2" class="st0" cx="558.59" cy="632.15" r="500"/>
+		<ellipse id="path3" class="st1" cx="558.59" cy="632.15" rx="464.45" ry="464.45"/>
+		<circle id="path4" class="st0" cx="558.59" cy="632.15" r="424.31"/>
+		<g id="g8">
+			<path id="path8" sodipodi:nodetypes="cscsc" class="st1" d="M698.26,472.78c-5.17,14.68-43.38,208.5-67.79,357.95
+				c-17.07,104.5-40.96,183.74,23.68,183.15c81.71,5.48,104.73-104.13,105.59-126.19C762.74,810.54,713.32,473.07,698.26,472.78
+				L698.26,472.78z"/>
+			<path id="path6" sodipodi:nodetypes="csc" class="st1" d="M825.85,371.15c-115.24,0.01,7.03,645.29,99.1,397.08
+				C1000.06,565.74,860.12,357.83,825.85,371.15z"/>
+		</g>
+		<g id="g8-7" transform="matrix(-0.99999351,0,0,1,200.90428,-0.0030141)">
+			<path class="st1" d="M-434.65,351.5c-1.17-5.72-1.75-11.56-1.75-17.4c0-45.47,34.8-82.71,78.63-84.35v-0.09
+				c0.18,0.01,0.36,0.04,0.55,0.04c0.03,0,0.07-0.01,0.1-0.01v0.02c43.84,1.64,78.64,38.87,78.63,84.35c0,5.85-0.59,11.68-1.75,17.4
+				h0.13l-77.01,467.52v3.37l-0.05,0.28l-0.28-1.68l-0.27,1.64l-0.05-0.28v-3.29l-77.01-467.52H-434.65z"/>
+			<path id="path8-3" sodipodi:nodetypes="cscsc" class="st1" d="M-217.54,472.75c-5.17,14.68-43.38,208.5-67.79,357.95
+				c-17.07,104.5-40.96,183.74,23.68,183.15c81.71,5.48,104.73-104.13,105.59-126.19C-153.05,810.51-202.48,473.04-217.54,472.75
+				L-217.54,472.75z"/>
+			<path id="path6-6" sodipodi:nodetypes="csc" class="st1" d="M-89.95,371.11c-115.24,0.01,7.03,645.29,99.1,397.08
+				C84.27,565.71-55.67,357.79-89.95,371.11z"/>
+		</g>
+	</g>
+</g>
+</svg>
