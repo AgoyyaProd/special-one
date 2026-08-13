@@ -269,12 +269,11 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   --r-md:12px;
   --r-lg:18px;
 
-  /* Fond neutre gris/noir par défaut (hors partie active, ou si aucun
-     club favori n'est défini) - repris dynamiquement en JS par
-     applyClubTheme/applyFavoriteClubTheme dès qu'un club (favori ou en
-     cours de partie) doit teinter le fond. Les noms de variable --club-*
-     sont réutilisés pour l'accent des boutons/éléments interactifs même
-     hors contexte de club, d'où le rester au bleu par défaut pour --club-accent. */
+  /* Fond neutre gris/noir, fixe partout SAUF en partie active (une fois un
+     club choisi/en cours de saison, voir applyClubTheme) - plus aucune
+     variation liée au club favori ou à la page d'accueil : plus simple,
+     et ça évite toute une classe de bugs (rotation d'accueil, écrans hors
+     jeu qui écrasaient le thème par erreur, etc). */
   --club-primary:#3d434f;
   --club-secondary:#14161c;
   --club-accent:#3B82F6;
@@ -418,13 +417,6 @@ button{ font-family:inherit; cursor:pointer; }
   flex-direction:column;
   gap:2px;
   overflow:hidden;
-}
-.gm-account-dropdown::before{
-  content:'';
-  position:absolute;
-  top:0; left:0;
-  width:100%; height:2px;
-  background:var(--club-accent);
 }
 .gm-account-menu.open .gm-account-dropdown{ display:flex; }
 .gm-dropdown-item{
@@ -863,7 +855,7 @@ button{ font-family:inherit; cursor:pointer; }
 #coach-quiz-restart{ margin-top:20px; }
 
 /* Résumé du profil de coach sur la page "Mon compte" */
-.coach-profile-card{ margin-top:22px; }
+.coach-profile-card{ margin-top:4px; }
 .coach-profile-archetype{
   font-family:var(--bn-bold);
   font-size:20px;
@@ -2403,7 +2395,9 @@ button{ font-family:inherit; cursor:pointer; }
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:28px;
+  margin-bottom:32px;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--border);
 }
 .account-title{
   font-family:var(--bn-bold);
@@ -2612,40 +2606,41 @@ button{ font-family:inherit; cursor:pointer; }
 
 .profile-card{
   position:relative;
-  background:var(--surface-2);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--club-accent) 7%, var(--surface-2) 93%), var(--surface-2) 65%);
   border:1px solid var(--border);
-  border-radius:2px var(--r-lg) 2px var(--r-lg);
-  padding:20px 22px;
-  margin-bottom:24px;
-}
-.profile-card::before{
-  content:'';
-  position:absolute;
-  top:0; left:0;
-  width:40px; height:3px;
-  background:var(--club-accent);
+  border-radius:var(--r-lg, 16px);
+  padding:26px 28px;
+  margin-bottom:20px;
+  box-shadow:0 16px 34px rgba(0,0,0,.22);
 }
 .profile-card-title{
   font-family:var(--sans);
-  font-size:13px;
+  font-size:15px;
   font-weight:700;
+  letter-spacing:.01em;
   color:var(--text);
-  margin-bottom:16px;
+  margin-bottom:20px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
 }
 .profile-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:16px;
+  gap:18px;
 }
 .profile-field{ display:flex; flex-direction:column; }
 .profile-field-wide{ grid-column:1 / -1; }
 .profile-field label{
   font-family:var(--sans);
-  font-size:11.5px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
   color:var(--text-faint);
-  margin-bottom:8px;
+  margin-bottom:9px;
 }
-.profile-field .modal-input{ margin-top:0; width:100%; }
+.profile-field .modal-input{ margin-top:0; width:100%; transition:border-color .15s, background .15s; }
+.profile-field .modal-input:hover{ border-color:color-mix(in srgb, var(--club-accent) 35%, var(--border-2)); }
 .profile-field-hint{
   font-family:var(--sans);
   font-size:10.5px;
@@ -3397,7 +3392,7 @@ select.modal-input option{ color:#111; background:#fff; }
         <div id="coach-profile-summary"></div>
       </div>
 
-      <div class="section-label">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
+      <div class="section-label" style="margin-top:8px">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
       <div class="achv-grid" id="achv-grid"></div>
     </div>
   </section>
@@ -4447,8 +4442,11 @@ const state = {
   bonusMercatoAnnounced:false,
   // Nombre de saisons consécutives où le club a répondu aux attentes de
   // son conseil d'administration - déclenche une offre de transfert d'un
-  // club légèrement plus huppé à partir de 2 saisons d'affilée.
+  // club légèrement plus huppé à partir de 4 saisons d'affilée (voir
+  // checkPoachingOfferEligible pour les autres conditions : délai minimum
+  // entre deux offres + part d'aléatoire, pour rester occasionnel).
   goodSeasonStreak:0,
+  seasonsSincePoachingOffer:0,
   pendingPoachingOffer:null,
   poachingOffersHistory:[],
   winStreak:0,
@@ -4500,17 +4498,6 @@ function applyClubTheme(club){
   // Le texte et les infos restent fixes en blanc - seuls le fond et les
   // maillots varient avec les 2 couleurs du club.
   root.setProperty('--club-accent', '#ffffff');
-}
-
-// Retire toute couleur de club appliquée en ligne (favori ou partie en
-// cours) - le fond retombe alors sur le dégradé gris/noir neutre défini
-// par défaut dans :root. Utilisé à la déconnexion, pour ne pas garder les
-// couleurs du club favori affichées une fois le compte quitté.
-function resetToDefaultTheme(){
-  const root = document.documentElement.style;
-  root.removeProperty('--club-primary');
-  root.removeProperty('--club-secondary');
-  root.removeProperty('--club-accent');
 }
 
 function toast(msg){
@@ -4930,7 +4917,7 @@ function renderCoachProfileSummary(){
   const result = state.coachProfile || (state.session && state.session.user.user_metadata && state.session.user.user_metadata.coach_profile) || null;
   if(!result){
     el.innerHTML = `
-      <p class="profile-field-hint" style="margin:0 0 14px">Découvre ton profil tactique et managérial en 20 questions, et compare-toi aux plus grands entraîneurs.</p>
+      <p style="font-family:var(--sans);font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 16px">Découvre ton profil tactique et managérial en 20 questions, et compare-toi aux plus grands entraîneurs.</p>
       <button class="season-btn season-btn-primary" id="btn-goto-coach-quiz-from-account">Passer le test</button>
     `;
   } else {
@@ -6130,13 +6117,21 @@ function autoFillSquadFromClub(club){
 // Doit avoir enchaîné au moins 2 saisons où le club a répondu (ou dépassé)
 // les attentes de son conseil d'administration (même seuil que le mercato
 // hivernal/bonus) - et au moins un club "légèrement au-dessus" disponible.
+// Reste volontairement occasionnel, pas systématique dès qu'on enchaîne
+// de bonnes saisons : seuil de série relevé (4 au lieu de 2), délai
+// minimum entre deux offres, et une part d'aléatoire même une fois
+// éligible - retenté chaque saison tant que ça ne tombe pas, plutôt que
+// déclenché à coup sûr pile à la 4e bonne saison.
 function checkPoachingOfferEligible(){
   if(state.pendingPoachingOffer) return false;
-  if((state.goodSeasonStreak||0) < 2) return false;
+  if((state.goodSeasonStreak||0) < 4) return false;
+  if((state.seasonsSincePoachingOffer||0) < 3) return false;
+  if(Math.random() > 0.35) return false;
   return findPoachingCandidateClubs().length > 0;
 }
 
 function showPoachingOfferPopup(){
+  state.seasonsSincePoachingOffer = 0;
   const candidates = findPoachingCandidateClubs();
   // Aléatoire sur TOUS les candidats éligibles (pas seulement les plus
   // proches en force) pour maximiser la diversité des offres.
@@ -10922,23 +10917,10 @@ function allClubNames(){
   return Array.from(new Set(clubs.map(c=>c.name))).sort((a,b)=>a.localeCompare(b, 'fr'));
 }
 
-// Retrouve un club par son nom (les listes/formulaires travaillent en
-// noms affichables, pas en id) - utilisé pour appliquer les couleurs du
-// club favori comme thème du site en dehors d'une partie active.
-function findClubByName(name){
-  if(!name) return null;
-  return Object.values(LEAGUES).flat().find(c => c.name === name) || null;
-}
-function applyFavoriteClubTheme(name){
-  const club = findClubByName(name);
-  if(club) applyClubTheme(club);
-}
-
 function populateFavoriteClubOptions(){
   const current = (state.session && state.session.user.user_metadata && state.session.user.user_metadata.favorite_club) || '';
   populateDropdownOptions('profile-favorite-club-menu', allClubNames(), 'Aucun');
   setDropdownValue('profile-favorite-club-toggle', 'profile-favorite-club-label', 'profile-favorite-club-menu', current);
-  applyFavoriteClubTheme(current);
 }
 
 // Propose de compléter le profil (pseudo, date de naissance, genre, club
@@ -11001,7 +10983,6 @@ async function saveOnboarding(){
     if(error){ hint.textContent = `Erreur : ${error.message}`; return; }
     state.session.user = data.user;
     updateAccountMenuLabel();
-    applyFavoriteClubTheme(data.user.user_metadata.favorite_club);
     closeOnboardingModal();
   } finally {
     btn.disabled = false;
@@ -11031,7 +11012,6 @@ async function saveProfile(){
     if(updErr){ hint.textContent = `Erreur : ${updErr.message}`; return; }
     state.session.user = data.user;
     updateAccountMenuLabel();
-    applyFavoriteClubTheme(data.user.user_metadata.favorite_club);
     document.getElementById('account-profile-name').textContent = pantheonDisplayName();
 
     // Répercute le nouveau pseudo sur les saisons déjà enregistrées, pour
@@ -11054,7 +11034,6 @@ async function initAuth(){
   state.session = data.session;
   updateAccountMenuLabel();
   if(state.session){
-    applyFavoriteClubTheme(state.session.user.user_metadata && state.session.user.user_metadata.favorite_club);
     // Session déjà active au chargement (retour sur le site) : si le
     // compte a une sauvegarde plus récente que celle de ce navigateur
     // (partie continuée depuis un autre appareil), on bascule dessus.
@@ -11074,12 +11053,6 @@ async function initAuth(){
   sbClient.auth.onAuthStateChange((event, session)=>{
     state.session = session;
     updateAccountMenuLabel();
-    if(session) applyFavoriteClubTheme(session.user.user_metadata && session.user.user_metadata.favorite_club);
-    // Session perdue (expiration, déconnexion déclenchée ailleurs) hors
-    // partie active : retombe sur le fond neutre plutôt que de garder les
-    // couleurs du club favori affichées sans compte connecté. Ne touche
-    // jamais au thème d'une partie en cours (state.club déjà choisi).
-    else if(!state.club) resetToDefaultTheme();
     if(session && state.pendingAfterProfile){
       document.getElementById('profile-modal').style.display = 'none';
       const cb = state.pendingAfterProfile;
@@ -11253,6 +11226,7 @@ function snapshotGameState(){
     winterMercatoUsed: state.winterMercatoUsed,
     bonusMercatoAnnounced: state.bonusMercatoAnnounced,
     goodSeasonStreak: state.goodSeasonStreak,
+    seasonsSincePoachingOffer: state.seasonsSincePoachingOffer,
     pendingPoachingOffer: state.pendingPoachingOffer,
     poachingOffersHistory: state.poachingOffersHistory,
     coachProfile: state.coachProfile,
@@ -11405,7 +11379,13 @@ async function signOutUser(){
   if(!sbClient) return;
   await sbClient.auth.signOut();
   state.session = null;
-  resetToDefaultTheme();
+  // Retour à l'accueil (hors partie) : le thème repart sur le dégradé
+  // neutre gris/noir par défaut plutôt que de garder les couleurs d'une
+  // éventuelle partie en cours affichées sans compte connecté.
+  const root = document.documentElement.style;
+  root.removeProperty('--club-primary');
+  root.removeProperty('--club-secondary');
+  root.removeProperty('--club-accent');
   showScreen('landing');
 }
 
@@ -11864,9 +11844,13 @@ function recordSeasonIfNeeded(){
   // Suivi des "bonnes saisons" consécutives (répond ou dépasse les
   // attentes du conseil d'administration, même seuil que le mercato
   // hivernal/bonus) - condition d'apparition d'une offre de transfert
-  // avant le prochain mercato.
+  // avant le prochain mercato. Le nombre de saisons depuis la dernière
+  // offre (acceptée ou refusée) est également suivi, pour garantir un
+  // minimum de tranquillité même en cas de série de bonnes saisons
+  // ininterrompue.
   const metExpectations = myPos > 0 && myPos <= myTolerableRankLimit();
   state.goodSeasonStreak = metExpectations ? (state.goodSeasonStreak||0) + 1 : 0;
+  state.seasonsSincePoachingOffer = (state.seasonsSincePoachingOffer||0) + 1;
 
   let trophiesThisSeason = 0;
   if(myPos === 1) trophiesThisSeason++;
@@ -12246,9 +12230,9 @@ setupCustomSelect('pf-club-dropdown', 'pf-club-toggle', 'pf-club-menu', null, (v
   renderPantheonScreen();
 });
 setupCustomSelect('profile-gender-dropdown', 'profile-gender-toggle', 'profile-gender-menu', 'profile-gender-label');
-setupCustomSelect('profile-favorite-club-dropdown', 'profile-favorite-club-toggle', 'profile-favorite-club-menu', 'profile-favorite-club-label', applyFavoriteClubTheme);
+setupCustomSelect('profile-favorite-club-dropdown', 'profile-favorite-club-toggle', 'profile-favorite-club-menu', 'profile-favorite-club-label');
 setupCustomSelect('onboarding-gender-dropdown', 'onboarding-gender-toggle', 'onboarding-gender-menu', 'onboarding-gender-label');
-setupCustomSelect('onboarding-favorite-club-dropdown', 'onboarding-favorite-club-toggle', 'onboarding-favorite-club-menu', 'onboarding-favorite-club-label', applyFavoriteClubTheme);
+setupCustomSelect('onboarding-favorite-club-dropdown', 'onboarding-favorite-club-toggle', 'onboarding-favorite-club-menu', 'onboarding-favorite-club-label');
 setupCustomSelect('formation-dropdown', 'formation-toggle', 'formation-menu', 'formation-label', (value)=>{
   if(value) changeFormation(value);
 });
