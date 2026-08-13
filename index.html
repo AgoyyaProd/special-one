@@ -3223,7 +3223,7 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="season-controls">
           <button class="season-btn season-btn-ghost" id="btn-back-to-squad">Retour à l'effectif</button>
           <button class="season-btn" id="btn-play-live">Jouer en direct</button>
-          <button class="season-btn" id="btn-next-matchday">Journée suivante</button>
+          <button class="season-btn" id="btn-next-matchday">Match suivant</button>
           <button class="season-btn season-btn-primary" id="btn-next-season" style="display:none">Mercato → Saison suivante</button>
         </div>
       </div>
@@ -6492,13 +6492,21 @@ function simulateCupStageFor(cup, strengths){
     const awayStr = fx.away === state.club.id ? myTeamStrength('league') : strengths[fx.away];
     let hg = simulateGoals(homeStr, awayStr, true);
     let ag = simulateGoals(awayStr, homeStr, false);
+    fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
     if(hg === ag){
-      const pHome = homeStr / (homeStr + awayStr);
-      if(Math.random() < pHome) hg++; else ag++;
+      // Match nul après 90 minutes -> vraie prolongation puis tirs au but
+      // si besoin, comme pour les confrontations aller-retour européennes.
+      const result = resolveAggregateTie(homeStr, awayStr);
+      fx.wentToPenalties = result.wentToPenalties;
+      fx.penaltyScore = result.penaltyScore;
+      fx.extraTimeScore = result.extraTimeScore;
+      hg += result.etA; ag += result.etB;
+      fx.winner = result.winner === 'A' ? fx.home : fx.away;
+    } else {
+      fx.winner = hg > ag ? fx.home : fx.away;
     }
     fx.played = true; fx.hg = hg; fx.ag = ag;
     fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
-    fx.winner = hg > ag ? fx.home : fx.away;
     if(fx.home === state.club.id || fx.away === state.club.id){
       trackMatchResult(fx);
       if(stageKey === 'final' && fx.winner === state.club.id) checkUnderdogGoalscorer(fx);
@@ -6516,6 +6524,119 @@ function simulateCupStageFor(cup, strengths){
     const finalFx = fixtures[0];
     cup.finalist = finalFx.winner === finalFx.home ? finalFx.away : finalFx.home;
   }
+}
+
+// Ouvre VOTRE tie du tour de coupe nationale actuellement en attente, en
+// direct - les autres ties du même tour sont résolus instantanément en
+// parallèle (comme n'importe quel "soir de coupe"), mais toujours à part :
+// le championnat, lui, n'est jamais touché par ce clic.
+function startLiveCupMatchday(){
+  const season = state.season;
+  const cup = season && season.cup;
+  if(!cup) return;
+  const stageKey = cup.stage;
+  const fixtures = cup.bracket[stageKey];
+  const myFx = fixtures.find(fx => fx.home === state.club.id || fx.away === state.club.id);
+  if(!myFx){
+    // Votre club n'est plus en lice dans cette coupe (déjà éliminé à un
+    // tour précédent) - rien à jouer en direct, résolution instantanée.
+    resolveDueCupStep();
+    return;
+  }
+  const amHome = myFx.home === state.club.id;
+  state.liveMatch = {
+    fx: myFx, roundIdx: season.currentRound - 1, isCup:true, cupStage: stageKey,
+    homeId: myFx.home, awayId: myFx.away,
+    homeName: clubNameById(myFx.home), awayName: clubNameById(myFx.away),
+    homeTrigram: clubTrigramById(myFx.home), awayTrigram: clubTrigramById(myFx.away),
+    myModKey: amHome ? 'modHome' : 'modAway',
+    oppModKey: amHome ? 'modAway' : 'modHome',
+    myName: amHome ? clubNameById(myFx.home) : clubNameById(myFx.away),
+    oppName: amHome ? clubNameById(myFx.away) : clubNameById(myFx.home),
+    baseHomeStr: myFx.home === state.club.id ? myTeamStrength('league') : season.strengths[myFx.home],
+    baseAwayStr: myFx.away === state.club.id ? myTeamStrength('league') : season.strengths[myFx.away],
+    modHome:0, modAway:0,
+    minute:0, hg:0, ag:0, events:[],
+    decisionsUsed:0, subsUsed:0,
+    sentOffPlayers:[], injuredPlayers:[],
+    _decisionsThisMatch:[], _riskyChoicesThisMatch:0, _hadLateDecision:false,
+    _maxDeficit:0, _injuryAvoided:false, _redCardAvoided:false,
+    eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
+    pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
+  };
+  showScreen('live-match');
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+
+// Pendant du commit d'un match de championnat/Europe joué en direct, pour
+// VOTRE tie de coupe nationale : enregistre le résultat, simule les autres
+// ties du même tour instantanément, fait avancer la coupe au tour suivant
+// (ou la termine si c'était la finale). Même règle de départage qu'en
+// version instantanée en cas d'égalité (pas de vraie prolongation/tirs au
+// but pour la coupe, juste un but décisif tiré au sort pondéré par la
+// force respective) - pour rester cohérent entre les 2 modes.
+function commitLiveCupMatchResult(){
+  const lm = state.liveMatch;
+  if(!lm || !lm.isCup) return;
+  const season = state.season;
+  const cup = season.cup;
+  const stageKey = cup.stage;
+  const fixtures = cup.bracket[stageKey];
+
+  lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events;
+  lm.fx.wentToPenalties = false; lm.fx.penaltyScore = null; lm.fx.extraTimeScore = null;
+  if(lm.fx.hg === lm.fx.ag){
+    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
+    lm.fx.wentToPenalties = result.wentToPenalties;
+    lm.fx.penaltyScore = result.penaltyScore;
+    lm.fx.extraTimeScore = result.extraTimeScore;
+    lm.fx.hg += result.etA; lm.fx.ag += result.etB;
+    lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
+  } else {
+    lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
+  }
+  lm.fx.played = true;
+  trackMatchResult(lm.fx);
+  if(stageKey === 'final' && lm.fx.winner === state.club.id) checkUnderdogGoalscorer(lm.fx);
+
+  fixtures.forEach(fx=>{
+    if(fx === lm.fx) return;
+    const homeStr = fx.home === state.club.id ? myTeamStrength('league') : season.strengths[fx.home];
+    const awayStr = fx.away === state.club.id ? myTeamStrength('league') : season.strengths[fx.away];
+    let fhg = simulateGoals(homeStr, awayStr, true);
+    let fag = simulateGoals(awayStr, homeStr, false);
+    fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+    if(fhg === fag){
+      const result = resolveAggregateTie(homeStr, awayStr);
+      fx.wentToPenalties = result.wentToPenalties;
+      fx.penaltyScore = result.penaltyScore;
+      fx.extraTimeScore = result.extraTimeScore;
+      fhg += result.etA; fag += result.etB;
+      fx.winner = result.winner === 'A' ? fx.home : fx.away;
+    } else {
+      fx.winner = fhg > fag ? fx.home : fx.away;
+    }
+    fx.played = true; fx.hg = fhg; fx.ag = fag;
+    fx.events = simulateMatchEvents(fx.home, fx.away, fhg, fag);
+  });
+  cup.results.push({ stage:stageKey, roundIdx:cup.matchdayFor[stageKey], fixtures:fixtures.map(f=>({...f})) });
+
+  const winners = fixtures.map(f=>f.winner);
+  if(stageKey==='r16'){ cup.bracket.qf = pairUp(winners); cup.stage = 'qf'; }
+  else if(stageKey==='qf'){ cup.bracket.sf = pairUp(winners); cup.stage = 'sf'; }
+  else if(stageKey==='sf'){ cup.bracket.final = pairUp(winners); cup.stage = 'final'; }
+  else if(stageKey==='final'){
+    cup.stage = 'done';
+    cup.champion = winners[0];
+    const finalFx = fixtures[0];
+    cup.finalist = finalFx.winner === finalFx.home ? finalFx.away : finalFx.home;
+  }
+
+  checkLiveMatchAchievements(lm, lm.fx.hg !== lm.fx.ag && (isMyTeamHome(lm) ? lm.fx.hg>lm.fx.ag : lm.fx.ag>lm.fx.hg));
+  state.liveMatch = null;
+  showScreen('season');
+  renderSeason();
 }
 
 // "Le Pari Payant" : un joueur nettement moins bien noté que la moyenne
@@ -6629,15 +6750,15 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
   season.currentRound++;
   tickOtherLeagues();
 
-  const cup = season.cup;
-  if(cup){
-    const md = cup.matchdayFor;
-    if(cup.stage==='r16' && md.r16===roundIdx) simulateCupStageFor(cup, season.strengths);
-    if(cup.stage==='qf' && md.qf===roundIdx) simulateCupStageFor(cup, season.strengths);
-    if(cup.stage==='sf' && md.sf===roundIdx) simulateCupStageFor(cup, season.strengths);
-    if(cup.stage==='final' && md.final===roundIdx) simulateCupStageFor(cup, season.strengths);
-  }
-
+  // La coupe nationale et la phase de ligue de VOTRE compétition
+  // européenne ne se résolvent plus ici automatiquement avec la journée
+  // de championnat - ce sont des matchs différents, à des dates
+  // différentes dans la vraie vie (mercredi soir de coupe d'Europe,
+  // samedi de championnat...). Elles occupent désormais chacune leur
+  // propre clic séparé (voir getDueCupStep/getDueEuroLeaguePhaseStep,
+  // vérifiés en priorité par startLiveMatchday/handleNextMatchday). Les
+  // compétitions fantômes, elles, continuent d'avancer simultanément
+  // (jamais interactives, purement en arrière-plan).
   if(!skipEuroTick) tickEuroForRound(roundIdx, skipPlayedEuroTick);
 
   if(season.currentRound >= season.calendar.length){
@@ -6676,7 +6797,7 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
   }
 }
 
-// Simulation en arrière-plan (bouton "Journée suivante", ou à l'intérieur
+// Simulation en arrière-plan (bouton "Match suivant", ou à l'intérieur
 // de "Simuler la saison") : tous les matchs de la journée, y compris celui
 // du joueur, sont calculés instantanément - les décisions de banc de
 // touche (Moment clé, Coup dur...) restent réservées au mode "Jouer en
@@ -6701,17 +6822,8 @@ function playMatchday(mode){
   if(myFx) trackMatchResult(myFx);
 
   season.resultsByRound.push(round);
-  const euroResultsBefore = state.euro ? state.euro.resultsByRound.length : 0;
   finishRoundBookkeeping(roundIdx);
   if(myFx) updateStreaksAndFatigue(myFx);
-
-  if(mode !== 'bulk' && state.euro && state.euro.resultsByRound.length > euroResultsBefore){
-    const lastEuroEntry = state.euro.resultsByRound[state.euro.resultsByRound.length - 1];
-    const myEuroFx = lastEuroEntry.matches.find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(myEuroFx && myEuroFx.hg !== undefined && myEuroFx.hg !== null){
-      toast(`${EURO_LABELS[state.euro.tier]} - ${lastEuroEntry.label} : ${clubNameById(myEuroFx.home)} ${myEuroFx.hg} - ${myEuroFx.ag} ${clubNameById(myEuroFx.away)}${myEuroFx.aggHome!==undefined ? ` (agg ${myEuroFx.aggHome}-${myEuroFx.aggAway}${myEuroFx.wentToPenalties ? ', tab '+myEuroFx.penaltyScore : myEuroFx.extraTimeScore ? ', a.p.' : ''})` : ''}`);
-    }
-  }
 
   const injuryEvent = myFx ? findInjuryOrRedAlert(myFx) : null;
   if(injuryEvent){
@@ -6752,6 +6864,19 @@ function startLiveMatchday(){
   if(!season || season.currentRound >= season.calendar.length) return;
   const roundIdx = season.currentRound;
 
+  // Trophée d'ouverture de saison puis Supercoupe d'Europe occupent le
+  // tout premier clic de la saison, avant même les qualifications
+  // européennes - ce sont les tout premiers matchs joués, avant la reprise
+  // de toute compétition continentale.
+  if(getDueDomesticSuperCupStep()){
+    startLiveDomesticSuperCupMatchday();
+    return;
+  }
+  if(getDueUefaSuperCupStep()){
+    startLiveUefaSuperCupMatchday();
+    return;
+  }
+
   // Les confrontations de qualification européenne (Tour LDC / Barrage
   // Conférence) doivent être entièrement résolues avant que le championnat
   // ne puisse démarrer - occupe ce clic en priorité, avant même le
@@ -6781,18 +6906,29 @@ function startLiveMatchday(){
     return;
   }
 
-  // Si votre campagne européenne a un match de phase de ligue prévu cette
-  // même journée, c'est celui-là qu'on joue en direct - le championnat de
-  // cette semaine-là est résolu instantanément en parallèle, comme pour
-  // n'importe quel soir de coupe d'Europe. Un seul bouton "Jouer en
-  // direct" pour les deux compétitions plutôt que deux boutons séparés.
+  // Un tour de coupe nationale en attente occupe ce clic à lui seul,
+  // jamais en même temps que le championnat ou l'Europe - VOTRE tie se
+  // joue en direct si vous êtes encore en lice, sinon rien à regarder
+  // (résolution instantanée, gérée à l'intérieur de startLiveCupMatchday).
+  if(getDueCupStep()){
+    startLiveCupMatchday();
+    return;
+  }
+
+  // Si votre campagne européenne a un match de phase de ligue en attente,
+  // c'est CELUI-LÀ qui se joue en direct, à lui tout seul - le championnat
+  // de cette semaine-là reste en attente pour un clic séparé ensuite (deux
+  // matchs différents, deux soirs différents dans la réalité : jamais
+  // résolus par le même clic).
   const euro = state.euro;
-  if(euro && euro.stage === 'league' && euro.schedule.leaguePhase[euro.currentRound] === roundIdx){
+  if(getDueEuroLeaguePhaseStep()){
     const euroFx = euro.calendar[euro.currentRound].find(fx => fx.home === state.club.id || fx.away === state.club.id);
     if(euroFx){
       startLiveEuroMatchday(euroFx, roundIdx, euro.tier);
-      return;
+    } else {
+      resolveDueEuroLeaguePhaseStepBulk();
     }
+    return;
   }
 
   const round = season.calendar[roundIdx];
@@ -7129,9 +7265,16 @@ function renderFixtureBlock(fx, homeName, awayName, extraClasses, homeClub, away
   const aggSuffix = fx.wentToPenalties ? ` (agg ${fx.aggHome}-${fx.aggAway}, tab ${fx.penaltyScore})`
     : fx.extraTimeScore ? ` (agg ${fx.aggHome}-${fx.aggAway}, a.p.)`
     : ` (agg ${fx.aggHome}-${fx.aggAway})`;
+  // Match unique (pas d'aller-retour) ayant eu besoin d'une prolongation
+  // et/ou de tirs au but pour être départagé - même principe que le
+  // suffixe "agg" ci-dessus, mais sans cumul puisqu'il n'y a qu'une seule
+  // manche (coupe nationale, trophée d'ouverture, supercoupe d'Europe...).
+  const singleSuffix = fx.wentToPenalties ? ` (tab ${fx.penaltyScore})`
+    : fx.extraTimeScore ? ' (a.p.)'
+    : '';
   const rowInner = `
     <div class="fx-home">${homeName}</div>
-    <div class="fx-score">${played ? `${fx.hg} - ${fx.ag}` : '- -'}${played && hasAgg ? `<span class="fx-agg">${aggSuffix}</span>` : ''}</div>
+    <div class="fx-score">${played ? `${fx.hg} - ${fx.ag}` : '- -'}${played && hasAgg ? `<span class="fx-agg">${aggSuffix}</span>` : (played && !hasAgg && singleSuffix ? `<span class="fx-agg">${singleSuffix}</span>` : '')}</div>
     <div class="fx-away">${awayName}</div>
   `;
   if(!played){
@@ -8648,19 +8791,10 @@ function commitLiveMatchResult(){
   });
 
   season.resultsByRound.push(round);
-  const euroResultsBefore = state.euro ? state.euro.resultsByRound.length : 0;
   finishRoundBookkeeping(roundIdx);
   updateStreaksAndFatigue(lm.fx);
   trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
-
-  if(state.euro && state.euro.resultsByRound.length > euroResultsBefore){
-    const lastEuroEntry = state.euro.resultsByRound[state.euro.resultsByRound.length - 1];
-    const myEuroFx = lastEuroEntry.matches.find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(myEuroFx && myEuroFx.hg !== undefined && myEuroFx.hg !== null){
-      toast(`${EURO_LABELS[state.euro.tier]} - ${lastEuroEntry.label} : ${clubNameById(myEuroFx.home)} ${myEuroFx.hg} - ${myEuroFx.ag} ${clubNameById(myEuroFx.away)}${myEuroFx.aggHome!==undefined ? ` (agg ${myEuroFx.aggHome}-${myEuroFx.aggAway}${myEuroFx.wentToPenalties ? ', tab '+myEuroFx.penaltyScore : myEuroFx.extraTimeScore ? ', a.p.' : ''})` : ''}`);
-    }
-  }
 
   state.liveMatch = null;
   showScreen('season');
@@ -8722,27 +8856,18 @@ function commitLiveEuroMatchResult(){
     euro.directQualifiers = ranked.slice(0,8).map(s=>s.id);
     euro.stage = 'playoff';
     euro.legPending = 'leg1';
+    // Idem que simulateEuroLeagueRound (version instantanée) : marquer
+    // explicitement l'élimination de MON club à ce stade s'il termine
+    // 25e-36e, sans quoi euro.stage continuerait de progresser (barrages,
+    // 8es, quarts...) en laissant croire à tort qu'il est toujours en lice.
+    const survivorIds = new Set([...euro.directQualifiers, ...euro.playoffTies.flatMap(t=>[t.teamA,t.teamB])]);
+    if(!survivorIds.has(state.club.id)) euro.myClubEliminatedAt = 'league';
   }
 
-  // Le match de championnat de cette même semaine se joue avec, résolu
-  // instantanément - vous avez choisi de suivre le match d'Europe en
-  // direct cette semaine-là, le championnat suit son cours en parallèle.
-  const season = state.season;
-  const domRound = season.calendar[roundIdx];
-  let myDomFx = null;
-  domRound.forEach(fx=>{
-    const hs = currentClubStrength(fx.home, season);
-    const as = currentClubStrength(fx.away, season);
-    fx.hg = simulateGoals(hs, as, true);
-    fx.ag = simulateGoals(as, hs, false);
-    fx.events = simulateMatchEvents(fx.home, fx.away, fx.hg, fx.ag);
-    applyFixtureResult(season.standings, fx);
-    if(fx.home === state.club.id || fx.away === state.club.id) myDomFx = fx;
-  });
-  season.resultsByRound.push(domRound);
-  finishRoundBookkeeping(roundIdx, false, true); // votre compétition vient d'être traitée ci-dessus, on ne la retick pas - mais les fantômes doivent continuer normalement
-  if(myDomFx){ updateStreaksAndFatigue(myDomFx); trackMatchResult(myDomFx); }
-
+  // Le championnat de cette même semaine N'EST PLUS résolu ici - c'est un
+  // match différent, à une autre date dans la réalité (le weekend suivant
+  // ce soir de coupe d'Europe). Il reste "en attente" pour son propre clic
+  // séparé, comme n'importe quel autre match.
   trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
 
@@ -8827,9 +8952,15 @@ function renderLiveMatch(){
   document.getElementById('live-minute').textContent = lm.finished ? 'Terminé' : `${lm.minute}'`;
   document.getElementById('live-competition-label').textContent = lm.isQualifying
     ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
-    : lm.isEuro
-      ? `${EURO_LABELS[lm.euroTier]} - Phase de ligue`
-      : `${state.league} - Journée ${lm.roundIdx+1}`;
+    : lm.isDomesticSuperCup
+      ? `${state.domesticSuperCup.name}${lm.domesticSuperCupStage === 'semis' ? ' - Demi-finales' : ' - Finale'}`
+      : lm.isUefaSuperCup
+        ? "Supercoupe d'Europe"
+        : lm.isCup
+          ? CUP_STAGE_LABEL[lm.cupStage] || lm.cupStage
+          : lm.isEuro
+            ? `${EURO_LABELS[lm.euroTier]} - Phase de ligue`
+            : `${state.league} - Journée ${lm.roundIdx+1}`;
 
   const subsBtn = document.getElementById('btn-live-subs');
   const remaining = 5 - (lm.subsUsed || 0);
@@ -9884,19 +10015,66 @@ const DOMESTIC_SUPER_CUP_FORMAT = {
   'La Liga': 'finalfour'
 };
 
-function playDomesticSuperCupDuel(a, b){
-  const sa = strengthForAnyClub(a), sb = strengthForAnyClub(b);
+// Simule UNE rencontre de trophée d'ouverture (aussi bien le duel simple
+// que chaque demie/finale d'un format à 4) - séparé de la construction du
+// tableau pour pouvoir la reporter au clic (voir plus bas) plutôt que de
+// toujours la résoudre instantanément. Vraie prolongation puis tirs au
+// but en cas d'égalité après 90 minutes, comme pour toute confrontation à
+// élimination directe.
+function simulateSuperCupFixture(fx){
+  const sa = strengthForAnyClub(fx.home), sb = strengthForAnyClub(fx.away);
   let hg = simulateGoals(sa, sb, true), ag = simulateGoals(sb, sa, false);
+  fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
   if(hg === ag){
-    if(Math.random() < sa/(sa+sb)) hg++; else ag++;
+    const result = resolveAggregateTie(sa, sb);
+    fx.wentToPenalties = result.wentToPenalties;
+    fx.penaltyScore = result.penaltyScore;
+    fx.extraTimeScore = result.extraTimeScore;
+    hg += result.etA; ag += result.etB;
+    fx.winner = result.winner === 'A' ? fx.home : fx.away;
+  } else {
+    fx.winner = hg > ag ? fx.home : fx.away;
   }
-  return { home:a, away:b, hg, ag, winner: hg>ag ? a : b };
+  fx.hg = hg; fx.ag = ag;
+  fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
+  fx.played = true;
+}
+
+// Fait progresser le trophée d'ouverture une fois la/les rencontre(s) de
+// l'étape en cours jouée(s) : passe des demies à la finale, ou couronne le
+// vainqueur si c'était déjà la finale (ou le format "duel" à un seul match).
+function advanceDomesticSuperCup(sc){
+  if(sc.stage === 'semis'){
+    if(sc.semis.every(s=>s.played)){
+      sc.final = { home: sc.semis[0].winner, away: sc.semis[1].winner, played:false, hg:null, ag:null, winner:null };
+      sc.stage = 'final';
+    }
+  } else if(sc.stage === 'final' && sc.final.played){
+    sc.champion = sc.final.winner;
+    sc.stage = 'done';
+  }
+}
+
+// Résout instantanément tout ce qui reste en attente dans ce trophée -
+// utilisé pour les 4 championnats non joués (jamais interactifs, toujours
+// résolus d'un coup) et pour le vôtre en simulation instantanée.
+function resolveSuperCupFixturesInstantly(sc){
+  if(!sc) return;
+  if(sc.stage === 'semis'){
+    sc.semis.forEach(s=>{ if(!s.played) simulateSuperCupFixture(s); });
+    advanceDomesticSuperCup(sc);
+  }
+  if(sc.stage === 'final' && sc.final && !sc.final.played){
+    simulateSuperCupFixture(sc.final);
+    advanceDomesticSuperCup(sc);
+  }
 }
 
 // Calcule le trophée d'ouverture de saison pour UN championnat donné, à
 // partir de son classement et de sa coupe nationale de la saison
 // précédente - utilisé aussi bien pour votre propre championnat que pour
-// les 4 autres, qui n'ont qu'une coupe légère simulée en coulisses.
+// les 4 autres. Construit désormais les rencontres SANS les jouer - à
+// résoudre au clic (voir getDueDomesticSuperCupStep) plutôt qu'instantané.
 function computeDomesticSuperCup(leagueName, standing, cupWinner, cupFinalist){
   if(!standing || !standing.length) return null;
   const format = DOMESTIC_SUPER_CUP_FORMAT[leagueName] || 'duel';
@@ -9908,8 +10086,7 @@ function computeDomesticSuperCup(leagueName, standing, cupWinner, cupFinalist){
   if(format === 'duel'){
     let other = (cupWinner && cupWinner !== champion) ? cupWinner : runnerUp;
     if(!other || other === champion) return null;
-    const final = playDomesticSuperCupDuel(champion, other);
-    return { format, name, badge, final, champion: final.winner };
+    return { format, name, badge, stage:'final', final:{ home:champion, away:other, played:false, hg:null, ag:null, winner:null }, champion:null };
   }
   const pool = [champion, runnerUp, cupWinner, cupFinalist];
   const unique = [];
@@ -9921,41 +10098,184 @@ function computeDomesticSuperCup(leagueName, standing, cupWinner, cupFinalist){
   }
   if(unique.length < 4) return null;
   const [a,b,c,d] = unique;
-  const semi1 = playDomesticSuperCupDuel(a, d);
-  const semi2 = playDomesticSuperCupDuel(b, c);
-  const final = playDomesticSuperCupDuel(semi1.winner, semi2.winner);
-  return { format, name, badge, semis:[semi1, semi2], final, champion: final.winner };
+  return {
+    format, name, badge, stage:'semis',
+    semis:[
+      { home:a, away:d, played:false, hg:null, ag:null, winner:null },
+      { home:b, away:c, played:false, hg:null, ag:null, winner:null }
+    ],
+    final:null, champion:null
+  };
 }
 
 function resolveDomesticSuperCupForNewSeason(){
   state.domesticSuperCup = computeDomesticSuperCup(state.league, state.prevSeasonStanding, state.prevSeasonCupWinner, state.prevSeasonCupFinalist);
+  // Le vôtre reste EN ATTENTE (voir getDueDomesticSuperCupStep) - jamais
+  // résolu ici automatiquement, pour laisser la possibilité de le jouer
+  // en direct si vous êtes concerné.
 
-  // Même chose pour les 4 championnats non joués, à partir de la coupe
-  // légère simulée à la fin de la saison précédente.
+  // Les 4 championnats non joués, eux, sont toujours résolus d'un coup
+  // (jamais interactifs) - à partir de la coupe légère simulée en
+  // coulisses à la fin de la saison précédente.
   state.otherDomesticSuperCups = {};
   if(state.prevOtherLeaguesData){
     Object.entries(state.prevOtherLeaguesData).forEach(([leagueName, data])=>{
       const sc = computeDomesticSuperCup(leagueName, data.standing, data.cupWinner, data.cupFinalist);
-      if(sc) state.otherDomesticSuperCups[leagueName] = sc;
+      if(sc){
+        resolveSuperCupFixturesInstantly(sc);
+        state.otherDomesticSuperCups[leagueName] = sc;
+      }
     });
   }
 }
 
+// Trophée d'ouverture de saison en attente : "en attente" tant qu'il n'est
+// pas allé jusqu'à son terme (stage 'done') - occupe alors son propre
+// clic, avant même les qualifications européennes (c'est le tout premier
+// match de la saison, avant même la reprise des compétitions continentales).
+function getDueDomesticSuperCupStep(){
+  const sc = state.domesticSuperCup;
+  return !!(sc && sc.stage !== 'done');
+}
+function resolveDueDomesticSuperCupStepBulk(){
+  resolveSuperCupFixturesInstantly(state.domesticSuperCup);
+  renderSeason();
+}
+// Ouvre en direct VOTRE rencontre de l'étape en cours (demie ou finale) si
+// vous y êtes engagé, sinon résolution instantanée classique.
+function startLiveDomesticSuperCupMatchday(){
+  const sc = state.domesticSuperCup;
+  if(!sc) return;
+  const fixtures = sc.stage === 'semis' ? sc.semis : [sc.final];
+  const myFx = fixtures.find(fx => fx && !fx.played && (fx.home === state.club.id || fx.away === state.club.id));
+  if(!myFx){ resolveDueDomesticSuperCupStepBulk(); return; }
+  const amHome = myFx.home === state.club.id;
+  state.liveMatch = {
+    fx: myFx, roundIdx:-1, isDomesticSuperCup:true, domesticSuperCupStage: sc.stage,
+    homeId: myFx.home, awayId: myFx.away,
+    homeName: clubNameForAnyId(myFx.home), awayName: clubNameForAnyId(myFx.away),
+    homeTrigram: (myFx.home===state.club.id ? state.club.trigram : clubNameForAnyId(myFx.home).slice(0,3).toUpperCase()),
+    awayTrigram: (myFx.away===state.club.id ? state.club.trigram : clubNameForAnyId(myFx.away).slice(0,3).toUpperCase()),
+    myModKey: amHome ? 'modHome' : 'modAway',
+    oppModKey: amHome ? 'modAway' : 'modHome',
+    myName: amHome ? clubNameForAnyId(myFx.home) : clubNameForAnyId(myFx.away),
+    oppName: amHome ? clubNameForAnyId(myFx.away) : clubNameForAnyId(myFx.home),
+    baseHomeStr: strengthForAnyClub(myFx.home),
+    baseAwayStr: strengthForAnyClub(myFx.away),
+    modHome:0, modAway:0,
+    minute:0, hg:0, ag:0, events:[],
+    decisionsUsed:0, subsUsed:0,
+    sentOffPlayers:[], injuredPlayers:[],
+    _decisionsThisMatch:[], _riskyChoicesThisMatch:0, _hadLateDecision:false,
+    _maxDeficit:0, _injuryAvoided:false, _redCardAvoided:false,
+    eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
+    pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
+  };
+  showScreen('live-match');
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+function commitLiveDomesticSuperCupMatchResult(){
+  const lm = state.liveMatch;
+  if(!lm || !lm.isDomesticSuperCup) return;
+  const sc = state.domesticSuperCup;
+  lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events;
+  lm.fx.wentToPenalties = false; lm.fx.penaltyScore = null; lm.fx.extraTimeScore = null;
+  if(lm.fx.hg === lm.fx.ag){
+    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
+    lm.fx.wentToPenalties = result.wentToPenalties;
+    lm.fx.penaltyScore = result.penaltyScore;
+    lm.fx.extraTimeScore = result.extraTimeScore;
+    lm.fx.hg += result.etA; lm.fx.ag += result.etB;
+    lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
+  } else {
+    lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
+  }
+  lm.fx.played = true;
+  advanceDomesticSuperCup(sc);
+  checkLiveMatchAchievements(lm, lm.fx.winner === state.club.id);
+  state.liveMatch = null;
+  showScreen('season');
+  renderSeason();
+}
+
 function resolveSuperCupForNewSeason(){
   const prev = state.prevSeasonEuroWinners;
-  if(!prev || !prev.cl || !prev.el) return;
-  const clStr = strengthForAnyClub(prev.cl);
-  const elStr = strengthForAnyClub(prev.el);
-  let hg = simulateGoals(clStr, elStr, true);
-  let ag = simulateGoals(elStr, clStr, false);
-  if(hg === ag){
-    const pCl = clStr / (clStr + elStr);
-    if(Math.random() < pCl) hg++; else ag++;
+  state.uefaSuperCupFixture = (prev && prev.cl && prev.el)
+    ? { home:prev.cl, away:prev.el, played:false, hg:null, ag:null, winner:null }
+    : null;
+  // Ne résout plus rien ici automatiquement (voir getDueUefaSuperCupStep) -
+  // laisse la possibilité de la jouer en direct si vous êtes le vainqueur
+  // LDC ou Europa de la saison précédente.
+}
+function applyUefaSuperCupResult(fx){
+  state.currentSeasonEuroWinners.superCupClId = fx.home;
+  state.currentSeasonEuroWinners.superCupElId = fx.away;
+  state.currentSeasonEuroWinners.superCupWinner = fx.winner;
+  state.currentSeasonEuroWinners.superCupScore = { clGoals: fx.hg, elGoals: fx.ag };
+}
+function getDueUefaSuperCupStep(){
+  return !!(state.uefaSuperCupFixture && !state.uefaSuperCupFixture.played);
+}
+function resolveDueUefaSuperCupStepBulk(){
+  const fx = state.uefaSuperCupFixture;
+  simulateSuperCupFixture(fx);
+  applyUefaSuperCupResult(fx);
+  renderSeason();
+}
+function startLiveUefaSuperCupMatchday(){
+  const fx = state.uefaSuperCupFixture;
+  if(!fx) return;
+  const amInvolved = fx.home === state.club.id || fx.away === state.club.id;
+  if(!amInvolved){ resolveDueUefaSuperCupStepBulk(); return; }
+  const amHome = fx.home === state.club.id;
+  state.liveMatch = {
+    fx, roundIdx:-1, isUefaSuperCup:true,
+    homeId: fx.home, awayId: fx.away,
+    homeName: clubNameForAnyId(fx.home), awayName: clubNameForAnyId(fx.away),
+    homeTrigram: (fx.home===state.club.id ? state.club.trigram : clubNameForAnyId(fx.home).slice(0,3).toUpperCase()),
+    awayTrigram: (fx.away===state.club.id ? state.club.trigram : clubNameForAnyId(fx.away).slice(0,3).toUpperCase()),
+    myModKey: amHome ? 'modHome' : 'modAway',
+    oppModKey: amHome ? 'modAway' : 'modHome',
+    myName: amHome ? clubNameForAnyId(fx.home) : clubNameForAnyId(fx.away),
+    oppName: amHome ? clubNameForAnyId(fx.away) : clubNameForAnyId(fx.home),
+    baseHomeStr: strengthForAnyClub(fx.home),
+    baseAwayStr: strengthForAnyClub(fx.away),
+    modHome:0, modAway:0,
+    minute:0, hg:0, ag:0, events:[],
+    decisionsUsed:0, subsUsed:0,
+    sentOffPlayers:[], injuredPlayers:[],
+    _decisionsThisMatch:[], _riskyChoicesThisMatch:0, _hadLateDecision:false,
+    _maxDeficit:0, _injuryAvoided:false, _redCardAvoided:false,
+    eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
+    pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
+  };
+  showScreen('live-match');
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+function commitLiveUefaSuperCupMatchResult(){
+  const lm = state.liveMatch;
+  if(!lm || !lm.isUefaSuperCup) return;
+  const fx = lm.fx;
+  fx.hg = lm.hg; fx.ag = lm.ag; fx.events = lm.events;
+  fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+  if(fx.hg === fx.ag){
+    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
+    fx.wentToPenalties = result.wentToPenalties;
+    fx.penaltyScore = result.penaltyScore;
+    fx.extraTimeScore = result.extraTimeScore;
+    fx.hg += result.etA; fx.ag += result.etB;
+    fx.winner = result.winner === 'A' ? fx.home : fx.away;
+  } else {
+    fx.winner = fx.hg > fx.ag ? fx.home : fx.away;
   }
-  state.currentSeasonEuroWinners.superCupClId = prev.cl;
-  state.currentSeasonEuroWinners.superCupElId = prev.el;
-  state.currentSeasonEuroWinners.superCupWinner = hg > ag ? prev.cl : prev.el;
-  state.currentSeasonEuroWinners.superCupScore = { clGoals: hg, elGoals: ag };
+  fx.played = true;
+  applyUefaSuperCupResult(fx);
+  checkLiveMatchAchievements(lm, fx.winner === state.club.id);
+  state.liveMatch = null;
+  showScreen('season');
+  renderSeason();
 }
 
 // 8 adversaires différents par club : on prend les 8 premiers tours d'un
@@ -10203,13 +10523,17 @@ function simulateEuroFinalMatch(euro){
 }
 
 // Appelée depuis playMatchday() à chaque journée de championnat, pour
-// intercaler les rencontres européennes programmées (comme la coupe).
+// faire avancer les 2 compétitions fantômes (jamais interactives). VOTRE
+// propre compétition n'est plus jamais résolue ici, ni en phase de ligue
+// ni en élimination directe - elle occupe systématiquement son propre
+// clic séparé (voir getDueEuroLeaguePhaseStep / getDueEuroKnockoutStep).
 function tickOneEuroCompetition(euro, roundIdx){
   if(!euro) return;
   if(euro.stage === 'done') return;
   const sch = euro.schedule;
   const isPlayed = euro === state.euro;
   if(euro.stage === 'league'){
+    if(isPlayed) return;
     const target = sch.leaguePhase[euro.currentRound];
     if(target === roundIdx) simulateEuroLeagueRound(euro, roundIdx);
     return;
@@ -10243,12 +10567,13 @@ function tickOneEuroCompetition(euro, roundIdx){
 // finale dès qu'elles y arrivent, puisqu'aucune interaction du joueur
 // n'y est nécessaire.
 function tickEuroForRound(roundIdx, skipPlayed){
-  // En simulation instantanée (Journée suivante / Simuler la saison),
-  // votre compétition avance au même rythme que les fantômes - dans ce
-  // cas personne ne "joue" rien en direct, ce n'est que le temps qui
-  // passe. Seul un match de championnat joué EN DIRECT met votre
-  // compétition européenne en pause pour cette journée précise, pour ne
-  // jamais faire jouer votre équipe deux matchs à la fois sous vos yeux.
+  // VOTRE compétition n'avance plus jamais ici (ni phase de ligue, ni
+  // élimination directe - voir tickOneEuroCompetition) : elle occupe
+  // toujours son propre clic séparé. Seules les 2 compétitions fantômes
+  // (jamais interactives) continuent d'avancer au fil des journées de
+  // championnat. Le paramètre skipPlayed ne sert donc plus qu'à
+  // ignorer explicitement l'appel pour votre compétition si jamais elle
+  // était encore passée en argument - conservé par prudence/compatibilité.
   if(!skipPlayed) tickOneEuroCompetition(state.euro, roundIdx);
   if(state.shadowEuro){
     Object.values(state.shadowEuro).forEach(euro=>{
@@ -10299,6 +10624,49 @@ function simulateRestOfEuro(){
 // avant que le championnat ne puisse avancer davantage. La phase de
 // ligue, elle, continue de se jouer en même temps que la journée
 // correspondante (comportement inchangé).
+// Un tour de coupe nationale (8es/quarts/demies/finale) est "en attente"
+// dès que la journée de championnat qui lui sert de repère calendaire a
+// été jouée - il occupe alors son propre clic, séparé du championnat
+// (jamais résolu automatiquement en même temps que la journée).
+function getDueCupStep(){
+  const season = state.season;
+  const cup = season && season.cup;
+  if(!cup || cup.stage === 'done') return false;
+  const md = cup.matchdayFor[cup.stage];
+  return md !== undefined && md <= season.currentRound - 1;
+}
+function resolveDueCupStep(){
+  const season = state.season;
+  simulateCupStageFor(season.cup, season.strengths);
+  renderSeason();
+}
+
+// Idem pour un match de phase de ligue de VOTRE compétition européenne -
+// "en attente" dès que la journée de championnat qui lui sert de repère a
+// été atteinte, avant même qu'elle soit jouée (l'Europe se joue avant le
+// week-end de championnat correspondant, comme dans la réalité).
+function getDueEuroLeaguePhaseStep(){
+  const euro = state.euro;
+  const season = state.season;
+  if(!euro || !season || euro.stage !== 'league' || euro.currentRound >= euro.calendar.length) return false;
+  const anchor = euro.schedule.leaguePhase[euro.currentRound];
+  return anchor !== undefined && anchor <= season.currentRound;
+}
+function resolveDueEuroLeaguePhaseStepBulk(){
+  const euro = state.euro;
+  const anchor = euro.schedule.leaguePhase[euro.currentRound];
+  const resultsBefore = euro.resultsByRound.length;
+  simulateEuroLeagueRound(euro, anchor);
+  if(euro.resultsByRound.length > resultsBefore){
+    const lastEntry = euro.resultsByRound[euro.resultsByRound.length - 1];
+    const myFx = lastEntry.matches.find(fx => fx.home === state.club.id || fx.away === state.club.id);
+    if(myFx && myFx.hg !== undefined && myFx.hg !== null){
+      toast(`${EURO_LABELS[euro.tier]} - ${lastEntry.label} : ${clubNameById(myFx.home)} ${myFx.hg} - ${myFx.ag} ${clubNameById(myFx.away)}`);
+    }
+  }
+  renderSeason();
+}
+
 function getDueEuroKnockoutStep(){
   const euro = state.euro;
   if(!euro || euro.stage === 'done' || euro.stage === 'league' || !state.season) return false;
@@ -10334,12 +10702,20 @@ function resolveDueEuroKnockoutStep(){
 }
 
 function handleNextMatchday(){
-  // "Journée suivante" privilégie la simulation instantanée - même la
-  // manche de qualification qui vous concerne est résolue sans passer par
+  // "Match suivant" privilégie la simulation instantanée - même la manche
+  // de qualification qui vous concerne est résolue sans passer par
   // l'écran de match en direct (comme n'importe quel autre match que vous
-  // choisissez de ne pas suivre en direct).
+  // choisissez de ne pas suivre en direct). Un seul match à la fois :
+  // jamais le championnat et une autre compétition résolus par le même
+  // clic (trophée d'ouverture, supercoupe d'Europe, coupe nationale,
+  // phase de ligue ou tour à élimination européens ont chacun leur propre
+  // clic dédié).
+  if(getDueDomesticSuperCupStep()){ resolveDueDomesticSuperCupStepBulk(); return; }
+  if(getDueUefaSuperCupStep()){ resolveDueUefaSuperCupStepBulk(); return; }
   if(hasPendingEuroQualifying()){ bulkResolveEuroQualifyingWave(); renderSeason(); return; }
   if(getDueEuroKnockoutStep()){ resolveDueEuroKnockoutStep(); return; }
+  if(getDueCupStep()){ resolveDueCupStep(); return; }
+  if(getDueEuroLeaguePhaseStep()){ resolveDueEuroLeaguePhaseStepBulk(); return; }
   playMatchday();
 }
 
@@ -10564,11 +10940,16 @@ function renderLeaguePanels(){
   if(state.domesticSuperCup){
     const sc = state.domesticSuperCup;
     if(sc.format === 'duel'){
-      timeline.push({ type:'supercup', roundIdx:-1, label:sc.name, matches:[sc.final] });
+      timeline.push({ type:'supercup', roundIdx:-1, label:sc.name, matches:[sc.final], upcoming:!sc.final.played });
     } else {
-      timeline.push({ type:'supercup', roundIdx:-1, label:`${sc.name} - Demi-finales`, matches:sc.semis });
-      timeline.push({ type:'supercup', roundIdx:-0.5, label:`${sc.name} - Finale`, matches:[sc.final] });
+      timeline.push({ type:'supercup', roundIdx:-1, label:`${sc.name} - Demi-finales`, matches:sc.semis, upcoming:sc.semis.some(s=>!s.played) });
+      if(sc.final){
+        timeline.push({ type:'supercup', roundIdx:-0.5, label:`${sc.name} - Finale`, matches:[sc.final], upcoming:!sc.final.played });
+      }
     }
+  }
+  if(state.uefaSuperCupFixture){
+    timeline.push({ type:'supercup', roundIdx:-1.5, label:"Supercoupe d'Europe", matches:[state.uefaSuperCupFixture], upcoming:!state.uefaSuperCupFixture.played });
   }
   timeline.sort((a,b)=>a.roundIdx - b.roundIdx);
 
@@ -10801,15 +11182,26 @@ function renderSeason(){
     });
   }
 
-  // Un seul jeu de boutons pour tout - "Jouer en direct" et "Journée
-  // suivante" gèrent aussi bien le championnat que l'Europe en interne,
-  // selon ce qui est prévu cette semaine-là. Les onglets Ligue 1 / Europe
-  // ne servent qu'à consulter classement et calendrier.
+  // Un seul jeu de boutons pour tout - "Jouer en direct" et "Match
+  // suivant" gèrent aussi bien le championnat que la coupe nationale et
+  // l'Europe en interne, selon ce qui est prévu ensuite - mais toujours UN
+  // SEUL match à la fois, jamais deux compétitions résolues par le même
+  // clic (voir startLiveMatchday/handleNextMatchday). Les onglets Ligue 1
+  // / Europe ne servent qu'à consulter classement et calendrier.
   liveBtn.style.display = '';
   liveBtn.disabled = seasonDone;
   nextBtn.style.display = '';
   nextBtn.disabled = seasonDone;
-  if(hasPendingEuroQualifying()){
+  if(getDueDomesticSuperCupStep()){
+    const sc = state.domesticSuperCup;
+    const compTxt = sc.stage === 'semis' ? `${sc.name} - Demi-finales` : `${sc.name} - Finale`;
+    nextBtn.textContent = compTxt;
+    liveBtn.textContent = `Jouer en direct (${compTxt})`;
+  } else if(getDueUefaSuperCupStep()){
+    const compTxt = "Supercoupe d'Europe";
+    nextBtn.textContent = compTxt;
+    liveBtn.textContent = `Jouer en direct (${compTxt})`;
+  } else if(hasPendingEuroQualifying()){
     const myTie = myPendingQualifyingTie();
     const legTxt = myTie ? (!myTie.leg1 ? 'Aller' : 'Retour') : '';
     const compTxt = myTie
@@ -10817,8 +11209,22 @@ function renderSeason(){
       : 'Qualifs Europe';
     nextBtn.textContent = compTxt;
     liveBtn.textContent = myTie ? `Jouer en direct (${compTxt})` : 'Résoudre les qualifs';
+  } else if(getDueEuroKnockoutStep()){
+    const stageLabelOf = { playoff:'Barrages', ro16:'8es de finale', qf:'Quarts de finale', sf:'Demi-finales', final:'Finale' };
+    const legTxt = euro.stage !== 'final' ? (euro.legPending === 'leg1' ? ' - Aller' : ' - Retour') : '';
+    const compTxt = `${EURO_LABELS[euro.tier]} - ${stageLabelOf[euro.stage] || euro.stage}${legTxt}`;
+    nextBtn.textContent = compTxt;
+    liveBtn.textContent = compTxt; // pas de version "en direct" pour ces tours (résolu instantanément)
+  } else if(getDueCupStep()){
+    const compTxt = CUP_STAGE_LABEL[season.cup.stage] || season.cup.stage;
+    nextBtn.textContent = compTxt;
+    liveBtn.textContent = `Jouer en direct (${compTxt})`;
+  } else if(getDueEuroLeaguePhaseStep()){
+    const compTxt = `${EURO_LABELS[euro.tier]} - Phase de ligue - J${euro.currentRound+1}`;
+    nextBtn.textContent = compTxt;
+    liveBtn.textContent = `Jouer en direct (${compTxt})`;
   } else {
-    nextBtn.textContent = seasonDone ? 'Saison terminée' : `Journée suivante (${season.currentRound+1}/${season.calendar.length})`;
+    nextBtn.textContent = seasonDone ? 'Saison terminée' : `Match suivant (${season.currentRound+1}/${season.calendar.length})`;
     liveBtn.textContent = 'Jouer en direct';
   }
 
@@ -12121,6 +12527,9 @@ document.getElementById('live-decision-options').addEventListener('click', (e)=>
 });
 document.getElementById('btn-live-continue').addEventListener('click', ()=>{
   if(state.liveMatch && state.liveMatch.isQualifying) commitLiveQualifyingLegResult();
+  else if(state.liveMatch && state.liveMatch.isDomesticSuperCup) commitLiveDomesticSuperCupMatchResult();
+  else if(state.liveMatch && state.liveMatch.isUefaSuperCup) commitLiveUefaSuperCupMatchResult();
+  else if(state.liveMatch && state.liveMatch.isCup) commitLiveCupMatchResult();
   else if(state.liveMatch && state.liveMatch.isEuro) commitLiveEuroMatchResult();
   else commitLiveMatchResult();
 });
