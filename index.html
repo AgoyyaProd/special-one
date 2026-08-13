@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
 
-<link rel="preconnect" -href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -633,7 +633,7 @@ button{ font-family:inherit; cursor:pointer; }
 .end-career-block{
   display:flex;
   justify-content:center;
-  padding:20px var(--gutter) 12px;
+  padding:56px var(--gutter) 20px;
 }
 #btn-end-career{
   font-size:16px;
@@ -1013,11 +1013,11 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1680px;
   margin:0 auto;
   padding:22px var(--gutter);
-  /* Laisse de la place sous le tableau de bord pour que le bouton "Mettre
-     un terme à la carrière" et le footer restent visibles sans qu'il
-     faille deviner qu'il faut faire défiler toute la page - sinon ils
-     sont techniquement présents mais jamais découverts. */
-  height:calc(100vh - var(--header-h) - 76px);
+  /* Reprend toute la hauteur d'écran (comme le tableau de bord d'origine) :
+     le bouton "Mettre un terme à la carrière" et le footer restent
+     accessibles juste en dessous, mais volontairement hors champ tant
+     qu'on ne fait pas défiler - pas une action à portée du premier regard. */
+  height:calc(100vh - var(--header-h));
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -6951,20 +6951,22 @@ function simulateCupStageFor(cup, strengths){
     let hg = simulateGoals(homeStr, awayStr, true);
     let ag = simulateGoals(awayStr, homeStr, false);
     fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+    let tiebreakResult = null;
     if(hg === ag){
       // Match nul après 90 minutes -> vraie prolongation puis tirs au but
       // si besoin, comme pour les confrontations aller-retour européennes.
-      const result = resolveAggregateTie(homeStr, awayStr);
-      fx.wentToPenalties = result.wentToPenalties;
-      fx.penaltyScore = result.penaltyScore;
-      fx.extraTimeScore = result.extraTimeScore;
-      hg += result.etA; ag += result.etB;
-      fx.winner = result.winner === 'A' ? fx.home : fx.away;
+      tiebreakResult = resolveAggregateTie(homeStr, awayStr);
+      fx.wentToPenalties = tiebreakResult.wentToPenalties;
+      fx.penaltyScore = tiebreakResult.penaltyScore;
+      fx.extraTimeScore = tiebreakResult.extraTimeScore;
+      hg += tiebreakResult.etA; ag += tiebreakResult.etB;
+      fx.winner = tiebreakResult.winner === 'A' ? fx.home : fx.away;
     } else {
       fx.winner = hg > ag ? fx.home : fx.away;
     }
     fx.played = true; fx.hg = hg; fx.ag = ag;
     fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
+    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
     if(fx.home === state.club.id || fx.away === state.club.id){
       trackMatchResult(fx);
       if(stageKey === 'final' && fx.winner === state.club.id) checkUnderdogGoalscorer(fx);
@@ -7051,6 +7053,7 @@ function commitLiveCupMatchResult(){
     lm.fx.extraTimeScore = result.extraTimeScore;
     lm.fx.hg += result.etA; lm.fx.ag += result.etB;
     lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
+    appendKnockoutTiebreakEvents(lm.fx.events, result, clubNameForAnyId(lm.fx.home), clubNameForAnyId(lm.fx.away));
   } else {
     lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
   }
@@ -7065,18 +7068,20 @@ function commitLiveCupMatchResult(){
     let fhg = simulateGoals(homeStr, awayStr, true);
     let fag = simulateGoals(awayStr, homeStr, false);
     fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+    let tiebreakResult = null;
     if(fhg === fag){
-      const result = resolveAggregateTie(homeStr, awayStr);
-      fx.wentToPenalties = result.wentToPenalties;
-      fx.penaltyScore = result.penaltyScore;
-      fx.extraTimeScore = result.extraTimeScore;
-      fhg += result.etA; fag += result.etB;
-      fx.winner = result.winner === 'A' ? fx.home : fx.away;
+      tiebreakResult = resolveAggregateTie(homeStr, awayStr);
+      fx.wentToPenalties = tiebreakResult.wentToPenalties;
+      fx.penaltyScore = tiebreakResult.penaltyScore;
+      fx.extraTimeScore = tiebreakResult.extraTimeScore;
+      fhg += tiebreakResult.etA; fag += tiebreakResult.etB;
+      fx.winner = tiebreakResult.winner === 'A' ? fx.home : fx.away;
     } else {
       fx.winner = fhg > fag ? fx.home : fx.away;
     }
     fx.played = true; fx.hg = fhg; fx.ag = fag;
     fx.events = simulateMatchEvents(fx.home, fx.away, fhg, fag);
+    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
   });
   cup.results.push({ stage:stageKey, roundIdx:cup.matchdayFor[stageKey], fixtures:fixtures.map(f=>({...f})) });
 
@@ -7702,6 +7707,17 @@ const LIVE_EVENT_ICONS = {
 function liveEventIcon(type){ return LIVE_EVENT_ICONS[type] || '\u2022'; }
 
 function matchEventText(ev, homeName, awayName){
+  // Les événements produits par un match joué EN DIRECT portent déjà un
+  // texte entièrement formaté (voir pushLiveEvent) - on le réutilise tel
+  // quel plutôt que d'essayer de le reconstruire depuis des champs
+  // structurés (ev.scorer/ev.player/ev.in/ev.out) qui n'existent que pour
+  // les événements de simulation en masse. Sans ça, les événements
+  // "carton" (type 'card' en direct, mais 'yellow' attendu ici), "décision"
+  // (type 'decision', pas géré du tout ci-dessous) ou "suspension" d'un
+  // match joué en direct s'affichaient vides une fois rouverts depuis le
+  // calendrier - le ticker en direct, lui, affiche ev.text directement,
+  // donc le problème ne se voyait que là, après coup.
+  if(ev.text) return ev.text;
   const teamName = ev.side === 'home' ? homeName : awayName;
   switch(ev.type){
     case 'goal':
@@ -10496,18 +10512,20 @@ function simulateSuperCupFixture(fx){
   const sa = strengthForAnyClub(fx.home), sb = strengthForAnyClub(fx.away);
   let hg = simulateGoals(sa, sb, true), ag = simulateGoals(sb, sa, false);
   fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+  let tiebreakResult = null;
   if(hg === ag){
-    const result = resolveAggregateTie(sa, sb);
-    fx.wentToPenalties = result.wentToPenalties;
-    fx.penaltyScore = result.penaltyScore;
-    fx.extraTimeScore = result.extraTimeScore;
-    hg += result.etA; ag += result.etB;
-    fx.winner = result.winner === 'A' ? fx.home : fx.away;
+    tiebreakResult = resolveAggregateTie(sa, sb);
+    fx.wentToPenalties = tiebreakResult.wentToPenalties;
+    fx.penaltyScore = tiebreakResult.penaltyScore;
+    fx.extraTimeScore = tiebreakResult.extraTimeScore;
+    hg += tiebreakResult.etA; ag += tiebreakResult.etB;
+    fx.winner = tiebreakResult.winner === 'A' ? fx.home : fx.away;
   } else {
     fx.winner = hg > ag ? fx.home : fx.away;
   }
   fx.hg = hg; fx.ag = ag;
   fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
+  if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
   fx.played = true;
 }
 
@@ -10679,6 +10697,7 @@ function commitLiveDomesticSuperCupMatchResult(){
     lm.fx.extraTimeScore = result.extraTimeScore;
     lm.fx.hg += result.etA; lm.fx.ag += result.etB;
     lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
+    appendKnockoutTiebreakEvents(lm.fx.events, result, clubNameForAnyId(lm.fx.home), clubNameForAnyId(lm.fx.away));
   } else {
     lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
   }
@@ -10758,6 +10777,7 @@ function commitLiveUefaSuperCupMatchResult(){
     fx.extraTimeScore = result.extraTimeScore;
     fx.hg += result.etA; fx.ag += result.etB;
     fx.winner = result.winner === 'A' ? fx.home : fx.away;
+    appendKnockoutTiebreakEvents(fx.events, result, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
   } else {
     fx.winner = fx.hg > fx.ag ? fx.home : fx.away;
   }
@@ -10812,6 +10832,32 @@ function resolveAggregateTie(strengthA, strengthB){
     if(Math.random() < strengthA/(strengthA+strengthB)) pA++; else pB++;
   }
   return { winner: pA>pB?'A':'B', wentToPenalties:true, penaltyScore:`${pA}-${pB}`, extraTimeScore: etA===etB ? `${etA}-${etB}` : null, etA, etB };
+}
+
+// Ajoute des événements synthétiques décrivant la prolongation puis les
+// tirs au but à la suite d'un match à élimination directe EN UN SEUL MATCH
+// (coupe nationale, trophée d'ouverture, supercoupe d'Europe) - sans ça,
+// un score final "3-3 (tab 4-3)" n'était expliqué par AUCUN événement
+// visible dans le récapitulatif, qu'il ait été joué en direct ou simulé
+// instantanément. result vient de resolveAggregateTie(forceDomicile,
+// forceExtérieur) dans tous ces contextes - etA/etB correspondent donc
+// directement à domicile/extérieur, sans inversion nécessaire.
+function appendKnockoutTiebreakEvents(events, result, homeName, awayName){
+  if(!result || !events) return;
+  const etGoals = [];
+  for(let i=0;i<(result.etA||0);i++) etGoals.push({ side:'home', name:homeName });
+  for(let i=0;i<(result.etB||0);i++) etGoals.push({ side:'away', name:awayName });
+  const minutes = etGoals.map(()=> 91 + Math.floor(Math.random()*29)).sort((a,b)=>a-b);
+  etGoals.forEach((g,i)=>{
+    events.push({ minute:minutes[i], type:'goal', side:g.side, text:`But pour ${g.name} (prolongation).` });
+  });
+  if(result.wentToPenalties){
+    const [scoreHome, scoreAway] = result.penaltyScore.split('-');
+    events.push({ minute:121, type:'decision', side:null, text:`Tirs au but : ${homeName} ${scoreHome} - ${scoreAway} ${awayName}.` });
+  } else if(result.extraTimeScore){
+    const winnerName = result.winner === 'A' ? homeName : awayName;
+    events.push({ minute:120, type:'decision', side:null, text:`Fin de la prolongation : qualification de ${winnerName}.` });
+  }
 }
 
 function euroStrengthOf(euro, id){
@@ -11248,6 +11294,21 @@ function renderLeagueSwitchRow(){
   });
 }
 
+// Fait défiler UNIQUEMENT le conteneur donné jusqu'à cet élément, jamais
+// la page entière - contrairement à element.scrollIntoView(), qui peut
+// aussi faire défiler des ancêtres scrollables en dehors du panneau visé.
+// C'est devenu nécessaire depuis que la page elle-même peut défiler
+// jusqu'au bouton "Mettre un terme à la carrière"/au footer en bas de
+// l'écran de saison : scrollIntoView() faisait alors sauter toute la page
+// vers le bas à chaque clic sur "Match suivant", au lieu de ne faire
+// défiler que le panneau Résultats en interne.
+function scrollContainerToElement(container, el){
+  if(!container || !el) return;
+  const containerRect = container.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  container.scrollTop += (elRect.top - containerRect.top);
+}
+
 function renderLeaguePanels(){
   const season = state.season;
   const seasonDone = season.currentRound >= season.calendar.length;
@@ -11479,7 +11540,7 @@ function renderLeaguePanels(){
       const headings = resultsEl.querySelectorAll('.rd-heading');
       let lastPlayed = null;
       headings.forEach(h=>{ if(h.dataset.upcoming === '0') lastPlayed = h; });
-      if(lastPlayed) lastPlayed.scrollIntoView({ block:'start' });
+      if(lastPlayed) scrollContainerToElement(resultsEl, lastPlayed);
     }
   }
 }
@@ -11598,7 +11659,7 @@ function renderEuroPanels(){
     const headings = resultsEl.querySelectorAll('.rd-heading');
     let last = null;
     headings.forEach(h=>{ if(h.dataset.upcoming === '0') last = h; });
-    if(last) last.scrollIntoView({ block:'start' });
+    if(last) scrollContainerToElement(resultsEl, last);
     else resultsEl.scrollTop = 0;
   }
 }
