@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" -href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -633,15 +633,17 @@ button{ font-family:inherit; cursor:pointer; }
 .end-career-block{
   display:flex;
   justify-content:center;
-  padding:28px var(--gutter) 4px;
+  padding:20px var(--gutter) 12px;
 }
 #btn-end-career{
-  font-size:12.5px;
-  padding:9px 20px;
-  color:var(--text-faint);
-  border-color:var(--border);
+  font-size:16px;
+  font-weight:700;
+  padding:16px 36px;
+  color:#f87171;
+  border:1.5px solid #f87171;
+  border-radius:999px;
 }
-#btn-end-career:hover{ color:#f87171; border-color:#f87171; background:transparent; }
+#btn-end-career:hover{ color:#0a0d13; background:#f87171; border-color:#f87171; }
 
 /* ============================= FOOTER ============================= */
 .site-footer{
@@ -1011,7 +1013,11 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1680px;
   margin:0 auto;
   padding:22px var(--gutter);
-  height:calc(100vh - var(--header-h));
+  /* Laisse de la place sous le tableau de bord pour que le bouton "Mettre
+     un terme à la carrière" et le footer restent visibles sans qu'il
+     faille deviner qu'il faut faire défiler toute la page - sinon ils
+     sont techniquement présents mais jamais découverts. */
+  height:calc(100vh - var(--header-h) - 76px);
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -2592,17 +2598,21 @@ button{ font-family:inherit; cursor:pointer; }
 .career-group{ display:flex; flex-direction:column; gap:12px; }
 .career-group-header{
   display:flex;
-  align-items:baseline;
-  justify-content:space-between;
+  align-items:center;
   flex-wrap:wrap;
   gap:8px 16px;
   padding-bottom:10px;
   border-bottom:1px solid var(--border);
+  cursor:pointer;
+  list-style:none;
 }
+.career-group-header::-webkit-details-marker{ display:none; }
+.career-group-header:hover .career-group-title{ color:var(--club-accent); }
 .career-group-title{
   font-family:var(--bn-bold);
   font-size:19px;
   color:var(--text);
+  transition:color .15s;
 }
 .career-group-stats{
   display:flex;
@@ -2610,6 +2620,8 @@ button{ font-family:inherit; cursor:pointer; }
   font-family:var(--sans);
   font-size:12.5px;
   color:var(--text-faint);
+  margin-right:auto;
+  margin-left:16px;
 }
 .career-group-stats span{
   padding:3px 10px;
@@ -2617,10 +2629,17 @@ button{ font-family:inherit; cursor:pointer; }
   background:rgba(255,255,255,.05);
   border:1px solid var(--border);
 }
+.career-group-toggle{
+  flex-shrink:0;
+  color:var(--text-faint);
+  transition:transform .2s;
+}
+.career-group[open] .career-group-toggle{ transform:rotate(180deg); }
 .career-group-seasons{
   display:flex;
   flex-direction:column;
   gap:12px;
+  padding-top:4px;
 }
 .careers-tiles{
   display:grid;
@@ -6534,14 +6553,17 @@ function proceedToRegularMercatoFlow(){
 // simplement regroupé sous "Carrière N" au Palmarès/Mon compte) et
 // réinitialise tout l'état de jeu pour repartir de zéro.
 function confirmEndCareer(){
-  if(!state.club || !state.career) return;
+  if(!state.club) return;
   const titleEl = document.getElementById('season-event-title');
   titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Mettre un terme à la carrière ?`;
   titleEl.classList.add('is-rare');
   document.getElementById('season-event-context').style.display = 'none';
-  const years = state.career.yearsInCareer || 0;
+  // state.career peut encore être vide (toute première saison, jamais
+  // encore terminée) - le bouton doit fonctionner dès la saison 1, pas
+  // seulement une fois le système de carrière initialisé.
+  const years = state.career ? (state.career.yearsInCareer || 0) : 0;
   document.getElementById('season-event-text').textContent =
-    `Cette action est définitive : votre carrière actuelle (${years} saison${years>1?'s':''}, dernier club ${state.club.name}) restera dans votre Palmarès, et vous repartirez de zéro avec un nouveau coach.`;
+    `Cette action est définitive : votre carrière actuelle (${years} saison${years>1?'s':''} enregistrée${years>1?'s':''}, dernier club ${state.club.name}) restera dans votre Palmarès, et vous repartirez de zéro avec un nouveau coach.`;
   const optsEl = document.getElementById('season-event-options');
   optsEl.innerHTML = `
     <button class="live-decision-option" data-key="confirm">Mettre un terme à la carrière</button>
@@ -13025,17 +13047,18 @@ async function renderPalmaresScreen(){
         `;
       }).join('');
       return `
-        <div class="career-group">
-          <div class="career-group-header">
+        <details class="career-group" ${cn === careerNumbers[0] ? 'open' : ''}>
+          <summary class="career-group-header">
             <div class="career-group-title">Carrière ${cn}</div>
             <div class="career-group-stats">
               <span>${rows.length} saison${rows.length>1?'s':''}</span>
               <span>${clubsInCareer.size} club${clubsInCareer.size>1?'s':''}</span>
               <span>${trophiesInCareer} trophée${trophiesInCareer>1?'s':''}</span>
             </div>
-          </div>
+            <span class="career-group-toggle">&#9662;</span>
+          </summary>
           <div class="career-group-seasons">${seasonCardsHtml}</div>
-        </div>
+        </details>
       `;
     }).join('');
   }
