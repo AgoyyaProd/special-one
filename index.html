@@ -630,6 +630,19 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .howto-row p + p{ margin-top:14px; }
 
+.end-career-block{
+  display:flex;
+  justify-content:center;
+  padding:28px var(--gutter) 4px;
+}
+#btn-end-career{
+  font-size:12.5px;
+  padding:9px 20px;
+  color:var(--text-faint);
+  border-color:var(--border);
+}
+#btn-end-career:hover{ color:#f87171; border-color:#f87171; background:transparent; }
+
 /* ============================= FOOTER ============================= */
 .site-footer{
   position:relative;
@@ -2574,7 +2587,66 @@ button{ font-family:inherit; cursor:pointer; }
 .account-history{
   display:flex;
   flex-direction:column;
+  gap:28px;
+}
+.career-group{ display:flex; flex-direction:column; gap:12px; }
+.career-group-header{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.career-group-title{
+  font-family:var(--bn-bold);
+  font-size:19px;
+  color:var(--text);
+}
+.career-group-stats{
+  display:flex;
+  gap:14px;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--text-faint);
+}
+.career-group-stats span{
+  padding:3px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+}
+.career-group-seasons{
+  display:flex;
+  flex-direction:column;
   gap:12px;
+}
+.careers-tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+  gap:10px;
+}
+.career-tile{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:var(--r-md, 12px);
+  padding:14px 16px;
+}
+.career-tile-title{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:14px;
+  color:var(--text);
+  margin-bottom:8px;
+}
+.career-tile-stats{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  font-family:var(--sans);
+  font-size:12px;
+  color:var(--text-faint);
 }
 .account-season-card{
   background:var(--surface-2);
@@ -3274,6 +3346,41 @@ select.modal-input option{ color:#111; background:#fff; }
       </div>
       </div>
     </div>
+
+    <div class="end-career-block">
+      <button class="season-btn season-btn-ghost" id="btn-end-career">Mettre un terme à la carrière</button>
+    </div>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-brand">
+          <div class="site-footer-logo">The Special One</div>
+          <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
+        </div>
+        <div class="site-footer-cols">
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Le jeu</div>
+            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
+            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
+            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
+          </div>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">À propos</div>
+            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="faq">FAQ</button>
+            <button class="site-footer-link" data-info="contact">Contact</button>
+          </div>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Légal</div>
+            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
+            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
+          </div>
+        </div>
+      </div>
+      <div class="site-footer-bottom">
+        <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
+      </div>
+    </footer>
   </section>
 
   <!-- ============================ MATCH EN DIRECT ============================ -->
@@ -3390,6 +3497,11 @@ select.modal-input option{ color:#111; background:#fff; }
       <div class="profile-card coach-profile-card">
         <div class="profile-card-title">Profil de coach</div>
         <div id="coach-profile-summary"></div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-card-title">Carrières</div>
+        <div id="careers-summary"></div>
       </div>
 
       <div class="section-label" style="margin-top:8px">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
@@ -4409,6 +4521,7 @@ const state = {
   seasonView:"league",
   seasonNumber:1,
   prevSeasonStanding:null,
+  prevSeasonLeague:null,
   prevSeasonCupWinner:null,
   prevSeasonCupFinalist:null,
   domesticSuperCup:null,
@@ -4440,15 +4553,21 @@ const state = {
   rareSeasonEventUsed:false,
   winterMercatoUsed:false,
   bonusMercatoAnnounced:false,
-  // Nombre de saisons consécutives où le club a répondu aux attentes de
-  // son conseil d'administration - déclenche une offre de transfert d'un
-  // club légèrement plus huppé à partir de 4 saisons d'affilée (voir
-  // checkPoachingOfferEligible pour les autres conditions : délai minimum
-  // entre deux offres + part d'aléatoire, pour rester occasionnel).
-  goodSeasonStreak:0,
-  seasonsSincePoachingOffer:0,
+  // Système de carrière (performance/trophées/dynamique/réputation/
+  // longévité) - voir initCareer() pour le détail des variables. Reste
+  // null tant que la toute première saison n'est pas terminée.
+  career:null,
+  // Numéro de la carrière en cours (1re, 2e...) - incrémenté uniquement
+  // quand une carrière est explicitement terminée (bouton "Mettre un
+  // terme à la carrière"), jamais par un simple changement de club en
+  // cours de route (transfert, licenciement) qui reste dans LA MÊME
+  // carrière. Sert à regrouper l'historique de saisons au Palmarès/Mon
+  // compte.
+  careerNumber:1,
   pendingPoachingOffer:null,
   poachingOffersHistory:[],
+  pendingSackingEvent:false,
+  awaitingNewClubAfterSacking:false,
   winStreak:0,
   lossStreak:0,
   fatigueLevel:0,
@@ -5202,6 +5321,14 @@ function renderSelect(){
     btn.addEventListener('click', ()=>{
       const c = clubs.find(c=>c.id===btn.dataset.id);
       if(!c || c.playable === false) return; // pas encore de base de données joueurs - non sélectionnable
+      // Après un licenciement, choisir un club ici reprend directement la
+      // carrière en cours (effectif hérité + mercato), comme une offre de
+      // transfert acceptée - pas un nouveau départ avec draft complète.
+      if(state.awaitingNewClubAfterSacking){
+        state.awaitingNewClubAfterSacking = false;
+        acceptPoachingOffer(c);
+        return;
+      }
       state.club = c;
       applyClubTheme(state.club);
       renderSelect();
@@ -6018,29 +6145,195 @@ function estimateClubStrength(club){
   return 74 + Math.round(Math.random()*12); // 74-86, plausible mid-table default
 }
 
+// ---------------------------- CARRIÈRE DE COACH ----------------------------
+// Base temporelle exprimée en ANNÉES DE CARRIÈRE (jamais l'âge). 5 variables
+// pilotent la trajectoire : performance (saison en cours, vs attentes du
+// club), trophées (poids selon leur importance + l'ampleur de la
+// performance), dynamique (tendance lissée sur plusieurs saisons, jamais
+// une seule saison isolée), réputation (valeur de marché, évolue
+// progressivement) et longévité restante (jamais un simple compte à
+// rebours - prolongée par les réussites, réduite par le déclin durable).
+function initCareer(){
+  state.career = {
+    yearsInCareer: 0,
+    // Longévité théorique de départ, tirée aléatoirement - une base de
+    // référence plausible, pas une limite stricte : elle évoluera ensuite
+    // au fil des saisons selon les événements et performances.
+    baseLongevity: 10 + Math.round(Math.random()*8), // 10-18 ans
+    remainingLongevity: 0, // fixé juste après à baseLongevity
+    reputation: 40 + Math.round(Math.random()*15), // 40-55 au départ
+    momentum: 0,
+    seasonScores: [],
+    stagnationStreak: 0,
+    declineStreak: 0,
+    progressionStreak: 0,
+    clubTenure: 0,
+    seasonsSinceOffer: 0,
+    phase: 'rising'
+  };
+  state.career.remainingLongevity = state.career.baseLongevity;
+}
+
+// Poids de base de chaque trophée, avant pondération par le niveau du
+// club et l'ampleur de la performance - reflète l'importance sportive
+// réelle de chaque compétition. Prévu dès maintenant pour d'éventuels
+// futurs trophées (promotion...) : ajouter une clé suffit, aucune refonte
+// nécessaire.
+const TROPHY_BASE_WEIGHT = {
+  champion: 30, cup: 15, domesticSuperCup: 6,
+  el: 25, ecl: 18, cl: 45, uefaSuperCup: 12,
+  // Prévu pour l'avenir (promotion/relégation, pas encore actif dans le
+  // jeu) - poids nul pour l'instant, à activer sans refonte le jour venu.
+  promotion: 0, avoidedRelegation: 0
+};
+
+// Un trophée remporté avec un club nettement plus faible que la moyenne du
+// championnat pèse plus lourd (vraie performance) qu'avec un club déjà
+// favori (résultat largement attendu) - distingue une surperformance
+// réelle d'un simple bon classement avec l'effectif le plus fort.
+function computeTrophyScore(myClubStrength, leagueAvgStrength, trophiesWon){
+  const underdogFactor = Math.max(0.6, Math.min(1.8, 1.5 - (myClubStrength - leagueAvgStrength) / 20));
+  let total = 0;
+  trophiesWon.forEach(key => { total += (TROPHY_BASE_WEIGHT[key] || 0) * underdogFactor; });
+  return total;
+}
+
+// Performance = résultat par rapport à la limite tolérable du club (déjà
+// pondérée par son envergure, voir myTolerableRankLimit) - normalisée sur
+// une échelle -100/+100 comparable d'une saison à l'autre quel que soit le
+// nombre de clubs du championnat.
+function computeSeasonPerformanceScore(myPos, totalClubs, tolerableLimit){
+  if(!myPos || !totalClubs) return 0;
+  const rankDelta = tolerableLimit - myPos; // >0 = mieux que la limite tolérable
+  const normalized = rankDelta / totalClubs;
+  return Math.max(-100, Math.min(100, normalized * 220));
+}
+
+// Dynamique = tendance lissée sur plusieurs saisons (jusqu'à 6 gardées en
+// mémoire), jamais un aller-retour brutal sur une seule saison. Combine le
+// niveau récent ET sa tendance (progression/stabilité/déclin) par rapport
+// aux saisons d'avant.
+function updateCareerMomentum(career, seasonScore){
+  career.seasonScores.push(seasonScore);
+  if(career.seasonScores.length > 6) career.seasonScores.shift();
+  const s = career.seasonScores;
+  const recentWindow = s.slice(-2);
+  const priorWindow = s.slice(0, Math.max(0, s.length - 2));
+  const recentAvg = recentWindow.reduce((a,b)=>a+b, 0) / recentWindow.length;
+  const priorAvg = priorWindow.length ? priorWindow.reduce((a,b)=>a+b, 0) / priorWindow.length : recentAvg;
+  const trend = recentAvg - priorAvg;
+  const target = recentAvg * 0.5 + trend * 0.5;
+  career.momentum = career.momentum * 0.55 + target * 0.45;
+}
+
+// Classe CETTE saison (pas la tendance globale) pour faire évoluer les
+// séries - l'absence de trophée n'est PAS classée comme absence de
+// performance : le score combine déjà performance + trophées, une saison
+// sans titre mais avec un classement nettement au-dessus des attentes
+// reste "progress".
+function classifySeasonScore(score){
+  if(score >= 25) return 'progress';
+  if(score <= -22) return 'decline';
+  if(score > -10 && score < 12) return 'stagnation';
+  return 'neutral';
+}
+function updateCareerStreaks(career, score){
+  const kind = classifySeasonScore(score);
+  if(kind === 'progress'){ career.progressionStreak++; career.declineStreak = 0; career.stagnationStreak = 0; }
+  else if(kind === 'decline'){ career.declineStreak++; career.progressionStreak = 0; career.stagnationStreak = 0; }
+  else if(kind === 'stagnation'){ career.stagnationStreak++; career.progressionStreak = 0; career.declineStreak = 0; }
+  else { career.progressionStreak = 0; career.declineStreak = 0; career.stagnationStreak = Math.max(0, career.stagnationStreak - 1); }
+  return kind;
+}
+
+// La réputation (valeur de marché) évolue PROGRESSIVEMENT - jamais un
+// bond sur une seule saison isolée, mais les tendances cumulées (séries de
+// progression/déclin/stagnation) pèsent plus lourd que le résultat brut.
+function updateCareerReputation(career, perfScore, trophyScore){
+  let delta = perfScore * 0.12 + trophyScore * 0.35;
+  if(career.progressionStreak >= 2) delta += 4;
+  if(career.declineStreak >= 2) delta -= 4;
+  if(career.stagnationStreak >= 3) delta -= 2.5;
+  career.reputation = Math.max(5, Math.min(100, career.reputation + delta));
+}
+
+// La longévité restante n'est PAS un compte à rebours mécanique : les
+// trophées et les périodes de progression la prolongent, le déclin ou la
+// stagnation durables la réduisent. Le temps qui passe grignote très peu
+// en comparaison des événements sportifs.
+function updateCareerLongevity(career, trophyScore){
+  let delta = -0.35;
+  if(trophyScore >= 25) delta += 1.8;
+  else if(trophyScore >= 8) delta += 0.7;
+  if(career.progressionStreak >= 2) delta += 1;
+  if(career.declineStreak >= 3) delta -= 1.6;
+  if(career.stagnationStreak >= 4) delta -= 1;
+  career.remainingLongevity = Math.max(0, career.remainingLongevity + delta);
+  // Peut dépasser la base initiale (une grande carrière allonge sa propre
+  // trajectoire) - plafond généreux plutôt qu'un maximum figé.
+  career.remainingLongevity = Math.min(career.baseLongevity * 1.8, career.remainingLongevity);
+}
+
+function updateCareerPhase(career){
+  const ratio = career.remainingLongevity / Math.max(1, career.baseLongevity);
+  if(ratio <= 0.15) career.phase = 'twilight';
+  else if(career.declineStreak >= 3) career.phase = 'declining';
+  else if(career.reputation >= 65 || career.progressionStreak >= 2) career.phase = 'rising';
+  else career.phase = 'established';
+}
+
+// Point d'entrée appelé à CHAQUE fin de saison : analyse les résultats vs
+// attentes, identifie les trophées, mesure la dynamique par rapport aux
+// saisons précédentes, met à jour réputation et longévité restante. Les
+// événements de carrière (offre de transfert, licenciement...) sont
+// ensuite déterminés séparément à partir de ce nouvel état (voir
+// checkPoachingOfferEligible / checkSackingEligible).
+function updateCareerAfterSeason(myPos, totalClubs, trophiesWon){
+  if(!state.career) initCareer();
+  const career = state.career;
+  career.yearsInCareer++;
+  career.clubTenure++;
+  career.seasonsSinceOffer = (career.seasonsSinceOffer||0) + 1;
+
+  const tolerableLimit = myTolerableRankLimit();
+  const myStrength = estimateClubStrength(state.club);
+  const leagueClubs = LEAGUES[state.league] || [];
+  const leagueAvgStrength = leagueClubs.length
+    ? leagueClubs.reduce((a,c)=>a+estimateClubStrength(c), 0) / leagueClubs.length
+    : myStrength;
+
+  const perfScore = computeSeasonPerformanceScore(myPos, totalClubs, tolerableLimit);
+  const trophyScore = computeTrophyScore(myStrength, leagueAvgStrength, trophiesWon);
+  // Le score combiné penche performance + trophées, mais les trophées ne
+  // dominent jamais totalement (une superbe saison sans titre doit rester
+  // valorisée, cf. absence de trophée != absence de performance).
+  const combinedScore = Math.max(-100, Math.min(100, perfScore + trophyScore * 0.6));
+
+  updateCareerMomentum(career, combinedScore);
+  const seasonKind = updateCareerStreaks(career, combinedScore);
+  updateCareerReputation(career, perfScore, trophyScore);
+  updateCareerLongevity(career, trophyScore);
+  updateCareerPhase(career);
+
+  return { perfScore, trophyScore, combinedScore, seasonKind };
+}
+
 // ---------------------------- OFFRES DE TRANSFERT (carrière manager) ----------------------------
-// Après plusieurs bonnes saisons consécutives, un club LÉGÈREMENT plus huppé
-// que le vôtre (jamais un géant hors de portée type Barça pour un coach de
-// Lens) peut proposer de vous recruter avant le mercato. Uniquement parmi
-// les clubs jouables (playable !== false) : impossible d'hériter d'un
-// effectif réel pour un club sans base de données joueurs.
+// La réputation élargit la fenêtre de clubs accessibles : un coach très
+// coté peut viser nettement plus haut qu'un coach tout juste dans les
+// clous, jamais un saut extrême non plus (ex: Lens -> Barça, hors de
+// portée même à réputation maximale). Uniquement parmi les clubs jouables
+// (playable !== false) : impossible d'hériter d'un effectif réel pour un
+// club sans base de données joueurs.
 function findPoachingCandidateClubs(){
   const myStrength = estimateClubStrength(state.club);
+  const reputation = state.career ? state.career.reputation : 45;
+  const upperReach = 3 + (reputation/100) * 9; // +3 (faible réputation) à +12 (très forte)
   const proposedBefore = state.poachingOffersHistory || [];
   const allClubs = Object.values(LEAGUES).flat().filter(c => c.playable !== false && c.id !== state.club.id);
   const eligible = allClubs
     .map(c => ({ club:c, strength: estimateClubStrength(c) }))
-    // "Légèrement au-dessus" : strictement plus fort, jusqu'à +6 points -
-    // jamais un saut extrême (ex: Rennes -> Arsenal, qui à +7 casserait la
-    // crédibilité). Seuil bas volontairement large (n'importe quel club
-    // plus fort, même d'1 point) : les forces réelles des clubs suivis
-    // sont souvent très regroupées (ex: OM/OL/Monaco à seulement +1 de
-    // Rennes) - exiger +2 les excluait systématiquement, ne laissant que
-    // des clubs d'un autre championnat. Seuls les clubs "jouables" (vraie
-    // base de données) sont proposés - les "bientôt disponibles" (Espagne,
-    // Allemagne, Italie pour l'instant) le deviendront automatiquement dès
-    // qu'ils auront une vraie base, sans changement de code nécessaire ici.
-    .filter(({strength}) => strength > myStrength && strength <= myStrength + 6)
+    .filter(({strength}) => strength > myStrength && strength <= myStrength + upperReach)
     .map(c=>c.club);
   // Évite de reproposer un club déjà refusé/rejoint dans cette carrière
   // tant qu'il reste d'autres options - garantit la diversité réclamée
@@ -6114,24 +6407,27 @@ function autoFillSquadFromClub(club){
   state.usedNames = used;
 }
 
-// Doit avoir enchaîné au moins 2 saisons où le club a répondu (ou dépassé)
-// les attentes de son conseil d'administration (même seuil que le mercato
-// hivernal/bonus) - et au moins un club "légèrement au-dessus" disponible.
-// Reste volontairement occasionnel, pas systématique dès qu'on enchaîne
-// de bonnes saisons : seuil de série relevé (4 au lieu de 2), délai
-// minimum entre deux offres, et une part d'aléatoire même une fois
-// éligible - retenté chaque saison tant que ça ne tombe pas, plutôt que
-// déclenché à coup sûr pile à la 4e bonne saison.
+// L'offre de transfert n'est plus un simple compteur de "bonnes saisons" :
+// elle dépend de la RÉPUTATION (valeur de marché) et de la DYNAMIQUE
+// récente (lissée sur plusieurs saisons, jamais une seule saison isolée),
+// avec un délai minimum entre deux offres et une probabilité proportionnelle
+// à l'ampleur de la réussite plutôt qu'un taux fixe - reste occasionnel
+// même pour un coach qui enchaîne les bonnes saisons.
 function checkPoachingOfferEligible(){
   if(state.pendingPoachingOffer) return false;
-  if((state.goodSeasonStreak||0) < 4) return false;
-  if((state.seasonsSincePoachingOffer||0) < 3) return false;
-  if(Math.random() > 0.35) return false;
+  const career = state.career;
+  if(!career) return false;
+  if(career.phase === 'twilight') return false; // fin de carrière : plus d'offres de plus grand club
+  if((career.seasonsSinceOffer||0) < 3) return false;
+  if(career.momentum < 18) return false;
+  if(career.reputation < 40) return false;
+  const chance = Math.min(0.55, 0.15 + (career.reputation-40)/100 + (career.momentum-18)/200);
+  if(Math.random() > chance) return false;
   return findPoachingCandidateClubs().length > 0;
 }
 
 function showPoachingOfferPopup(){
-  state.seasonsSincePoachingOffer = 0;
+  state.career.seasonsSinceOffer = 0;
   const candidates = findPoachingCandidateClubs();
   // Aléatoire sur TOUS les candidats éligibles (pas seulement les plus
   // proches en force) pour maximiser la diversité des offres.
@@ -6157,7 +6453,6 @@ function showPoachingOfferPopup(){
   optsEl.querySelector('[data-key="refuse"]').addEventListener('click', ()=>{
     document.getElementById('season-event-overlay').style.display = 'none';
     state.pendingPoachingOffer = null;
-    state.goodSeasonStreak = 0;
     proceedToRegularMercatoFlow();
   });
   document.getElementById('season-event-overlay').style.display = 'flex';
@@ -6169,9 +6464,55 @@ function acceptPoachingOffer(newClub){
   applyClubTheme(state.club);
   autoFillSquadFromClub(newClub);
   state.pendingPoachingOffer = null;
-  state.goodSeasonStreak = 0;
+  if(state.career) state.career.clubTenure = 0; // nouveau chapitre au nouveau club
   toast(`Vous rejoignez ${newClub.name} ! Un mercato s'ouvre pour composer votre nouvel effectif.`);
   startTransferWindow(3, false);
+}
+
+// ---------------------------- LICENCIEMENT (fin de collaboration) ----------------------------
+// Jamais déclenché par une seule mauvaise saison (les résultats sportifs
+// comportent une part naturelle d'incertitude) - seulement quand le déclin
+// est vraiment installé ET que la réputation est tombée bas, signe que le
+// conseil d'administration a perdu patience durablement.
+function checkSackingEligible(){
+  const career = state.career;
+  if(!career) return false;
+  if(state.pendingPoachingOffer || state.pendingSackingEvent) return false;
+  if(career.declineStreak < 4) return false;
+  if(career.reputation > 25) return false;
+  const chance = Math.min(0.6, 0.2 + (career.declineStreak - 4) * 0.12);
+  return Math.random() < chance;
+}
+
+function showSackingPopup(){
+  state.pendingSackingEvent = true;
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Fin de collaboration`;
+  titleEl.classList.add('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  document.getElementById('season-event-text').textContent =
+    `Après plusieurs saisons de déclin, ${state.club.name} met fin à votre contrat. Il est temps de retrouver un banc de touche.`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `<button class="live-decision-option" data-key="ok">Chercher un nouveau club</button>`;
+  optsEl.querySelector('.live-decision-option').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    startFreeAgentClubSearch();
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
+// Redirige vers l'écran de sélection de club pour en choisir un nouveau -
+// une séparation ne garantit pas de rebondir au même niveau : la
+// réputation, réduite par le déclin qui a mené au licenciement, limitera
+// naturellement les clubs qui vous font vraiment confiance ensuite (voir
+// findPoachingCandidateClubs, même logique de fenêtre par réputation).
+function startFreeAgentClubSearch(){
+  state.pendingSackingEvent = false;
+  state.awaitingNewClubAfterSacking = true;
+  state.club = null;
+  showScreen('select');
+  renderSelect();
+  toast("Vous êtes libre - choisissez votre prochain club pour continuer votre carrière.");
 }
 
 // Chemin normal de fin de saison (bonus mercato puis mercato classique) -
@@ -6184,6 +6525,101 @@ function proceedToRegularMercatoFlow(){
   } else {
     startTransferWindow(3, false);
   }
+}
+
+// ---------------------------- FIN DE CARRIÈRE (action volontaire) ----------------------------
+// Action définitive et volontaire du joueur (distincte du licenciement,
+// qui est un événement subi) - archive la carrière actuelle telle quelle
+// dans l'historique (déjà enregistré saison par saison, se retrouvera
+// simplement regroupé sous "Carrière N" au Palmarès/Mon compte) et
+// réinitialise tout l'état de jeu pour repartir de zéro.
+function confirmEndCareer(){
+  if(!state.club || !state.career) return;
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Mettre un terme à la carrière ?`;
+  titleEl.classList.add('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  const years = state.career.yearsInCareer || 0;
+  document.getElementById('season-event-text').textContent =
+    `Cette action est définitive : votre carrière actuelle (${years} saison${years>1?'s':''}, dernier club ${state.club.name}) restera dans votre Palmarès, et vous repartirez de zéro avec un nouveau coach.`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `
+    <button class="live-decision-option" data-key="confirm">Mettre un terme à la carrière</button>
+    <button class="live-decision-option" data-key="cancel">Annuler</button>
+  `;
+  optsEl.querySelector('[data-key="confirm"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    endCurrentCareer();
+  });
+  optsEl.querySelector('[data-key="cancel"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
+function endCurrentCareer(){
+  // La prochaine saison jouée démarrera sous un nouveau numéro de
+  // carrière - l'historique déjà enregistré en base reste inchangé, il se
+  // retrouve simplement regroupé sous "Carrière N" (voir career_number).
+  state.careerNumber = (state.careerNumber || 1) + 1;
+  state.seasonNumber = 1;
+
+  state.career = null;
+  state.club = null;
+  state.league = null;
+  state.season = null;
+  state.formationKey = "4-3-3";
+  state.locked = false;
+  state.slots.forEach(s=>{ s.player = null; });
+  state.subs.forEach(s=>{ s.player = null; });
+  state.hand = [];
+  state.selectedUid = null;
+  state.repositionSlotId = null;
+  state.usedNames = new Set();
+  state.rerollsLeft = 5;
+  state.transfer = null;
+  state.pelouseId = null;
+
+  state.euro = null;
+  state.shadowEuro = null;
+  state.otherLeagues = null;
+  state.domesticSuperCup = null;
+  state.otherDomesticSuperCups = null;
+  state.uefaSuperCupFixture = null;
+  state.euroQualifying = null;
+  state.currentSeasonEuroWinners = {};
+  state.prevSeasonEuroWinners = null;
+  state.epsLeagues = [];
+  state.myEuroEntryRound = null;
+  state.myClQualifyingResult = null;
+  state.myEclQualifyingResult = null;
+  state.clQualifyingResults = [];
+  state.eclQualifyingResults = [];
+
+  state.prevSeasonStanding = null;
+  state.prevSeasonLeague = null;
+  state.prevSeasonCupWinner = null;
+  state.prevSeasonCupFinalist = null;
+  state.prevOtherLeaguesData = null;
+
+  state.pendingPoachingOffer = null;
+  state.poachingOffersHistory = [];
+  state.pendingSackingEvent = false;
+  state.awaitingNewClubAfterSacking = false;
+  state.winterMercatoUsed = false;
+  state.bonusMercatoAnnounced = false;
+
+  localStorage.removeItem(PENDING_STATE_KEY);
+  // Retour au dégradé neutre gris/noir par défaut (hors partie active),
+  // comme à la déconnexion.
+  const root = document.documentElement.style;
+  root.removeProperty('--club-primary');
+  root.removeProperty('--club-secondary');
+  root.removeProperty('--club-accent');
+
+  showScreen('landing');
+  renderLanding();
+  toast('Votre carrière a été archivée - à vous de commencer une nouvelle histoire !');
 }
 
 // ---------------------------- MERCATOS SPÉCIAUX ----------------------------
@@ -6763,6 +7199,13 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
 
   if(season.currentRound >= season.calendar.length){
     state.prevSeasonStanding = sortedStandings();
+    // Le championnat auquel appartient ce classement - PAS forcément
+    // state.league au moment où on le relit plus tard (une offre de
+    // transfert acceptée entre-temps peut avoir changé de championnat) :
+    // sans ce marqueur, le trophée d'ouverture et les qualifications
+    // européennes de la saison suivante utiliseraient par erreur le
+    // classement de l'ANCIEN championnat sous le nom du nouveau.
+    state.prevSeasonLeague = state.league;
     state.prevSeasonCupWinner = season.cup ? season.cup.champion : null;
     state.prevSeasonCupFinalist = season.cup ? season.cup.finalist : null;
     // Les championnats non joués ont désormais leur propre coupe nationale
@@ -9657,11 +10100,17 @@ function qualifyingTimelineEntriesForClub(clubId){
 function qualifiersForLeagueTier(leagueName, tier){
 
   let standing = null, cupWinnerId = null;
-  if(leagueName === state.league && state.seasonNumber > 1 && state.prevSeasonStanding){
+  // Comparé à prevSeasonLeague (le championnat auquel appartient VRAIMENT
+  // ce classement), pas à state.league qui peut avoir changé depuis (offre
+  // de transfert acceptée) - sinon le nouveau championnat hériterait par
+  // erreur du classement de l'ancien, et l'ancien n'aurait plus aucune
+  // donnée du tout (jamais suivi comme "autre championnat" tant qu'il
+  // était le vôtre).
+  if(leagueName === state.prevSeasonLeague && state.seasonNumber > 1 && state.prevSeasonStanding){
     standing = state.prevSeasonStanding;
     cupWinnerId = state.prevSeasonCupWinner;
   } else {
-    const otherData = leagueName !== state.league && state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
+    const otherData = leagueName !== state.prevSeasonLeague && state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
     if(otherData && otherData.standing){
       standing = otherData.standing;
       cupWinnerId = otherData.cupWinner;
@@ -10109,17 +10558,37 @@ function computeDomesticSuperCup(leagueName, standing, cupWinner, cupFinalist){
 }
 
 function resolveDomesticSuperCupForNewSeason(){
-  state.domesticSuperCup = computeDomesticSuperCup(state.league, state.prevSeasonStanding, state.prevSeasonCupWinner, state.prevSeasonCupFinalist);
+  // Le classement à utiliser pour VOTRE championnat dépend de quel
+  // championnat vous jouiez réellement la saison passée (prevSeasonLeague)
+  // - si vous avez changé de championnat entre-temps (offre de transfert
+  // acceptée), state.league a déjà basculé sur le nouveau, mais
+  // prevSeasonStanding appartient encore à l'ancien : dans ce cas, on
+  // retrouve les vraies données du nouveau championnat via
+  // prevOtherLeaguesData (où il était suivi "en arrière-plan" jusqu'ici),
+  // exactement comme pour n'importe quel autre championnat non joué.
+  if(state.league === state.prevSeasonLeague){
+    state.domesticSuperCup = computeDomesticSuperCup(state.league, state.prevSeasonStanding, state.prevSeasonCupWinner, state.prevSeasonCupFinalist);
+  } else {
+    const otherData = state.prevOtherLeaguesData && state.prevOtherLeaguesData[state.league];
+    state.domesticSuperCup = otherData
+      ? computeDomesticSuperCup(state.league, otherData.standing, otherData.cupWinner, otherData.cupFinalist)
+      : null;
+  }
   // Le vôtre reste EN ATTENTE (voir getDueDomesticSuperCupStep) - jamais
   // résolu ici automatiquement, pour laisser la possibilité de le jouer
   // en direct si vous êtes concerné.
 
-  // Les 4 championnats non joués, eux, sont toujours résolus d'un coup
+  // Les autres championnats non joués sont toujours résolus d'un coup
   // (jamais interactifs) - à partir de la coupe légère simulée en
-  // coulisses à la fin de la saison précédente.
+  // coulisses à la fin de la saison précédente. On exclut explicitement
+  // VOTRE championnat actuel de cette boucle : sinon, en cas de
+  // changement de championnat, il apparaîtrait à tort une seconde fois
+  // dans "les autres" alors qu'il vient d'être traité ci-dessus comme le
+  // vôtre.
   state.otherDomesticSuperCups = {};
   if(state.prevOtherLeaguesData){
     Object.entries(state.prevOtherLeaguesData).forEach(([leagueName, data])=>{
+      if(leagueName === state.league) return;
       const sc = computeDomesticSuperCup(leagueName, data.standing, data.cupWinner, data.cupFinalist);
       if(sc){
         resolveSuperCupFixturesInstantly(sc);
@@ -11595,7 +12064,9 @@ function snapshotGameState(){
     shadowEuro: state.shadowEuro,
     seasonView: state.seasonView,
     seasonNumber: state.seasonNumber,
+    careerNumber: state.careerNumber,
     prevSeasonStanding: state.prevSeasonStanding,
+    prevSeasonLeague: state.prevSeasonLeague,
     prevSeasonCupWinner: state.prevSeasonCupWinner,
     prevSeasonCupFinalist: state.prevSeasonCupFinalist,
     domesticSuperCup: state.domesticSuperCup,
@@ -11631,10 +12102,11 @@ function snapshotGameState(){
     // saison en boucle.
     winterMercatoUsed: state.winterMercatoUsed,
     bonusMercatoAnnounced: state.bonusMercatoAnnounced,
-    goodSeasonStreak: state.goodSeasonStreak,
-    seasonsSincePoachingOffer: state.seasonsSincePoachingOffer,
+    career: state.career,
     pendingPoachingOffer: state.pendingPoachingOffer,
     poachingOffersHistory: state.poachingOffersHistory,
+    pendingSackingEvent: state.pendingSackingEvent,
+    awaitingNewClubAfterSacking: state.awaitingNewClubAfterSacking,
     coachProfile: state.coachProfile,
     careerStats: state.careerStats
   };
@@ -11742,7 +12214,19 @@ async function reconcileGameStateAfterLogin(){
 // Reconstitue l'écran à afficher à partir d'un instantané restauré.
 function routeToRestoredScreen(snap, opts){
   opts = opts || {};
-  if(snap && snap.season){
+  // Un mercato en cours (fenêtre de transfert active - fin de saison,
+  // bonus, hivernal, ou juste après une offre de transfert/un
+  // licenciement) doit TOUJOURS reprendre l'écran de mercato en priorité,
+  // même si state.season pointe encore vers l'ancienne saison terminée -
+  // sinon un rechargement pendant un mercato affichait par erreur l'écran
+  // de saison avec les données de l'ancien club, effectif "vide" en
+  // apparence et boutons inopérants.
+  if(snap && snap.transfer && snap.club){
+    history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
+    showScreen('game', { skipHistory:true });
+    applyClubTheme(snap.club);
+    renderGame();
+  } else if(snap && snap.season){
     history.replaceState({ screen:'season' }, '', location.pathname + location.search + '#season');
     showScreen('season', { skipHistory:true });
     if(snap.club) applyClubTheme(snap.club);
@@ -11935,7 +12419,7 @@ function finalizeSeasonEuroWinners(){
 // qui vient de se terminer - factorisé entre le récap de qualification et
 // la recherche du bénéficiaire EPS ci-dessous.
 function prevSeasonStandingAndCup(leagueName){
-  if(leagueName === state.league){
+  if(leagueName === state.prevSeasonLeague){
     return { standing: state.prevSeasonStanding, cupWinnerId: state.prevSeasonCupWinner };
   }
   const otherData = state.prevOtherLeaguesData && state.prevOtherLeaguesData[leagueName];
@@ -12247,16 +12731,20 @@ function recordSeasonIfNeeded(){
   // - distinct de la Supercoupe d'Europe (superCupWon ci-dessus).
   const domesticSuperCupWon = !!(state.domesticSuperCup && state.domesticSuperCup.champion === state.club.id);
 
-  // Suivi des "bonnes saisons" consécutives (répond ou dépasse les
-  // attentes du conseil d'administration, même seuil que le mercato
-  // hivernal/bonus) - condition d'apparition d'une offre de transfert
-  // avant le prochain mercato. Le nombre de saisons depuis la dernière
-  // offre (acceptée ou refusée) est également suivi, pour garantir un
-  // minimum de tranquillité même en cas de série de bonnes saisons
-  // ininterrompue.
-  const metExpectations = myPos > 0 && myPos <= myTolerableRankLimit();
-  state.goodSeasonStreak = metExpectations ? (state.goodSeasonStreak||0) + 1 : 0;
-  state.seasonsSincePoachingOffer = (state.seasonsSincePoachingOffer||0) + 1;
+  // Met à jour le système de carrière (performance vs attentes, trophées
+  // pondérés, dynamique lissée sur plusieurs saisons, réputation,
+  // longévité restante) - remplace l'ancien simple compteur de "bonnes
+  // saisons consécutives". Détermine l'accès aux offres de transfert et
+  // au risque de licenciement en cas de déclin durable (voir
+  // checkPoachingOfferEligible / checkSackingEligible, appelés depuis le
+  // clic "Saison suivante").
+  const trophiesWonKeys = [];
+  if(myPos === 1) trophiesWonKeys.push('champion');
+  if(cupWon) trophiesWonKeys.push('cup');
+  if(domesticSuperCupWon) trophiesWonKeys.push('domesticSuperCup');
+  if(euroWon && state.euro) trophiesWonKeys.push(state.euro.tier);
+  if(superCupWon) trophiesWonKeys.push('uefaSuperCup');
+  updateCareerAfterSeason(myPos, standing.length, trophiesWonKeys);
 
   let trophiesThisSeason = 0;
   if(myPos === 1) trophiesThisSeason++;
@@ -12295,6 +12783,7 @@ function recordSeasonIfNeeded(){
       user_id: state.session.user.id,
       player_name: pantheonDisplayName(),
       season_number: state.seasonNumber,
+      career_number: state.careerNumber || 1,
       club: state.club.name,
       league: state.league,
       position: myPos,
@@ -12418,7 +12907,47 @@ async function renderAccountScreen(){
   populateFavoriteClubOptions();
   document.getElementById('pseudo-hint').textContent = '';
   renderCoachProfileSummary();
+  renderCareersSummary();
   renderAchievementsGrid();
+}
+
+// Résumé compact des carrières (une tuile "Carrière N" par carrière), sans
+// le détail saison par saison qui reste réservé au Palmarès - juste de
+// quoi voir d'un coup d'œil combien de carrières, de saisons, de clubs et
+// de trophées ont été accumulés au total.
+async function renderCareersSummary(){
+  const el = document.getElementById('careers-summary');
+  if(!el || !sbClient || !state.session) return;
+  el.innerHTML = `<div class="hand-empty">Chargement…</div>`;
+  const { data: history, error } = await sbClient
+    .from('career_history')
+    .select('career_number, club, is_champion, cup_won, domestic_super_cup_won, euro_result')
+    .eq('user_id', state.session.user.id);
+  if(error || !history || !history.length){
+    el.innerHTML = `<p class="profile-field-hint" style="margin:0">Aucune carrière terminée pour l'instant.</p>`;
+    return;
+  }
+  const byCareer = {};
+  history.forEach(r=>{
+    const cn = r.career_number || 1;
+    (byCareer[cn] = byCareer[cn] || []).push(r);
+  });
+  const careerNumbers = Object.keys(byCareer).map(Number).sort((a,b)=>b-a);
+  el.innerHTML = `<div class="careers-tiles">${careerNumbers.map(cn=>{
+    const rows = byCareer[cn];
+    const clubs = new Set(rows.map(r=>r.club));
+    const trophies = countTrophies(rows);
+    return `
+      <div class="career-tile">
+        <div class="career-tile-title">Carrière ${cn}</div>
+        <div class="career-tile-stats">
+          <span>${rows.length} saison${rows.length>1?'s':''}</span>
+          <span>${clubs.size} club${clubs.size>1?'s':''}</span>
+          <span>${trophies} trophée${trophies>1?'s':''}</span>
+        </div>
+      </div>
+    `;
+  }).join('')}</div>`;
 }
 
 async function renderPalmaresScreen(){
@@ -12452,31 +12981,60 @@ async function renderPalmaresScreen(){
   if(!history.length){
     historyEl.innerHTML = `<div class="hand-empty">Aucune saison terminée pour l'instant.</div>`;
   } else {
-    historyEl.innerHTML = history.slice().reverse().map(r=>{
-      const posLabel = r.position===1 ? '1er' : `${r.position}e`;
-      const euroLine = r.euro_result
-        ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}${r.euro_result.superCupWon ? " · Supercoupe d'Europe remportée 🏆" : ''}`
-        : "Pas d'Europe cette saison-là";
-      const scoreLine = r.score
-        ? `Score de la saison : <strong>${r.score.total} pts</strong> (Championnat ${r.score.league} · Coupe ${r.score.cup} · Europe ${r.score.euro})`
-        : '';
+    // Regroupe l'historique par carrière (career_number) - les lignes
+    // enregistrées avant l'introduction de ce champ valent 1 par défaut
+    // (colonne créée avec DEFAULT 1), donc rentrent naturellement dans
+    // "Carrière 1" sans migration de données nécessaire.
+    const byCareer = {};
+    history.forEach(r=>{
+      const cn = r.career_number || 1;
+      (byCareer[cn] = byCareer[cn] || []).push(r);
+    });
+    const careerNumbers = Object.keys(byCareer).map(Number).sort((a,b)=>b-a); // la plus récente en premier
+
+    historyEl.innerHTML = careerNumbers.map(cn=>{
+      const rows = byCareer[cn];
+      const clubsInCareer = new Set(rows.map(r=>r.club));
+      const trophiesInCareer = countTrophies(rows);
+      const seasonCardsHtml = rows.slice().sort((a,b)=>b.season_number-a.season_number).map(r=>{
+        const posLabel = r.position===1 ? '1er' : `${r.position}e`;
+        const euroLine = r.euro_result
+          ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}${r.euro_result.superCupWon ? " · Supercoupe d'Europe remportée 🏆" : ''}`
+          : "Pas d'Europe cette saison-là";
+        const scoreLine = r.score
+          ? `Score de la saison : <strong>${r.score.total} pts</strong> (Championnat ${r.score.league} · Coupe ${r.score.cup} · Europe ${r.score.euro})`
+          : '';
+        return `
+          <div class="account-season-card">
+            <div class="account-season-head">
+              <div class="account-season-title">Saison ${r.season_number} - ${r.club} (${r.league})</div>
+              ${r.is_champion ? '<span class="st-badge st-badge-champ">C</span>' : ''}
+              ${r.cup_won ? '<span class="st-badge st-badge-cup">CN</span>' : ''}
+              ${r.domestic_super_cup_won ? `<span class="st-badge st-badge-tc">${DOMESTIC_SUPER_CUP_BADGE[r.league] || 'TC'}</span>` : ''}
+              ${r.euro_result && r.euro_result.won ? `<span class="st-badge st-badge-${r.euro_result.tier==='cl'?'c1':r.euro_result.tier==='el'?'c3':'c4'}">${EURO_TROPHY_BADGE[r.euro_result.tier]}</span>` : ''}
+              ${r.euro_result && r.euro_result.superCupWon ? '<span class="st-badge st-badge-sc">SC</span>' : ''}
+            </div>
+            <div class="account-season-body">
+              <div>Classement : ${posLabel} / ${r.total_clubs} (${r.points ?? '-'} pts)</div>
+              <div>Coupe Nationale : ${r.cup_won ? 'Remportée 🏆' : 'Non remportée'}</div>
+              ${r.domestic_super_cup_won ? `<div>${DOMESTIC_SUPER_CUP_NAME[r.league] || 'Trophée des Champions'} : Remporté 🏆</div>` : ''}
+              <div>${euroLine}</div>
+              ${scoreLine ? `<div>${scoreLine}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
       return `
-        <div class="account-season-card">
-          <div class="account-season-head">
-            <div class="account-season-title">Saison ${r.season_number} - ${r.club} (${r.league})</div>
-            ${r.is_champion ? '<span class="st-badge st-badge-champ">C</span>' : ''}
-            ${r.cup_won ? '<span class="st-badge st-badge-cup">CN</span>' : ''}
-            ${r.domestic_super_cup_won ? `<span class="st-badge st-badge-tc">${DOMESTIC_SUPER_CUP_BADGE[r.league] || 'TC'}</span>` : ''}
-            ${r.euro_result && r.euro_result.won ? `<span class="st-badge st-badge-${r.euro_result.tier==='cl'?'c1':r.euro_result.tier==='el'?'c3':'c4'}">${EURO_TROPHY_BADGE[r.euro_result.tier]}</span>` : ''}
-            ${r.euro_result && r.euro_result.superCupWon ? '<span class="st-badge st-badge-sc">SC</span>' : ''}
+        <div class="career-group">
+          <div class="career-group-header">
+            <div class="career-group-title">Carrière ${cn}</div>
+            <div class="career-group-stats">
+              <span>${rows.length} saison${rows.length>1?'s':''}</span>
+              <span>${clubsInCareer.size} club${clubsInCareer.size>1?'s':''}</span>
+              <span>${trophiesInCareer} trophée${trophiesInCareer>1?'s':''}</span>
+            </div>
           </div>
-          <div class="account-season-body">
-            <div>Classement : ${posLabel} / ${r.total_clubs} (${r.points ?? '-'} pts)</div>
-            <div>Coupe Nationale : ${r.cup_won ? 'Remportée 🏆' : 'Non remportée'}</div>
-            ${r.domestic_super_cup_won ? `<div>${DOMESTIC_SUPER_CUP_NAME[r.league] || 'Trophée des Champions'} : Remporté 🏆</div>` : ''}
-            <div>${euroLine}</div>
-            ${scoreLine ? `<div>${scoreLine}</div>` : ''}
-          </div>
+          <div class="career-group-seasons">${seasonCardsHtml}</div>
         </div>
       `;
     }).join('');
@@ -12552,12 +13110,15 @@ document.getElementById('btn-resume-manual').addEventListener('click', ()=>{
   });
 });
 document.getElementById('btn-next-season').addEventListener('click', ()=>{
-  if(checkPoachingOfferEligible()){
+  if(checkSackingEligible()){
+    showSackingPopup();
+  } else if(checkPoachingOfferEligible()){
     showPoachingOfferPopup();
   } else {
     proceedToRegularMercatoFlow();
   }
 });
+document.getElementById('btn-end-career').addEventListener('click', confirmEndCareer);
 document.getElementById('btn-injury-alert-squad').addEventListener('click', ()=>{
   document.getElementById('injury-alert-overlay').style.display = 'none';
   state._pendingInjuryAlert = null;
