@@ -5297,6 +5297,12 @@ function stopLandingRotation(){
 // SELECT (league -> club)
 // ============================================================
 function renderSelect(){
+  // Contrairement à renderGame/renderSeason, cet écran n'a pas toujours
+  // déclenché de sauvegarde automatique - or il peut représenter un moment
+  // pivot (juste après un licenciement, ou avant qu'une nouvelle carrière
+  // ne démarre vraiment) qui mérite d'être remonté au compte même si le
+  // joueur ne va pas plus loin tout de suite sur cet appareil.
+  scheduleSaveSnapshot();
   const leagueGrid = document.getElementById('league-grid');
   leagueGrid.innerHTML = Object.keys(LEAGUES).map(lg=>`
     <button class="league-pill ${state.league===lg?'is-active':''}" data-league="${lg}">
@@ -6601,6 +6607,7 @@ function endCurrentCareer(){
   state.rerollsLeft = 5;
   state.transfer = null;
   state.pelouseId = null;
+  resetPelouseVisuals();
 
   state.euro = null;
   state.shadowEuro = null;
@@ -6631,7 +6638,14 @@ function endCurrentCareer(){
   state.winterMercatoUsed = false;
   state.bonusMercatoAnnounced = false;
 
-  localStorage.removeItem(PENDING_STATE_KEY);
+  // Pousse immédiatement cet état "carrière archivée, rien en cours" vers
+  // le compte (locale ET serveur) - sans ça, seul renderGame()/renderSeason()
+  // déclenchent une sauvegarde automatique, et l'écran d'accueil vers lequel
+  // on revient ici n'en déclenche aucune. Si le joueur change d'appareil
+  // avant d'être allé assez loin dans une nouvelle carrière pour re-déclencher
+  // une sauvegarde, l'archivage ne serait jamais remonté au compte - la
+  // saison "archivée" réapparaîtrait comme toujours en cours ailleurs.
+  saveSnapshotNow();
   // Retour au dégradé neutre gris/noir par défaut (hors partie active),
   // comme à la déconnexion.
   const root = document.documentElement.style;
@@ -7044,19 +7058,14 @@ function commitLiveCupMatchResult(){
   const stageKey = cup.stage;
   const fixtures = cup.bracket[stageKey];
 
+  // Le match a désormais été entièrement joué en direct, prolongation et
+  // tirs au but compris (voir advanceLiveMoment) - le résultat est déjà
+  // acquis, plus besoin de le retirer au sort ici après coup.
   lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events;
-  lm.fx.wentToPenalties = false; lm.fx.penaltyScore = null; lm.fx.extraTimeScore = null;
-  if(lm.fx.hg === lm.fx.ag){
-    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
-    lm.fx.wentToPenalties = result.wentToPenalties;
-    lm.fx.penaltyScore = result.penaltyScore;
-    lm.fx.extraTimeScore = result.extraTimeScore;
-    lm.fx.hg += result.etA; lm.fx.ag += result.etB;
-    lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
-    appendKnockoutTiebreakEvents(lm.fx.events, result, clubNameForAnyId(lm.fx.home), clubNameForAnyId(lm.fx.away));
-  } else {
-    lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
-  }
+  lm.fx.wentToPenalties = !!lm.wentToPenalties;
+  lm.fx.penaltyScore = lm.penaltyScore || null;
+  lm.fx.extraTimeScore = (lm.inExtraTime && !lm.wentToPenalties) ? 'ap' : null;
+  lm.fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away);
   lm.fx.played = true;
   trackMatchResult(lm.fx);
   if(stageKey === 'final' && lm.fx.winner === state.club.id) checkUnderdogGoalscorer(lm.fx);
@@ -7096,7 +7105,7 @@ function commitLiveCupMatchResult(){
     cup.finalist = finalFx.winner === finalFx.home ? finalFx.away : finalFx.home;
   }
 
-  checkLiveMatchAchievements(lm, lm.fx.hg !== lm.fx.ag && (isMyTeamHome(lm) ? lm.fx.hg>lm.fx.ag : lm.fx.ag>lm.fx.hg));
+  checkLiveMatchAchievements(lm, lm.fx.winner === state.club.id);
   state.liveMatch = null;
   showScreen('season');
   renderSeason();
@@ -8997,15 +9006,94 @@ function resolveSeasonEvent(optionKey){
     toast(outcomeMsg);
   }
 }
+// Une séance de tirs au but est modélisée comme une suite de tirs
+// (5 chacun puis mort subite si toujours à égalité) - un tir résolu par
+// "instant", au même rythme que le reste du match, avec un vrai tireur
+// pioché dans l'effectif à chaque fois.
+function startPenaltyShootout(lm){
+  lm.penaltyShootout = { homeScore:0, awayScore:0, homeKicks:[], awayKicks:[], turn:'home', done:false };
+}
+
+function isPenaltyShootoutDecided(ps){
+  const homeKicks = ps.homeKicks.length, awayKicks = ps.awayKicks.length;
+  if(homeKicks !== awayKicks) return false; // tour en cours, jamais tranché au milieu
+  if(homeKicks <= 5){
+    const homeLeft = 5 - homeKicks, awayLeft = 5 - awayKicks;
+    if(homeLeft <= 0 && awayLeft <= 0) return ps.homeScore !== ps.awayScore; // 5 tirs chacun joués
+    return (ps.homeScore > ps.awayScore + awayLeft) || (ps.awayScore > ps.homeScore + homeLeft);
+  }
+  return ps.homeScore !== ps.awayScore; // mort subite : un tour complet suffit à trancher
+}
+
+function advancePenaltyKick(lm){
+  const ps = lm.penaltyShootout;
+  const isHomeTurn = ps.turn === 'home';
+  const kickerName = isHomeTurn ? lm.homeName : lm.awayName;
+  const kickerId = isHomeTurn ? lm.homeId : lm.awayId;
+  const kickerSide = isHomeTurn ? 'home' : 'away';
+  const pool = clubPlayerPool(kickerId);
+  const kicker = pickWeightedPlayer(pool, 'scorer', null);
+  const str = isHomeTurn ? lm.baseHomeStr : lm.baseAwayStr;
+  const oppStr = isHomeTurn ? lm.baseAwayStr : lm.baseHomeStr;
+  const scoreChance = Math.max(0.62, Math.min(0.85, 0.74 + (str-oppStr)/400));
+  const scored = Math.random() < scoreChance;
+
+  if(isHomeTurn){ ps.homeKicks.push(scored); if(scored) ps.homeScore++; }
+  else { ps.awayKicks.push(scored); if(scored) ps.awayScore++; }
+
+  const text = kicker
+    ? `${scored ? 'But' : 'Manqué'} ! ${kicker.nom} (${kickerName}) ${scored ? 'transforme son tir au but' : 'échoue son tir au but'}.`
+    : `${scored ? 'But' : 'Manqué'} au tir au but pour ${kickerName}.`;
+  pushLiveEvent(lm, 120, 'decision', text, kickerSide);
+
+  if(isHomeTurn) ps.turn = 'away'; else ps.turn = 'home';
+
+  if(isPenaltyShootoutDecided(ps)){
+    ps.done = true;
+    const winnerId = ps.homeScore > ps.awayScore ? lm.homeId : lm.awayId;
+    lm.wentToPenalties = true;
+    lm.penaltyScore = `${ps.homeScore}-${ps.awayScore}`;
+    lm.penaltyWinnerId = winnerId;
+    const winnerName = winnerId === lm.homeId ? lm.homeName : lm.awayName;
+    pushLiveEvent(lm, 121, 'decision', `Tirs au but : ${lm.homeName} ${ps.homeScore} - ${ps.awayScore} ${lm.awayName}. ${winnerName} se qualifie !`);
+    lm.finished = true;
+  }
+}
+
 function advanceLiveMoment(lm){
   if(lm.finished || lm.pendingDecision) return;
 
-  const step = 4 + Math.floor(Math.random()*6); // 4 à 9 minutes par instant
-  lm.minute = Math.min(93, lm.minute + step);
+  // Séance de tirs au but en cours : un tir résolu par instant, jamais de
+  // minutes qui avancent pendant ce temps-là.
+  if(lm.penaltyShootout && !lm.penaltyShootout.done){
+    advancePenaltyKick(lm);
+    return;
+  }
 
-  if(lm.minute >= 93){
+  const step = 4 + Math.floor(Math.random()*6); // 4 à 9 minutes par instant
+  // Seuls les matchs à élimination directe en un seul match (coupe,
+  // trophée d'ouverture, supercoupe d'Europe) peuvent aller en
+  // prolongation puis tirs au but - jamais un match de championnat/phase
+  // de ligue, où un nul reste un résultat valide.
+  const isKnockout = !!(lm.isCup || lm.isDomesticSuperCup || lm.isUefaSuperCup);
+  const capMinute = lm.inExtraTime ? 123 : 93;
+  lm.minute = Math.min(capMinute, lm.minute + step);
+
+  if(lm.minute >= capMinute){
+    if(isKnockout && lm.hg === lm.ag){
+      if(!lm.inExtraTime){
+        lm.inExtraTime = true;
+        lm.minute = 91;
+        pushLiveEvent(lm, 90, 'ft', `Fin du temps réglementaire : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}. Place à la prolongation !`);
+        return;
+      }
+      pushLiveEvent(lm, 120, 'ft', `Fin de la prolongation : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}. Direction les tirs au but !`);
+      startPenaltyShootout(lm);
+      return;
+    }
     lm.finished = true;
-    pushLiveEvent(lm, 90, 'ft', `Coup de sifflet final : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}.`);
+    const label = lm.inExtraTime ? 'Coup de sifflet final (après prolongation)' : 'Coup de sifflet final';
+    pushLiveEvent(lm, lm.inExtraTime ? 120 : 90, 'ft', `${label} : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}.`);
     return;
   }
 
@@ -9429,8 +9517,16 @@ function renderLiveMatch(){
 
   document.getElementById('live-home-name').textContent = lm.homeName;
   document.getElementById('live-away-name').textContent = lm.awayName;
-  document.getElementById('live-score').textContent = `${lm.hg} - ${lm.ag}`;
-  document.getElementById('live-minute').textContent = lm.finished ? 'Terminé' : `${lm.minute}'`;
+  document.getElementById('live-score').textContent = lm.penaltyShootout
+    ? `${lm.hg} - ${lm.ag} (tab ${lm.penaltyShootout.homeScore}-${lm.penaltyShootout.awayScore})`
+    : `${lm.hg} - ${lm.ag}`;
+  document.getElementById('live-minute').textContent = lm.finished
+    ? 'Terminé'
+    : lm.penaltyShootout
+      ? 'Tirs au but'
+      : lm.inExtraTime
+        ? `${lm.minute}' (prolongation)`
+        : `${lm.minute}'`;
   document.getElementById('live-competition-label').textContent = lm.isQualifying
     ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
     : lm.isDomesticSuperCup
@@ -10688,19 +10784,14 @@ function commitLiveDomesticSuperCupMatchResult(){
   const lm = state.liveMatch;
   if(!lm || !lm.isDomesticSuperCup) return;
   const sc = state.domesticSuperCup;
+  // Le match a désormais été entièrement joué en direct, prolongation et
+  // tirs au but compris (voir advanceLiveMoment) - le résultat est déjà
+  // acquis, plus besoin de le retirer au sort ici après coup.
   lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events;
-  lm.fx.wentToPenalties = false; lm.fx.penaltyScore = null; lm.fx.extraTimeScore = null;
-  if(lm.fx.hg === lm.fx.ag){
-    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
-    lm.fx.wentToPenalties = result.wentToPenalties;
-    lm.fx.penaltyScore = result.penaltyScore;
-    lm.fx.extraTimeScore = result.extraTimeScore;
-    lm.fx.hg += result.etA; lm.fx.ag += result.etB;
-    lm.fx.winner = result.winner === 'A' ? lm.fx.home : lm.fx.away;
-    appendKnockoutTiebreakEvents(lm.fx.events, result, clubNameForAnyId(lm.fx.home), clubNameForAnyId(lm.fx.away));
-  } else {
-    lm.fx.winner = lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away;
-  }
+  lm.fx.wentToPenalties = !!lm.wentToPenalties;
+  lm.fx.penaltyScore = lm.penaltyScore || null;
+  lm.fx.extraTimeScore = (lm.inExtraTime && !lm.wentToPenalties) ? 'ap' : null;
+  lm.fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away);
   lm.fx.played = true;
   advanceDomesticSuperCup(sc);
   checkLiveMatchAchievements(lm, lm.fx.winner === state.club.id);
@@ -10768,19 +10859,14 @@ function commitLiveUefaSuperCupMatchResult(){
   const lm = state.liveMatch;
   if(!lm || !lm.isUefaSuperCup) return;
   const fx = lm.fx;
+  // Le match a désormais été entièrement joué en direct, prolongation et
+  // tirs au but compris (voir advanceLiveMoment) - le résultat est déjà
+  // acquis, plus besoin de le retirer au sort ici après coup.
   fx.hg = lm.hg; fx.ag = lm.ag; fx.events = lm.events;
-  fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
-  if(fx.hg === fx.ag){
-    const result = resolveAggregateTie(lm.baseHomeStr, lm.baseAwayStr);
-    fx.wentToPenalties = result.wentToPenalties;
-    fx.penaltyScore = result.penaltyScore;
-    fx.extraTimeScore = result.extraTimeScore;
-    fx.hg += result.etA; fx.ag += result.etB;
-    fx.winner = result.winner === 'A' ? fx.home : fx.away;
-    appendKnockoutTiebreakEvents(fx.events, result, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
-  } else {
-    fx.winner = fx.hg > fx.ag ? fx.home : fx.away;
-  }
+  fx.wentToPenalties = !!lm.wentToPenalties;
+  fx.penaltyScore = lm.penaltyScore || null;
+  fx.extraTimeScore = (lm.inExtraTime && !lm.wentToPenalties) ? 'ap' : null;
+  fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (fx.hg > fx.ag ? fx.home : fx.away);
   fx.played = true;
   applyUefaSuperCupResult(fx);
   checkLiveMatchAchievements(lm, fx.winner === state.club.id);
@@ -13557,6 +13643,30 @@ function applyPelouse(id){
     });
   }
   state.pelouseId = id;
+}
+
+// Retire tout style de pelouse posé en ligne par applyPelouse() ci-dessus -
+// sans ça, remettre state.pelouseId à null (ex: fin de carrière) ne suffit
+// pas : les styles en ligne (plus prioritaires que la classe CSS
+// pelouse-pending) font que l'ancien fond de terrain choisi reste visible
+// en "reliquat" tant qu'ils ne sont pas explicitement effacés.
+function resetPelouseVisuals(){
+  const pitch = document.getElementById('pitch');
+  const grass = document.getElementById('pitch-grass');
+  if(grass){
+    grass.style.clipPath = '';
+    grass.style.backgroundImage = '';
+    grass.style.backgroundSize = '';
+    grass.style.backgroundPosition = '';
+    grass.style.backgroundRepeat = '';
+    grass.style.backgroundColor = '';
+    grass.style.border = '';
+  }
+  if(pitch){
+    ['.pitch-halfway', '.pitch-circle', '.pitch-line'].forEach(sel=>{
+      pitch.querySelectorAll(sel).forEach(el=>{ el.style.visibility = ''; });
+    });
+  }
 }
 function openPelouseModal(){
   renderPelouseGrid();
