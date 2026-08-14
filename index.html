@@ -6966,6 +6966,13 @@ function simulateCupStageFor(cup, strengths){
     let ag = simulateGoals(awayStr, homeStr, false);
     fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
     let tiebreakResult = null;
+    // Score de fin de temps réglementaire (90 min), CAPTURÉ AVANT tout
+    // ajout de prolongation - simulateMatchEvents doit générer les
+    // événements sur cette base réglementaire uniquement, sinon les buts
+    // de prolongation se retrouvaient comptés une deuxième fois avec de
+    // faux noms (voir appendKnockoutTiebreakEvents plus bas, qui gère
+    // spécifiquement et correctement les buts de prolongation).
+    const regHg = hg, regAg = ag;
     if(hg === ag){
       // Match nul après 90 minutes -> vraie prolongation puis tirs au but
       // si besoin, comme pour les confrontations aller-retour européennes.
@@ -6979,8 +6986,8 @@ function simulateCupStageFor(cup, strengths){
       fx.winner = hg > ag ? fx.home : fx.away;
     }
     fx.played = true; fx.hg = hg; fx.ag = ag;
-    fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
-    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
+    fx.events = simulateMatchEvents(fx.home, fx.away, regHg, regAg);
+    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away), fx.home, fx.away);
     if(fx.home === state.club.id || fx.away === state.club.id){
       trackMatchResult(fx);
       if(stageKey === 'final' && fx.winner === state.club.id) checkUnderdogGoalscorer(fx);
@@ -7038,6 +7045,7 @@ function startLiveCupMatchday(){
     eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
     pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -7078,6 +7086,7 @@ function commitLiveCupMatchResult(){
     let fag = simulateGoals(awayStr, homeStr, false);
     fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
     let tiebreakResult = null;
+    const regHg = fhg, regAg = fag;
     if(fhg === fag){
       tiebreakResult = resolveAggregateTie(homeStr, awayStr);
       fx.wentToPenalties = tiebreakResult.wentToPenalties;
@@ -7089,8 +7098,8 @@ function commitLiveCupMatchResult(){
       fx.winner = fhg > fag ? fx.home : fx.away;
     }
     fx.played = true; fx.hg = fhg; fx.ag = fag;
-    fx.events = simulateMatchEvents(fx.home, fx.away, fhg, fag);
-    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
+    fx.events = simulateMatchEvents(fx.home, fx.away, regHg, regAg);
+    if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away), fx.home, fx.away);
   });
   cup.results.push({ stage:stageKey, roundIdx:cup.matchdayFor[stageKey], fixtures:fixtures.map(f=>({...f})) });
 
@@ -7377,11 +7386,12 @@ function startLiveMatchday(){
   }
 
   // Si un tour à élimination de votre compétition est en attente depuis
-  // une journée déjà jouée, il occupe ce clic (résolu instantanément, pas
-  // de version "en direct" pour les barrages/8es/quarts/demies/finale) -
-  // le championnat n'avance pas tant que ce n'est pas fait.
+  // une journée déjà jouée, il occupe ce clic - VOTRE manche (aller,
+  // retour ou finale) se joue en direct si vous êtes encore en lice, sinon
+  // rien à regarder (résolution instantanée, gérée à l'intérieur de
+  // startLiveEuroKnockoutMatchday).
   if(getDueEuroKnockoutStep()){
-    resolveDueEuroKnockoutStep();
+    startLiveEuroKnockoutMatchday();
     return;
   }
 
@@ -7455,6 +7465,7 @@ function startLiveMatchday(){
     speed:1,
     timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -7502,6 +7513,7 @@ function startLiveEuroMatchday(euroFx, roundIdx, tier){
     speed:1,
     timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -8394,7 +8406,11 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function stoppageTimeDecision(lm){
-    if(lm.minute < 88) return null;
+    // Le vrai temps additionnel de la 2e mi-temps (au-delà de la 90e,
+    // propre à chaque match - voir rollLiveMatchInjuryTimes) plutôt qu'un
+    // seuil fixe à la 88e qui ne représentait pas vraiment "les arrêts de
+    // jeu".
+    if(!(lm.inSecondHalf && lm.minute > 90)) return null;
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
       title:'Temps additionnel',
@@ -8414,6 +8430,73 @@ const LIVE_DECISION_BUILDERS = [
         }}
       ]
     };
+  },
+  // ---------------------------- ÉVÉNEMENTS DE FIN DE MATCH ----------------------------
+  // Pensés pour faire émerger naturellement les nouveaux succès de coaching
+  // (Le Hold-up, Le Bus, On ferme !, Tout pour l'attaque, Catenaccio...) -
+  // chaque choix pose un drapeau sur lm, vérifié à la fin du match par
+  // checkLiveMatchAchievements.
+  function underSiegeDecision(lm){
+    // L'adversaire domine fortement en fin de match (net avantage de
+    // momentum en sa faveur) - jamais en tout début de match, où ce serait
+    // juste une période difficile normale plutôt qu'un vrai siège.
+    if(lm.minute < 65) return null;
+    if((lm[oppModKey(lm)] - lm[myModKey(lm)]) < 7) return null;
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    return {
+      title:'Siège adverse',
+      text:"L'adversaire domine fortement et votre équipe subit plusieurs vagues. Comment réagir ?",
+      options:[
+        { key:'shutdown', label:'Fermer le bloc', apply(){
+          lm[oppModKey(lm)] -= 6;
+          lm._chosenDefensiveUnderSiege = true;
+          lm._consecutiveDefensiveChoices = (lm._consecutiveDefensiveChoices||0) + 1;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous resserrez complètement le bloc pour encaisser la pression.', mySide);
+        }},
+        { key:'goforit', label:'Sortir jouer', risky:true, apply(){
+          lm[myModKey(lm)] += 5; lm[oppModKey(lm)] += 3;
+          lm._consecutiveDefensiveChoices = 0;
+          pushLiveEvent(lm, lm.minute, 'decision', "Vous demandez à votre équipe de sortir jouer malgré la pression.", mySide);
+        }},
+        { key:'counter', label:'Contre-attaquer', risky:true, apply(){
+          lm[myModKey(lm)] += 7; lm[oppModKey(lm)] -= 1;
+          lm._consecutiveDefensiveChoices = 0;
+          pushLiveEvent(lm, lm.minute, 'decision', "Vous misez sur la contre-attaque pour punir l'adversaire.", mySide);
+        }}
+      ]
+    };
+  },
+  function finalMinutesDecision(lm){
+    // Uniquement en toute fin de match, en menant d'exactement un but -
+    // exactement le scénario décrit ("dans les dernières minutes").
+    if(lm.minute < 80) return null;
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    const myScore = mySide==='home' ? lm.hg : lm.ag;
+    const oppScore = mySide==='home' ? lm.ag : lm.hg;
+    if(myScore - oppScore !== 1) return null;
+    return {
+      title:'Dernières minutes',
+      text:"Votre équipe mène d'un but dans les dernières minutes. Quelle consigne donner ?",
+      options:[
+        { key:'shutdown', label:'Fermer le jeu', apply(){
+          lm[myModKey(lm)] -= 3; lm[oppModKey(lm)] -= 7;
+          lm._lateDefensiveChoice = true;
+          lm._consecutiveDefensiveChoices = (lm._consecutiveDefensiveChoices||0) + 1;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous demandez à votre équipe de fermer le jeu pour protéger son avantage.', mySide);
+        }},
+        { key:'continue', label:'Continuer à jouer', apply(){
+          lm[myModKey(lm)] += 2; lm[oppModKey(lm)] += 2;
+          lm._consecutiveDefensiveChoices = 0;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous demandez à votre équipe de continuer à produire du jeu.', mySide);
+        }},
+        { key:'second', label:'Chercher le deuxième but', risky:true, apply(){
+          lm[myModKey(lm)] += 8; lm[oppModKey(lm)] += 5;
+          lm._lateAttackingChoice = true;
+          lm._consecutiveDefensiveChoices = 0;
+          pushLiveEvent(lm, lm.minute, 'decision', 'Vous envoyez votre équipe chercher le but qui tuerait le match.', mySide);
+        }}
+      ]
+    };
   }
 ];
 
@@ -8426,6 +8509,305 @@ function buildRandomLiveDecision(lm){
   const chosen = candidates[Math.floor(Math.random() * candidates.length)];
   lm.usedScenarioKeys.push(chosen.fn.name);
   return chosen.decision;
+}
+
+// ============================================================
+// DÉCISIONS DE MI-TEMPS
+// ============================================================
+// Un vrai moment de décision distinct des événements de match classiques :
+// se déclenche UNE SEULE FOIS par match, exactement à la fin de la 1ère
+// mi-temps (voir triggerHalftimeDecision), et exploite les vraies données
+// de la première période (score, domination, buteur peu en vue, zone
+// ciblée...) plutôt que de tirer un événement générique au hasard.
+// Plusieurs peuvent être éligibles à la fois (ex : match nul ET buteur
+// discret) - un seul est choisi au hasard parmi les éligibles, pour
+// laisser de la variété tout en restant toujours pertinent par rapport à
+// la situation réelle de la première mi-temps.
+
+// Le buteur le plus dangereux de l'effectif titulaire (poste offensif,
+// meilleure note) - sert à repérer s'il a été "en vue" ou pas en 1ère mi-temps.
+function myMainAttacker(){
+  const attackers = state.slots.filter(s=>s.player && ['BU','AD','AG'].includes(s.label)).map(s=>s.player);
+  if(!attackers.length) return null;
+  return attackers.slice().sort((a,b)=>b.note-a.note)[0];
+}
+
+const HALFTIME_EVENT_BUILDERS = [
+  function leTournantHalftime(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    const diff = myScore - oppScore;
+    const dominated = (lm[oppModKey(lm)] - lm[myModKey(lm)]) >= 6;
+    // Situation clairement dégradée : mené de 2+ buts, ou mené d'1 but tout
+    // en étant nettement dominé - la simple "Vestiaire sous tension"
+    // (menée d'1 but "normale") ne suffit plus, il faut un vrai virage.
+    if(!(diff <= -2 || (diff === -1 && dominated))) return null;
+    return {
+      title:'Le tournant',
+      text:'À la mi-temps, votre équipe doit changer son approche pour inverser la dynamique. Quelle décision prendre ?',
+      isHalftime:true,
+      options:[
+        { key:'system', label:'Changer le système', risky:true, apply(){
+          lm[myModKey(lm)] += 9; lm[oppModKey(lm)] += 2;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous changez complètement de système pour la 2e mi-temps.', mySide);
+        }},
+        { key:'insist', label:'Accentuer le plan actuel', apply(){
+          lm[myModKey(lm)] += 2;
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez à votre équipe de persévérer dans le plan initial.', mySide);
+        }},
+        { key:'rebalance', label:'Rééquilibrer', apply(){
+          lm[myModKey(lm)] += 5; lm[oppModKey(lm)] -= 3;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous rééquilibrez les lignes pour reprendre le contrôle.', mySide);
+        }}
+      ]
+    };
+  },
+  function vestiaireSousTension(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    if(myScore - oppScore !== -1) return null; // "Le tournant" gère les cas plus graves
+    return {
+      title:'Vestiaire sous tension',
+      text:'Votre équipe est menée à la mi-temps et le groupe doute. Comment réagir ?',
+      isHalftime:true,
+      options:[
+        { key:'remobilize', label:'Remobiliser', risky:true, apply(){
+          lm[myModKey(lm)] += 7;
+          pushLiveEvent(lm, 45, 'decision', 'Vous haussez le ton pour remobiliser le groupe.', mySide);
+        }},
+        { key:'calm', label:'Calmer les esprits', apply(){
+          lm[myModKey(lm)] += 3; lm[oppModKey(lm)] -= 1;
+          pushLiveEvent(lm, 45, 'decision', 'Vous apaisez le vestiaire avant la reprise.', mySide);
+        }},
+        { key:'change', label:'Changer le plan', apply(){
+          lm[myModKey(lm)] += 5; lm[oppModKey(lm)] += 2;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez un changement de plan pour la 2e mi-temps.', mySide);
+        }}
+      ]
+    };
+  },
+  function planB(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    const dominated = (lm[oppModKey(lm)] - lm[myModKey(lm)]) >= 6;
+    if(myScore !== oppScore || !dominated) return null;
+    return {
+      title:'Plan B',
+      text:"Le plan de jeu ne fonctionne pas malgré une première mi-temps dominée par l'adversaire. Que faire ?",
+      isHalftime:true,
+      options:[
+        { key:'system', label:'Changer le système', risky:true, apply(){
+          lm[myModKey(lm)] += 8; lm[oppModKey(lm)] += 1;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous changez de système pour retrouver le contrôle du jeu.', mySide);
+        }},
+        { key:'tweak', label:'Modifier les consignes', apply(){
+          lm[myModKey(lm)] += 4; lm[oppModKey(lm)] -= 2;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous ajustez les consignes sans tout bouleverser.', mySide);
+        }},
+        { key:'stay', label:'Ne rien changer', apply(){
+          pushLiveEvent(lm, 45, 'decision', 'Vous faites confiance au plan initial malgré la domination adverse.', mySide);
+        }}
+      ]
+    };
+  },
+  function avantageFragile(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    if(myScore - oppScore !== 1) return null;
+    return {
+      title:'Avantage fragile',
+      text:"Votre équipe mène d'un but à la mi-temps. Quelle orientation donner pour la 2e mi-temps ?",
+      isHalftime:true,
+      options:[
+        { key:'push', label:"Continuer d'attaquer", risky:true, apply(){
+          lm[myModKey(lm)] += 6; lm[oppModKey(lm)] += 4;
+          pushLiveEvent(lm, 45, 'decision', "Vous demandez à votre équipe de continuer à prendre des risques offensifs.", mySide);
+        }},
+        { key:'balance', label:'Équilibrer', apply(){
+          lm[myModKey(lm)] += 2;
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez un jeu plus équilibré pour la reprise.', mySide);
+        }},
+        { key:'manage', label:"Gérer l'avantage", apply(){
+          lm[myModKey(lm)] -= 2; lm[oppModKey(lm)] -= 5;
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez à votre équipe de gérer son avantage.', mySide);
+        }}
+      ]
+    };
+  },
+  function toutResteAFaire(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    const dominated = (lm[oppModKey(lm)] - lm[myModKey(lm)]) >= 6;
+    if(myScore !== oppScore || dominated) return null; // "Plan B" couvre le nul + dominé
+    return {
+      title:'Tout reste à faire',
+      text:'Le score est nul à la mi-temps dans un match à enjeu. Quel rythme donner à la 2e mi-temps ?',
+      isHalftime:true,
+      options:[
+        { key:'accelerate', label:'Accélérer', risky:true, apply(){
+          lm[myModKey(lm)] += 6; lm[oppModKey(lm)] += 3;
+          pushLiveEvent(lm, 45, 'decision', "Vous demandez à votre équipe d'accélérer le rythme dès la reprise.", mySide);
+        }},
+        { key:'wait', label:'Patienter', apply(){
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez à votre équipe de rester patiente.', mySide);
+        }},
+        { key:'secure', label:'Sécuriser', apply(){
+          lm[oppModKey(lm)] -= 4;
+          pushLiveEvent(lm, 45, 'decision', "Vous préférez sécuriser le point du match nul avant tout.", mySide);
+        }}
+      ]
+    };
+  },
+  function leReveilDuButeur(lm){
+    const attacker = myMainAttacker();
+    if(!attacker) return null;
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home' ? lm.hg : lm.ag;
+    // Réservé aux vraies mi-temps où l'attaque est restée muette (pas
+    // seulement "ce joueur précis n'a pas marqué", sinon ça se déclenche
+    // presque toujours et écrase les autres événements au tirage).
+    if(myScore > 0) return null;
+    const involved = (lm.scorers||[]).some(s=>s.minute<=45 && s.scorer===attacker.nom);
+    if(involved) return null;
+    return {
+      title:'Le réveil du buteur',
+      text:`${attacker.nom} a été peu en vue en première période. Comment relancer son influence ?`,
+      isHalftime:true,
+      options:[
+        { key:'keep', label:'Continuer à le servir', apply(){
+          lm[myModKey(lm)] += 3;
+          pushLiveEvent(lm, 45, 'decision', `Vous demandez à l'équipe de continuer à chercher ${attacker.nom}.`, mySide);
+        }},
+        { key:'change', label:"Changer de point d'appui", risky:true, apply(){
+          lm[myModKey(lm)] += 5;
+          pushLiveEvent(lm, 45, 'decision', "Vous changez de point d'appui offensif pour la 2e mi-temps.", mySide);
+        }},
+        { key:'reposition', label:'Le repositionner', apply(){
+          lm[myModKey(lm)] += 4;
+          pushLiveEvent(lm, 45, 'decision', `Vous repositionnez ${attacker.nom} pour mieux l'impliquer.`, mySide);
+        }}
+      ]
+    };
+  },
+  function faiblesseIdentifiee(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const oppSide = mySide==='home'?'away':'home';
+    const oppThreats = (lm.events||[]).filter(e=>e.minute<=45 && (e.type==='chance'||e.type==='goal') && e.side===oppSide).length;
+    if(oppThreats < 3) return null;
+    return {
+      title:'Faiblesse identifiée',
+      text:'Une zone de votre équipe a été ciblée à plusieurs reprises en première période. Comment réagir ?',
+      isHalftime:true,
+      options:[
+        { key:'reinforce', label:'Renforcer la zone', apply(){
+          lm[oppModKey(lm)] -= 6;
+          pushLiveEvent(lm, 45, 'decision', 'Vous renforcez la zone visée par vos consignes.', mySide);
+        }},
+        { key:'system', label:'Changer de système', risky:true, apply(){
+          lm[myModKey(lm)] += 4; lm[oppModKey(lm)] -= 3;
+          lm._halftimeApproachChanged = true;
+          pushLiveEvent(lm, 45, 'decision', 'Vous changez de système pour corriger cette faiblesse.', mySide);
+        }},
+        { key:'assume', label:'Prendre le risque d\'assumer', risky:true, apply(){
+          lm[myModKey(lm)] += 6; lm[oppModKey(lm)] += 3;
+          pushLiveEvent(lm, 45, 'decision', "Vous assumez le risque plutôt que de sacrifier l'équilibre offensif.", mySide);
+        }}
+      ]
+    };
+  },
+  function lectureDuMatch(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    // Une vraie "opportunité tactique" à exploiter : quand on mène déjà
+    // nettement, ou qu'on domine clairement sans forcément mener au score.
+    const dominating = (lm[myModKey(lm)] - lm[oppModKey(lm)]) >= 6;
+    if(!(myScore - oppScore >= 2 || dominating)) return null;
+    return {
+      title:'Lecture du match',
+      text:'Les statistiques et le scénario de la première période indiquent une opportunité tactique. Quelle décision prendre ?',
+      isHalftime:true,
+      options:[
+        { key:'exploit', label:'Exploiter la faille', risky:true, apply(){
+          lm[myModKey(lm)] += 7;
+          pushLiveEvent(lm, 45, 'decision', 'Vous demandez à votre équipe d\'exploiter la faille identifiée.', mySide);
+        }},
+        { key:'stay', label:'Rester fidèle au plan', apply(){
+          pushLiveEvent(lm, 45, 'decision', 'Vous restez fidèle au plan qui fonctionne.', mySide);
+        }},
+        { key:'reduce', label:'Réduire les risques', apply(){
+          lm[oppModKey(lm)] -= 4;
+          pushLiveEvent(lm, 45, 'decision', 'Vous préférez réduire les risques pour la 2e mi-temps.', mySide);
+        }}
+      ]
+    };
+  },
+  function dernierMotDuCoach(lm){
+    const mySide = isMyTeamHome(lm) ? 'home':'away';
+    const myScore = mySide==='home'?lm.hg:lm.ag, oppScore = mySide==='home'?lm.ag:lm.hg;
+    // Filet de rattrapage toujours éligible pour un match serré (0 ou 1
+    // but d'écart), pour ne jamais laisser une mi-temps sans décision.
+    if(Math.abs(myScore - oppScore) > 1) return null;
+    return {
+      title:'Dernier mot du coach',
+      text:'Moment clé de la mi-temps dans un match très serré. Quelle orientation générale donner à la 2e mi-temps ?',
+      isHalftime:true,
+      options:[
+        { key:'offensive', label:'Offensif', risky:true, apply(){
+          lm[myModKey(lm)] += 7; lm[oppModKey(lm)] += 4;
+          pushLiveEvent(lm, 45, 'decision', 'Vous donnez une orientation offensive pour la 2e mi-temps.', mySide);
+        }},
+        { key:'balanced', label:'Équilibré', apply(){
+          lm[myModKey(lm)] += 2;
+          pushLiveEvent(lm, 45, 'decision', 'Vous donnez une orientation équilibrée pour la 2e mi-temps.', mySide);
+        }},
+        { key:'defensive', label:'Défensif', apply(){
+          lm[oppModKey(lm)] -= 5;
+          pushLiveEvent(lm, 45, 'decision', 'Vous donnez une orientation défensive pour la 2e mi-temps.', mySide);
+        }}
+      ]
+    };
+  }
+];
+
+// Choisit UNE décision de mi-temps parmi celles éligibles pour l'état réel
+// de la première période - jamais générique, toujours ancrée dans ce qui
+// vient de se passer.
+function buildHalftimeDecision(lm){
+  const candidates = HALFTIME_EVENT_BUILDERS.map(fn => fn(lm)).filter(Boolean);
+  if(!candidates.length) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// Déclenche la pause obligatoire de mi-temps : choisit et affiche une
+// décision de mi-temps, en réutilisant exactement le même mécanisme que
+// les décisions en cours de match (lm.pendingDecision / chooseLiveDecision)
+// - la reprise de la 2e mi-temps (minute remise à 45, inSecondHalf=true)
+// n'a lieu qu'une fois la décision validée par le joueur (voir
+// chooseLiveDecision).
+function triggerHalftimeDecision(lm){
+  // Score au moment de la mi-temps, du point de vue de mon club - sert à
+  // repérer plus tard (fin de match) si l'équipe était menée ou tenue en
+  // échec à ce moment précis (voir "Le Déclic").
+  const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+  lm._halftimeScoreDiff = (mySide==='home' ? lm.hg-lm.ag : lm.ag-lm.hg);
+  const decision = buildHalftimeDecision(lm);
+  if(!decision){
+    // Filet de sécurité (ne devrait jamais arriver, "Dernier mot du coach"
+    // étant éligible sur tout match à 1 but d'écart ou moins - mais un
+    // écart de 2+ sans domination nette pourrait en théorie n'avoir aucun
+    // événement éligible) : passe directement à la 2e mi-temps.
+    lm.inSecondHalf = true;
+    lm.minute = 45;
+    pushLiveEvent(lm, 45, 'ft', 'Fin de la première mi-temps.');
+    return;
+  }
+  lm.pendingDecision = decision;
+  pushLiveEvent(lm, 45, 'decision', `Mi-temps : ${decision.title}.`);
 }
 
 // ============================================================
@@ -9060,6 +9442,34 @@ function advancePenaltyKick(lm){
   }
 }
 
+// Le cumul aller+retour est-il à égalité ? Fonctionne aussi bien pour une
+// confrontation de qualification (clubId/opponentId) que pour un tour à
+// élimination directe de VOTRE compétition européenne (teamA/teamB) -
+// utilisé pendant le match retour joué en direct pour décider s'il faut
+// réellement basculer en prolongation. Le score du seul match retour ne
+// suffit jamais à en juger : une qualification peut déjà être jouée avant
+// même la fin du temps réglementaire du retour.
+function isQualifyingAggregateTied(lm){
+  let leg1, meId, amHome;
+  if(lm.euroKnockoutTie){
+    const tie = lm.euroKnockoutTie;
+    leg1 = tie.leg1;
+    meId = state.club.id;
+    amHome = lm.homeId === state.club.id;
+  } else {
+    const tie = lm.qualifyingTie;
+    if(!tie || !tie.leg1) return lm.hg === lm.ag;
+    leg1 = tie.leg1;
+    meId = tie.clubId;
+    amHome = lm.homeId === tie.clubId;
+  }
+  const clubG1 = leg1.home === meId ? leg1.hg : leg1.ag;
+  const oppG1 = leg1.home === meId ? leg1.ag : leg1.hg;
+  const clubG2 = amHome ? lm.hg : lm.ag;
+  const oppG2 = amHome ? lm.ag : lm.hg;
+  return (clubG1 + clubG2) === (oppG1 + oppG2);
+}
+
 function advanceLiveMoment(lm){
   if(lm.finished || lm.pendingDecision) return;
 
@@ -9071,20 +9481,39 @@ function advanceLiveMoment(lm){
   }
 
   const step = 4 + Math.floor(Math.random()*6); // 4 à 9 minutes par instant
-  // Seuls les matchs à élimination directe en un seul match (coupe,
-  // trophée d'ouverture, supercoupe d'Europe) peuvent aller en
-  // prolongation puis tirs au but - jamais un match de championnat/phase
-  // de ligue, où un nul reste un résultat valide.
-  const isKnockout = !!(lm.isCup || lm.isDomesticSuperCup || lm.isUefaSuperCup);
-  const capMinute = lm.inExtraTime ? 123 : 93;
+  // Matchs à élimination directe en un seul match (coupe, trophée
+  // d'ouverture, supercoupe d'Europe) OU manche RETOUR d'une confrontation
+  // aller-retour de qualification européenne (Tour LDC/Barrage Conférence)
+  // - jamais un match de championnat/phase de ligue, où un nul reste un
+  // résultat valide.
+  const isReturnLeg = (lm.isQualifying && lm.qualifyingLeg === 'leg2') || (lm.isEuroKnockout && lm.euroKnockoutLeg === 'leg2');
+  const isKnockout = !!(lm.isCup || lm.isDomesticSuperCup || lm.isUefaSuperCup || isReturnLeg);
+  // Temps additionnel propre à chaque mi-temps (voir rollLiveMatchInjuryTimes,
+  // tiré au sort au coup d'envoi) - jamais un total fixe : un match avec
+  // +6 en 2e mi-temps joue réellement jusqu'à la 96e minute.
+  const capMinute = lm.inExtraTime ? 123 : (lm.inSecondHalf ? (90 + lm.injuryTime2) : (45 + lm.injuryTime1));
   lm.minute = Math.min(capMinute, lm.minute + step);
 
   if(lm.minute >= capMinute){
-    if(isKnockout && lm.hg === lm.ag){
+    if(!lm.inSecondHalf && !lm.inExtraTime){
+      // Fin de la 1ère mi-temps (temps additionnel inclus) - jamais une fin
+      // de match, toujours la pause obligatoire de mi-temps (voir plus
+      // haut, DÉCISIONS DE MI-TEMPS). La reprise de la 2e mi-temps n'a
+      // lieu qu'une fois la décision validée (voir chooseLiveDecision).
+      triggerHalftimeDecision(lm);
+      return;
+    }
+    // Pour la manche retour d'une confrontation aller-retour, "à égalité"
+    // s'apprécie sur le CUMUL aller+retour, jamais sur cette seule manche -
+    // sans quoi une qualification qui se jouait sur les buts marqués à
+    // l'extérieur (ou déjà décidée par l'aller) partirait à tort en
+    // prolongation, ou l'inverse.
+    const tiedForExtraTime = isReturnLeg ? isQualifyingAggregateTied(lm) : (lm.hg === lm.ag);
+    if(isKnockout && tiedForExtraTime){
       if(!lm.inExtraTime){
         lm.inExtraTime = true;
         lm.minute = 91;
-        pushLiveEvent(lm, 90, 'ft', `Fin du temps réglementaire : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}. Place à la prolongation !`);
+        pushLiveEvent(lm, lm.minute, 'ft', `Fin du temps réglementaire : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}. Place à la prolongation !`);
         return;
       }
       pushLiveEvent(lm, 120, 'ft', `Fin de la prolongation : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}. Direction les tirs au but !`);
@@ -9093,12 +9522,16 @@ function advanceLiveMoment(lm){
     }
     lm.finished = true;
     const label = lm.inExtraTime ? 'Coup de sifflet final (après prolongation)' : 'Coup de sifflet final';
-    pushLiveEvent(lm, lm.inExtraTime ? 120 : 90, 'ft', `${label} : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}.`);
+    pushLiveEvent(lm, lm.inExtraTime ? 120 : lm.minute, 'ft', `${label} : ${lm.homeName} ${lm.hg} - ${lm.ag} ${lm.awayName}.`);
     return;
   }
 
   const margin = Math.abs(lm.hg - lm.ag);
-  if(lm.decisionsUsed < lm.maxDecisions && lm.minute >= 15 && lm.minute <= 88 && Math.random() < (margin <= 1 ? 0.22 : 0.13)){
+  // Fenêtre élargie pour couvrir le vrai temps additionnel de la 2e
+  // mi-temps (auparavant coupée à la 88e, ce qui empêchait "Temps
+  // additionnel" de jamais vraiment se déclencher - voir stoppageTimeDecision).
+  const inStoppage = lm.inSecondHalf && lm.minute > 90;
+  if(lm.decisionsUsed < lm.maxDecisions && lm.minute >= 15 && (lm.minute <= 88 || inStoppage) && Math.random() < (margin <= 1 ? 0.22 : 0.13)){
     const decision = buildRandomLiveDecision(lm);
     if(decision){
       lm.decisionsUsed++;
@@ -9184,6 +9617,28 @@ function stopLiveMatchTimer(){
   if(lm) lm.playing = false;
 }
 
+// Temps additionnel propre à chaque mi-temps - jamais un total figé
+// partout dans le match : la 1ère mi-temps est courte (0 à 4 minutes), la
+// 2e peut être beaucoup plus longue (1 à 10 minutes). Appelée juste avant
+// l'affichage de CHAQUE match en direct, quel que soit son type
+// (championnat, coupe, Europe, qualifications, supercoupes).
+function rollLiveMatchInjuryTimes(lm){
+  if(!lm) return;
+  lm.injuryTime1 = Math.floor(Math.random()*5); // 0 à 4 minutes
+  lm.injuryTime2 = 1 + Math.floor(Math.random()*10); // 1 à 10 minutes
+  lm.inSecondHalf = false;
+}
+
+// Représentation footballistique réaliste ("45+2'", "90+6'") plutôt que
+// d'afficher bêtement 47 ou 96 - jamais pendant la prolongation (déjà son
+// propre affichage "X' (prolongation)").
+function formatLiveMatchMinute(lm){
+  if(lm.inExtraTime) return `${lm.minute}'`;
+  if(!lm.inSecondHalf && lm.minute > 45) return `45+${lm.minute-45}'`;
+  if(lm.inSecondHalf && lm.minute > 90) return `90+${lm.minute-90}'`;
+  return `${lm.minute}'`;
+}
+
 function resumeLiveMatch(){
   const lm = state.liveMatch;
   if(!lm || lm.finished || lm.pendingDecision) return;
@@ -9238,7 +9693,7 @@ function chooseLiveDecision(key){
   const netImpact = (after.my - before.my) - (after.opp - before.opp);
   const positive = netImpact >= 0;
 
-  lm._decisionsThisMatch.push({ title: decision.title, key, risky: !!(opt && opt.risky), positive });
+  lm._decisionsThisMatch.push({ title: decision.title, key, risky: !!(opt && opt.risky), positive, minute: lm.minute });
   if(opt && opt.risky) lm._riskyChoicesThisMatch++;
   if(lm.minute >= 75) lm._hadLateDecision = true;
   if(decision.title === 'Adaptation adverse' && positive) bumpTieredCounter('successfulAdaptations');
@@ -9258,6 +9713,16 @@ function chooseLiveDecision(key){
   lm.pendingDecision = null;
   bumpTieredCounter('decisionsTotal');
   unlockAchievement('premieres_consignes');
+
+  // Décision de mi-temps validée : reprise effective de la 2e mi-temps
+  // (minute remise à 45 pile, comme au coup d'envoi réel) - jamais pour
+  // les décisions habituelles en cours de match.
+  if(decision.isHalftime){
+    lm.inSecondHalf = true;
+    lm.minute = 45;
+    pushLiveEvent(lm, 45, 'ft', 'Coup d\'envoi de la 2e mi-temps.');
+  }
+
   renderLiveMatch();
   resumeLiveMatch();
 }
@@ -9339,6 +9804,56 @@ function checkLiveMatchAchievements(lm, won){
   const subs = lm.events.filter(e=>e.type==='sub' && e.side===mySide && e.in);
   const impact = subs.some(s => myGoals.some(g => g.minute >= s.minute && (g.scorer===s.in || g.assist===s.in)));
   if(impact) bumpTieredCounter('impactSubsTotal');
+
+  // ---------------------------- NOUVEAUX SUCCÈS DE COACHING ----------------------------
+  // Conséquences naturelles des décisions de mi-temps et de fin de match
+  // (voir HALFTIME_EVENT_BUILDERS et LIVE_DECISION_BUILDERS - Siège
+  // adverse / Dernières minutes) - jamais des objectifs artificiels,
+  // toujours la conclusion d'une vraie situation de jeu. NB : ces IDs ne
+  // prendront effet qu'une fois ajoutés à achievements.json (fichier
+  // externe non fourni pour cette session).
+  const myFinalScore = mySide==='home' ? lm.hg : lm.ag;
+  const oppFinalScore = mySide==='home' ? lm.ag : lm.hg;
+
+  // Fergie Time : une décision prise après la 90e qui débouche sur le but
+  // de la victoire (même logique que "À la dernière seconde", mais liée
+  // explicitement à une DÉCISION de coaching, pas juste un but tardif).
+  if(lateWinningGoal && won && lm._decisionsThisMatch.some(d => (d.minute||0) >= 90 && d.minute <= lateWinningGoal.minute)){
+    unlockAchievement('fergie_time');
+  }
+
+  // On ferme ! / Le Bus : approche défensive choisie dans les dernières
+  // minutes (voir finalMinutesDecision) et avantage conservé jusqu'au bout.
+  if(lm._lateDefensiveChoice && won){
+    unlockAchievement('on_ferme');
+    if(myFinalScore - oppFinalScore === 1) unlockAchievement('le_bus');
+  }
+  // Tout pour l'attaque : approche offensive choisie dans les dernières
+  // minutes et victoire au bout du compte (le but décisif qui en découle).
+  if(lm._lateAttackingChoice && won) unlockAchievement('tout_pour_lattaque');
+
+  // Le Hold-up : approche défensive choisie alors que l'adversaire
+  // dominait fortement (voir underSiegeDecision) et victoire finale.
+  if(lm._chosenDefensiveUnderSiege && won) unlockAchievement('le_hold_up');
+
+  // Catenaccio : plusieurs décisions défensives consécutives (mi-temps
+  // et/ou fin de match confondues) et victoire sans encaisser.
+  if((lm._consecutiveDefensiveChoices||0) >= 2 && won && oppFinalScore === 0){
+    unlockAchievement('catenaccio');
+  }
+
+  // Le Déclic : changement d'approche décidé à la mi-temps (voir
+  // isHalftime) alors que l'équipe était menée ou tenue en échec à ce
+  // moment précis, et victoire finale.
+  if(lm._halftimeApproachChanged && won && (lm._halftimeScoreDiff||0) <= 0){
+    unlockAchievement('le_declic');
+  }
+
+  // Le 12e homme : plusieurs décisions de coaching au net impact positif
+  // dans le même match (mi-temps et en cours de match confondues).
+  if(lm._decisionsThisMatch.filter(d=>d.positive).length >= 3){
+    unlockAchievement('le_12e_homme');
+  }
 }
 
 function commitLiveMatchResult(){
@@ -9526,7 +10041,7 @@ function renderLiveMatch(){
       ? 'Tirs au but'
       : lm.inExtraTime
         ? `${lm.minute}' (prolongation)`
-        : `${lm.minute}'`;
+        : formatLiveMatchMinute(lm);
   document.getElementById('live-competition-label').textContent = lm.isQualifying
     ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
     : lm.isDomesticSuperCup
@@ -9535,9 +10050,11 @@ function renderLiveMatch(){
         ? "Supercoupe d'Europe"
         : lm.isCup
           ? CUP_STAGE_LABEL[lm.cupStage] || lm.cupStage
-          : lm.isEuro
-            ? `${EURO_LABELS[lm.euroTier]} - Phase de ligue`
-            : `${state.league} - Journée ${lm.roundIdx+1}`;
+          : lm.isEuroKnockout
+            ? `${EURO_LABELS[lm.euroTier]} - ${EURO_KNOCKOUT_STAGE_LABEL[lm.euroKnockoutStage] || (lm.euroKnockoutStage==='final'?'Finale':lm.euroKnockoutStage)}${lm.euroKnockoutLeg ? (lm.euroKnockoutLeg==='leg1' ? ' - Aller' : ' - Retour') : ''}`
+            : lm.isEuro
+              ? `${EURO_LABELS[lm.euroTier]} - Phase de ligue`
+              : `${state.league} - Journée ${lm.roundIdx+1}`;
 
   const subsBtn = document.getElementById('btn-live-subs');
   const remaining = 5 - (lm.subsUsed || 0);
@@ -9986,15 +10503,27 @@ function resolveOneQualifyingLeg(tie, legKey){
 // Victoire mais tour de qualification suivant à disputer (ex: Tour 3 gagné
 // -> Barrage à venir) : une NOUVELLE confrontation est automatiquement
 // enchaînée plutôt que de considérer la qualification acquise trop tôt.
-function finalizeQualifyingTie(tie, clubStr, oppStr){
+function finalizeQualifyingTie(tie, clubStr, oppStr, liveResult){
   const clubG1 = tie.leg1.home === tie.clubId ? tie.leg1.hg : tie.leg1.ag;
   const oppG1  = tie.leg1.home === tie.clubId ? tie.leg1.ag : tie.leg1.hg;
+  // Si le retour a été joué en direct avec prolongation, les buts de
+  // prolongation sont déjà comptés dans tie.leg2.hg/ag (même mécanisme que
+  // les buts du temps réglementaire, voir advanceLiveMoment) - inutile de
+  // les rajouter une seconde fois ici.
   const clubG2 = tie.leg2.home === tie.clubId ? tie.leg2.hg : tie.leg2.ag;
   const oppG2  = tie.leg2.home === tie.clubId ? tie.leg2.ag : tie.leg2.hg;
   let aggClub = clubG1 + clubG2;
   let aggOpp = oppG1 + oppG2;
   if(aggClub !== aggOpp){
     tie.winner = aggClub > aggOpp ? tie.clubId : tie.opponentId;
+    if(liveResult && liveResult.inExtraTime) tie.extraTimeScore = 'ap';
+  } else if(liveResult && liveResult.wentToPenalties){
+    // La prolongation ne suffisant pas, les tirs au but ont déjà été
+    // réellement joués en direct (voir startPenaltyShootout) - on reprend
+    // ce résultat déjà acquis plutôt que d'en retirer un nouveau au sort.
+    tie.wentToPenalties = true;
+    tie.penaltyScore = liveResult.penaltyScore;
+    tie.winner = liveResult.penaltyWinnerId;
   } else {
     const result = resolveAggregateTie(clubStr, oppStr);
     tie.wentToPenalties = result.wentToPenalties;
@@ -10093,6 +10622,7 @@ function startLiveQualifyingLeg(tie, legKey){
     eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
     pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -10117,7 +10647,7 @@ function commitLiveQualifyingLegResult(){
   if(legKey === 'leg2'){
     const clubStr = myTeamStrength('euro');
     const filler = EURO_FILLER_CLUBS.find(f=>f.id===tie.opponentId);
-    finalizeQualifyingTie(tie, clubStr, filler ? filler.strength : 65);
+    finalizeQualifyingTie(tie, clubStr, filler ? filler.strength : 65, lm);
   }
 
   const eq = state.euroQualifying;
@@ -10552,7 +11082,19 @@ function clubNameForAnyId(id){
     if(club) return club.name;
   }
   const filler = EURO_FILLER_CLUBS.find(c=>c.id===id);
-  return filler ? filler.name : id;
+  if(filler) return filler.name;
+  // Filets de sécurité supplémentaires : le club peut être un participant
+  // d'une compétition européenne (la mienne ou l'une des 2 "fantômes")
+  // jamais retrouvé dans LEAGUES/EURO_FILLER_CLUBS pour une raison ou une
+  // autre - autant réutiliser le nom déjà connu de cette compétition
+  // plutôt que d'afficher l'identifiant brut.
+  if(state.euro && state.euro.clubsById && state.euro.clubsById[id]) return state.euro.clubsById[id].name;
+  if(state.shadowEuro){
+    for(const euro of Object.values(state.shadowEuro)){
+      if(euro && euro.clubsById && euro.clubsById[id]) return euro.clubsById[id].name;
+    }
+  }
+  return id;
 }
 
 // Initialise les 2 coupes d'Europe que le joueur ne dispute pas cette
@@ -10609,6 +11151,7 @@ function simulateSuperCupFixture(fx){
   let hg = simulateGoals(sa, sb, true), ag = simulateGoals(sb, sa, false);
   fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
   let tiebreakResult = null;
+  const regHg = hg, regAg = ag;
   if(hg === ag){
     tiebreakResult = resolveAggregateTie(sa, sb);
     fx.wentToPenalties = tiebreakResult.wentToPenalties;
@@ -10620,8 +11163,8 @@ function simulateSuperCupFixture(fx){
     fx.winner = hg > ag ? fx.home : fx.away;
   }
   fx.hg = hg; fx.ag = ag;
-  fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
-  if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away));
+  fx.events = simulateMatchEvents(fx.home, fx.away, regHg, regAg);
+  if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away), fx.home, fx.away);
   fx.played = true;
 }
 
@@ -10776,6 +11319,7 @@ function startLiveDomesticSuperCupMatchday(){
     eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
     pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -10851,6 +11395,7 @@ function startLiveUefaSuperCupMatchday(){
     eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
     pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
   };
+  rollLiveMatchInjuryTimes(state.liveMatch);
   showScreen('live-match');
   renderLiveMatch();
   resumeLiveMatch();
@@ -10920,22 +11465,26 @@ function resolveAggregateTie(strengthA, strengthB){
   return { winner: pA>pB?'A':'B', wentToPenalties:true, penaltyScore:`${pA}-${pB}`, extraTimeScore: etA===etB ? `${etA}-${etB}` : null, etA, etB };
 }
 
-// Ajoute des événements synthétiques décrivant la prolongation puis les
-// tirs au but à la suite d'un match à élimination directe EN UN SEUL MATCH
-// (coupe nationale, trophée d'ouverture, supercoupe d'Europe) - sans ça,
-// un score final "3-3 (tab 4-3)" n'était expliqué par AUCUN événement
-// visible dans le récapitulatif, qu'il ait été joué en direct ou simulé
-// instantanément. result vient de resolveAggregateTie(forceDomicile,
-// forceExtérieur) dans tous ces contextes - etA/etB correspondent donc
-// directement à domicile/extérieur, sans inversion nécessaire.
-function appendKnockoutTiebreakEvents(events, result, homeName, awayName){
+// Ajoute des événements décrivant la prolongation puis les tirs au but à
+// la suite d'un match à élimination directe EN UN SEUL MATCH (coupe
+// nationale, trophée d'ouverture, supercoupe d'Europe) résolu
+// instantanément - sans ça, un score final "3-3 (tab 4-3)" n'était
+// expliqué par AUCUN événement visible. Les buts de prolongation ont un
+// vrai buteur pioché dans l'effectif de chaque club (comme n'importe quel
+// autre but du match), pas un texte générique. result vient de
+// resolveAggregateTie(forceDomicile, forceExtérieur) dans tous ces
+// contextes - etA/etB correspondent donc directement à domicile/extérieur,
+// sans inversion nécessaire.
+function appendKnockoutTiebreakEvents(events, result, homeName, awayName, homeId, awayId){
   if(!result || !events) return;
   const etGoals = [];
-  for(let i=0;i<(result.etA||0);i++) etGoals.push({ side:'home', name:homeName });
-  for(let i=0;i<(result.etB||0);i++) etGoals.push({ side:'away', name:awayName });
+  for(let i=0;i<(result.etA||0);i++) etGoals.push({ side:'home', name:homeName, clubId:homeId });
+  for(let i=0;i<(result.etB||0);i++) etGoals.push({ side:'away', name:awayName, clubId:awayId });
   const minutes = etGoals.map(()=> 91 + Math.floor(Math.random()*29)).sort((a,b)=>a-b);
   etGoals.forEach((g,i)=>{
-    events.push({ minute:minutes[i], type:'goal', side:g.side, text:`But pour ${g.name} (prolongation).` });
+    const scorer = g.clubId ? pickWeightedPlayer(clubPlayerPool(g.clubId), 'scorer', null) : null;
+    const text = scorer ? `But de ${scorer.nom} (${g.name}).` : `But pour ${g.name}.`;
+    events.push({ minute:minutes[i], type:'goal', side:g.side, text });
   });
   if(result.wentToPenalties){
     const [scoreHome, scoreAway] = result.penaltyScore.split('-');
@@ -11304,15 +11853,16 @@ function getDueEuroKnockoutStep(){
   return expected <= roundIdx;
 }
 
+const EURO_KNOCKOUT_NEXT_STAGE = { playoff:'ro16', ro16:'qf', qf:'sf', sf:'final' };
+const EURO_KNOCKOUT_STAGE_LABEL = { playoff:'Barrages', ro16:'Huitièmes de finale', qf:'Quarts de finale', sf:'Demi-finales' };
+
 function resolveDueEuroKnockoutStep(){
   const euro = state.euro;
-  const nextStageOf = { playoff:'ro16', ro16:'qf', qf:'sf', sf:'final' };
-  const labelOf = { playoff:'Barrages', ro16:'Huitièmes de finale', qf:'Quarts de finale', sf:'Demi-finales' };
   const resultsBefore = euro.resultsByRound.length;
   if(euro.stage === 'final'){
     simulateEuroFinalMatch(euro);
   } else {
-    simulateEuroKnockoutLeg(euro, euro.stage, nextStageOf[euro.stage], labelOf[euro.stage]);
+    simulateEuroKnockoutLeg(euro, euro.stage, EURO_KNOCKOUT_NEXT_STAGE[euro.stage], EURO_KNOCKOUT_STAGE_LABEL[euro.stage]);
   }
   if(euro.resultsByRound.length > resultsBefore){
     const lastEntry = euro.resultsByRound[euro.resultsByRound.length - 1];
@@ -11321,6 +11871,159 @@ function resolveDueEuroKnockoutStep(){
       toast(`${EURO_LABELS[euro.tier]} - ${lastEntry.label} : ${clubNameById(myFx.home)} ${myFx.hg} - ${myFx.ag} ${clubNameById(myFx.away)}${myFx.aggHome!==undefined ? ` (agg ${myFx.aggHome}-${myFx.aggAway}${myFx.wentToPenalties ? ', tab '+myFx.penaltyScore : myFx.extraTimeScore ? ', a.p.' : ''})` : ''}`);
     }
   }
+  renderSeason();
+}
+
+// Ma confrontation pour le tour à élimination directe en attente de VOTRE
+// compétition européenne - null si déjà éliminé (le tour continue pour les
+// autres) ou si c'est la finale (gérée à part, un seul match).
+function myEuroKnockoutTie(euro){
+  if(euro.stage === 'final') return null;
+  const ties = euro[euro.stage + 'Ties'];
+  if(!ties) return null;
+  return ties.find(t => t.teamA === state.club.id || t.teamB === state.club.id) || null;
+}
+
+function buildEuroKnockoutLiveMatch(homeId, awayId, euro, extra){
+  const homeStr = euroStrengthOf(euro, homeId);
+  const awayStr = euroStrengthOf(euro, awayId);
+  const amHome = homeId === state.club.id;
+  state.careerStats.liveEuroMatchesPlayed++;
+  state.liveMatch = Object.assign({
+    fx: { home:homeId, away:awayId, hg:0, ag:0 }, roundIdx:-1, isEuro:true, euroTier: euro.tier,
+    homeId, awayId,
+    homeName: clubNameForAnyId(homeId), awayName: clubNameForAnyId(awayId),
+    homeTrigram: homeId===state.club.id ? state.club.trigram : clubNameForAnyId(homeId).slice(0,3).toUpperCase(),
+    awayTrigram: awayId===state.club.id ? state.club.trigram : clubNameForAnyId(awayId).slice(0,3).toUpperCase(),
+    myModKey: amHome ? 'modHome' : 'modAway',
+    oppModKey: amHome ? 'modAway' : 'modHome',
+    myName: state.club.name,
+    oppName: amHome ? clubNameForAnyId(awayId) : clubNameForAnyId(homeId),
+    baseHomeStr: homeStr, baseAwayStr: awayStr,
+    modHome:0, modAway:0,
+    minute:0, hg:0, ag:0, events:[],
+    decisionsUsed:0, subsUsed:0,
+    sentOffPlayers:[], injuredPlayers:[],
+    _decisionsThisMatch:[], _riskyChoicesThisMatch:0, _hadLateDecision:false,
+    _maxDeficit:0, _injuryAvoided:false, _redCardAvoided:false,
+    eventFilter:'all', scorers:[], maxDecisions:3, usedScenarioKeys:[],
+    pendingDecision:null, finished:false, playing:false, speed:1, timerId:null
+  }, extra);
+  rollLiveMatchInjuryTimes(state.liveMatch);
+  showScreen('live-match');
+  renderLiveMatch();
+  resumeLiveMatch();
+}
+
+// Ouvre en direct VOTRE manche (aller, retour, ou la finale) du tour à
+// élimination directe en attente - si vous n'êtes plus en lice à ce tour
+// (déjà éliminé), rien à jouer : résolution instantanée classique pour
+// laisser la compétition avancer pour les autres.
+function startLiveEuroKnockoutMatchday(){
+  const euro = state.euro;
+  if(!euro) return;
+  if(euro.stage === 'final'){
+    const fx = euro.finalFixture;
+    if(!fx || (fx.home !== state.club.id && fx.away !== state.club.id)){ resolveDueEuroKnockoutStep(); return; }
+    buildEuroKnockoutLiveMatch(fx.home, fx.away, euro, { isEuroKnockout:true, euroKnockoutStage:'final', euroKnockoutLeg:null });
+    return;
+  }
+  const tie = myEuroKnockoutTie(euro);
+  if(!tie){ resolveDueEuroKnockoutStep(); return; }
+  const legKey = euro.legPending;
+  const homeId = legKey === 'leg1' ? tie.teamA : tie.teamB;
+  const awayId = legKey === 'leg1' ? tie.teamB : tie.teamA;
+  buildEuroKnockoutLiveMatch(homeId, awayId, euro, { isEuroKnockout:true, euroKnockoutTie:tie, euroKnockoutStage:euro.stage, euroKnockoutLeg:legKey });
+}
+
+// Une fois VOTRE manche jouée en direct (aller, retour ou finale) : les
+// AUTRES confrontations du même tour (qui ne vous concernent pas) sont
+// résolues instantanément en parallèle, exactement comme pour la coupe
+// nationale ou les qualifications - un seul match à la fois reste jouable,
+// jamais tout le tour d'un coup.
+function commitLiveEuroKnockoutLegResult(){
+  const lm = state.liveMatch;
+  if(!lm || !lm.isEuroKnockout) return;
+  const euro = state.euro;
+  lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events; lm.fx.played = true;
+  trackMatchResult(lm.fx);
+
+  if(lm.euroKnockoutStage === 'final'){
+    lm.fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away);
+    euro.finalFixture = lm.fx;
+    euro.resultsByRound.push({ label:'Finale', matches:[{ ...lm.fx, wentToPenalties: !!lm.wentToPenalties, penaltyScore: lm.penaltyScore || null }], roundIdx:Infinity });
+    euro.champion = lm.fx.winner;
+    euro.stage = 'done';
+    state.currentSeasonEuroWinners[euro.tier] = euro.champion;
+    if(euro.champion === state.club.id) checkUnderdogGoalscorer(lm.fx);
+  } else {
+    const tie = lm.euroKnockoutTie;
+    const legKey = lm.euroKnockoutLeg;
+    const stage = lm.euroKnockoutStage;
+    tie[legKey] = lm.fx;
+    const ties = euro[stage + 'Ties'];
+
+    if(legKey === 'leg1'){
+      // Les autres confrontations du même tour jouent aussi leur aller,
+      // instantanément.
+      ties.forEach(t=>{ if(t !== tie && !t.leg1) playKnockoutLeg1(euro, [t]); });
+      euro.resultsByRound.push({ label:`${EURO_KNOCKOUT_STAGE_LABEL[stage]} - Aller`, matches: ties.map(t=>({...t.leg1})), roundIdx: state.season.currentRound-1 });
+      euro.legPending = 'leg2';
+    } else {
+      // Cumul + départage pour VOTRE confrontation - reprend le résultat
+      // déjà réellement joué en direct (prolongation et tirs au but
+      // compris, voir advanceLiveMoment) plutôt que de le retirer au sort.
+      const aggA = tie.leg1.hg + tie.leg2.ag;
+      const aggB = tie.leg1.ag + tie.leg2.hg;
+      tie.aggA = aggA; tie.aggB = aggB;
+      if(aggA !== aggB){
+        tie.winner = aggA > aggB ? tie.teamA : tie.teamB;
+        if(lm.inExtraTime) tie.extraTimeScore = 'ap';
+      } else if(lm.wentToPenalties){
+        tie.wentToPenalties = true;
+        tie.penaltyScore = lm.penaltyScore;
+        tie.winner = lm.penaltyWinnerId;
+      } else {
+        // Filet de sécurité (ne devrait jamais arriver - advanceLiveMoment
+        // garantit une issue tranchée avant la fin du match retour).
+        const sA = euroStrengthOf(euro, tie.teamA), sB = euroStrengthOf(euro, tie.teamB);
+        const result = resolveAggregateTie(sA, sB);
+        tie.wentToPenalties = result.wentToPenalties;
+        tie.penaltyScore = result.penaltyScore;
+        tie.extraTimeScore = result.extraTimeScore;
+        tie.winner = result.winner === 'A' ? tie.teamA : tie.teamB;
+        tie.aggA += result.etA; tie.aggB += result.etB;
+      }
+      // Les autres confrontations du même tour jouent aussi leur retour,
+      // instantanément (cumul/prolongation/tirs au but compris pour elles).
+      ties.forEach(t=>{ if(t !== tie && !t.leg2) playKnockoutLeg2(euro, [t]); });
+      euro.resultsByRound.push({
+        label:`${EURO_KNOCKOUT_STAGE_LABEL[stage]} - Retour`,
+        matches: ties.map(t=>({ ...t.leg2, aggHome:t.aggB, aggAway:t.aggA, wentToPenalties:t.wentToPenalties, penaltyScore:flipScorePair(t.penaltyScore), extraTimeScore:flipScorePair(t.extraTimeScore) })),
+        roundIdx: state.season.currentRound-1
+      });
+
+      let winners = ties.map(t=>t.winner);
+      if(stage === 'playoff') winners = [...euro.directQualifiers, ...winners];
+      const wasInTies = ties.some(t => t.teamA === state.club.id || t.teamB === state.club.id);
+      if(wasInTies && !winners.includes(state.club.id) && !euro.myClubEliminatedAt){
+        euro.myClubEliminatedAt = stage;
+      }
+      const nextStage = EURO_KNOCKOUT_NEXT_STAGE[stage];
+      if(nextStage === 'final'){
+        euro.finalFixture = { home:winners[0], away:winners[1], played:false };
+        euro.legPending = null;
+      } else {
+        euro[nextStage + 'Ties'] = buildKnockoutTies(winners, true);
+        euro.legPending = 'leg1';
+      }
+      euro.stage = nextStage;
+    }
+  }
+
+  checkLiveMatchAchievements(lm, lm.fx.winner === state.club.id);
+  state.liveMatch = null;
+  showScreen('season');
   renderSeason();
 }
 
@@ -11852,7 +12555,9 @@ function renderSeason(){
     const legTxt = euro.stage !== 'final' ? (euro.legPending === 'leg1' ? ' - Aller' : ' - Retour') : '';
     const compTxt = `${EURO_LABELS[euro.tier]} - ${stageLabelOf[euro.stage] || euro.stage}${legTxt}`;
     nextBtn.textContent = compTxt;
-    liveBtn.textContent = compTxt; // pas de version "en direct" pour ces tours (résolu instantanément)
+    liveBtn.textContent = myEuroKnockoutTie(euro) || (euro.stage==='final' && euro.finalFixture && (euro.finalFixture.home===state.club.id || euro.finalFixture.away===state.club.id))
+      ? `Jouer en direct (${compTxt})`
+      : compTxt; // plus en lice à ce tour : rien à jouer, résolution instantanée
   } else if(getDueCupStep()){
     const compTxt = CUP_STAGE_LABEL[season.cup.stage] || season.cup.stage;
     nextBtn.textContent = compTxt;
@@ -13258,6 +13963,7 @@ document.getElementById('btn-live-continue').addEventListener('click', ()=>{
   else if(state.liveMatch && state.liveMatch.isDomesticSuperCup) commitLiveDomesticSuperCupMatchResult();
   else if(state.liveMatch && state.liveMatch.isUefaSuperCup) commitLiveUefaSuperCupMatchResult();
   else if(state.liveMatch && state.liveMatch.isCup) commitLiveCupMatchResult();
+  else if(state.liveMatch && state.liveMatch.isEuroKnockout) commitLiveEuroKnockoutLegResult();
   else if(state.liveMatch && state.liveMatch.isEuro) commitLiveEuroMatchResult();
   else commitLiveMatchResult();
 });
