@@ -4584,6 +4584,7 @@ const state = {
   // compte.
   careerNumber:1,
   pendingPoachingOffer:null,
+  pendingFullCircleOffer:null,
   poachingOffersHistory:[],
   pendingSackingEvent:false,
   awaitingNewClubAfterSacking:false,
@@ -5949,27 +5950,6 @@ function launchTransferDraft(){
   beginNextTransferSlot();
 }
 
-// Relance les 5 candidats du poste de mercato EN COURS, sans passer au
-// poste suivant de la file (contrairement à beginNextTransferSlot).
-function rerollTransferSlot(){
-  const tr = state.transfer;
-  if(!tr || tr.phase !== 'draft' || !tr.activeSlotId) return;
-  const slot = findSlot(tr.activeSlotId);
-  const incumbent = slot.player;
-  const refPositions = isBenchSlot(tr.activeSlotId) ? compatiblePositions(incumbent) : [slot.label];
-  const names = [playerKey(incumbent)];
-  const cards = [{ uid:'t'+Math.random().toString(36).slice(2), player: incumbent }];
-  for(let i=0;i<4;i++){
-    const p = drawRandomCompatible(refPositions, names);
-    if(!p) break;
-    names.push(playerKey(p));
-    cards.push({ uid:'t'+Math.random().toString(36).slice(2), player:p });
-  }
-  state.hand = shuffleArr(cards);
-  state.selectedUid = null;
-  renderGame();
-}
-
 function beginNextTransferSlot(){
   const tr = state.transfer;
   if(!tr.queue.length){
@@ -6090,8 +6070,12 @@ function renderTransferGame(){
     const slot = findSlot(tr.activeSlotId);
     draftBtn.textContent = 'Choisissez un joueur ci-dessous…';
     draftBtn.disabled = true;
-    relanceBtn.disabled = false;
-    relanceBtn.textContent = 'Relancer la draft';
+    // Aucune relance possible pendant un mercato (contrairement à la draft
+    // initiale) - les 5 candidats proposés pour ce poste sont définitifs,
+    // sans quoi il était possible de relancer à l'infini dès lors que des
+    // relances de la draft initiale n'avaient pas toutes été utilisées.
+    relanceBtn.disabled = true;
+    relanceBtn.textContent = 'Relance indisponible en mercato';
     rerollCountEl.textContent = `Poste concerné : ${slot ? (isBenchSlot(tr.activeSlotId) ? 'Remplaçant ('+compatiblePositions(slot.player).join('/')+')' : slot.label) : ''} - conservez votre joueur ou remplacez-le.`;
   } else { // 'review'
     state.hand = [];
@@ -6194,7 +6178,14 @@ function initCareer(){
     progressionStreak: 0,
     clubTenure: 0,
     seasonsSinceOffer: 0,
-    phase: 'rising'
+    phase: 'rising',
+    // Le tout premier club entraîné dans cette carrière - jamais modifié
+    // ensuite, quels que soient les transferts/licenciements traversés.
+    // Sert à proposer un retour aux racines en fin de carrière (voir
+    // checkFullCircleEligible / "Boucler la boucle").
+    firstClubId: state.club ? state.club.id : null,
+    twilightWarningShown: false,
+    seasonsSinceFullCircleOffer: 0
   };
   state.career.remainingLongevity = state.career.baseLongevity;
 }
@@ -6297,6 +6288,11 @@ function updateCareerLongevity(career, trophyScore){
   // Peut dépasser la base initiale (une grande carrière allonge sa propre
   // trajectoire) - plafond généreux plutôt qu'un maximum figé.
   career.remainingLongevity = Math.min(career.baseLongevity * 1.8, career.remainingLongevity);
+  // Nombre de saisons consécutives à longévité épuisée - sert à augmenter
+  // progressivement la probabilité de retraite forcée (voir
+  // checkForcedRetirementEligible) plutôt qu'un couperet brutal pile à 0 :
+  // certains coachs vont un peu au-delà, d'autres s'arrêtent avant.
+  career.seasonsAtZeroLongevity = career.remainingLongevity <= 0 ? (career.seasonsAtZeroLongevity||0) + 1 : 0;
 }
 
 function updateCareerPhase(career){
@@ -6319,6 +6315,7 @@ function updateCareerAfterSeason(myPos, totalClubs, trophiesWon){
   career.yearsInCareer++;
   career.clubTenure++;
   career.seasonsSinceOffer = (career.seasonsSinceOffer||0) + 1;
+  career.seasonsSinceFullCircleOffer = (career.seasonsSinceFullCircleOffer||0) + 1;
 
   const tolerableLimit = myTolerableRankLimit();
   const myStrength = estimateClubStrength(state.club);
@@ -6540,6 +6537,109 @@ function startFreeAgentClubSearch(){
   toast("Vous êtes libre - choisissez votre prochain club pour continuer votre carrière.");
 }
 
+// ---------------------------- FIN DE CARRIÈRE (longévité épuisée) ----------------------------
+// Avertissement affiché UNE SEULE FOIS, au moment où la carrière entre en
+// phase de fin (remainingLongevity sous ~15% de la longévité de départ) -
+// purement informatif, ne bloque rien d'autre ensuite, juste un signal
+// clair avant la retraite forcée qui approche.
+function checkTwilightWarningEligible(){
+  const career = state.career;
+  return !!(career && career.phase === 'twilight' && !career.twilightWarningShown);
+}
+function showTwilightWarningPopup(){
+  state.career.twilightWarningShown = true;
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Fin de carrière en approche`;
+  titleEl.classList.add('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  document.getElementById('season-event-text').textContent =
+    `Après ${state.career.yearsInCareer} saison${state.career.yearsInCareer>1?'s':''} sur les bancs, votre carrière entre dans sa dernière ligne droite. Il est temps de penser à l'héritage que vous allez laisser.`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `<button class="live-decision-option" data-key="ok">Continuer</button>`;
+  optsEl.querySelector('.live-decision-option').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    proceedToRegularMercatoFlow();
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
+// Fin de carrière FORCÉE une fois la longévité restante réellement
+// épuisée - jamais un couperet brutal pile à 0 : une chance croissante de
+// partir à la retraite à chaque saison passée sous ce seuil, pour que
+// certains coachs aillent un peu au-delà quand d'autres s'arrêtent net.
+function checkForcedRetirementEligible(){
+  const career = state.career;
+  if(!career || career.remainingLongevity > 0) return false;
+  const overdue = career.seasonsAtZeroLongevity || 1;
+  const chance = Math.min(0.85, 0.35 + (overdue-1)*0.25);
+  return Math.random() < chance;
+}
+function showForcedRetirementPopup(){
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Fin de carrière`;
+  titleEl.classList.add('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  const years = state.career.yearsInCareer || 0;
+  document.getElementById('season-event-text').textContent =
+    `Après ${years} saison${years>1?'s':''} sur les bancs, vous décidez de raccrocher. Votre carrière (dernier club ${state.club.name}) reste gravée dans votre Palmarès.`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `<button class="live-decision-option" data-key="ok">Prendre sa retraite</button>`;
+  optsEl.querySelector('.live-decision-option').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    endCurrentCareer();
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
+// ---------------------------- BOUCLER LA BOUCLE (retour au club de départ) ----------------------------
+// Dans les toutes dernières saisons d'une carrière, la possibilité (jamais
+// garantie) de revenir terminer sa carrière dans le tout premier club
+// entraîné - un retour aux racines, distinct d'une offre de transfert
+// classique : motivé par le symbole, pas par la réputation/performance.
+function checkFullCircleEligible(){
+  const career = state.career;
+  if(!career || !career.firstClubId) return false;
+  if(state.pendingPoachingOffer || state.pendingFullCircleOffer) return false;
+  if(state.club.id === career.firstClubId) return false; // déjà là
+  // Uniquement dans les toutes dernières saisons (longévité restante
+  // faible) - jamais en pleine force de l'âge, où ça n'aurait pas de sens
+  // narratif.
+  if(career.remainingLongevity > 4) return false;
+  if((career.seasonsSinceFullCircleOffer||0) < 2) return false;
+  const originalClub = Object.values(LEAGUES).flat().find(c=>c.id===career.firstClubId);
+  if(!originalClub || originalClub.playable === false) return false;
+  return Math.random() < 0.35;
+}
+function showFullCircleOfferPopup(){
+  state.career.seasonsSinceFullCircleOffer = 0;
+  const originalClub = Object.values(LEAGUES).flat().find(c=>c.id===state.career.firstClubId);
+  state.pendingFullCircleOffer = originalClub;
+
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.innerHTML = `<span class="rare-star">&#9733;</span>Boucler la boucle ?`;
+  titleEl.classList.add('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  document.getElementById('season-event-text').textContent =
+    `${originalClub.name}, le club où tout a commencé, vous propose de revenir terminer votre carrière chez eux. Boucler la boucle ?`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `
+    <button class="live-decision-option" data-key="accept">Revenir à ${originalClub.name}</button>
+    <button class="live-decision-option" data-key="refuse">Rester à ${state.club.name}</button>
+  `;
+  optsEl.querySelector('[data-key="accept"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    const club = state.pendingFullCircleOffer;
+    state.pendingFullCircleOffer = null;
+    acceptPoachingOffer(club);
+  });
+  optsEl.querySelector('[data-key="refuse"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    state.pendingFullCircleOffer = null;
+    proceedToRegularMercatoFlow();
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
 // Chemin normal de fin de saison (bonus mercato puis mercato classique) -
 // factorisé pour être appelé aussi bien directement que depuis un refus
 // d'offre de transfert.
@@ -6632,6 +6732,7 @@ function endCurrentCareer(){
   state.prevOtherLeaguesData = null;
 
   state.pendingPoachingOffer = null;
+  state.pendingFullCircleOffer = null;
   state.poachingOffersHistory = [];
   state.pendingSackingEvent = false;
   state.awaitingNewClubAfterSacking = false;
@@ -7524,7 +7625,12 @@ function liveEffectiveStrength(lm, side){
 }
 
 function pushLiveEvent(lm, minute, type, text, side){
-  lm.events.push({ minute, type, text, side: side || null });
+  // inExtraTime capturé explicitement à la création de l'événement, plutôt
+  // que déduit après coup depuis la minute seule - les 2 phases (arrêts de
+  // jeu de la 2e mi-temps, prolongation) peuvent partager les mêmes
+  // minutes brutes (91-100), ce qui rendrait la distinction ambiguë a
+  // posteriori (voir checkLiveMatchAchievements, "À la dernière seconde").
+  lm.events.push({ minute, type, text, side: side || null, inExtraTime: !!lm.inExtraTime });
 }
 
 function isMyTeamHome(lm){ return lm.homeId === state.club.id; }
@@ -9770,13 +9876,19 @@ function checkLiveMatchAchievements(lm, won){
   // résultat après la 90e (score nul ou défavorable juste avant, puis
   // passage en tête) - pas n'importe quel but marqué tard dans une victoire
   // déjà acquise (ex: un 5e but à la 90e dans un 5-1 ne compte pas).
+  // Réservé au VRAI temps réglementaire (arrêts de jeu de la 2e mi-temps) :
+  // un but similaire en prolongation est une autre histoire (un match qui
+  // va en prolongation n'est déjà plus "à la dernière seconde" au sens
+  // propre), d'où l'exclusion explicite de inExtraTime - les 2 phases
+  // pouvant partager les mêmes minutes brutes (91-100), s'appuyer sur la
+  // minute seule aurait été ambigu (voir pushLiveEvent).
   let myRunning = 0, oppRunning = 0, lateWinningGoal = null;
   lm.events.forEach(e=>{
     if(e.type !== 'goal') return;
     const wasLevelOrBehind = myRunning <= oppRunning;
     if(e.side === mySide) myRunning++;
     else if(e.side === oppSide) oppRunning++;
-    if(e.side === mySide && e.minute >= 90 && wasLevelOrBehind && myRunning > oppRunning){
+    if(e.side === mySide && e.minute >= 90 && !e.inExtraTime && wasLevelOrBehind && myRunning > oppRunning){
       lateWinningGoal = e;
     }
   });
@@ -10359,11 +10471,22 @@ function computeEuropeanQualifications(leagueName, standing, cupWinnerId, euroWi
     if(target) addSource(target, 'cl', 'leaguePhase', 'EPS');
   }
 
-  // 3. Vainqueurs européens de la saison précédente.
+  // 3. Vainqueurs européens de la saison précédente - UNIQUEMENT s'ils
+  // n'ont pas déjà aussi bien (ou mieux) via leur classement/l'EPS. Sinon
+  // le titre de champion en titre ne "sert à rien" pour ce club et ne doit
+  // JAMAIS libérer de place supplémentaire ailleurs - contrairement au
+  // vainqueur de la Coupe Nationale (étape 4), dont la place se redistribue
+  // toujours normalement s'il a déjà mieux : ce sont deux mécaniques
+  // réellement différentes.
   if(euroWinners){
-    if(euroWinners.cl) addSource(euroWinners.cl, 'cl', 'leaguePhase', 'CL_WINNER');
-    if(euroWinners.el) addSource(euroWinners.el, 'cl', 'leaguePhase', 'EL_WINNER');
-    if(euroWinners.ecl) addSource(euroWinners.ecl, 'el', 'leaguePhase', 'ECL_WINNER');
+    function addWinnerSourceIfNeeded(clubId, competition, entryRound, source){
+      if(!clubId) return;
+      if(currentBestTierRank(clubId) >= euroTierRankOf(competition, entryRound)) return;
+      addSource(clubId, competition, entryRound, source);
+    }
+    addWinnerSourceIfNeeded(euroWinners.cl, 'cl', 'leaguePhase', 'CL_WINNER');
+    addWinnerSourceIfNeeded(euroWinners.el, 'cl', 'leaguePhase', 'EL_WINNER');
+    addWinnerSourceIfNeeded(euroWinners.ecl, 'el', 'leaguePhase', 'ECL_WINNER');
   }
 
   // 4. Vainqueur de la Coupe Nationale -> Europa (redistribuée automatiquement
@@ -12978,6 +13101,7 @@ function snapshotGameState(){
     bonusMercatoAnnounced: state.bonusMercatoAnnounced,
     career: state.career,
     pendingPoachingOffer: state.pendingPoachingOffer,
+    pendingFullCircleOffer: state.pendingFullCircleOffer,
     poachingOffersHistory: state.poachingOffersHistory,
     pendingSackingEvent: state.pendingSackingEvent,
     awaitingNewClubAfterSacking: state.awaitingNewClubAfterSacking,
@@ -13986,8 +14110,14 @@ document.getElementById('btn-resume-manual').addEventListener('click', ()=>{
   });
 });
 document.getElementById('btn-next-season').addEventListener('click', ()=>{
-  if(checkSackingEligible()){
+  if(checkForcedRetirementEligible()){
+    showForcedRetirementPopup();
+  } else if(checkSackingEligible()){
     showSackingPopup();
+  } else if(checkTwilightWarningEligible()){
+    showTwilightWarningPopup();
+  } else if(checkFullCircleEligible()){
+    showFullCircleOfferPopup();
   } else if(checkPoachingOfferEligible()){
     showPoachingOfferPopup();
   } else {
@@ -14299,8 +14429,9 @@ document.getElementById('btn-goto-game').addEventListener('click', ()=>{
   enterGame();
 });
 document.getElementById('relance-btn').addEventListener('click', ()=>{
-  if(state.transfer && state.transfer.phase === 'draft') rerollTransferSlot();
-  else if(!state.transfer) rerollAll();
+  // Aucune relance possible en mercato (voir renderTransferGame) - reste
+  // uniquement pour la draft initiale d'une nouvelle carrière.
+  if(!state.transfer) rerollAll();
 });
 document.getElementById('btn-end-transfer-window').addEventListener('click', endTransferWindow);
 document.getElementById('draft-btn').addEventListener('click', startDraft);
