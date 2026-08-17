@@ -5924,14 +5924,26 @@ function renderSlotHTML(slot, isOpen){
 // MERCATO (fenêtre de transferts entre deux saisons)
 // ============================================================
 
+// Tire UN joueur compatible avec le(s) poste(s) demandé(s), non déjà
+// utilisé - avec un filet de sécurité en 3 niveaux, pour ne jamais laisser
+// un poste de mercato avec un seul choix (voire aucun) faute de candidats
+// exacts restants dans un effectif déjà bien entamé.
 function drawRandomCompatible(refPositions, exclude){
-  const pool = activePool().filter(p =>
-    !state.usedNames.has(playerKey(p)) &&
-    !exclude.includes(playerKey(p)) &&
-    compatiblePositions(p).some(pos => refPositions.includes(pos))
-  );
-  if(!pool.length) return null;
-  return pool[Math.floor(Math.random()*pool.length)];
+  const isFree = p => !state.usedNames.has(playerKey(p)) && !exclude.includes(playerKey(p));
+  const pool = activePool();
+  // 1) Correspondance exacte de poste.
+  let candidates = pool.filter(p => isFree(p) && compatiblePositions(p).some(pos => refPositions.includes(pos)));
+  if(candidates.length) return candidates[Math.floor(Math.random()*candidates.length)];
+  // 2) Filet de sécurité : effectif trop restreint pour ce poste précis -
+  // propose un joueur de la MÊME LIGNE (déf/mil/att) plutôt qu'aucune
+  // alternative réelle.
+  const lines = new Set(refPositions.map(pos => POSITION_LINE[pos]).filter(Boolean));
+  candidates = pool.filter(p => isFree(p) && playerLines(p).some(l => lines.has(l)));
+  if(candidates.length) return candidates[Math.floor(Math.random()*candidates.length)];
+  // 3) Dernier recours : n'importe quel joueur non utilisé, peu importe le poste.
+  candidates = pool.filter(isFree);
+  if(!candidates.length) return null;
+  return candidates[Math.floor(Math.random()*candidates.length)];
 }
 
 function startTransferWindow(maxPicks, midSeason){
