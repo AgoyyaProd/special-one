@@ -20,13 +20,7 @@
       "category": "Coaching",
       "kind": "tiered",
       "counter": "decisionsTotal",
-      "thresholds": [
-        50,
-        250,
-        750,
-        2000,
-        5000
-      ],
+      "thresholds": [50, 250, 750, 2000, 5000],
       "condition": "Prendre des décisions de coaching",
       "icon": "🧠"
     },
@@ -36,13 +30,7 @@
       "category": "Coaching",
       "kind": "tiered",
       "counter": "positiveImpactDecisions",
-      "thresholds": [
-        10,
-        50,
-        150,
-        400,
-        1000
-      ],
+      "thresholds": [10, 50, 150, 400, 1000],
       "condition": "Prendre une décision ayant un impact positif sur le résultat d'un match",
       "icon": "🎯"
     },
@@ -52,13 +40,7 @@
       "category": "Coaching",
       "kind": "tiered",
       "counter": "successfulAdaptations",
-      "thresholds": [
-        10,
-        50,
-        150,
-        400,
-        1000
-      ],
+      "thresholds": [10, 50, 150, 400, 1000],
       "condition": "Réussir une adaptation tactique (Adaptation adverse)",
       "icon": "♟️"
     },
@@ -68,13 +50,7 @@
       "category": "Coaching",
       "kind": "tiered",
       "counter": "lateDecisionWins",
-      "thresholds": [
-        5,
-        20,
-        50,
-        100,
-        250
-      ],
+      "thresholds": [5, 20, 50, 100, 250],
       "condition": "Gagner un match après une décision prise après la 75e minute",
       "icon": "⏱️"
     },
@@ -84,13 +60,7 @@
       "category": "Coaching",
       "kind": "tiered",
       "counter": "riskyChoiceWins",
-      "thresholds": [
-        5,
-        20,
-        50,
-        100,
-        250
-      ],
+      "thresholds": [5, 20, 50, 100, 250],
       "condition": "Choisir une option risquée qui mène à la victoire",
       "icon": "🎲"
     },
@@ -100,13 +70,7 @@
       "category": "Gestion des joueurs",
       "kind": "tiered",
       "counter": "injuriesAvoided",
-      "thresholds": [
-        5,
-        25,
-        75,
-        200,
-        500
-      ],
+      "thresholds": [5, 25, 75, 200, 500],
       "condition": "Éviter une blessure grâce à une décision",
       "icon": "🩹"
     },
@@ -116,13 +80,7 @@
       "category": "Gestion des joueurs",
       "kind": "tiered",
       "counter": "redCardsAvoided",
-      "thresholds": [
-        5,
-        20,
-        50,
-        100,
-        250
-      ],
+      "thresholds": [5, 20, 50, 100, 250],
       "condition": "Éviter un carton rouge grâce à une décision",
       "icon": "🟨"
     },
@@ -132,13 +90,7 @@
       "category": "Gestion des joueurs",
       "kind": "tiered",
       "counter": "impactSubsTotal",
-      "thresholds": [
-        5,
-        25,
-        75,
-        150,
-        300
-      ],
+      "thresholds": [5, 25, 75, 150, 300],
       "condition": "Un remplaçant devient décisif après votre changement",
       "icon": "🔄"
     },
@@ -148,13 +100,7 @@
       "category": "Gestion des joueurs",
       "kind": "tiered",
       "counter": "fatigueEventsHandled",
-      "thresholds": [
-        10,
-        50,
-        150,
-        300,
-        750
-      ],
+      "thresholds": [10, 50, 150, 300, 750],
       "condition": "Réussir un événement de gestion de fatigue",
       "icon": "🔋"
     },
@@ -164,13 +110,7 @@
       "category": "Carrière",
       "kind": "tiered",
       "counter": "matchesPlayed",
-      "thresholds": [
-        100,
-        500,
-        1000,
-        2500,
-        5000
-      ],
+      "thresholds": [100, 500, 1000, 2500, 5000],
       "condition": "Disputer des matchs",
       "icon": "📅"
     },
@@ -180,13 +120,7 @@
       "category": "Carrière",
       "kind": "tiered",
       "counter": "matchesWon",
-      "thresholds": [
-        25,
-        100,
-        250,
-        500,
-        1000
-      ],
+      "thresholds": [25, 100, 250, 500, 1000],
       "condition": "Remporter des matchs",
       "icon": "🏆"
     },
@@ -196,13 +130,7 @@
       "category": "Carrière",
       "kind": "tiered",
       "counter": "trophiesWon",
-      "thresholds": [
-        5,
-        15,
-        30,
-        60,
-        100
-      ],
+      "thresholds": [5, 15, 30, 60, 100],
       "condition": "Remporter des trophées",
       "icon": "🏅"
     },
@@ -212,13 +140,7 @@
       "category": "Draft",
       "kind": "tiered",
       "counter": "draftPicksTotal",
-      "thresholds": [
-        100,
-        500,
-        1500,
-        3000,
-        5000
-      ],
+      "thresholds": [100, 500, 1500, 3000, 5000],
       "condition": "Effectuer des choix de draft",
       "icon": "📝"
     },
@@ -228,13 +150,7 @@
       "category": "Draft",
       "kind": "tiered",
       "counter": "completeSquadsBuilt",
-      "thresholds": [
-        10,
-        50,
-        150,
-        300,
-        500
-      ],
+      "thresholds": [10, 50, 150, 300, 500],
       "condition": "Construire un effectif complet",
       "icon": "🏗️"
     },
@@ -244,13 +160,7 @@
       "category": "Draft",
       "kind": "tiered",
       "counter": "decisiveDraftPicks",
-      "thresholds": [
-        10,
-        50,
-        150,
-        300,
-        750
-      ],
+      "thresholds": [10, 50, 150, 300, 750],
       "condition": "Réaliser un choix de draft qui devient décisif",
       "icon": "👁️"
     },
@@ -372,6 +282,86 @@
       "grade": "Élite",
       "condition": "Réussir tous les événements de coaching d'un même match.",
       "icon": "💯",
+      "hidden": false
+    },
+    {
+      "id": "fergie_time",
+      "name": "Fergie Time",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Élite",
+      "condition": "Marquer le but de la victoire sur une décision de coaching prise après la 90e minute.",
+      "icon": "🕰️",
+      "hidden": false
+    },
+    {
+      "id": "le_bus",
+      "name": "Le Bus",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Expert",
+      "condition": "Choisir une approche défensive dans les dernières minutes et conserver une victoire d'un but.",
+      "icon": "🚌",
+      "hidden": false
+    },
+    {
+      "id": "on_ferme",
+      "name": "On ferme !",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Confirmé",
+      "condition": "Choisir une approche défensive dans les dernières minutes et conserver votre avantage jusqu'au coup de sifflet final.",
+      "icon": "🚪",
+      "hidden": false
+    },
+    {
+      "id": "tout_pour_lattaque",
+      "name": "Tout pour l'attaque",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Expert",
+      "condition": "Choisir une approche offensive dans les dernières minutes et marquer le but de la victoire.",
+      "icon": "⚔️",
+      "hidden": false
+    },
+    {
+      "id": "le_hold_up",
+      "name": "Le Hold-up",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Élite",
+      "condition": "Choisir de fermer le jeu alors que l'adversaire domine fortement, et remporter le match.",
+      "icon": "🎩",
+      "hidden": false
+    },
+    {
+      "id": "catenaccio",
+      "name": "Catenaccio",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Élite",
+      "condition": "Enchaîner plusieurs décisions défensives consécutives et remporter le match sans encaisser.",
+      "icon": "⛓️",
+      "hidden": false
+    },
+    {
+      "id": "le_declic",
+      "name": "Le Déclic",
+      "category": "Exploits de match",
+      "kind": "simple",
+      "grade": "Expert",
+      "condition": "Changer d'approche à la mi-temps après avoir été mené ou tenu en échec, et remporter le match.",
+      "icon": "💡",
+      "hidden": false
+    },
+    {
+      "id": "le_12e_homme",
+      "name": "Le 12e homme",
+      "category": "Gestion des joueurs",
+      "kind": "simple",
+      "grade": "Expert",
+      "condition": "Prendre au moins trois décisions de coaching au net impact positif dans un même match.",
+      "icon": "🙌",
       "hidden": false
     },
     {
