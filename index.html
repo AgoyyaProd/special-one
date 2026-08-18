@@ -154,7 +154,12 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
 }
 
 .pc-firstname{
-  color:var(--accent);
+  /* Couleur fixe (jamais dérivée du club) : certains clubs ont un accent
+     très sombre (ex: Lens, rouge/noir), ce qui rendait le prénom
+     quasiment illisible sur le fond de carte, lui aussi sombre. Légèrement
+     moins opaque que le nom (blanc plein) pour garder une hiérarchie
+     visuelle entre les deux, sans jamais sacrifier la lisibilité. */
+  color:rgba(255,255,255,.88);
   font-family:var(--card-font-regular); font-weight:400;
   font-size:8.5cqw;
   letter-spacing:0;
