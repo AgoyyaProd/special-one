@@ -5598,10 +5598,16 @@ function startDraft(){
     enterSeason();
     return;
   }
-  if(state.hand.length){ return; }
-  const names = [];
-  const cards = [];
-  for(let i=0;i<5;i++){
+  // Complète la main jusqu'à 5 cartes plutôt que de s'arrêter dès qu'elle
+  // contient ne serait-ce qu'UNE carte - une main coincée à moins de 5
+  // (ex: suite à un effectif CSV temporairement cassé pour un club, ou
+  // toute autre anomalie passée) se retrouvait sinon bloquée pour de bon,
+  // "Relancer la main" ne faisant que remplacer les cartes déjà présentes
+  // sans jamais en rajouter (voir rerollAll).
+  if(state.hand.length >= 5){ return; }
+  const names = state.hand.map(c=>playerKey(c.player));
+  const cards = [...state.hand];
+  for(let i=cards.length;i<5;i++){
     const p = drawRandom(names);
     if(!p) break;
     names.push(playerKey(p));
@@ -5638,6 +5644,16 @@ function rerollAll(){
     newNames.push(playerKey(p));
     return { uid:'c'+Math.random().toString(36).slice(2), player:p };
   });
+  // Complète aussi jusqu'à 5 si la main était restée coincée à moins de 5
+  // (voir startDraft) - une simple relance des cartes déjà présentes ne
+  // rajoutait jamais de carte manquante.
+  while(state.hand.length < 5){
+    const exclude = state.hand.map(h=>playerKey(h.player));
+    const p = drawRandom(exclude);
+    if(!p) break;
+    changed = true;
+    state.hand.push({ uid:'c'+Math.random().toString(36).slice(2), player:p });
+  }
   if(changed && !free) state.rerollsLeft -= 1;
   if(free) toast('Aucun poste disponible pour cette main, relance offerte.');
   renderGame();
