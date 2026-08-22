@@ -293,7 +293,11 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   --zone-sc:#A78BFA;
 }
 @media(min-width:768px){
-  :root{ --gutter:120px; }
+  /* En clamp() plutôt qu'en 120px fixe : un même padding fixe grignotait
+     une part disproportionnée de l'espace utile sur un 16/9 étroit (petit
+     laptop, ~1366px) par rapport à un grand écran (2560px+), forçant à
+     dézoomer le navigateur pour retrouver un affichage correct. */
+  :root{ --gutter:clamp(40px, 6vw, 120px); }
 }
 
 *{ box-sizing:border-box; }
@@ -963,6 +967,15 @@ button{ font-family:inherit; cursor:pointer; }
   cursor:not-allowed;
 }
 .club-tile.is-unplayable:hover{ transform:none; border-color:var(--border); }
+/* Après un licenciement, un club de niveau équivalent ou supérieur à
+   celui qui vient de vous renvoyer reste hors de portée - une séparation
+   ne permet jamais de rebondir "vers le haut", seulement vers plus modeste. */
+.club-tile.is-too-strong{
+  opacity:.4;
+  filter:grayscale(1);
+  cursor:not-allowed;
+}
+.club-tile.is-too-strong:hover{ transform:none; border-color:var(--border); }
 .club-unplayable-tag{
   font-family:var(--sans);
   font-size:9px;
@@ -1595,7 +1608,11 @@ button{ font-family:inherit; cursor:pointer; }
 /* ============================= GAME ============================= */
 .game-wrap{
   height:calc(100vh - var(--header-h));
-  padding:32px 110px 20px;
+  /* En clamp() plutôt qu'en px fixe : sur un 16/9 étroit (1366px de large,
+     petit laptop), un padding fixe de 110px de chaque côté grignotait une
+     part disproportionnée de l'espace utile, écrasant le terrain central -
+     d'où le besoin de dézoomer le navigateur pour compenser. */
+  padding:clamp(16px, 3vh, 32px) clamp(24px, 6vw, 110px) clamp(12px, 2vh, 20px);
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -1604,8 +1621,12 @@ button{ font-family:inherit; cursor:pointer; }
   flex:1;
   min-height:0;
   display:grid;
-  grid-template-columns:398px 1fr 503px;
-  gap:34px;
+  /* Les 2 colonnes latérales restent bornées (jamais trop étroites pour
+     rester lisibles, jamais plus larges qu'à l'origine) mais se
+     réduisent proportionnellement à la largeur d'écran réelle plutôt que
+     de rester figées et de tout écraser sur un écran plus petit. */
+  grid-template-columns:clamp(280px, 22vw, 398px) 1fr clamp(340px, 27vw, 503px);
+  gap:clamp(16px, 2vw, 34px);
 }
 .col-left, .col-right{
   height:100%;
@@ -1975,6 +1996,12 @@ button{ font-family:inherit; cursor:pointer; }
   position:relative;
   border-radius:var(--r-md);
   margin:0 auto;
+  /* Permet aux maillots/numéros/noms des postes (ci-dessous, en cqw) de se
+     dimensionner par rapport à la largeur RÉELLE du terrain (fixée
+     dynamiquement en JS via sizePitch), plutôt qu'à une taille fixe en px
+     qui finissait par chevaucher les rangées sur un terrain rendu petit
+     (fenêtre étroite, panneaux latéraux qui grignotent l'espace...). */
+  container-type:inline-size;
 }
 .pitch-grass{
   position:absolute;
@@ -2052,7 +2079,11 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .jersey-box{
   position:relative;
-  width:66px; height:66px;
+  /* En cqw plutôt qu'en px fixe (66px) : reste proportionnel à la taille
+     réelle du terrain (voir container-type sur .pitch ci-dessus), pour ne
+     plus jamais chevaucher les rangées voisines sur un terrain rendu
+     petit - référence Figma ~920px de large, d'où 66/920 ≈ 7.2cqw. */
+  width:clamp(28px, 7.2cqw, 80px); height:clamp(28px, 7.2cqw, 80px);
   flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
 }
@@ -2068,7 +2099,7 @@ button{ font-family:inherit; cursor:pointer; }
   position:relative;
   z-index:2;
   font-family:var(--bn-bold);
-  font-size:13px;
+  font-size:clamp(8px, 1.4cqw, 15px);
   letter-spacing:.5px;
   color:rgba(255,255,255,.65);
 }
@@ -2076,7 +2107,7 @@ button{ font-family:inherit; cursor:pointer; }
   position:relative;
   z-index:2;
   font-family:var(--bn-bold);
-  font-size:27px;
+  font-size:clamp(13px, 2.9cqw, 32px);
   color:#fff;
   text-shadow:0 1px 4px rgba(0,0,0,.7);
 }
@@ -2094,11 +2125,11 @@ button{ font-family:inherit; cursor:pointer; }
 
 .slot-name{
   font-family:var(--bn-regular);
-  font-size:13px;
+  font-size:clamp(8px, 1.4cqw, 15px);
   letter-spacing:.3px;
   color:#fff;
   text-shadow:0 1px 4px rgba(0,0,0,.85);
-  max-width:100px;
+  max-width:clamp(50px, 11cqw, 120px);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -3174,6 +3205,7 @@ select.modal-input option{ color:#111; background:#fff; }
       <button class="gm-btn-secondary" id="btn-info-back">&larr; Retour</button>
       <h1 class="info-title" id="info-title"></h1>
       <div class="info-content" id="info-content"></div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3208,6 +3240,7 @@ select.modal-input option{ color:#111; background:#fff; }
           <button class="gm-btn-secondary" id="coach-quiz-restart">Recommencer le test</button>
         </section>
       </div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3223,6 +3256,7 @@ select.modal-input option{ color:#111; background:#fff; }
       <div class="select-cta" id="select-cta" style="display:none">
         <button class="gm-btn-primary" id="btn-goto-game" disabled>Commencer</button>
       </div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3303,6 +3337,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
       </div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ SEASON ============================ -->
@@ -3450,6 +3485,7 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="live-scorers" id="live-scorers"></div>
         <button class="season-btn season-btn-primary" id="btn-live-continue">Continuer</button>
       </div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3530,6 +3566,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="section-label" style="margin-top:8px">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
       <div class="achv-grid" id="achv-grid"></div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3547,6 +3584,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="section-label">Saisons jouées</div>
       <div class="account-history" id="account-history"></div>
+      <div data-footer-slot></div>
     </div>
   </section>
 
@@ -3596,6 +3634,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="pantheon-main">
         <div class="pantheon-list" id="pantheon-list"></div>
+        <div data-footer-slot></div>
       </div>
     </div>
   </section>
@@ -4593,6 +4632,7 @@ const state = {
   poachingOffersHistory:[],
   pendingSackingEvent:false,
   awaitingNewClubAfterSacking:false,
+  sackedFromClubStrength:null,
   winStreak:0,
   lossStreak:0,
   fatigueLevel:0,
@@ -4654,6 +4694,43 @@ function toast(msg){
 }
 
 // ---------------------------- PAGES D'INFO (footer) ----------------------------
+// Pied de page du site, réutilisable sur n'importe quel écran - injecté
+// dynamiquement dans chaque emplacement [data-footer-slot] au démarrage
+// (voir plus bas), plutôt que dupliqué en dur dans chaque section HTML,
+// pour n'avoir qu'un seul endroit à maintenir.
+const SITE_FOOTER_HTML = `
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-brand">
+          <div class="site-footer-logo">The Special One</div>
+          <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
+        </div>
+        <div class="site-footer-cols">
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Le jeu</div>
+            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
+            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
+            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
+          </div>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">À propos</div>
+            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="faq">FAQ</button>
+            <button class="site-footer-link" data-info="contact">Contact</button>
+          </div>
+          <div class="site-footer-col">
+            <div class="site-footer-col-title">Légal</div>
+            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
+            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
+          </div>
+        </div>
+      </div>
+      <div class="site-footer-bottom">
+        <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
+      </div>
+    </footer>
+`;
+
 const INFO_PAGES = {
   'comment-jouer': {
     title:'Comment jouer',
@@ -5131,7 +5208,16 @@ function showInfoPage(key){
   if(!INFO_PAGES[key]) return;
   state.infoPage = key;
   renderInfoPage();
-  showScreen('info');
+  showScreen('info', { skipHistory:true });
+  // Chaque page d'info a sa propre URL distincte (#info/conditions,
+  // #info/confidentialite...) plutôt qu'un seul et même #info générique
+  // partagé par toutes - sans ça, impossible de savoir sur quelle page on
+  // se trouve dans la barre d'adresse, de la partager en lien direct, ou
+  // de naviguer correctement en arrière entre deux pages d'info.
+  const targetHash = '#info/' + key;
+  if(location.hash !== targetHash){
+    history.pushState({ screen:'info', infoPage:key }, '', targetHash);
+  }
   window.scrollTo({ top:0 });
 }
 
@@ -5173,7 +5259,20 @@ function showScreen(name, opts){
 }
 
 window.addEventListener('popstate', (e)=>{
-  let name = (e.state && e.state.screen) || (location.hash ? location.hash.slice(1) : 'landing');
+  const rawHash = location.hash ? location.hash.slice(1) : 'landing';
+  // Les pages d'info utilisent un hash composé (#info/conditions) plutôt
+  // qu'un simple nom d'écran - on en extrait la clé précise avant de
+  // router, pour retomber sur la bonne page (pas juste "une page d'info
+  // quelconque") au clic sur précédent/suivant du navigateur.
+  let name = rawHash;
+  let infoKey = null;
+  if(rawHash.startsWith('info/')){
+    name = 'info';
+    infoKey = rawHash.slice(5);
+  }
+  if(name === 'info'){
+    if(infoKey && INFO_PAGES[infoKey]) state.infoPage = infoKey;
+  }
   if(!document.getElementById('screen-'+name) || !canShowScreen(name)){
     name = 'landing';
   }
@@ -5340,23 +5439,34 @@ function renderSelect(){
     // n'a aucune date prévue - on ne l'affiche même pas, plutôt que de
     // promettre une disponibilité "bientôt" qui n'est pas d'actualité.
     .filter(c => c.playable !== false || c.comingSoon === true);
-  clubGrid.innerHTML = clubs.map(c=>`
-    <button class="club-tile ${state.club && state.club.id===c.id?'is-active':''} ${c.playable===false?'is-unplayable':''}" data-id="${c.id}" ${c.playable===false?'aria-disabled="true"':''}>
+  // Après un licenciement, tout club de niveau équivalent ou supérieur à
+  // celui qui vient de vous renvoyer reste grisé/non sélectionnable - une
+  // séparation ne permet jamais de rebondir "vers le haut" ou à niveau
+  // égal, seulement vers un club plus modeste (voir startFreeAgentClubSearch).
+  const sackedThreshold = state.awaitingNewClubAfterSacking ? state.sackedFromClubStrength : null;
+  clubGrid.innerHTML = clubs.map(c=>{
+    const tooStrong = sackedThreshold !== null && c.playable !== false && estimateClubStrength(c) >= sackedThreshold;
+    return `
+    <button class="club-tile ${state.club && state.club.id===c.id?'is-active':''} ${c.playable===false?'is-unplayable':''} ${tooStrong?'is-too-strong':''}" data-id="${c.id}" ${(c.playable===false||tooStrong)?'aria-disabled="true"':''}>
       <div class="club-crest" style="background:${c.logo?'transparent':'color-mix(in srgb, '+c.primary+' 55%, #000 45%)'}">
         ${c.logo ? `<img src="${(crestBlobCache[c.logo] && typeof crestBlobCache[c.logo]==='string')?crestBlobCache[c.logo]:c.logo}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : c.trigram}
       </div>
       <div class="club-name">${c.playable===false ? 'Bientôt disponible' : c.name}</div>
+      ${tooStrong ? '<div class="club-unplayable-tag">Hors de portée</div>' : ''}
     </button>
-  `).join('');
+  `;
+  }).join('');
   clubGrid.querySelectorAll('.club-tile').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const c = clubs.find(c=>c.id===btn.dataset.id);
       if(!c || c.playable === false) return; // pas encore de base de données joueurs - non sélectionnable
+      if(sackedThreshold !== null && estimateClubStrength(c) >= sackedThreshold) return; // hors de portée après un licenciement
       // Après un licenciement, choisir un club ici reprend directement la
       // carrière en cours (effectif hérité + mercato), comme une offre de
       // transfert acceptée - pas un nouveau départ avec draft complète.
       if(state.awaitingNewClubAfterSacking){
         state.awaitingNewClubAfterSacking = false;
+        state.sackedFromClubStrength = null;
         acceptPoachingOffer(c);
         return;
       }
@@ -6317,6 +6427,17 @@ function updateCareerLongevity(career, trophyScore){
   if(career.progressionStreak >= 2) delta += 1;
   if(career.declineStreak >= 3) delta -= 1.6;
   if(career.stagnationStreak >= 4) delta -= 1;
+  // Fatigue de carrière : au-delà d'un très grand nombre de saisons déjà
+  // coachées, une érosion supplémentaire s'installe et s'accentue
+  // progressivement, quels que soient les résultats - jamais liée à l'âge
+  // de l'entraîneur (jamais utilisé comme variable ici), mais au nombre
+  // d'années déjà passées sur les bancs. Sans ça, un coach qui enchaîne
+  // durablement les trophées majeurs pouvait voir sa longévité grimper
+  // indéfiniment (aucun autre facteur ne la fait jamais redescendre), pour
+  // une carrière littéralement infinie plutôt que simplement exceptionnelle.
+  if(career.yearsInCareer > 25){
+    delta -= (career.yearsInCareer - 25) * 0.12;
+  }
   career.remainingLongevity = Math.max(0, career.remainingLongevity + delta);
   // Peut dépasser la base initiale (une grande carrière allonge sa propre
   // trajectoire) - plafond généreux plutôt qu'un maximum figé.
@@ -6417,6 +6538,19 @@ function autoFillSquadFromClub(club){
   });
   const candidates = [...bestByPlayer.values()].sort((a,b)=>b.note-a.note);
 
+  // Filet de sécurité : une entrée de poste malformée pour UN joueur ne
+  // doit jamais interrompre le remplissage de tout le reste de l'effectif
+  // (sans ça, une erreur sur un seul joueur pouvait laisser tous les
+  // postes suivants vides, y compris via les filets de secours ci-dessous).
+  function safeCompatiblePositions(p){
+    try{ return compatiblePositions(p) || []; }
+    catch(e){ return []; }
+  }
+  function safePlayerLines(p){
+    try{ return playerLines(p) || []; }
+    catch(e){ return []; }
+  }
+
   state.slots.forEach(s=>{ s.player = null; });
   state.subs.forEach(s=>{ s.player = null; });
   const used = new Set();
@@ -6428,12 +6562,12 @@ function autoFillSquadFromClub(club){
   // laissant ce dernier vide alors qu'un joueur éligible existait bel et
   // bien dans l'effectif (typiquement AG/AD, souvent moins fournis).
   const slotsByScarcity = [...state.slots].sort((a,b)=>{
-    const countA = candidates.filter(p=>compatiblePositions(p).includes(a.label)).length;
-    const countB = candidates.filter(p=>compatiblePositions(p).includes(b.label)).length;
+    const countA = candidates.filter(p=>safeCompatiblePositions(p).includes(a.label)).length;
+    const countB = candidates.filter(p=>safeCompatiblePositions(p).includes(b.label)).length;
     return countA - countB;
   });
   slotsByScarcity.forEach(slot=>{
-    const pick = candidates.find(p => !used.has(playerKey(p)) && compatiblePositions(p).includes(slot.label));
+    const pick = candidates.find(p => !used.has(playerKey(p)) && safeCompatiblePositions(p).includes(slot.label));
     if(pick){ slot.player = pick; used.add(playerKey(pick)); }
   });
 
@@ -6443,7 +6577,7 @@ function autoFillSquadFromClub(club){
   state.slots.forEach(slot=>{
     if(slot.player) return;
     const line = POSITION_LINE[slot.label];
-    const pick = candidates.find(p => !used.has(playerKey(p)) && playerLines(p).includes(line));
+    const pick = candidates.find(p => !used.has(playerKey(p)) && safePlayerLines(p).includes(line));
     if(pick){ slot.player = pick; used.add(playerKey(pick)); }
   });
   // 3) Dernier recours (effectif vraiment trop court) : n'importe quel
@@ -6564,6 +6698,12 @@ function showSackingPopup(){
 function startFreeAgentClubSearch(){
   state.pendingSackingEvent = false;
   state.awaitingNewClubAfterSacking = true;
+  // Force de référence du club qui vient de vous licencier - capturée
+  // AVANT la remise à null de state.club, pour pouvoir ensuite griser sur
+  // l'écran de sélection tout club de niveau équivalent ou supérieur (une
+  // séparation ne permet jamais de rebondir "vers le haut" ou "à niveau
+  // égal", seulement vers un club plus modeste).
+  state.sackedFromClubStrength = estimateClubStrength(state.club);
   state.club = null;
   showScreen('select');
   renderSelect();
@@ -6769,6 +6909,7 @@ function endCurrentCareer(){
   state.poachingOffersHistory = [];
   state.pendingSackingEvent = false;
   state.awaitingNewClubAfterSacking = false;
+  state.sackedFromClubStrength = null;
   state.winterMercatoUsed = false;
   state.bonusMercatoAnnounced = false;
 
@@ -13138,6 +13279,7 @@ function snapshotGameState(){
     poachingOffersHistory: state.poachingOffersHistory,
     pendingSackingEvent: state.pendingSackingEvent,
     awaitingNewClubAfterSacking: state.awaitingNewClubAfterSacking,
+    sackedFromClubStrength: state.sackedFromClubStrength,
     coachProfile: state.coachProfile,
     careerStats: state.careerStats
   };
@@ -14086,6 +14228,13 @@ document.getElementById('btn-home').addEventListener('click', ()=>{
   window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('btn-next-matchday').addEventListener('click', handleNextMatchday);
+// Remplit chaque emplacement [data-footer-slot] (écrans qui n'avaient pas
+// encore de footer en dur dans leur HTML) avec le footer complet - avant
+// le câblage générique des clics juste en dessous, qui couvre alors aussi
+// bien les footers déjà présents en HTML que ceux injectés ici.
+document.querySelectorAll('[data-footer-slot]').forEach(slot=>{
+  slot.innerHTML = SITE_FOOTER_HTML;
+});
 document.querySelectorAll('.site-footer-link[data-info]').forEach(btn=>{
   btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
 });
@@ -14576,6 +14725,17 @@ Promise.all([loadAllClubRosters(), loadEuroFillerClubs()]).finally(()=>{
   const bootHash = location.hash.replace('#','');
   if(isOAuthCallbackHash){
     renderLanding();
+  } else if(bootHash.startsWith('info/')){
+    // Lien direct vers une page d'info précise (partagé, mis en favori, ou
+    // simple rafraîchissement) - un contenu statique, sans dépendance à
+    // une partie en cours, donc jamais besoin de passer par la
+    // restauration de sauvegarde comme pour les écrans de jeu.
+    const infoKey = bootHash.slice(5);
+    renderLanding();
+    if(INFO_PAGES[infoKey]){
+      history.replaceState({ screen:'info', infoPage:infoKey }, '', location.pathname + location.search + '#info/' + infoKey);
+      showInfoPage(infoKey);
+    }
   } else if(bootHash && bootHash !== 'landing'){
     // Rechargement en pleine partie (le hash pointe déjà vers un écran
     // précis, ex: #season) : on restaure directement sans repasser par le
