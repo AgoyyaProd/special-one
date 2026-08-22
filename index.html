@@ -24,6 +24,24 @@
   --card-font-bold:'bebas-neue-pro','Bebas Neue','Anton',Arial,sans-serif;
 }
 
+/* Barre de défilement personnalisée, discrète et cohérente avec le thème
+   sombre - sans ça, le navigateur affiche sa barre par défaut (souvent
+   blanche/grise), qui tranche violemment sur les conteneurs qui défilent
+   en interne (ex: .account-shell, .pantheon-shell) et peut ressembler à
+   un simple trait vertical mal placé sur un écran large, puisque ces
+   conteneurs sont centrés et pas forcément aussi larges que la fenêtre. */
+*{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.18) transparent;
+}
+*::-webkit-scrollbar{ width:8px; height:8px; }
+*::-webkit-scrollbar-track{ background:transparent; }
+*::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18);
+  border-radius:999px;
+}
+*::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,.3); }
+
 body{
   margin:0;
   font-family:var(--bn-regular);
@@ -6310,9 +6328,18 @@ function initCareer(){
     yearsInCareer: 0,
     // Longévité théorique de départ, tirée aléatoirement - une base de
     // référence plausible, pas une limite stricte : elle évoluera ensuite
-    // au fil des saisons selon les événements et performances.
-    baseLongevity: 10 + Math.round(Math.random()*8), // 10-18 ans
+    // au fil des saisons selon les événements et performances. Recalibrée
+    // pour un plafond ABSOLU de carrière entre 23 et 25 saisons (voir
+    // hardCapYears ci-dessous) - une carrière "courte" ou "normale" doit
+    // rester nettement en-deçà de ce plafond, réservé aux dynasties
+    // exceptionnelles qui prolongent leur longévité par leurs résultats.
+    baseLongevity: 8 + Math.round(Math.random()*6), // 8-14 ans
     remainingLongevity: 0, // fixé juste après à baseLongevity
+    // Plafond ABSOLU et garanti pour cette carrière, tiré une fois pour
+    // toutes : peu importe les résultats (même une dynastie qui enchaîne
+    // les trophées sans interruption), la carrière s'arrête forcément une
+    // fois ce nombre de saisons atteint (voir checkForcedRetirementEligible).
+    hardCapYears: 23 + Math.floor(Math.random()*3), // 23, 24 ou 25
     reputation: 40 + Math.round(Math.random()*15), // 40-55 au départ
     momentum: 0,
     seasonScores: [],
@@ -6427,21 +6454,24 @@ function updateCareerLongevity(career, trophyScore){
   if(career.progressionStreak >= 2) delta += 1;
   if(career.declineStreak >= 3) delta -= 1.6;
   if(career.stagnationStreak >= 4) delta -= 1;
-  // Fatigue de carrière : au-delà d'un très grand nombre de saisons déjà
-  // coachées, une érosion supplémentaire s'installe et s'accentue
-  // progressivement, quels que soient les résultats - jamais liée à l'âge
-  // de l'entraîneur (jamais utilisé comme variable ici), mais au nombre
-  // d'années déjà passées sur les bancs. Sans ça, un coach qui enchaîne
-  // durablement les trophées majeurs pouvait voir sa longévité grimper
-  // indéfiniment (aucun autre facteur ne la fait jamais redescendre), pour
-  // une carrière littéralement infinie plutôt que simplement exceptionnelle.
-  if(career.yearsInCareer > 25){
-    delta -= (career.yearsInCareer - 25) * 0.12;
+  // Fatigue de carrière : plus on approche du plafond ABSOLU de cette
+  // carrière (hardCapYears, 23 à 25 saisons selon les coachs - voir
+  // initCareer), plus l'érosion s'accentue, quels que soient les
+  // résultats - jamais liée à l'âge de l'entraîneur (jamais utilisé comme
+  // variable ici), mais à la proximité du plafond personnel de CETTE
+  // carrière. Sans ça, un coach qui enchaîne durablement les trophées
+  // majeurs pouvait voir sa longévité grimper indéfiniment (aucun autre
+  // facteur ne la fait jamais redescendre) et ne jamais réellement
+  // ressentir l'approche de la fin avant le couperet du plafond.
+  const capProgress = career.yearsInCareer / career.hardCapYears;
+  if(capProgress > 0.55){
+    delta -= (capProgress - 0.55) * 8;
   }
   career.remainingLongevity = Math.max(0, career.remainingLongevity + delta);
   // Peut dépasser la base initiale (une grande carrière allonge sa propre
-  // trajectoire) - plafond généreux plutôt qu'un maximum figé.
-  career.remainingLongevity = Math.min(career.baseLongevity * 1.8, career.remainingLongevity);
+  // trajectoire) mais reste sous un plafond raisonnable, cohérent avec le
+  // plafond absolu de 23-25 saisons de toute façon garanti par hardCapYears.
+  career.remainingLongevity = Math.min(career.baseLongevity * 1.4, career.remainingLongevity);
   // Nombre de saisons consécutives à longévité épuisée - sert à augmenter
   // progressivement la probabilité de retraite forcée (voir
   // checkForcedRetirementEligible) plutôt qu'un couperet brutal pile à 0 :
@@ -6736,13 +6766,18 @@ function showTwilightWarningPopup(){
   document.getElementById('season-event-overlay').style.display = 'flex';
 }
 
-// Fin de carrière FORCÉE une fois la longévité restante réellement
-// épuisée - jamais un couperet brutal pile à 0 : une chance croissante de
-// partir à la retraite à chaque saison passée sous ce seuil, pour que
-// certains coachs aillent un peu au-delà quand d'autres s'arrêtent net.
+// Fin de carrière FORCÉE - soit un plafond ABSOLU garanti (23 à 25
+// saisons, voir hardCapYears dans initCareer, quels que soient les
+// résultats), soit une longévité réellement épuisée avant ce plafond
+// (jamais un couperet brutal pile à 0 dans ce second cas : une chance
+// croissante de partir à la retraite à chaque saison passée sous ce
+// seuil, pour que certains coachs aillent un peu au-delà quand d'autres
+// s'arrêtent net).
 function checkForcedRetirementEligible(){
   const career = state.career;
-  if(!career || career.remainingLongevity > 0) return false;
+  if(!career) return false;
+  if(career.yearsInCareer >= career.hardCapYears) return true;
+  if(career.remainingLongevity > 0) return false;
   const overdue = career.seasonsAtZeroLongevity || 1;
   const chance = Math.min(0.85, 0.35 + (overdue-1)*0.25);
   return Math.random() < chance;
@@ -6774,10 +6809,14 @@ function checkFullCircleEligible(){
   if(!career || !career.firstClubId) return false;
   if(state.pendingPoachingOffer || state.pendingFullCircleOffer) return false;
   if(state.club.id === career.firstClubId) return false; // déjà là
-  // Uniquement dans les toutes dernières saisons (longévité restante
-  // faible) - jamais en pleine force de l'âge, où ça n'aurait pas de sens
-  // narratif.
-  if(career.remainingLongevity > 4) return false;
+  // Uniquement dans les toutes dernières saisons - soit parce que la
+  // longévité restante est basse, soit parce qu'on approche du plafond
+  // ABSOLU de cette carrière (hardCapYears) même si les résultats restent
+  // bons : sans ce second cas, un coach encore dominant pourrait ne
+  // jamais voir cette proposition avant le couperet du plafond.
+  const nearingLongevityEnd = career.remainingLongevity <= 4;
+  const nearingHardCap = (career.hardCapYears - career.yearsInCareer) <= 3;
+  if(!nearingLongevityEnd && !nearingHardCap) return false;
   if((career.seasonsSinceFullCircleOffer||0) < 2) return false;
   const originalClub = Object.values(LEAGUES).flat().find(c=>c.id===career.firstClubId);
   if(!originalClub || originalClub.playable === false) return false;
