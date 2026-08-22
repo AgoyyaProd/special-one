@@ -3233,8 +3233,8 @@ select.modal-input option{ color:#111; background:#fff; }
       <button class="gm-btn-secondary" id="btn-info-back">&larr; Retour</button>
       <h1 class="info-title" id="info-title"></h1>
       <div class="info-content" id="info-content"></div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ PROFIL DE COACH (quiz) ============================ -->
@@ -3268,8 +3268,8 @@ select.modal-input option{ color:#111; background:#fff; }
           <button class="gm-btn-secondary" id="coach-quiz-restart">Recommencer le test</button>
         </section>
       </div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ SELECT ============================ -->
@@ -3284,8 +3284,8 @@ select.modal-input option{ color:#111; background:#fff; }
       <div class="select-cta" id="select-cta" style="display:none">
         <button class="gm-btn-primary" id="btn-goto-game" disabled>Commencer</button>
       </div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ GAME ============================ -->
@@ -3513,8 +3513,8 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="live-scorers" id="live-scorers"></div>
         <button class="season-btn season-btn-primary" id="btn-live-continue">Continuer</button>
       </div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <div class="pelouse-modal-overlay" id="live-subs-overlay" style="display:none">
@@ -3594,8 +3594,8 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="section-label" style="margin-top:8px">Succès (<span id="achv-count">0</span>/<span id="achv-total">0</span>)</div>
       <div class="achv-grid" id="achv-grid"></div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ PALMARÈS (historique personnel) ============================ -->
@@ -3612,8 +3612,8 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="section-label">Saisons jouées</div>
       <div class="account-history" id="account-history"></div>
-      <div data-footer-slot></div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <!-- ============================ PANTHÉON (classement global) ============================ -->
@@ -3662,9 +3662,9 @@ select.modal-input option{ color:#111; background:#fff; }
 
       <div class="pantheon-main">
         <div class="pantheon-list" id="pantheon-list"></div>
-        <div data-footer-slot></div>
       </div>
     </div>
+    <div data-footer-slot></div>
   </section>
 
   <div class="modal-overlay" id="profile-modal" style="display:none">
@@ -7593,14 +7593,17 @@ function finishRoundBookkeeping(roundIdx, skipEuroTick, skipPlayedEuroTick){
         };
       });
     }
-    // Le championnat vient de se terminer : votre coupe d'Europe (si elle
-    // en est aux quarts, en attente depuis la mi-saison) enchaîne
-    // immédiatement finale, pour arriver "Terminé" en même temps que les
-    // compétitions fantômes plutôt que d'attendre des clics manuels dans
-    // l'onglet Europe. Seules LDC et Conférence attendent la fin du
-    // championnat pour leur finale - la Ligue Europa se joue avant la
-    // dernière journée et est donc déjà terminée à ce stade.
-    if(state.euro && state.euro.stage !== 'done') simulateRestOfEuro();
+    // Le championnat vient de se terminer : les compétitions FANTÔMES (pas
+    // la mienne) enchaînent directement leur éventuelle finale en attente,
+    // pour arriver "Terminé" en même temps plutôt que de rester bloquées
+    // sans jamais être rejouées (elles ne sont de toute façon jamais
+    // jouées par le joueur). MA PROPRE finale, elle, ne se résout plus
+    // jamais silencieusement ici - elle passe désormais par le même
+    // circuit "tour en attente" que n'importe quel autre match spécial
+    // (coupe, mercato...), avec sa propre possibilité de jouer en direct
+    // (voir getDueEuroKnockoutStep/startLiveEuroKnockoutMatchday) plutôt
+    // que d'être imposée en même temps que la dernière journée du
+    // championnat sans que le joueur ait eu son mot à dire.
     if(state.shadowEuro){
       Object.values(state.shadowEuro).forEach(euro=>{
         if(euro.stage === 'final') simulateEuroFinalMatch(euro);
@@ -10479,8 +10482,19 @@ function sortedStandings(){
 }
 
 function euroFullyDoneNow(){
+  // "Fully" doit vraiment dire TOUTES les compétitions européennes de la
+  // saison - la mienne ET les 2 "fantômes" (simulées en arrière-plan pour
+  // les 2 autres coupes). Vérifier uniquement state.euro (comme c'était le
+  // cas ici avant) pouvait déclencher la finalisation des coefficients
+  // UEFA/de l'EPS (voir finalizeSeasonEuroWinners) alors que les
+  // compétitions fantômes tournaient encore avec des données incomplètes
+  // ou pas encore mises à jour pour la bonne saison - la place EPS
+  // calculée pouvait alors rester figée sur une valeur obsolète d'une
+  // saison à l'autre au lieu d'être recalculée à neuf.
   const euro = state.euro;
-  return !euro || euro.stage === 'done';
+  const mineDone = !euro || euro.stage === 'done';
+  const shadowsDone = !state.shadowEuro || Object.values(state.shadowEuro).every(e => !e || e.stage === 'done');
+  return mineDone && shadowsDone;
 }
 
 // Contrairement à euroFullyDoneNow (tournoi entier terminé pour tout le
@@ -10913,23 +10927,24 @@ function myPendingQualifyingTie(){
   return state.euroQualifying ? state.euroQualifying.ties.find(t=>t.isMine && !t.resolved) : null;
 }
 
-// Résout d'un coup, en instantané, TOUTES les confrontations restantes
-// (y compris la vôtre, si vous avez choisi de ne pas la jouer en direct)
-// - en boucle, car gagner un tour peut en enchaîner un nouveau (Tour 3 ->
-// Barrage) qu'il faut alors résoudre à son tour. Utilisé par "Journée
-// suivante" et par la simulation en masse.
+// Résout d'un coup, en instantané, UNE SEULE manche (aller ou retour) pour
+// chaque confrontation encore en attente - la vôtre si vous choisissez de
+// ne pas la jouer en direct, et celle des autres clubs en parallèle pour
+// ce même tour. Ne chaîne plus automatiquement vers le tour suivant en
+// boucle (Tour 3 -> Barrage résolus d'un coup) : comme n'importe quel
+// autre match spécial du jeu (coupe, mercato...), une seule manche à la
+// fois occupe un clic de "Match suivant".
 function bulkResolveEuroQualifyingWave(){
   const eq = state.euroQualifying;
   if(!eq) return;
-  let iterations = 0;
-  while(eq.ties.some(t=>!t.resolved) && iterations < 20){
-    eq.ties.filter(t=>!t.resolved).forEach(t=>{
-      if(!t.leg1) resolveOneQualifyingLeg(t, 'leg1');
-      else if(!t.leg2) resolveOneQualifyingLeg(t, 'leg2');
-    });
-    iterations++;
-  }
-  finalizeEuroQualifyingAndEnterEuro();
+  eq.ties.filter(t=>!t.resolved).forEach(t=>{
+    if(!t.leg1) resolveOneQualifyingLeg(t, 'leg1');
+    else if(!t.leg2) resolveOneQualifyingLeg(t, 'leg2');
+  });
+  // La campagne de qualification n'est réellement terminée que si cette
+  // résolution n'a engendré aucun nouveau tour en attente (ex: gagner le
+  // Tour 3 crée une confrontation de Barrage à jouer séparément).
+  if(!eq.ties.some(t=>!t.resolved)) finalizeEuroQualifyingAndEnterEuro();
 }
 
 // Ouvre l'écran de match en direct pour VOTRE manche (aller ou retour) -
@@ -11440,6 +11455,16 @@ function clubNameForAnyId(id){
       if(euro && euro.clubsById && euro.clubsById[id]) return euro.clubsById[id].name;
     }
   }
+  // Dernier filet : le vainqueur LDC/Europa de la saison précédente (voir
+  // finalizeSeasonEuroWinners) - la Supercoupe d'Europe se joue une fois
+  // les données de l'ancienne saison remises à zéro pour la nouvelle,
+  // moment où un club hors des 5 grands championnats ne serait plus
+  // résolvable par aucun des filets ci-dessus.
+  const prevWinners = state.prevSeasonEuroWinners;
+  if(prevWinners){
+    if(id === prevWinners.cl && prevWinners.clName) return prevWinners.clName;
+    if(id === prevWinners.el && prevWinners.elName) return prevWinners.elName;
+  }
   return id;
 }
 
@@ -11693,7 +11718,7 @@ function commitLiveDomesticSuperCupMatchResult(){
 function resolveSuperCupForNewSeason(){
   const prev = state.prevSeasonEuroWinners;
   state.uefaSuperCupFixture = (prev && prev.cl && prev.el)
-    ? { home:prev.cl, away:prev.el, played:false, hg:null, ag:null, winner:null }
+    ? { home:prev.cl, away:prev.el, homeName:prev.clName, awayName:prev.elName, played:false, hg:null, ag:null, winner:null }
     : null;
   // Ne résout plus rien ici automatiquement (voir getDueUefaSuperCupStep) -
   // laisse la possibilité de la jouer en direct si vous êtes le vainqueur
@@ -12191,7 +12216,16 @@ function getDueEuroKnockoutStep(){
   const roundIdx = state.season.currentRound - 1; // dernière journée effectivement jouée
   const sch = euro.schedule;
   if(euro.stage === 'final'){
-    return euro.tier === 'el' && sch.elFinal <= roundIdx;
+    // L'Europa League a une journée d'attente précise avant sa finale
+    // (elle se joue avant la toute dernière journée du championnat). La
+    // Ligue des Champions et la Ligue Conférence, elles, se jouent
+    // toujours APRÈS la fin complète du championnat national (jamais
+    // avant, même si les demi-finales sont déjà bouclées plus tôt) - dès
+    // que le championnat est terminé, la finale devient immédiatement
+    // disponible pour son propre clic dédié (voir finishRoundBookkeeping,
+    // qui ne la résout plus jamais automatiquement en arrière-plan).
+    if(euro.tier === 'el') return sch.elFinal <= roundIdx;
+    return !state.season || state.season.currentRound >= state.season.calendar.length;
   }
   const anchors = { playoff:[sch.playoffLeg1, sch.playoffLeg2], ro16:[sch.ro16Leg1, sch.ro16Leg2], qf:[sch.qfLeg1, sch.qfLeg2], sf:[sch.sfLeg1, sch.sfLeg2] }[euro.stage];
   if(!anchors) return false;
@@ -12654,8 +12688,13 @@ function renderLeaguePanels(){
     const renderEntry = entry => `
       <div class="rd-heading ${entry.type==='cup'?'rd-cup':''} ${entry.type==='supercup'?'rd-supercup':''} ${entry.type.startsWith('euro-')?entry.type+'-text':''}" data-upcoming="${entry.upcoming ? '1' : '0'}">${entry.label}${entry.upcoming ? ' <span class="rd-upcoming-tag">à venir</span>' : ''}</div>
       ${entry.matches.map(fx=>{
-        const home = resolveClub(fx.home);
-        const away = resolveClub(fx.away);
+        // fx.homeName/awayName (posés à la clôture de la saison précédente,
+        // voir finalizeSeasonEuroWinners) priment sur resolveClub() - la
+        // Supercoupe d'Europe se joue une fois les données de l'ancienne
+        // saison remises à zéro, où un club hors des 5 grands championnats
+        // ne serait plus résolvable autrement.
+        const home = fx.homeName ? { name:fx.homeName } : resolveClub(fx.home);
+        const away = fx.awayName ? { name:fx.awayName } : resolveClub(fx.away);
         const isMe = fx.home===state.club.id || fx.away===state.club.id;
         const extraClasses = `${isMe?'fx-me':''} ${entry.type==='cup'?'fx-cup':''} ${entry.type==='supercup'?'fx-supercup':''} ${entry.type.startsWith('euro-')?entry.type:''}`;
         return renderFixtureBlock(fx, home.name, away.name, extraClasses, home, away);
@@ -12675,7 +12714,14 @@ function renderLeaguePanels(){
       const headings = resultsEl.querySelectorAll('.rd-heading');
       let lastPlayed = null;
       headings.forEach(h=>{ if(h.dataset.upcoming === '0') lastPlayed = h; });
+      // Sans ce else, le changement d'innerHTML juste au-dessus ne
+      // réinitialise PAS la position de défilement à lui seul (comportement
+      // normal du navigateur) - en tout début de saison (aucune journée
+      // encore jouée, lastPlayed reste null), la vue restait donc collée
+      // sur l'ancienne position de scroll héritée de la fin de la saison
+      // précédente, bien plus longue, au lieu de revenir tout en haut.
       if(lastPlayed) scrollContainerToElement(resultsEl, lastPlayed);
+      else resultsEl.scrollTop = 0;
     }
   }
 }
@@ -12917,7 +12963,12 @@ function renderSeason(){
     liveBtn.textContent = 'Jouer en direct';
   }
 
-  const euroFullyDone = !euro || euro.stage === 'done';
+  // Toutes les compétitions européennes (la mienne + les 2 fantômes) - pas
+  // seulement la mienne - doivent être terminées avant de proposer "Saison
+  // suivante" ET de finaliser les coefficients UEFA/l'EPS ci-dessous (voir
+  // euroFullyDoneNow) : sans ça, l'EPS pouvait se figer sur une valeur
+  // obsolète si une compétition fantôme tournait encore à ce moment-là.
+  const euroFullyDone = euroFullyDoneNow();
   nextSeasonBtn.style.display = (seasonDone && euroFullyDone) ? '' : 'none';
   if(seasonDone && euroFullyDone){ recordSeasonIfNeeded(); finalizeSeasonEuroWinners(); }
 
@@ -13623,6 +13674,16 @@ function finalizeSeasonEuroWinners(){
   if(!state.season || state.season.euroWinnersFinalized) return;
   state.season.euroWinnersFinalized = true;
   state.prevSeasonEuroWinners = { ...state.currentSeasonEuroWinners };
+  // Noms résolus et figés ICI, tant que les données de la saison qui
+  // vient de se terminer (state.euro/state.shadowEuro) sont encore
+  // intactes - la Supercoupe d'Europe de la saison suivante (voir
+  // resolveSuperCupForNewSeason) se joue APRÈS la remise à zéro de ces
+  // données pour la nouvelle saison, donc re-résoudre le nom à ce
+  // moment-là échouerait pour un club qui n'est pas dans les 5 grands
+  // championnats (l'ancienne "compétition fantôme" qui le référençait
+  // n'existe déjà plus).
+  state.prevSeasonEuroWinners.clName = state.currentSeasonEuroWinners.cl ? clubNameForAnyId(state.currentSeasonEuroWinners.cl) : null;
+  state.prevSeasonEuroWinners.elName = state.currentSeasonEuroWinners.el ? clubNameForAnyId(state.currentSeasonEuroWinners.el) : null;
   // EPS de la saison qui vient de se terminer -> s'applique aux
   // qualifications de la saison suivante (jamais celle-ci). Calculé une
   // seule fois ici, une fois les 3 coupes d'Europe réellement terminées
