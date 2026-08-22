@@ -11957,13 +11957,32 @@ function playEuroSingleMatch(fx, euro){
   const awayStr = fx.away === state.club.id ? myTeamStrength('euro') : euro.strengths[fx.away];
   let hg = simulateGoals(homeStr, awayStr, true);
   let ag = simulateGoals(awayStr, homeStr, false);
+  fx.wentToPenalties = false; fx.penaltyScore = null; fx.extraTimeScore = null;
+  let tiebreakResult = null;
+  // Score de fin de temps réglementaire, CAPTURÉ AVANT tout ajout de
+  // prolongation - simulateMatchEvents doit générer les événements sur
+  // cette base réglementaire uniquement (voir appendKnockoutTiebreakEvents
+  // plus bas, qui gère spécifiquement et correctement les buts de
+  // prolongation avec un vrai buteur).
+  const regHg = hg, regAg = ag;
   if(hg === ag){
-    const pHome = homeStr / (homeStr + awayStr);
-    if(Math.random() < pHome) hg++; else ag++;
+    // Une finale ne peut jamais rester nulle - vraie prolongation puis
+    // tirs au but si besoin, comme n'importe quel autre match à
+    // élimination directe en un seul match (coupe, trophée d'ouverture,
+    // supercoupe d'Europe). L'ancien comportement ajoutait un simple "but
+    // fantôme" tiré au sort, sans prolongation ni tirs au but visibles.
+    tiebreakResult = resolveAggregateTie(homeStr, awayStr);
+    fx.wentToPenalties = tiebreakResult.wentToPenalties;
+    fx.penaltyScore = tiebreakResult.penaltyScore;
+    fx.extraTimeScore = tiebreakResult.extraTimeScore;
+    hg += tiebreakResult.etA; ag += tiebreakResult.etB;
+    fx.winner = tiebreakResult.winner === 'A' ? fx.home : fx.away;
+  } else {
+    fx.winner = hg > ag ? fx.home : fx.away;
   }
   fx.played = true; fx.hg = hg; fx.ag = ag;
-  fx.events = simulateMatchEvents(fx.home, fx.away, hg, ag);
-  fx.winner = hg > ag ? fx.home : fx.away;
+  fx.events = simulateMatchEvents(fx.home, fx.away, regHg, regAg);
+  if(tiebreakResult) appendKnockoutTiebreakEvents(fx.events, tiebreakResult, clubNameForAnyId(fx.home), clubNameForAnyId(fx.away), fx.home, fx.away);
   if(euro === state.euro && (fx.home === state.club.id || fx.away === state.club.id)) trackMatchResult(fx);
   return fx;
 }
