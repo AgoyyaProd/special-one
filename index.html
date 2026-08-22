@@ -2417,10 +2417,11 @@ button{ font-family:inherit; cursor:pointer; }
   .draft-btn{ font-size:14px; padding:13px; }
   .relance-btn{ font-size:11px; }
   .hand-card, .hand-card .pc-card{ width:104px; }
-  .jersey-box{ width:46px; height:46px; }
-  .slot-label{ font-size:11px; }
-  .slot-number{ font-size:18px; }
-  .slot-name{ font-size:11px; max-width:60px; }
+  /* jersey-box/slot-label/slot-number/slot-name : plus besoin de valeurs
+     fixes ici, le dimensionnement en cqw (voir .pitch, container-type)
+     s'adapte déjà en continu à la taille réelle du terrain, y compris sur
+     mobile - une valeur fixe ici ferait juste régresser vers l'ancien
+     souci de chevauchement sur un terrain très étroit. */
   .team-stats{ gap:5px; }
   .stat-tile{ padding:6px 2px; }
   .stat-tile .v{ font-size:17px; }
@@ -2450,6 +2451,15 @@ button{ font-family:inherit; cursor:pointer; }
   .hero-cards-wrap{ flex-direction:column; align-items:center; gap:28px; }
   .hero-card-slot:nth-child(2){ margin-top:0; }
   .hero-card-slot .pc-card{ width:min(72vw, 300px); }
+}
+
+/* Sur téléphone étroit, 8 colonnes (# Club J V N D Diff Pts) laissent bien
+   trop peu de place au nom du club - on masque V/N/D (déductibles depuis
+   les autres colonnes de toute façon) pour ne garder que l'essentiel :
+   position, club, matchs joués, différence de buts, points. */
+@media (max-width: 480px){
+  .st-row{ grid-template-columns:18px 1fr 24px 32px 38px; gap:4px; padding:8px 6px; }
+  .st-row > div:nth-child(4), .st-row > div:nth-child(5), .st-row > div:nth-child(6){ display:none; }
 }
 
 @media (max-width: 380px){
