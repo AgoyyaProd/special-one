@@ -5321,19 +5321,40 @@ window.addEventListener('popstate', (e)=>{
 // ============================================================
 // LANDING
 // ============================================================
-const THEME_PREVIEW_CLUBS = [
-  LEAGUES["Ligue 1"][0], LEAGUES["La Liga"][0], LEAGUES["Bundesliga"][0],
-  LEAGUES["Premier League"][0], LEAGUES["Serie A"][0]
-];
+function clubById(id){
+  return Object.values(LEAGUES).flat().find(c => c.id === id) || null;
+}
 
-// Deux joueurs par club pour l'aperçu (mêmes couleurs, deux légendes)
-const LANDING_PLAYER_PAIRS = [
-  [35, 36], // PSG: Dembélé, Lewandowski
-  [21, 33], // Real Madrid: Modrić, Cristiano Ronaldo
-  [24, 20], // Bayern: De Bruyne(reskin), Kroos
-  [22, 30], // Man City: Kroos(reskin), Ronaldinho
-  [17, 3]   // Juventus: Xavi(reskin), Neuer
-];
+const THEME_PREVIEW_CLUBS = [
+  clubById('psg'), clubById('srfc'), clubById('ol'), clubById('liv'),
+  clubById('rma'), clubById('juv'), clubById('fcb2')
+].filter(Boolean);
+
+// Duo de légendes mis en avant sur les cartes d'accueil pour certains clubs,
+// par nom de famille (insensible à la casse/accents - voir normalizeName).
+// Tant que le club n'a pas encore son CSV d'effectif chargé (comingSoon),
+// la recherche ne trouve simplement personne et paintHeroCards laisse les
+// cartes précédentes affichées (comportement déjà existant) - dès que les
+// données arrivent, le duo apparaît automatiquement sans autre changement.
+const LANDING_FEATURED_PLAYERS = {
+  psg:  ['Pauleta', 'Marquinhos'],
+  srfc: ['Frei', 'Monterrubio'],
+  ol:   ['Coupet', 'Cris'],
+  liv:  ['Gerrard', 'Salah'],
+  // Real Madrid, Juventus, Bayern : en attente des CSV d'effectif -
+  // dès qu'ils seront chargés, choisir ici les deux légendes à mettre en avant.
+  rma:  [],
+  juv:  [],
+  fcb2: []
+};
+// Note affichée sur la carte d'accueil pour ce duo mis en avant - volontairement
+// maximale ("note maxi"), sans toucher à la note réelle du joueur dans le CSV
+// (qui reste utilisée telle quelle partout ailleurs : draft, effectifs, etc.).
+const LANDING_FEATURED_NOTE = 99;
+
+function normalizeName(str){
+  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
 
 let landingTimer = null;
 
@@ -5357,6 +5378,18 @@ function harmonizeSurnameSizes(cardEls){
   });
 }
 
+// Cherche dans l'effectif l'entrée (toutes saisons confondues) portant ce
+// nom de famille, en retenant la saison à la meilleure note si plusieurs
+// correspondent - puis renvoie une copie avec la note forcée au maximum
+// pour l'affichage de la carte d'accueil (voir LANDING_FEATURED_NOTE).
+function findFeaturedPlayer(roster, surname){
+  const target = normalizeName(surname);
+  const matches = roster.filter(p => normalizeName(p.nom) === target);
+  if(!matches.length) return null;
+  const best = matches.reduce((a,b) => (b.note > a.note ? b : a));
+  return { ...best, note: LANDING_FEATURED_NOTE };
+}
+
 function pickHeroPlayers(club){
   const roster = CLUB_ROSTERS[club.id];
   if(!roster || !roster.length){
@@ -5367,14 +5400,26 @@ function pickHeroPlayers(club){
   const sorted = [...roster].sort((a,b)=>b.note-a.note);
   const picks = [];
   const seen = new Set();
-  for(const p of sorted){
-    const key = p.prenom+'|'+p.nom;
-    if(seen.has(key)) continue;
+  const addPick = p => {
+    if(!p) return false;
+    const key = normalizeName(p.prenom)+'|'+normalizeName(p.nom);
+    if(seen.has(key)) return false;
     seen.add(key);
     picks.push(p);
-    if(picks.length===2) break;
+    return true;
+  };
+
+  // Duo mis en avant en priorité pour ce club, s'il est défini et trouvé
+  // dans l'effectif chargé.
+  const featured = LANDING_FEATURED_PLAYERS[club.id] || [];
+  featured.forEach(surname => addPick(findFeaturedPlayer(roster, surname)));
+
+  // Complète (ou remplace, si aucun duo défini) avec les mieux notés du club.
+  for(const p of sorted){
+    if(picks.length === 2) break;
+    addPick(p);
   }
-  return picks;
+  return picks.length === 2 ? picks : [null, null];
 }
 
 function paintHeroCards(club, animate){
