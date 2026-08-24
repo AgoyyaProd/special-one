@@ -2294,6 +2294,15 @@ button{ font-family:inherit; cursor:pointer; }
   padding:20px 0;
 }
 
+/* Sur très grand écran (2200px+, ex: 2560x1440), les cartes de la main de
+   draft restaient figées à leur taille de base (144px) alors que le reste
+   de la mise en page (terrain, panneaux latéraux) profite déjà de tout
+   l'espace disponible - elles paraissaient donc proportionnellement
+   petites. Uniquement la taille des cartes change ici, rien d'autre. */
+@media (min-width: 2200px){
+  .hand-card, .hand-card .pc-card{ width:190px; }
+}
+
 .gm-toast{
   position:fixed;
   bottom:28px; left:50%;
