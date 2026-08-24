@@ -1081,6 +1081,20 @@ button{ font-family:inherit; cursor:pointer; }
   margin:0 auto;
   padding:32px var(--gutter) 60px;
 }
+/* Le contenu du direct est parfois très court (début de match) : sans ça,
+   le footer suit le flux normal juste après .live-shell et laisse un grand
+   vide sous lui (le reste du min-height de l'écran), qui se résorbe au fil
+   du match à mesure que le ticker se remplit - donnant l'impression que le
+   footer "bouge"/rétrécit selon les événements. On ancre donc le footer en
+   bas du viewport quand le contenu est court, tout en le laissant suivre
+   normalement le contenu quand celui-ci dépasse la hauteur de l'écran. */
+#screen-live-match.screen.active{
+  display:flex;
+  flex-direction:column;
+}
+#screen-live-match [data-footer-slot]{
+  margin-top:auto;
+}
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
 #screen-live-match.euro-ecl{ --club-accent:var(--zone-ecl); --club-primary:var(--zone-ecl); }
@@ -2374,7 +2388,7 @@ button{ font-family:inherit; cursor:pointer; }
   .hero-copy p{ margin-left:auto; margin-right:auto; }
   .hero-cards-wrap{ padding:8px 0 0; }
   .club-grid{ grid-template-columns:repeat(3,1fr); }
-  .account-shell{ padding:32px var(--gutter) 48px; height:auto; overflow-y:visible; }
+  .account-shell{ padding:32px var(--gutter) 48px; min-height:auto; }
   .account-stats{ grid-template-columns:repeat(3, 1fr); gap:10px; }
 }
 
@@ -2480,8 +2494,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:900px;
   margin:0 auto;
   padding:40px var(--gutter) 60px;
-  height:calc(100vh - var(--header-h));
-  overflow-y:auto;
+  min-height:calc(100vh - var(--header-h));
 }
 .account-header{
   display:flex;
@@ -13245,9 +13258,18 @@ async function initAuth(){
     // Session déjà active au chargement (retour sur le site) : si le
     // compte a une sauvegarde plus récente que celle de ce navigateur
     // (partie continuée depuis un autre appareil), on bascule dessus.
+    // Important : on capture "on est sur l'accueil" AVANT reconcile -
+    // reconcileGameStateAfterLogin() applique le gagnant via
+    // applyGameStateSnapshot(), qui écrase state.screen avec la valeur
+    // sauvegardée. Tester state.screen APRÈS l'appel donnait donc presque
+    // toujours "faux" (même en étant visuellement sur l'accueil), ce qui
+    // pouvait soit rediriger l'utilisateur sans prévenir depuis l'accueil,
+    // soit - selon l'écran resté affiché - ne jamais relancer le bon
+    // rendu et laisser la sauvegarde comme "non restaurée" à l'écran.
+    const wasOnLanding = state.screen === 'landing';
     const winner = await reconcileGameStateAfterLogin();
     if(winner && (winner.season || winner.club)){
-      if(state.screen === 'landing'){
+      if(wasOnLanding){
         // L'utilisateur est sur l'écran de choix (Continuer / Commencer) -
         // on ne bascule pas automatiquement, on se contente de rafraîchir
         // ce que "Continuer" reprendra au cas où le compte a une
@@ -13351,7 +13373,15 @@ const PENDING_STATE_KEY = 'specialone_pending_game_state';
 // Vérifie s'il existe une sauvegarde reprenable SANS l'appliquer à state -
 // utilisé pour décider d'afficher "Continuer" sur l'écran d'accueil, sans
 // polluer l'état si le joueur choisit finalement "Commencer" à la place.
+// Priorité à la partie réellement chargée en mémoire (state.club/state.season) :
+// si l'onglet a encore une partie active, "Continuer" doit apparaître même si
+// la sauvegarde locale n'a pas encore été écrite (débounce de
+// scheduleSaveSnapshot) ou a été effacée entre-temps (ex : navigation vers
+// l'accueil) - state reste la source de vérité la plus à jour tant que
+// l'onglet n'a pas été rechargé. On ne retombe sur localStorage que si
+// aucune partie n'est chargée en mémoire (page tout juste rechargée/ouverte).
 function peekPendingSave(){
+  if(state.club || state.season) return snapshotGameState();
   const raw = localStorage.getItem(PENDING_STATE_KEY);
   if(!raw) return null;
   try {
@@ -13898,7 +13928,21 @@ function unlockAchievement(id){
 function bumpTieredCounter(counterKey, delta){
   delta = (delta === undefined) ? 1 : delta;
   state.careerStats[counterKey] = (state.careerStats[counterKey]||0) + delta;
-  const value = state.careerStats[counterKey];
+  checkTieredThresholds(counterKey);
+}
+// Relève le plancher d'un compteur de carrière SANS l'incrémenter (utilisé
+// pour le rattrapage rétroactif ci-dessous, où l'on reconstitue une valeur
+// totale à partir de l'historique déjà en base plutôt que d'ajouter delta
+// par delta) - ne fait jamais redescendre le compteur, pour ne jamais
+// effacer une progression déjà suivie en direct par bumpTieredCounter.
+function raiseTieredCounterFloor(counterKey, minValue){
+  const current = state.careerStats[counterKey] || 0;
+  if(minValue <= current) return;
+  state.careerStats[counterKey] = minValue;
+  checkTieredThresholds(counterKey);
+}
+function checkTieredThresholds(counterKey){
+  const value = state.careerStats[counterKey] || 0;
   ACHIEVEMENT_DEFS.filter(a=>a.kind==='tiered' && a.counter===counterKey).forEach(def=>{
     const prog = state.achievementProgress[def.id] || { tier:0 };
     let newTier = prog.tier || 0;
@@ -13945,9 +13989,58 @@ function checkCoachTotalAndSpecialOne(){
 // Recalcule les succès qui nécessitent de comparer plusieurs saisons entre
 // elles (palmarès entier) à partir des lignes career_history du joueur.
 // Appelée à chaque affichage du Palmarès.
+// Rattrapage rétroactif des succès à partir de l'historique déjà en base
+// (career_history) - indispensable pour tout compte ayant accumulé des
+// saisons AVANT l'introduction du système de succès dans le jeu : le suivi
+// en direct (unlockAchievement/bumpTieredCounter, voir trackMatchResult et
+// recordSeasonIfNeeded) ne s'est déclenché qu'à partir du moment où ce code
+// existe, donc une très longue carrière déjà bien avancée pouvait n'avoir
+// presque aucun succès malgré des dizaines de saisons et de trophées déjà
+// enregistrés - ce n'était pas une perte de données, juste un suivi qui
+// n'avait jamais tourné sur cet historique. On reconstitue ici tout ce qui
+// est déductible des lignes déjà stockées ; idempotent (unlockAchievement
+// et raiseTieredCounterFloor ne redescendent/re-déclenchent jamais rien).
 function evaluateHistoryAchievements(history){
   if(!history || !history.length) return;
-  const sorted = history.slice().sort((a,b)=>a.season_number-b.season_number);
+  // IMPORTANT : trier par (career_number, season_number), jamais par
+  // season_number seul - season_number repart à 1 à chaque nouvelle
+  // carrière (voir endCurrentCareer), donc un tri sur ce seul champ
+  // mélangeait la chronologie dès qu'un compte avait plusieurs carrières,
+  // et pouvait fausser les succès basés sur une série (ex: 3 titres de
+  // suite qui ne l'étaient pas vraiment une fois remis dans l'ordre).
+  const sorted = history.slice().sort((a,b)=>
+    (a.career_number||1) - (b.career_number||1) || a.season_number - b.season_number
+  );
+
+  let anyTrophyThisSeason = false;
+  sorted.forEach(r=>{
+    const played = (r.wins||0) + (r.draws||0) + (r.losses||0);
+    const hasEuroWin = !!(r.euro_result && r.euro_result.won);
+    const hasSuperCupWin = !!(r.euro_result && r.euro_result.superCupWon);
+    if(r.is_champion || r.cup_won || r.domestic_super_cup_won || hasEuroWin || hasSuperCupWin){
+      anyTrophyThisSeason = true;
+    }
+    if(played > 0 && r.losses === 0) unlockAchievement('invincible_simple');
+    if(played > 0 && r.wins === played) unlockAchievement('saison_parfaite');
+    if(r.is_champion && r.cup_won && hasEuroWin) unlockAchievement('le_triple');
+    if(hasEuroWin){
+      unlockAchievement('roi_deurope');
+      if(r.euro_result.tier === 'el') unlockAchievement('vainqueur_europa_league');
+      if(r.euro_result.tier === 'ecl') unlockAchievement('vainqueur_ligue_conference');
+    }
+  });
+  if(anyTrophyThisSeason) unlockAchievement('premier_trophee');
+
+  // Compteurs à palier : on ne peut reconstituer ici qu'un plancher -
+  // wins/draws/losses de l'historique ne couvrent que le championnat
+  // (coupe et Europe, match par match, ne sont pas stockés séparément),
+  // donc matchesPlayed/matchesWon repartent au moins de là sans jamais
+  // redescendre en dessous de ce que le suivi en direct a déjà compté.
+  const leaguePlayed = sorted.reduce((n,r)=> n + (r.wins||0) + (r.draws||0) + (r.losses||0), 0);
+  const leagueWon = sorted.reduce((n,r)=> n + (r.wins||0), 0);
+  raiseTieredCounterFloor('matchesPlayed', leaguePlayed);
+  raiseTieredCounterFloor('matchesWon', leagueWon);
+  raiseTieredCounterFloor('trophiesWon', countTrophies(sorted));
 
   const wonTiers = new Set(sorted.filter(r=>r.euro_result && r.euro_result.won).map(r=>r.euro_result.tier));
   if(wonTiers.has('cl') && wonTiers.has('el') && wonTiers.has('ecl')) unlockAchievement('empereur_deurope');
@@ -13958,6 +14051,8 @@ function evaluateHistoryAchievements(history){
     bestStreak = Math.max(bestStreak, streak);
   });
   if(bestStreak >= 3) unlockAchievement('jamais_deux_sans_trois');
+
+  checkCoachTotalAndSpecialOne();
 }
 
 function averageLeagueStrengthExcludingMe(){
@@ -14266,12 +14361,19 @@ async function renderCareersSummary(){
   el.innerHTML = `<div class="hand-empty">Chargement…</div>`;
   const { data: history, error } = await sbClient
     .from('career_history')
-    .select('career_number, club, is_champion, cup_won, domestic_super_cup_won, euro_result')
+    .select('career_number, season_number, club, is_champion, cup_won, domestic_super_cup_won, euro_result, wins, draws, losses')
     .eq('user_id', state.session.user.id);
   if(error || !history || !history.length){
     el.innerHTML = `<p class="profile-field-hint" style="margin:0">Aucune carrière terminée pour l'instant.</p>`;
     return;
   }
+  // La page Mon compte est un point d'entrée courant qui n'ouvre pas
+  // forcément le Palmarès dans la foulée - le rattrapage rétroactif des
+  // succès (voir evaluateHistoryAchievements) doit donc aussi tourner ici,
+  // pas uniquement depuis Palmarès/la fin de saison, sinon un compte
+  // n'ayant jamais visité l'un ou l'autre ne se met jamais à jour.
+  evaluateHistoryAchievements(history);
+  renderAchievementsGrid();
   const byCareer = {};
   history.forEach(r=>{
     const cn = r.career_number || 1;
@@ -14393,7 +14495,11 @@ async function renderPalmaresScreen(){
 document.getElementById('btn-home').addEventListener('click', ()=>{
   if(state.screen !== 'landing'){
     stopLiveMatchTimer();
-    localStorage.removeItem(PENDING_STATE_KEY);
+    // Un simple retour à l'accueil n'est jamais un abandon de carrière (voir
+    // "Mettre un terme à la carrière" pour ça, la seule action réellement
+    // destructrice) : la partie reste chargée en mémoire (state.club/
+    // state.season) et "Continuer" doit pouvoir la reprendre immédiatement,
+    // qu'il y ait un compte ou non - voir peekPendingSave().
     showScreen('landing');
     renderLanding();
   }
@@ -14769,7 +14875,11 @@ document.getElementById('profile-password').addEventListener('keydown', (e)=>{
 });
 document.getElementById('btn-resume-save').addEventListener('click', ()=>{
   stopLandingRotation();
-  const snap = restoreGameStateSnapshot();
+  // La partie est peut-être déjà chargée en mémoire (ex: l'onglet n'a
+  // jamais été rechargé depuis un clic sur "Ago") - dans ce cas on route
+  // directement dessus plutôt que de repasser par localStorage, qui peut
+  // être vide/périmé à cet instant (voir peekPendingSave).
+  const snap = (state.club || state.season) ? snapshotGameState() : restoreGameStateSnapshot();
   routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
 });
 document.getElementById('btn-start').addEventListener('click', ()=>{
