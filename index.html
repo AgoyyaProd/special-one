@@ -5347,10 +5347,6 @@ const LANDING_FEATURED_PLAYERS = {
   juv:  [],
   fcb2: []
 };
-// Note affichée sur la carte d'accueil pour ce duo mis en avant - volontairement
-// maximale ("note maxi"), sans toucher à la note réelle du joueur dans le CSV
-// (qui reste utilisée telle quelle partout ailleurs : draft, effectifs, etc.).
-const LANDING_FEATURED_NOTE = 99;
 
 function normalizeName(str){
   return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -5379,15 +5375,13 @@ function harmonizeSurnameSizes(cardEls){
 }
 
 // Cherche dans l'effectif l'entrée (toutes saisons confondues) portant ce
-// nom de famille, en retenant la saison à la meilleure note si plusieurs
-// correspondent - puis renvoie une copie avec la note forcée au maximum
-// pour l'affichage de la carte d'accueil (voir LANDING_FEATURED_NOTE).
+// nom de famille, et renvoie sa meilleure saison (note la plus haute) telle
+// quelle - "note maxi" = le pic de carrière du joueur, pas une note forcée.
 function findFeaturedPlayer(roster, surname){
   const target = normalizeName(surname);
   const matches = roster.filter(p => normalizeName(p.nom) === target);
   if(!matches.length) return null;
-  const best = matches.reduce((a,b) => (b.note > a.note ? b : a));
-  return { ...best, note: LANDING_FEATURED_NOTE };
+  return matches.reduce((a,b) => (b.note > a.note ? b : a));
 }
 
 function pickHeroPlayers(club){
