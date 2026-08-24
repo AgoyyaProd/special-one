@@ -9602,13 +9602,8 @@ function checkImmediateEventImpact(fx, roundIdx, newEventFired){
   const check = state._pendingImpactCheck;
   if(!check || check.roundIdx !== roundIdx) return;
   state._pendingImpactCheck = null;
-  if(newEventFired || !fx) return; // résultat encore masqué par une nouvelle décision en attente
-  const won = (fx.home===state.club.id && fx.hg>fx.ag) || (fx.away===state.club.id && fx.ag>fx.hg);
-  const lost = (fx.home===state.club.id && fx.hg<fx.ag) || (fx.away===state.club.id && fx.ag<fx.hg);
-  const verdict = won ? 'décision payante ✅' : lost ? 'décision qui n\'a pas payé ❌' : 'résultat mitigé ➖';
-  const homeName = clubNameById(fx.home);
-  const awayName = clubNameById(fx.away);
-  toast(`${check.title} : ${verdict} (${homeName} ${fx.hg} - ${fx.ag} ${awayName})`);
+  // Le toast de verdict ("décision payante / qui n'a pas payé") a été retiré :
+  // on conserve uniquement le nettoyage de l'état en attente.
 }
 
 // Se déclenche après qu'une journée a été bouclée. Renvoie true si un
