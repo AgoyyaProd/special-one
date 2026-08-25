@@ -548,6 +548,15 @@ button{ font-family:inherit; cursor:pointer; }
   background:var(--text);
 }
 .landing-cta-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+.landing-cta-row > button{
+  /* Sans ça, le bouton "Continuer" refuse de se réduire en dessous de la
+     largeur de sa sous-ligne (ex: "Stade Rennais - Draft en cours") - même
+     comportement par défaut des enfants flex déjà rencontré ailleurs (voir
+     .profile-field) - et les deux boutons passaient à la ligne sur mobile
+     faute de place, alors qu'ils tiennent très bien côte à côte une fois
+     le texte autorisé à s'enrouler sur 2 lignes dans un bouton plus étroit. */
+  min-width:0;
+}
 .gm-btn-secondary{
   font-family:var(--bn-regular);
   font-size:clamp(15px, 2vw, 22px);
@@ -1079,7 +1088,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 
 .live-shell{
-  max-width:920px;
+  max-width:1100px;
   margin:0 auto;
   padding:32px var(--gutter) 60px;
 }
@@ -2426,13 +2435,28 @@ button{ font-family:inherit; cursor:pointer; }
   .landing-shell{ padding:0 var(--gutter); }
   .hero{ padding:36px 0 24px; gap:24px; }
   .hero-copy p{ font-size:14px; max-width:100%; }
+  /* "Continuer"/"Commencer" côte à côte plutôt qu'empilés - padding et
+     police réduits pour ce duo précis (scopé à .landing-cta-row, ne touche
+     pas les .gm-btn-primary/.gm-btn-secondary utilisés ailleurs). */
+  .landing-cta-row{ flex-wrap:nowrap; gap:8px; }
+  .landing-cta-row .gm-btn-primary{
+    padding-left:14px; padding-right:14px;
+    font-size:14px;
+  }
+  #btn-resume-save-desc{ font-size:10px; }
   .hero-cards-wrap{ gap:24px; }
   .hero-card-slot:nth-child(2){ margin-top:26px; }
 
   .select-wrap{ padding:32px var(--gutter) 60px; }
   .select-title{ font-size:24px; }
   .league-grid{ gap:8px; margin-bottom:32px; }
-  .league-pill{ padding:10px 16px; font-size:13px; gap:8px; flex:1 1 auto; justify-content:center; }
+  /* Logos seuls sur mobile - avec le nom en plus (ex: "Bundesliga",
+     "Premier League"), la grille à 5 colonnes égales n'a jamais assez de
+     place et débordait de l'écran (Serie A coupé à droite) : le texte,
+     non compressible par défaut dans une grille, forçait chaque colonne
+     bien au-delà de sa part équitable. */
+  .league-pill{ padding:10px 4px; font-size:13px; gap:0; min-width:0; }
+  .league-pill span{ display:none; }
   .league-logo-wrap{ width:30px; height:30px; padding:4px; }
   .club-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
   .club-tile{ padding:18px 10px; gap:8px; }
@@ -2443,7 +2467,22 @@ button{ font-family:inherit; cursor:pointer; }
   .game-wrap{ padding:14px 14px 24px; }
   .game-grid{ gap:14px; }
   .col-left, .col-right{ gap:14px; }
-  .col-center{ height:46vh; min-height:320px; }
+  .col-center{ height:auto; }
+  /* Le terrain était écrasé sur mobile : .col-center était contraint à
+     46vh, partagé entre le terrain, les remplaçants ET la main de draft -
+     sur un petit écran ça ne laissait que quelques dizaines de pixels au
+     terrain lui-même (mesuré : ~67px de haut), tassant tous les maillots
+     les uns sur les autres. On repasse en hauteur naturelle (comme
+     .game-wrap/.game-grid juste au-dessus, qui le sont déjà) et on donne
+     au terrain un ratio fixe basé sur sa largeur réelle (généreuse) plutôt
+     que sur une hauteur de conteneur artificiellement comprimée - tout le
+     reste (remplaçants, main) suit en dessous, la page défile normalement.
+     !important nécessaire pour l'emporter sur le width/height en pixels
+     posés en ligne par sizePitch() (JS, utilisé pour le dimensionnement
+     desktop) - un des deux mécanismes doit gagner explicitement. */
+  .pitch-block{ flex:none; }
+  .pitch{ width:100% !important; height:auto !important; aspect-ratio:1000/453; }
+  .pitch.pelouse-pending{ aspect-ratio:680/920; }
   .panel{ padding:12px; border-radius:var(--r-md); }
   .club-box .club-crest{ width:40px; height:40px; }
   .club-box-name{ font-size:16px; }
@@ -2479,6 +2518,23 @@ button{ font-family:inherit; cursor:pointer; }
   .league-switch-btn{ font-size:9.5px; padding:5px 8px; }
 
   .account-header{ flex-direction:column; align-items:flex-start; gap:12px; }
+  /* La page Panthéon n'avait aucune adaptation mobile : la barre latérale
+     de 240px fixe (jamais compressible, flex-shrink:0) ne laissait quasi
+     aucune place à la zone de résultats à côté, dont le texte se
+     retrouvait écrasé/superposé à la barre. On empile verticalement en
+     dessous de cette largeur plutôt que de forcer une colonne étroite. */
+  .pantheon-shell{ flex-direction:column; gap:24px; padding:24px var(--gutter) 48px; min-height:auto; }
+  .pantheon-sidebar{ width:100%; }
+  .pantheon-divider{ display:none; }
+  /* Les sous-menus (championnat/club) s'ouvrent normalement à droite de la
+     barre latérale (position:absolute, left:calc(100% + 10px)) - sur une
+     barre latérale pleine largeur, ça les pousserait hors de l'écran. */
+  .pantheon-submenu.pf-dropdown-menu{ left:0; top:calc(100% + 8px); }
+  /* Sélecteur plus spécifique que la règle de base .pantheon-submenu
+     .pf-dropdown-menu (définie plus loin dans la feuille de style, donc
+     gagnante à spécificité égale) - nécessaire pour que le repositionnement
+     mobile ci-dessus l'emporte réellement. */
+  #pf-league-menu, #pf-club-menu{ left:0; top:calc(100% + 8px); }
   .account-title{ font-size:24px; }
   .account-stats{ grid-template-columns:1fr 1fr; }
   .account-stats .stat-tile:last-child{ grid-column:1 / -1; }
@@ -2548,8 +2604,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:40px var(--gutter) 60px;
-  height:calc(100vh - var(--header-h));
-  overflow-y:auto;
+  min-height:calc(100vh - var(--header-h));
   display:flex;
   gap:36px;
 }
@@ -5517,6 +5572,18 @@ function stopLandingRotation(){
 // ============================================================
 // SELECT (league -> club)
 // ============================================================
+// Un club peut être marqué "playable" dans la liste statique ci-dessus
+// alors que son fichier CSV d'effectif n'a en réalité pas pu être chargé au
+// démarrage (fichier manquant/vide/cassé côté déploiement, voir
+// loadClubRosterCsv qui échoue silencieusement et renvoie null dans ce
+// cas) - sans cette vérification, un tel club restait sélectionnable et
+// menait à une draft d'apparence normale mais totalement vide (aucune
+// carte à piocher), sans le moindre message pour l'utilisateur (voir
+// startDraft, qui gère déjà ce cas côté relance mais pas côté sélection).
+function clubIsSelectable(c){
+  return c.playable !== false && !!(CLUB_ROSTERS[c.id] && CLUB_ROSTERS[c.id].length);
+}
+
 function renderSelect(){
   // Contrairement à renderGame/renderSeason, cet écran n'a pas toujours
   // déclenché de sauvegarde automatique - or il peut représenter un moment
@@ -5561,13 +5628,14 @@ function renderSelect(){
   // égal, seulement vers un club plus modeste (voir startFreeAgentClubSearch).
   const sackedThreshold = state.awaitingNewClubAfterSacking ? state.sackedFromClubStrength : null;
   clubGrid.innerHTML = clubs.map(c=>{
-    const tooStrong = sackedThreshold !== null && c.playable !== false && estimateClubStrength(c) >= sackedThreshold;
+    const selectable = clubIsSelectable(c);
+    const tooStrong = sackedThreshold !== null && selectable && estimateClubStrength(c) >= sackedThreshold;
     return `
-    <button class="club-tile ${state.club && state.club.id===c.id?'is-active':''} ${c.playable===false?'is-unplayable':''} ${tooStrong?'is-too-strong':''}" data-id="${c.id}" ${(c.playable===false||tooStrong)?'aria-disabled="true"':''}>
+    <button class="club-tile ${state.club && state.club.id===c.id?'is-active':''} ${!selectable?'is-unplayable':''} ${tooStrong?'is-too-strong':''}" data-id="${c.id}" ${(!selectable||tooStrong)?'aria-disabled="true"':''}>
       <div class="club-crest" style="background:${c.logo?'transparent':'color-mix(in srgb, '+c.primary+' 55%, #000 45%)'}">
         ${c.logo ? `<img src="${(crestBlobCache[c.logo] && typeof crestBlobCache[c.logo]==='string')?crestBlobCache[c.logo]:c.logo}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : c.trigram}
       </div>
-      <div class="club-name">${c.playable===false ? 'Bientôt disponible' : c.name}</div>
+      <div class="club-name">${!selectable ? 'Bientôt disponible' : c.name}</div>
       ${tooStrong ? '<div class="club-unplayable-tag">Hors de portée</div>' : ''}
     </button>
   `;
@@ -5575,7 +5643,7 @@ function renderSelect(){
   clubGrid.querySelectorAll('.club-tile').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const c = clubs.find(c=>c.id===btn.dataset.id);
-      if(!c || c.playable === false) return; // pas encore de base de données joueurs - non sélectionnable
+      if(!c || !clubIsSelectable(c)) return; // pas encore de base de données joueurs (ou CSV pas chargé) - non sélectionnable
       if(sackedThreshold !== null && estimateClubStrength(c) >= sackedThreshold) return; // hors de portée après un licenciement
       // Après un licenciement, choisir un club ici reprend directement la
       // carrière en cours (effectif hérité + mercato), comme une offre de
@@ -6995,7 +7063,18 @@ function confirmEndCareer(){
   document.getElementById('season-event-overlay').style.display = 'flex';
 }
 
-function endCurrentCareer(){
+// Remet l'état de partie à zéro (nouvelle carrière) - factorisé pour être
+// appelé aussi bien depuis "Mettre un terme à la carrière" (avec
+// confirmation, toast, retour à l'accueil) que depuis le bouton "Commencer"
+// de l'accueil (voir plus bas) : sans ça, choisir "Commencer" alors qu'une
+// partie déjà chargée en mémoire (ex: on vient de cliquer "Continuer" puis
+// de revenir en arrière) laissait state.season/state.club de l'ancienne
+// partie en place - le nouveau club choisi entrait alors dans l'écran de
+// draft avec ce vieux state.season toujours défini, qui le faisait passer
+// à tort pour une simple consultation d'effectif en cours de saison
+// (voir renderGame -> midSeasonView) plutôt qu'une draft neuve : aucune
+// carte n'était distribuée, l'écran restait vide.
+function resetToFreshCareer(){
   // La prochaine saison jouée démarrera sous un nouveau numéro de
   // carrière - l'historique déjà enregistré en base reste inchangé, il se
   // retrouve simplement regroupé sous "Carrière N" (voir career_number).
@@ -7064,7 +7143,10 @@ function endCurrentCareer(){
   root.removeProperty('--club-primary');
   root.removeProperty('--club-secondary');
   root.removeProperty('--club-accent');
+}
 
+function endCurrentCareer(){
+  resetToFreshCareer();
   showScreen('landing');
   renderLanding();
   toast('Votre carrière a été archivée - à vous de commencer une nouvelle histoire !');
@@ -14938,10 +15020,54 @@ document.getElementById('btn-resume-save').addEventListener('click', ()=>{
   const snap = (state.club || state.season) ? snapshotGameState() : restoreGameStateSnapshot();
   routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
 });
+// Confirmation avant d'écraser une carrière déjà en cours (voir
+// resetToFreshCareer) quand on clique "Commencer" depuis l'accueil alors
+// qu'une partie est encore chargée en mémoire - réutilise le même overlay
+// que "Mettre un terme à la carrière" (#season-event-overlay), qui est un
+// élément global, pas propre à l'écran de saison.
+function confirmStartNewCareer(onConfirm){
+  const titleEl = document.getElementById('season-event-title');
+  titleEl.textContent = 'Commencer une nouvelle carrière ?';
+  titleEl.classList.remove('is-rare');
+  document.getElementById('season-event-context').style.display = 'none';
+  const clubLabel = state.club ? state.club.name : 'votre carrière actuelle';
+  document.getElementById('season-event-text').textContent =
+    `Une carrière est déjà en cours (${clubLabel}). En commencer une nouvelle archivera celle-ci dans votre Palmarès (les saisons déjà terminées restent enregistrées), et vous repartirez de zéro avec un nouveau coach - le choix de pelouse et la draft complète compris.`;
+  const optsEl = document.getElementById('season-event-options');
+  optsEl.innerHTML = `
+    <button class="live-decision-option" data-key="confirm">Commencer une nouvelle carrière</button>
+    <button class="live-decision-option" data-key="cancel">Annuler</button>
+  `;
+  optsEl.querySelector('[data-key="confirm"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+    onConfirm();
+  });
+  optsEl.querySelector('[data-key="cancel"]').addEventListener('click', ()=>{
+    document.getElementById('season-event-overlay').style.display = 'none';
+  });
+  document.getElementById('season-event-overlay').style.display = 'flex';
+}
+
 document.getElementById('btn-start').addEventListener('click', ()=>{
-  stopLandingRotation();
-  showScreen('select');
-  renderSelect();
+  const proceed = ()=>{
+    stopLandingRotation();
+    // Si une partie était déjà chargée en mémoire (ex: on vient de cliquer
+    // "Continuer" puis de revenir en arrière sans recharger la page), il
+    // faut repartir d'une ardoise vierge avant la sélection de club - sinon
+    // le nouveau club choisi entre dans l'écran de draft avec l'ancien
+    // state.season toujours défini, qui le fait passer à tort pour une
+    // simple consultation d'effectif en cours de saison (aucune carte
+    // distribuée, écran vide).
+    if(state.club || state.season) resetToFreshCareer();
+    showScreen('select');
+    renderSelect();
+  };
+  if(state.club || state.season){
+    stopLandingRotation();
+    confirmStartNewCareer(proceed);
+  } else {
+    proceed();
+  }
 });
 document.getElementById('btn-goto-game').addEventListener('click', ()=>{
   if(!state.club) return;
