@@ -327,6 +327,24 @@ h1{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
   :root{ --gutter:clamp(40px, 6vw, 120px); }
 }
 
+/* 2560px de large = résolution de référence ("100%", zoom:1, taille de
+   conception de toute l'interface - tuiles, polices, marges...). En
+   dessous, on réduit ce zoom en continu jusqu'à 1101px, pour qu'un écran
+   plus petit affiche la MÊME mise en page proportionnellement réduite
+   plutôt que la même taille de contenu avec juste moins de marge autour
+   (l'effet "ça grossit/rétrécit selon l'écran" demandé). Sous 1101px, le
+   zoom est désactivé : les breakpoints mobile/tablette dédiés plus bas
+   dans cette feuille (déjà ajustés à la main pour ces tailles réelles,
+   pas une version réduite du design 2560px) prennent le relais tels quels.
+   Appliqué en JS (voir applyDesktopZoom() plus bas) plutôt qu'en pur CSS :
+   `zoom:calc(100vw / 2560)` sur <html> crée une dépendance circulaire
+   (100vw dépend potentiellement du zoom lui-même) que les navigateurs
+   n'évaluent pas de façon fiable. `zoom` (contrairement à un
+   transform:scale()) s'applique nativement aux éléments position:fixed
+   (header, modales) sans bidouillage de compensation de largeur/hauteur -
+   pris en charge par tous les navigateurs majeurs, Firefox inclus depuis
+   la version 126 (2024). */
+
 *{ box-sizing:border-box; }
 
 body{
@@ -4696,6 +4714,32 @@ function crestClub(club){
 function primeCrestCache(){
   Object.values(LEAGUES).forEach(list => list.forEach(c => preloadCrest(c.logo)));
 }
+
+// ------------------------ DESKTOP REFERENCE ZOOM ------------------------
+// 2560px = résolution de conception de référence (zoom 1 = taille "native").
+// En dessous, jusqu'à 1101px, on réduit le zoom en continu pour que
+// l'interface entière (tuiles, polices, marges) rétrécisse proportionnellement
+// avec l'écran plutôt que de rester à taille fixe avec juste moins de marge
+// autour. Sous 1101px, on retire le zoom : les breakpoints mobile/tablette
+// dédiés plus bas dans la feuille de style (ajustés à la main pour ces
+// tailles réelles, pas une version réduite du design 2560px) reprennent la
+// main sans interférence.
+// Fait en JS plutôt qu'en CSS pur (`zoom:calc(100vw / 2560)` sur <html>) :
+// cette formule crée une dépendance circulaire (100vw peut dépendre du
+// zoom lui-même) que les navigateurs n'évaluent pas de façon fiable.
+const DESKTOP_ZOOM_REFERENCE_WIDTH = 2560;
+const DESKTOP_ZOOM_MIN_WIDTH = 1101;
+function applyDesktopZoom(){
+  const w = window.innerWidth;
+  if(w < DESKTOP_ZOOM_MIN_WIDTH){
+    document.documentElement.style.zoom = '';
+    return;
+  }
+  const zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
+  document.documentElement.style.zoom = zoom;
+}
+applyDesktopZoom();
+window.addEventListener('resize', applyDesktopZoom);
 
 // ---------------------------- STATE ----------------------------
 const state = {
