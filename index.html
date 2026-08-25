@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Special One - Créez le club ultime</title>
 
+<!-- Favicon adaptatif : l'icône choisie doit contraster avec le thème du
+     navigateur, pas avec celui du site - donc à l'inverse du mode système
+     (fond clair -> logo foncé, fond sombre -> logo clair). Fichiers sur la
+     branche main du repo, à la racine à côté d'index.html. -->
+<link rel="icon" type="image/svg+xml" href="SpecialOne_Dark.svg" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/svg+xml" href="SpecialOne_Light.svg" media="(prefers-color-scheme: dark)">
+<!-- Repli pour les navigateurs qui ignorent le media sur <link rel="icon"> -->
+<link rel="icon" type="image/svg+xml" href="SpecialOne_Dark.svg">
+
 <link rel="stylesheet" href="https://use.typekit.net/dee3jbl.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
