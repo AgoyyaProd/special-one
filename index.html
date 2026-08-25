@@ -2388,8 +2388,6 @@ button{ font-family:inherit; cursor:pointer; }
   .hero-copy p{ margin-left:auto; margin-right:auto; }
   .hero-cards-wrap{ padding:8px 0 0; }
   .club-grid{ grid-template-columns:repeat(3,1fr); }
-  .account-shell{ padding:32px var(--gutter) 48px; min-height:auto; }
-  .account-stats{ grid-template-columns:repeat(3, 1fr); gap:10px; }
 }
 
 /* ---- Phone (<=640px) ---- */
@@ -2455,7 +2453,6 @@ button{ font-family:inherit; cursor:pointer; }
   .league-switch{ gap:4px; margin-bottom:10px; }
   .league-switch-btn{ font-size:9.5px; padding:5px 8px; }
 
-  .account-shell{ padding:20px var(--gutter) 40px; }
   .account-header{ flex-direction:column; align-items:flex-start; gap:12px; }
   .account-title{ font-size:24px; }
   .account-stats{ grid-template-columns:1fr 1fr; }
@@ -2493,7 +2490,12 @@ button{ font-family:inherit; cursor:pointer; }
 .account-shell{
   max-width:900px;
   margin:0 auto;
-  padding:40px var(--gutter) 60px;
+  /* Rembourrage en clamp() plutôt qu'en paliers fixes (40px puis 32px puis
+     20px à chaque media query) : sans ça, la page "sautait" visiblement en
+     traversant les seuils de largeur (1100px, 640px), même entre deux
+     résolutions de bureau très proches (1920x1080 vs un laptop 1366px par
+     ex). Une seule formule continue du mobile au très grand écran. */
+  padding:clamp(20px, 4vw, 40px) var(--gutter) clamp(40px, 6vw, 60px);
   min-height:calc(100vh - var(--header-h));
 }
 .account-header{
@@ -11060,6 +11062,13 @@ function commitLiveQualifyingLegResult(){
   // Comme n'importe quel autre match joué en direct : compte pour les
   // statistiques/succès (matchs joués, victoires, clean sheet...).
   trackMatchResult(tie[legKey]);
+  // Les succès propres au match en direct (comeback, décisions de fin de
+  // match...) n'étaient pas vérifiés ici, contrairement à tous les autres
+  // types de match joué en direct (championnat, coupe, tours à élimination
+  // européens) - une manche de qualification jouée en direct a pourtant
+  // exactement les mêmes décisions/événements disponibles (lm._maxDeficit,
+  // lm._decisionsThisMatch...), voir startLiveQualifyingLeg ci-dessus.
+  checkLiveMatchAchievements(lm, lm.hg !== lm.ag && (isMyTeamHome(lm) ? lm.hg>lm.ag : lm.ag>lm.hg));
 
   if(legKey === 'leg2'){
     const clubStr = myTeamStrength('euro');
@@ -11713,7 +11722,19 @@ function getDueDomesticSuperCupStep(){
   return !!(sc && sc.stage !== 'done');
 }
 function resolveDueDomesticSuperCupStepBulk(){
-  resolveSuperCupFixturesInstantly(state.domesticSuperCup);
+  const sc = state.domesticSuperCup;
+  // Le trophée d'ouverture (Trophée des Champions, Community Shield...)
+  // n'alimentait jusqu'ici jamais le suivi des succès (matchesPlayed,
+  // premiere_victoire, verrouille...) - ni en instantané ni en direct
+  // (voir aussi commitLiveDomesticSuperCupMatchResult) : trackMatchResult
+  // n'y était tout simplement jamais appelé, contrairement au championnat,
+  // à la coupe nationale et à l'Europe. On capture VOTRE rencontre de
+  // l'étape en cours (si elle n'est pas déjà jouée) avant résolution, pour
+  // pouvoir la faire suivre après coup.
+  const fixtures = sc && sc.stage === 'semis' ? sc.semis : (sc && sc.final ? [sc.final] : []);
+  const myFx = fixtures.find(fx => fx && !fx.played && (fx.home === state.club.id || fx.away === state.club.id));
+  resolveSuperCupFixturesInstantly(sc);
+  if(myFx) trackMatchResult(myFx);
   renderSeason();
 }
 // Ouvre en direct VOTRE rencontre de l'étape en cours (demie ou finale) si
@@ -11765,6 +11786,7 @@ function commitLiveDomesticSuperCupMatchResult(){
   lm.fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (lm.fx.hg > lm.fx.ag ? lm.fx.home : lm.fx.away);
   lm.fx.played = true;
   advanceDomesticSuperCup(sc);
+  trackMatchResult(lm.fx);
   checkLiveMatchAchievements(lm, lm.fx.winner === state.club.id);
   state.liveMatch = null;
   showScreen('season');
@@ -11791,8 +11813,16 @@ function getDueUefaSuperCupStep(){
 }
 function resolveDueUefaSuperCupStepBulk(){
   const fx = state.uefaSuperCupFixture;
+  // Même trou de suivi que le trophée d'ouverture (voir
+  // resolveDueDomesticSuperCupStepBulk) : la Supercoupe d'Europe ne fait
+  // qu'apparaître dans state.currentSeasonEuroWinners.superCupWinner, sans
+  // jamais alimenter matchesPlayed/premiere_victoire/etc. via
+  // trackMatchResult - même en direct (voir
+  // commitLiveUefaSuperCupMatchResult ci-dessous).
+  const amInvolved = !!(fx && (fx.home === state.club.id || fx.away === state.club.id));
   simulateSuperCupFixture(fx);
   applyUefaSuperCupResult(fx);
+  if(amInvolved) trackMatchResult(fx);
   renderSeason();
 }
 function startLiveUefaSuperCupMatchday(){
@@ -11841,6 +11871,7 @@ function commitLiveUefaSuperCupMatchResult(){
   fx.winner = lm.wentToPenalties ? lm.penaltyWinnerId : (fx.hg > fx.ag ? fx.home : fx.away);
   fx.played = true;
   applyUefaSuperCupResult(fx);
+  trackMatchResult(fx);
   checkLiveMatchAchievements(lm, fx.winner === state.club.id);
   state.liveMatch = null;
   showScreen('season');
