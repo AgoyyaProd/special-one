@@ -404,7 +404,9 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
   cursor:pointer;
   transition:opacity .15s ease;
+  flex-shrink:0;
 }
+.gm-logo-text{ white-space:nowrap; }
 .gm-logo:hover{ opacity:.8; }
 .gm-account-btn{
   display:inline-flex;
@@ -426,7 +428,7 @@ button{ font-family:inherit; cursor:pointer; }
   transform:translateY(-2px);
 }
 .gm-account-menu{ position:relative; }
-.gm-header-actions{ display:flex; align-items:center; gap:10px; }
+.gm-header-actions{ display:flex; align-items:center; gap:10px; min-width:0; flex-shrink:1; }
 .gm-account-menu .gm-account-btn{ max-width:180px; }
 .gm-account-menu .gm-account-btn span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gm-account-dropdown{
@@ -1092,6 +1094,16 @@ button{ font-family:inherit; cursor:pointer; }
   display:flex;
   flex-direction:column;
 }
+/* min-width:0 indispensable ici : sans lui, un enfant flex dans un
+   conteneur flex-column garde son min-width:auto par défaut et refuse de
+   se réduire en dessous de la largeur de son propre contenu - ce qui
+   provoquait un débordement horizontal de .live-shell sur mobile
+   (découvert en testant à 375px), invisible sur desktop où il y a
+   toujours assez de place. */
+#screen-live-match.screen.active > *{
+  min-width:0;
+  width:100%;
+}
 #screen-live-match [data-footer-slot]{
   margin-top:auto;
 }
@@ -1123,7 +1135,7 @@ button{ font-family:inherit; cursor:pointer; }
   gap:12px;
   margin-bottom:20px;
 }
-.live-controls-left{ display:flex; align-items:center; gap:12px; }
+.live-controls-left{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; row-gap:8px; }
 .live-speed-group{ display:flex; gap:6px; }
 .live-speed-btn{
   font-family:var(--sans); font-size:12px; font-weight:700;
@@ -2393,12 +2405,17 @@ button{ font-family:inherit; cursor:pointer; }
 /* ---- Phone (<=640px) ---- */
 @media (max-width: 640px){
   :root{ --header-h:60px; }
-  .gm-header-right{ display:none; }
   .season-wrap{ padding:18px var(--gutter) 40px; }
   .season-top{ flex-direction:column; align-items:flex-start; }
   .st-row{ grid-template-columns:22px 1fr 22px 22px 22px 28px 34px 40px; font-size:10.5px; gap:4px; }
   .fx-row{ font-size:12px; }
   .gm-logo{ font-size:19px; gap:8px; }
+  /* Sans ça, "THE SPECIAL ONE" + les 3 boutons du header ne tiennent tout
+     simplement pas sur un téléphone (mesuré : ~515px de contenu requis
+     pour ~360-375px de large réellement disponibles) - le texte du logo
+     passait sur 3 lignes et "Se connecter" se retrouvait coupé hors de
+     l'écran. On garde uniquement l'icône, déjà reconnaissable seule. */
+  .gm-logo-text{ display:none; }
   .howto{ padding:0 var(--gutter) 60px; }
   .howto-title{ margin-bottom:28px; }
   .howto-row{ padding:22px 0; }
@@ -2449,7 +2466,15 @@ button{ font-family:inherit; cursor:pointer; }
   .stat-tile .l{ font-size:8px; }
 
   .gm-header-inner{ padding:0; }
-  .gm-account-btn{ font-size:11px; padding:7px 12px; }
+  .gm-account-btn{ font-size:11px; padding:7px 12px; white-space:nowrap; flex-shrink:0; }
+  /* Filet de sécurité pour les téléphones les plus étroits (~320-360px) où
+     même le logo réduit à sa seule icône + les 3 boutons compactés ne
+     tiennent pas tout à fait : un défilement horizontal discret plutôt
+     qu'un débordement visuel (texte coupé) ou des boutons écrasés/superposés
+     - aucune fonctionnalité cachée, juste un léger swipe si l'écran est
+     vraiment très étroit. */
+  .gm-header-actions{ overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .gm-header-actions::-webkit-scrollbar{ display:none; }
   .league-switch{ gap:4px; margin-bottom:10px; }
   .league-switch-btn{ font-size:9.5px; padding:5px 8px; }
 
@@ -2807,7 +2832,7 @@ button{ font-family:inherit; cursor:pointer; }
   grid-template-columns:1fr 1fr;
   gap:18px;
 }
-.profile-field{ display:flex; flex-direction:column; }
+.profile-field{ display:flex; flex-direction:column; min-width:0; }
 .profile-field-wide{ grid-column:1 / -1; }
 .profile-field label{
   font-family:var(--sans);
@@ -3184,7 +3209,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
   <div class="gm-header">
     <div class="gm-header-inner">
-    <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> THE SPECIAL ONE</div>
+    <div class="gm-logo" id="btn-home" role="button" tabindex="0"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAzMC42LjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA5LjAzIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FscXVlXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDAwIDEwMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLk9tYnJlX3gwMDIwX3BvcnTDqWV7ZmlsbDpub25lO30NCgkuQXJyb25kaXNfeDAwMjBfMsKgcHR7ZmlsbDojRkZGRkZGO3N0cm9rZTojMDAwMDAwO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCgkuTWlyb2lyX3gwMDIwX2R5bmFtaXF1ZcKgWHtmaWxsOm5vbmU7fQ0KCS5CaXNlYXVfeDAwMjBfYWRvdWNpe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQ0KCS5DcsOpcHVzY3VsZXtmaWxsOiNGRkZGRkY7fQ0KCS5GZXVpbGxhZ2VfR1N7ZmlsbDojRkZERDAwO30NCgkuUG9tcGFkb3VyX0dTe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6IzUxQUVFMjt9DQo8L3N0eWxlPg0KPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8xXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMCIgeDI9IjAuNzA3MSIgeTI9IjAuNzA3MSI+DQoJPHN0b3AgIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U2RTZFQiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMTczOCIgc3R5bGU9InN0b3AtY29sb3I6I0UyRTJFNiIvPg0KCTxzdG9wICBvZmZzZXQ9IjAuMzUyIiBzdHlsZT0ic3RvcC1jb2xvcjojRDVENEQ4Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC41MzIzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzBCRkMyIi8+DQoJPHN0b3AgIG9mZnNldD0iMC43MTM5IiBzdHlsZT0ic3RvcC1jb2xvcjojQTRBMkE0Ii8+DQoJPHN0b3AgIG9mZnNldD0iMC44OTQ5IiBzdHlsZT0ic3RvcC1jb2xvcjojODI4MjgyIi8+DQoJPHN0b3AgIG9mZnNldD0iMSIgc3R5bGU9InN0b3AtY29sb3I6IzZCNkU2RSIvPg0KPC9saW5lYXJHcmFkaWVudD4NCjxnPg0KCTxwYXRoIGQ9Ik0xNDIuMSwwdjcxNy4wMWMwLDQ3LjcsMjUuNDksOTEuNzcsNjYuODcsMTE1LjYyYzk2LjgxLDU1Ljc5LDE5My42MSwxMTEuNTgsMjkwLjQyLDE2Ny4zN2wyOTEuNjQtMTY4LjA4DQoJCUM4MzIuNDEsODA4LjA3LDg1Ny45LDc2NCw4NTcuOSw3MTYuM1YwSDE0Mi4xeiBNODIzLjAzLDY5Ni4yYzAsNDcuNy0yNS40OSw5MS43Ny02Ni44NywxMTUuNjJMNDk5LjM5LDk1OS44TDI0My44NSw4MTIuNTMNCgkJYy00MS4zOC0yMy44NS02Ni44Ny02Ny45Mi02Ni44Ny0xMTUuNjJWMzQuODJoNjQ2LjA1VjY5Ni4yeiIvPg0KCTxwYXRoIGQ9Ik0zODkuMjksODIzLjQ2bDkzLjAxLDUzLjZWNTA1LjY1bC05My4wMS01My41OWwtNDcuNTMtMjcuNFYyMTBoNDcuNTN2MTY2LjU2aDkzLjAxVjE1Mi40NA0KCQljMC0xOS40OC0xNS44Mi0zNS4yOC0zNS4zNC0zNS4yOEgyODQuMWMtMTkuNTIsMC0zNS4zNCwxNS44LTM1LjM0LDM1LjI4djMyNS44NGw5My4wMSw1My41OWw0Ny41MywyNy40djE1Ny42OGwtNDcuNTMtMjcuMzkNCgkJdi04Mi40NmwtOTMuMDEtNTMuNnYxODguOTdsOTMuMDEsNTMuNkwzODkuMjksODIzLjQ2eiIvPg0KCTxwYXRoIGQ9Ik02NjMuMzIsNzk2Ljc3bDkzLjAxLTUzLjZWMTUyLjQ0YzAtMTkuNDgtMTUuODItMzUuMjgtMzUuMzQtMzUuMjhINTU4LjEzYy0xOS41MiwwLTM1LjM0LDE1LjgtMzUuMzQsMzUuMjh2NzI1LjMzDQoJCWw5My4wMS01My42TDY2My4zMiw3OTYuNzd6IE02MTUuNzksMjEwaDQ3LjUzdjQ3OS41N2wtNDcuNTMsMjcuMzlWMjEweiIvPg0KPC9nPg0KPC9zdmc+DQo=" class="gm-logo-img" alt="The Special One"> <span class="gm-logo-text">THE SPECIAL ONE</span></div>
     <div class="gm-header-actions">
       <button class="gm-account-btn" id="btn-pantheon">Panthéon</button>
       <button class="gm-account-btn" id="btn-coach-quiz">Profil coach</button>
