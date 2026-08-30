@@ -742,6 +742,26 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-faint);
   margin:10px 0 0;
 }
+.site-footer-kofi{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-top:18px;
+  padding:9px 18px;
+  border-radius:999px;
+  border:1px solid var(--border-2);
+  font-family:var(--sans);
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-dim);
+  text-decoration:none;
+  transition:color .15s, border-color .15s, background .15s;
+}
+.site-footer-kofi:hover{
+  color:var(--text);
+  border-color:#FF5E5B;
+  background:rgba(255,94,91,.08);
+}
 .site-footer-cols{
   display:flex;
   flex-wrap:wrap;
@@ -3341,6 +3361,7 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="site-footer-brand">
           <div class="site-footer-logo">The Special One</div>
           <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
+          <a class="site-footer-kofi" href="https://ko-fi.com/agoyyaprod" target="_blank" rel="noopener">☕ Soutenir sur Ko-fi</a>
         </div>
         <div class="site-footer-cols">
           <div class="site-footer-col">
@@ -3584,6 +3605,7 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="site-footer-brand">
           <div class="site-footer-logo">The Special One</div>
           <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
+          <a class="site-footer-kofi" href="https://ko-fi.com/agoyyaprod" target="_blank" rel="noopener">☕ Soutenir sur Ko-fi</a>
         </div>
         <div class="site-footer-cols">
           <div class="site-footer-col">
@@ -3877,6 +3899,25 @@ select.modal-input option{ color:#111; background:#fff; }
         </div>
       </div>
       <button class="season-btn season-btn-primary" id="btn-onboarding-save" style="margin-top:16px; width:100%">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="welcome-modal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-text" style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:4px;">Bienvenue sur The Special One !</div>
+      <div class="modal-text">Ce site est développé par un seul passionné, sur son temps libre - il n'est affilié ni à EA Sports, ni à la FIFA, ni à aucun club ou championnat mentionné. Le jeu évolue encore : il est possible que vous croisiez un bug de temps en temps. Si c'est le cas, ou si vous avez une suggestion, la page <button class="site-footer-link" data-info="contact" id="welcome-contact-link" style="display:inline; margin:0; color:var(--club-accent);">Contact</button> est là pour ça.</div>
+      <div class="modal-text" style="margin-top:10px;">Je vous souhaite une très belle carrière... et qui sait, peut-être deviendrez-vous, vous aussi, le prochain Special One.</div>
+      <button class="season-btn season-btn-primary" id="btn-welcome-close" style="margin-top:16px; width:100%">C'est parti !</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="support-modal" style="display:none">
+    <div class="modal-box">
+      <button class="modal-close" id="support-modal-close" aria-label="Fermer" title="Fermer">&times;</button>
+      <div class="modal-text" style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:4px;">Vous aimez The Special One ?</div>
+      <div class="modal-text">C'est un projet perso, développé sur mon temps libre. Si le jeu vous plaît, un don libre sur Ko-fi aide à le faire vivre - ça ne débloque rien de particulier, juste un coup de pouce pour la suite.</div>
+      <a class="season-btn season-btn-primary" href="https://ko-fi.com/agoyyaprod" target="_blank" rel="noopener" style="margin-top:16px; width:100%; text-align:center; display:block; text-decoration:none;" id="btn-support-kofi">☕ Soutenir sur Ko-fi</a>
+      <button class="site-footer-link" id="btn-support-never" style="margin-top:14px; width:100%; text-align:center;">Ne plus afficher ce message</button>
     </div>
   </div>
 
@@ -4899,6 +4940,7 @@ const SITE_FOOTER_HTML = `
         <div class="site-footer-brand">
           <div class="site-footer-logo">The Special One</div>
           <p class="site-footer-tagline">Composez votre équipe de légende et vivez la saison de vos rêves.</p>
+          <a class="site-footer-kofi" href="https://ko-fi.com/agoyyaprod" target="_blank" rel="noopener">☕ Soutenir sur Ko-fi</a>
         </div>
         <div class="site-footer-cols">
           <div class="site-footer-col">
@@ -5066,11 +5108,13 @@ const INFO_PAGES = {
     html:`
       <p class="info-meta">Dernière mise à jour : 2026.</p>
       <h2>Objet</h2>
-      <p>The Special One est un jeu de gestion sportive gratuit, à but non commercial, mis à disposition tel quel ("as is"). En utilisant ce site, vous acceptez les présentes conditions.</p>
+      <p>The Special One est un jeu de gestion sportive gratuit, mis à disposition tel quel ("as is"). En utilisant ce site, vous acceptez les présentes conditions.</p>
       <h2>Utilisation du service</h2>
       <p>Le site est destiné à un usage personnel et de loisir. Toute tentative d'extraction massive de données, d'automatisation abusive ou de perturbation du service est interdite.</p>
       <h2>Comptes utilisateurs</h2>
       <p>La création d'un compte permet de sauvegarder votre progression. Vous êtes responsable de la confidentialité de vos identifiants. Un compte peut être suspendu en cas d'usage abusif.</p>
+      <h2>Soutien au projet (dons)</h2>
+      <p>The Special One reste entièrement gratuit et ne nécessite aucun paiement pour être utilisé. Un lien de don volontaire vers la plateforme tierce Ko-fi est proposé pour celles et ceux qui souhaitent soutenir le développement du projet. Ces dons sont libres, non remboursables, et n'accordent aucun avantage de jeu, aucun contenu exclusif ni aucun accès particulier - ils ne financent que la poursuite du projet. Le traitement du paiement est intégralement géré par Ko-fi et son prestataire de paiement, conformément à leurs propres conditions d'utilisation ; aucune information de paiement ne transite par ou n'est conservée sur The Special One.</p>
       <h2>Contenu et propriété intellectuelle</h2>
       <p>Les noms de championnats, clubs et joueurs réels sont utilisés à titre informatif dans le cadre d'un projet de fan non commercial. Le code, les visuels et les textes propres au site restent la propriété de leur auteur. Aucune garantie n'est donnée quant à l'exactitude des données historiques utilisées.</p>
       <h2>Disponibilité</h2>
@@ -13571,6 +13615,57 @@ async function submitAuthForm(){
 
 const PENDING_STATE_KEY = 'specialone_pending_game_state';
 
+// ------------------------ POPUP DE BIENVENUE ------------------------
+// Une seule fois par navigateur (localStorage, pas par session) : contexte
+// du projet (solo, sur temps libre, non affilié), avertissement sur
+// d'éventuels bugs encore présents, et redirection vers Contact en cas de
+// souci/suggestion.
+const WELCOME_SEEN_KEY = 'specialone_welcome_seen';
+function maybeShowWelcomeModal(){
+  if(localStorage.getItem(WELCOME_SEEN_KEY) === '1') return;
+  document.getElementById('welcome-modal').style.display = 'flex';
+}
+maybeShowWelcomeModal();
+
+// ------------------------ POPUP DE SOUTIEN (KO-FI) ------------------------
+// Rappel occasionnel du lien de don, jamais pendant une action en cours
+// (draft/mercato = écran "game", match en direct) pour ne pas être intrusif :
+// - attend au moins 5 min de session avant de proposer quoi que ce soit
+// - ne réaffiche pas avant 12 jours après une précédente apparition
+// - "Ne plus afficher ce message" coupe le rappel définitivement (persistant
+//   en localStorage, pas seulement pour la session en cours)
+const SUPPORT_PROMPT_LAST_SHOWN_KEY = 'specialone_support_prompt_last_shown';
+const SUPPORT_PROMPT_DISMISSED_KEY = 'specialone_support_prompt_dismissed_forever';
+const SUPPORT_PROMPT_MIN_SESSION_MS = 45 * 60 * 1000;
+const SUPPORT_PROMPT_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
+const SUPPORT_PROMPT_UNSAFE_SCREENS = new Set(['game', 'live-match']);
+let supportPromptCheckInterval = null;
+
+function isEligibleForSupportPrompt(){
+  if(localStorage.getItem(SUPPORT_PROMPT_DISMISSED_KEY) === '1') return false;
+  const last = parseInt(localStorage.getItem(SUPPORT_PROMPT_LAST_SHOWN_KEY) || '0', 10);
+  return (Date.now() - last) >= SUPPORT_PROMPT_COOLDOWN_MS;
+}
+function maybeShowSupportPrompt(){
+  if(!isEligibleForSupportPrompt()){ clearInterval(supportPromptCheckInterval); return; }
+  // Écran "occupé" (draft/mercato en cours, match en direct) : on retente
+  // simplement au prochain passage de l'intervalle plutôt que d'interrompre.
+  if(SUPPORT_PROMPT_UNSAFE_SCREENS.has(state.screen)) return;
+  document.getElementById('support-modal').style.display = 'flex';
+  localStorage.setItem(SUPPORT_PROMPT_LAST_SHOWN_KEY, String(Date.now()));
+  clearInterval(supportPromptCheckInterval);
+}
+function initSupportPrompt(){
+  if(!isEligibleForSupportPrompt()) return;
+  setTimeout(() => {
+    maybeShowSupportPrompt();
+    if(isEligibleForSupportPrompt()){
+      supportPromptCheckInterval = setInterval(maybeShowSupportPrompt, 30000);
+    }
+  }, SUPPORT_PROMPT_MIN_SESSION_MS);
+}
+initSupportPrompt();
+
 // Vérifie s'il existe une sauvegarde reprenable SANS l'appliquer à state -
 // utilisé pour décider d'afficher "Continuer" sur l'écran d'accueil, sans
 // polluer l'état si le joueur choisit finalement "Commencer" à la place.
@@ -15065,12 +15160,31 @@ document.getElementById('europe-recap-overlay').addEventListener('click', (e)=>{
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape' && document.getElementById('profile-modal').style.display === 'flex') closeProfileModal();
   if(e.key === 'Escape' && document.getElementById('onboarding-modal').style.display === 'flex') skipOnboarding();
+  if(e.key === 'Escape' && document.getElementById('support-modal').style.display === 'flex') closeSupportModal();
 });
 document.getElementById('onboarding-modal-close').addEventListener('click', skipOnboarding);
 document.getElementById('btn-onboarding-save').addEventListener('click', saveOnboarding);
 document.getElementById('onboarding-modal').addEventListener('click', (e)=>{
   if(e.target.id === 'onboarding-modal') skipOnboarding();
 });
+function closeSupportModal(){
+  document.getElementById('support-modal').style.display = 'none';
+}
+document.getElementById('support-modal-close').addEventListener('click', closeSupportModal);
+document.getElementById('support-modal').addEventListener('click', (e)=>{
+  if(e.target.id === 'support-modal') closeSupportModal();
+});
+document.getElementById('btn-support-kofi').addEventListener('click', closeSupportModal);
+document.getElementById('btn-support-never').addEventListener('click', ()=>{
+  localStorage.setItem(SUPPORT_PROMPT_DISMISSED_KEY, '1');
+  closeSupportModal();
+});
+function closeWelcomeModal(){
+  localStorage.setItem(WELCOME_SEEN_KEY, '1');
+  document.getElementById('welcome-modal').style.display = 'none';
+}
+document.getElementById('btn-welcome-close').addEventListener('click', closeWelcomeModal);
+document.getElementById('welcome-contact-link').addEventListener('click', closeWelcomeModal);
 document.getElementById('profile-password').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ submitAuthForm(); }
 });
