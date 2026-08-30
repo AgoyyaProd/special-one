@@ -1118,17 +1118,27 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:32px var(--gutter) 60px;
+  /* flex:1 + overflow-y:auto : c'est cette zone qui défile en interne (comme
+     .standings-table/.results-list sur la page de saison), pas l'écran
+     entier - voir #screen-live-match.screen.active juste en dessous. */
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
 }
-/* Le contenu du direct est parfois très court (début de match) : sans ça,
-   le footer suit le flux normal juste après .live-shell et laisse un grand
-   vide sous lui (le reste du min-height de l'écran), qui se résorbe au fil
-   du match à mesure que le ticker se remplit - donnant l'impression que le
-   footer "bouge"/rétrécit selon les événements. On ancre donc le footer en
-   bas du viewport quand le contenu est court, tout en le laissant suivre
-   normalement le contenu quand celui-ci dépasse la hauteur de l'écran. */
+/* Même principe que .season-wrap (page de saison) : hauteur verrouillée à
+   un écran plein, overflow:hidden sur le conteneur externe - le footer se
+   retrouve donc TOUJOURS à la même position, juste après un écran plein,
+   quel que soit l'avancement du match (avant, ce n'était pas le cas : le
+   contenu variable - ticker qui se remplit, panneau de fin de match qui
+   apparaît - faisait varier la hauteur totale de .live-shell, et donc la
+   position du footer, d'où l'impression qu'il "bougeait"). Le contenu
+   variable défile dans .live-shell lui-même (voir ci-dessus) plutôt que
+   d'être coupé par cet overflow:hidden externe. */
 #screen-live-match.screen.active{
   display:flex;
   flex-direction:column;
+  height:calc(100vh - var(--header-h));
+  overflow:hidden;
 }
 /* min-width:0 indispensable ici : sans lui, un enfant flex dans un
    conteneur flex-column garde son min-width:auto par défaut et refuse de
@@ -1141,7 +1151,7 @@ button{ font-family:inherit; cursor:pointer; }
   width:100%;
 }
 #screen-live-match [data-footer-slot]{
-  margin-top:auto;
+  flex-shrink:0;
 }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
