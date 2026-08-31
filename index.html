@@ -353,7 +353,7 @@ body{
   padding-top:var(--header-h);
   overflow-x:hidden;
   background:var(--bg);
-  min-height:100vh;
+  min-height:var(--vh100, 100vh);
 }
 
 button{ font-family:inherit; cursor:pointer; }
@@ -361,7 +361,7 @@ button{ font-family:inherit; cursor:pointer; }
 .app{
   position:relative;
   z-index:1;
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
   width:100%;
 }
 
@@ -381,7 +381,7 @@ button{ font-family:inherit; cursor:pointer; }
 
 .screen{
   display:none;
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
   width:100%;
   animation:fadeIn .5s ease;
 }
@@ -516,7 +516,7 @@ button{ font-family:inherit; cursor:pointer; }
 /* ============================= LANDING ============================= */
 .landing-shell{
   position:relative;
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
   padding:0 var(--gutter);
   display:flex;
   align-items:center;
@@ -969,7 +969,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:70px 48px 120px;
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
 }
 .select-title{
   font-family:var(--bn-bold);
@@ -1111,7 +1111,7 @@ button{ font-family:inherit; cursor:pointer; }
      le bouton "Mettre un terme à la carrière" et le footer restent
      accessibles juste en dessous, mais volontairement hors champ tant
      qu'on ne fait pas défiler - pas une action à portée du premier regard. */
-  height:calc(100vh - var(--header-h));
+  height:calc(var(--vh100, 100vh) - var(--header-h));
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -1157,7 +1157,7 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.screen.active{
   display:flex;
   flex-direction:column;
-  height:calc(100vh - var(--header-h));
+  height:calc(var(--vh100, 100vh) - var(--header-h));
   overflow:hidden;
 }
 /* min-width:0 indispensable ici : sans lui, un enfant flex dans un
@@ -1717,7 +1717,7 @@ button{ font-family:inherit; cursor:pointer; }
 .fx-row.fx-upcoming .fx-score{ color:var(--text-faint); font-family:var(--sans); font-size:13px; }
 /* ============================= GAME ============================= */
 .game-wrap{
-  height:calc(100vh - var(--header-h));
+  height:calc(var(--vh100, 100vh) - var(--header-h));
   /* En clamp() plutôt qu'en px fixe : sur un 16/9 étroit (1366px de large,
      petit laptop), un padding fixe de 110px de chaque côté grignotait une
      part disproportionnée de l'espace utile, écrasant le terrain central -
@@ -2643,7 +2643,7 @@ button{ font-family:inherit; cursor:pointer; }
      résolutions de bureau très proches (1920x1080 vs un laptop 1366px par
      ex). Une seule formule continue du mobile au très grand écran. */
   padding:clamp(20px, 4vw, 40px) var(--gutter) clamp(40px, 6vw, 60px);
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
 }
 .account-header{
   display:flex;
@@ -2670,7 +2670,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:40px var(--gutter) 60px;
-  min-height:calc(100vh - var(--header-h));
+  min-height:calc(var(--vh100, 100vh) - var(--header-h));
   display:flex;
   gap:36px;
 }
@@ -4800,9 +4800,9 @@ function primeCrestCache(){
 // l'interface entière (tuiles, polices, marges) rétrécisse proportionnellement
 // avec l'écran plutôt que de rester à taille fixe avec juste moins de marge
 // autour. Sous 1101px, on retire le zoom : les breakpoints mobile/tablette
-// dédiés plus bas dans la feuille de style (ajustés à la main pour ces
-// tailles réelles, pas une version réduite du design 2560px) reprennent la
-// main sans interférence.
+// dédiés plus bas dans cette feuille (ajustés à la main pour ces tailles
+// réelles, pas une version réduite du design 2560px) reprennent la main
+// sans interférence.
 // Fait en JS plutôt qu'en CSS pur (`zoom:calc(100vw / 2560)` sur <html>) :
 // cette formule crée une dépendance circulaire (100vw peut dépendre du
 // zoom lui-même) que les navigateurs n'évaluent pas de façon fiable.
@@ -4810,12 +4810,23 @@ const DESKTOP_ZOOM_REFERENCE_WIDTH = 2560;
 const DESKTOP_ZOOM_MIN_WIDTH = 1101;
 function applyDesktopZoom(){
   const w = window.innerWidth;
+  let zoom = 1;
   if(w < DESKTOP_ZOOM_MIN_WIDTH){
     document.documentElement.style.zoom = '';
-    return;
+  } else {
+    zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
+    document.documentElement.style.zoom = zoom;
   }
-  const zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
-  document.documentElement.style.zoom = zoom;
+  // --vh100 remplace 100vh partout dans la feuille de style (voir plus
+  // bas) : sur un écran moins "large-écran" que la référence 2560x1440
+  // (ex: 1920x1200, en 16/10 plutôt qu'en 16/9), le zoom réduit la mise en
+  // page mais les unités vh ne suivent pas ce zoom dans certains moteurs -
+  // .landing-shell/.season-wrap/etc. ne remplissaient alors plus toute la
+  // hauteur réelle de l'écran, laissant un grand vide avant le footer au
+  // lieu de le repousser en bas comme sur l'écran de référence. En
+  // divisant par le zoom, --vh100 redevient, une fois affiché à cette
+  // échelle réduite, exactement égal à la hauteur physique de l'écran.
+  document.documentElement.style.setProperty('--vh100', (window.innerHeight / zoom) + 'px');
 }
 applyDesktopZoom();
 window.addEventListener('resize', applyDesktopZoom);
