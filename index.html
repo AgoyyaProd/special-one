@@ -2540,6 +2540,15 @@ button{ font-family:inherit; cursor:pointer; }
   .pitch-block{ flex:none; }
   .pitch{ width:100% !important; height:auto !important; aspect-ratio:1000/453; }
   .pitch.pelouse-pending{ aspect-ratio:680/920; }
+  /* Reliquat du même souci que .col-center ci-dessus : .hand-wrap gardait
+     "height:30%" - avec un parent flex en hauteur "auto", ce pourcentage se
+     résout quand même (résolution de pourcentage propre au flexbox, une
+     fois la hauteur du conteneur déterminée par son contenu) et plafonnait
+     la main à 30% de cette hauteur totale - trop court pour montrer les 5
+     cartes sans scroll interne. Elle suit maintenant, comme le reste, la
+     hauteur naturelle de son contenu. */
+  .hand-wrap{ height:auto; }
+  .hand{ max-height:none; overflow-y:visible; }
   .panel{ padding:12px; border-radius:var(--r-md); }
   .club-box .club-crest{ width:40px; height:40px; }
   .club-box-name{ font-size:16px; }
@@ -3157,6 +3166,25 @@ button{ font-family:inherit; cursor:pointer; }
   padding:0;
 }
 .modal-close:hover{ color:var(--text); border-color:var(--club-accent); }
+/* Popup de bienvenue : plus de texte que les autres modales (login,
+   profil...) qui restent volontairement compactes - élargie et agrandie
+   spécifiquement pour rester confortable à lire, surtout sur grand écran. */
+#welcome-modal .modal-box{
+  width:min(560px, 90vw);
+  padding:36px;
+}
+#welcome-modal .modal-text{
+  font-size:15px;
+  line-height:1.65;
+}
+#welcome-modal .modal-text:first-child{
+  font-size:21px;
+  margin-bottom:14px;
+}
+#welcome-modal #btn-welcome-close{
+  font-size:15px;
+  padding:14px;
+}
 .europe-recap-box{
   width:min(680px, 92vw);
   max-height:85vh;
@@ -3904,7 +3932,7 @@ select.modal-input option{ color:#111; background:#fff; }
 
   <div class="modal-overlay" id="welcome-modal" style="display:none">
     <div class="modal-box">
-      <div class="modal-text" style="font-weight:700; font-size:16px; color:var(--text); margin-bottom:4px;">Bienvenue sur The Special One !</div>
+      <div class="modal-text" style="font-weight:700; color:var(--text); margin-bottom:4px;">Bienvenue sur The Special One !</div>
       <div class="modal-text">Ce site est développé par un seul passionné, sur son temps libre - il n'est affilié ni à EA Sports, ni à la FIFA, ni à aucun club ou championnat mentionné. Le jeu évolue encore : il est possible que vous croisiez un bug de temps en temps. Si c'est le cas, ou si vous avez une suggestion, la page <button class="site-footer-link" data-info="contact" id="welcome-contact-link" style="display:inline; margin:0; color:var(--club-accent);">Contact</button> est là pour ça.</div>
       <div class="modal-text" style="margin-top:10px;">Je vous souhaite une très belle carrière... et qui sait, peut-être deviendrez-vous, vous aussi, le prochain Special One.</div>
       <button class="season-btn season-btn-primary" id="btn-welcome-close" style="margin-top:16px; width:100%">C'est parti !</button>
@@ -6027,6 +6055,16 @@ function startDraft(){
     toast('Aucun poste disponible pour cette main, relance offerte.');
   }
   renderGame();
+  // Sur mobile, terrain/remplaçants/main sont empilés verticalement - une
+  // fois la main distribuée, il fallait scroller manuellement pour la voir
+  // (elle est tout en bas de l'écran, après le terrain). Pas nécessaire sur
+  // desktop où les colonnes sont côte à côte et la main déjà visible.
+  if(window.innerWidth <= 1100){
+    setTimeout(()=>{
+      const hand = document.getElementById('hand');
+      if(hand) hand.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 50);
+  }
 }
 
 function handIsDead(){
@@ -15250,6 +15288,10 @@ document.getElementById('btn-goto-game').addEventListener('click', ()=>{
   if(!state.club) return;
   state.league = state.league;
   enterGame();
+  // Sur mobile, la page restait scrollée là où était le bouton "Commencer"
+  // (en bas de la grille de clubs) - l'écran de draft s'ouvrait donc déjà
+  // scrollé au milieu, sans montrer le club/la formation en haut.
+  window.scrollTo({ top:0, behavior:'smooth' });
 });
 document.getElementById('relance-btn').addEventListener('click', ()=>{
   // Aucune relance possible en mercato (voir renderTransferGame) - reste
