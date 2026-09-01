@@ -2362,13 +2362,19 @@ button{ font-family:inherit; cursor:pointer; }
   padding-top:6px;
 }
 .hand-card{
-  width:144px;
+  /* Base pensée pour la résolution de référence 2560px (voir
+     applyDesktopZoom) - le zoom desktop réduit proportionnellement cette
+     taille sur les écrans plus petits (ex: ~150px à 1920px de large,
+     zoom 0.75), donc augmenter cette valeur agrandit les cartes de la
+     draft de façon cohérente à toutes les résolutions de bureau, sans
+     media query séparée à maintenir en plus du système de zoom. */
+  width:200px;
   flex-shrink:0;
   cursor:pointer;
   transition:transform .18s ease;
   animation:dealIn .32s cubic-bezier(.2,.8,.3,1.1) backwards;
 }
-.hand-card .pc-card{ width:144px; border-width:1.3px; }
+.hand-card .pc-card{ width:200px; border-width:1.3px; }
 .hand-card:hover{ transform:translateY(-6px); }
 .hand-card.is-selected .pc-card{
   outline:3px solid var(--club-accent);
@@ -2384,15 +2390,6 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-faint);
   text-align:center;
   padding:20px 0;
-}
-
-/* Sur très grand écran (2200px+, ex: 2560x1440), les cartes de la main de
-   draft restaient figées à leur taille de base (144px) alors que le reste
-   de la mise en page (terrain, panneaux latéraux) profite déjà de tout
-   l'espace disponible - elles paraissaient donc proportionnellement
-   petites. Uniquement la taille des cartes change ici, rien d'autre. */
-@media (min-width: 2200px){
-  .hand-card, .hand-card .pc-card{ width:190px; }
 }
 
 .gm-toast{
