@@ -2364,17 +2364,17 @@ button{ font-family:inherit; cursor:pointer; }
 .hand-card{
   /* Base pensée pour la résolution de référence 2560px (voir
      applyDesktopZoom) - le zoom desktop réduit proportionnellement cette
-     taille sur les écrans plus petits (ex: ~150px à 1920px de large,
+     taille sur les écrans plus petits (ex: ~180px à 1920px de large,
      zoom 0.75), donc augmenter cette valeur agrandit les cartes de la
      draft de façon cohérente à toutes les résolutions de bureau, sans
      media query séparée à maintenir en plus du système de zoom. */
-  width:200px;
+  width:240px;
   flex-shrink:0;
   cursor:pointer;
   transition:transform .18s ease;
   animation:dealIn .32s cubic-bezier(.2,.8,.3,1.1) backwards;
 }
-.hand-card .pc-card{ width:200px; border-width:1.3px; }
+.hand-card .pc-card{ width:240px; border-width:1.3px; }
 .hand-card:hover{ transform:translateY(-6px); }
 .hand-card.is-selected .pc-card{
   outline:3px solid var(--club-accent);
