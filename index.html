@@ -353,7 +353,7 @@ body{
   padding-top:var(--header-h);
   overflow-x:hidden;
   background:var(--bg);
-  min-height:var(--vh100, 100vh);
+  min-height:var(--vh100, 100dvh);
 }
 
 button{ font-family:inherit; cursor:pointer; }
@@ -361,7 +361,7 @@ button{ font-family:inherit; cursor:pointer; }
 .app{
   position:relative;
   z-index:1;
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
   width:100%;
 }
 
@@ -381,7 +381,7 @@ button{ font-family:inherit; cursor:pointer; }
 
 .screen{
   display:none;
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
   width:100%;
   animation:fadeIn .5s ease;
 }
@@ -516,7 +516,7 @@ button{ font-family:inherit; cursor:pointer; }
 /* ============================= LANDING ============================= */
 .landing-shell{
   position:relative;
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
   padding:0 var(--gutter);
   display:flex;
   align-items:center;
@@ -978,7 +978,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:70px 48px 120px;
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
 }
 .select-title{
   font-family:var(--bn-bold);
@@ -1120,7 +1120,7 @@ button{ font-family:inherit; cursor:pointer; }
      le bouton "Mettre un terme à la carrière" et le footer restent
      accessibles juste en dessous, mais volontairement hors champ tant
      qu'on ne fait pas défiler - pas une action à portée du premier regard. */
-  height:calc(var(--vh100, 100vh) - var(--header-h));
+  height:calc(var(--vh100, 100dvh) - var(--header-h));
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -1147,27 +1147,27 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:32px var(--gutter) 60px;
-  /* flex:1 + overflow-y:auto : c'est cette zone qui défile en interne (comme
-     .standings-table/.results-list sur la page de saison), pas l'écran
-     entier - voir #screen-live-match.screen.active juste en dessous. */
-  flex:1;
-  min-height:0;
+  /* Même principe que .season-wrap (page de saison) : hauteur verrouillée à
+     un écran plein, overflow interne - le footer est un simple élément
+     APRÈS ce bloc (pas dedans, voir HTML), donc cette hauteur fixe le
+     pousse toujours à la même position, juste sous un écran plein,
+     "caché" tant qu'on ne fait pas défiler - exactement comme sur la
+     saison/l'accueil. Avant, le footer était un enfant flex du même
+     conteneur verrouillé que le contenu du match, ce qui le rendait
+     visible dans l'écran initial au lieu d'être sous la ligne de flottaison
+     (contrairement à la saison/l'accueil) - d'où l'écart signalé.
+     Le contenu variable (ticker qui se remplit, panneau de fin de match)
+     défile ici en interne plutôt que de faire grandir la page. */
+  height:calc(var(--vh100, 100dvh) - var(--header-h));
   overflow-y:auto;
 }
-/* Même principe que .season-wrap (page de saison) : hauteur verrouillée à
-   un écran plein, overflow:hidden sur le conteneur externe - le footer se
-   retrouve donc TOUJOURS à la même position, juste après un écran plein,
-   quel que soit l'avancement du match (avant, ce n'était pas le cas : le
-   contenu variable - ticker qui se remplit, panneau de fin de match qui
-   apparaît - faisait varier la hauteur totale de .live-shell, et donc la
-   position du footer, d'où l'impression qu'il "bougeait"). Le contenu
-   variable défile dans .live-shell lui-même (voir ci-dessus) plutôt que
-   d'être coupé par cet overflow:hidden externe. */
+/* Le verrouillage de hauteur/scroll vit sur .live-shell lui-même
+   maintenant (voir ci-dessus) - #screen-live-match n'a plus besoin d'être
+   lui-même un conteneur flex/overflow:hidden, exactement comme
+   #screen-season n'a aucune règle spéciale (seul .season-wrap, à
+   l'intérieur, est verrouillé). */
 #screen-live-match.screen.active{
-  display:flex;
-  flex-direction:column;
-  height:calc(var(--vh100, 100vh) - var(--header-h));
-  overflow:hidden;
+  display:block;
 }
 /* min-width:0 indispensable ici : sans lui, un enfant flex dans un
    conteneur flex-column garde son min-width:auto par défaut et refuse de
@@ -1175,12 +1175,9 @@ button{ font-family:inherit; cursor:pointer; }
    provoquait un débordement horizontal de .live-shell sur mobile
    (découvert en testant à 375px), invisible sur desktop où il y a
    toujours assez de place. */
-#screen-live-match.screen.active > *{
+#screen-live-match.screen.active .live-shell{
   min-width:0;
   width:100%;
-}
-#screen-live-match [data-footer-slot]{
-  flex-shrink:0;
 }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
@@ -1537,11 +1534,11 @@ button{ font-family:inherit; cursor:pointer; }
   padding:10px 8px;
   border-radius:var(--r-sm);
   font-family:var(--sans);
-  font-size:13px;
+  font-size:15px;
   color:var(--text);
 }
 .st-row.st-head{
-  font-size:10.5px;
+  font-size:11.5px;
   letter-spacing:.5px;
   text-transform:uppercase;
   color:var(--text-faint);
@@ -1672,7 +1669,7 @@ button{ font-family:inherit; cursor:pointer; }
   border-radius:var(--r-sm);
   background:var(--surface-2);
   font-family:var(--sans);
-  font-size:13px;
+  font-size:15px;
 }
 .fx-details{ margin-bottom:0; }
 .fx-details summary.fx-row{ cursor:pointer; list-style:none; margin-bottom:6px; }
@@ -1726,7 +1723,7 @@ button{ font-family:inherit; cursor:pointer; }
 .fx-row.fx-upcoming .fx-score{ color:var(--text-faint); font-family:var(--sans); font-size:13px; }
 /* ============================= GAME ============================= */
 .game-wrap{
-  height:calc(var(--vh100, 100vh) - var(--header-h));
+  height:calc(var(--vh100, 100dvh) - var(--header-h));
   /* En clamp() plutôt qu'en px fixe : sur un 16/9 étroit (1366px de large,
      petit laptop), un padding fixe de 110px de chaque côté grignotait une
      part disproportionnée de l'espace utile, écrasant le terrain central -
@@ -2056,7 +2053,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .ms-row.ms-header .ms-pos, .ms-row.ms-header .ms-name, .ms-row.ms-header .ms-note{
   font-family:var(--sans);
-  font-size:10px;
+  font-size:11px;
   font-weight:700;
   letter-spacing:.05em;
   text-transform:uppercase;
@@ -2064,7 +2061,7 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .ms-subhead{
   font-family:var(--sans);
-  font-size:10.5px;
+  font-size:11.5px;
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
@@ -2074,14 +2071,14 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .ms-pos{
   font-family:var(--bn-bold);
-  font-size:14px;
+  font-size:16px;
   color:var(--club-accent);
   width:42px;
   flex-shrink:0;
 }
 .ms-name{
   flex:1;
-  font-size:13px;
+  font-size:15px;
   font-weight:600;
   color:var(--text);
   white-space:nowrap;
@@ -2091,7 +2088,7 @@ button{ font-family:inherit; cursor:pointer; }
 .ms-row.empty .ms-name{ color:var(--text-faint); font-style:italic; font-weight:400; }
 .ms-note{
   font-family:var(--bn-bold);
-  font-size:14px;
+  font-size:16px;
   color:var(--text-dim);
   width:32px;
   text-align:right;
@@ -2480,6 +2477,13 @@ button{ font-family:inherit; cursor:pointer; }
   :root{ --header-h:60px; }
   .season-wrap{ padding:18px var(--gutter) 40px; }
   .season-top{ flex-direction:column; align-items:flex-start; }
+  /* Boutons "Retour à l'effectif / Jouer en direct / Match suivant" - en
+     ligne avec retour à la ligne automatique, ils tombaient à 2 sur la
+     première ligne puis 1 seul (plus court) esseulé sur la ligne suivante,
+     jamais alignés. Empilés pleine largeur, comme les autres groupes de
+     boutons déjà traités ainsi sur mobile (ex: écran de draft). */
+  .season-controls{ flex-direction:column; align-items:stretch; width:100%; }
+  .season-controls .season-btn{ width:100%; text-align:center; }
   .st-row{ grid-template-columns:22px 1fr 22px 22px 22px 28px 34px 40px; font-size:10.5px; gap:4px; }
   .fx-row{ font-size:12px; }
   .gm-logo{ font-size:19px; gap:8px; }
@@ -2650,7 +2654,7 @@ button{ font-family:inherit; cursor:pointer; }
      résolutions de bureau très proches (1920x1080 vs un laptop 1366px par
      ex). Une seule formule continue du mobile au très grand écran. */
   padding:clamp(20px, 4vw, 40px) var(--gutter) clamp(40px, 6vw, 60px);
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
 }
 .account-header{
   display:flex;
@@ -2677,7 +2681,7 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:1100px;
   margin:0 auto;
   padding:40px var(--gutter) 60px;
-  min-height:calc(var(--vh100, 100vh) - var(--header-h));
+  min-height:calc(var(--vh100, 100dvh) - var(--header-h));
   display:flex;
   gap:36px;
 }
@@ -2828,6 +2832,14 @@ button{ font-family:inherit; cursor:pointer; }
 }
 @media (max-width:640px){
   .achv-card{ flex-wrap:wrap; min-height:auto; }
+  /* Largeurs fixes (icône 84px + corps 280px = 364px) qui ne tenaient déjà
+     pas dans un conteneur mobile étroit (~358px pour le popup de succès
+     débloqué) - l'icône se retrouvait esseulée et le corps du texte
+     débordait/s'effondrait de façon imprévisible. Sur mobile, l'icône se
+     réduit et le corps devient flexible pour occuper l'espace restant. */
+  .achv-icon{ flex:0 0 64px; font-size:28px; }
+  .achv-body{ flex:1 1 auto; min-width:0; padding:8px 14px; }
+  .achv-name{ white-space:normal; }
   .achv-divider{ display:none; }
   .achv-condition{ flex:1 1 100%; padding-top:0; }
 }
@@ -4223,7 +4235,7 @@ function fitSurname(cardEl){
   const span = surnameEl && surnameEl.querySelector('span');
   if(!nameblock || !surnameEl || !span) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
-  const refSize = 205 * (cardWidth / PC_FIGMA_WIDTH);
+  const refSize = 235 * (cardWidth / PC_FIGMA_WIDTH);
 
   // Reset to single-line at the reference size first.
   surnameEl.style.whiteSpace = 'nowrap';
@@ -4275,7 +4287,7 @@ function fitFirstname(cardEl){
   const firstEl = cardEl.querySelector('.pc-firstname');
   if(!nameblock || !firstEl) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
-  const refSize = 84 * (cardWidth / PC_FIGMA_WIDTH); // ~8.5cqw at Figma scale
+  const refSize = 96 * (cardWidth / PC_FIGMA_WIDTH); // ~9.7cqw at Figma scale
   firstEl.style.fontSize = refSize + 'px';
   const boxWidth = nameblock.getBoundingClientRect().width;
   const textWidth = firstEl.scrollWidth;
@@ -4298,7 +4310,7 @@ function fitPosition(cardEl){
   const tokens = poste.split('-').map(s=>s.trim()).filter(Boolean);
   if(!tokens.length) return;
   const cardWidth = cardEl.getBoundingClientRect().width || 300;
-  const refSize = 100 * (cardWidth / PC_FIGMA_WIDTH);
+  const refSize = 115 * (cardWidth / PC_FIGMA_WIDTH);
 
   function setLines(lines){
     posEl.innerHTML = lines.map(l=>`<span>${l}</span>`).join('');
@@ -4817,13 +4829,21 @@ const DESKTOP_ZOOM_REFERENCE_WIDTH = 2560;
 const DESKTOP_ZOOM_MIN_WIDTH = 1101;
 function applyDesktopZoom(){
   const w = window.innerWidth;
-  let zoom = 1;
   if(w < DESKTOP_ZOOM_MIN_WIDTH){
+    // Sous le seuil desktop : pas de zoom, et --vh100 est retiré plutôt que
+    // recalculé (voir plus bas var(--vh100, 100dvh)) - le laisser à 1 ou
+    // recalculer window.innerHeight ici s'est avéré peu fiable sur Safari
+    // mobile (barres d'outils dynamiques qui font varier innerHeight sans
+    // déclencher 'resize' de façon cohérente) : ça verrouillait --vh100 sur
+    // une valeur bien trop petite, tronquant .live-shell juste après le
+    // bandeau de score. On repasse alors sur 100dvh, une unité CSS native
+    // pensée précisément pour ce cas (s'ajuste toute seule, sans JS).
     document.documentElement.style.zoom = '';
-  } else {
-    zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
-    document.documentElement.style.zoom = zoom;
+    document.documentElement.style.removeProperty('--vh100');
+    return;
   }
+  const zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
+  document.documentElement.style.zoom = zoom;
   // --vh100 remplace 100vh partout dans la feuille de style (voir plus
   // bas) : sur un écran moins "large-écran" que la référence 2560x1440
   // (ex: 1920x1200, en 16/10 plutôt qu'en 16/9), le zoom réduit la mise en
