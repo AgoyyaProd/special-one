@@ -2468,6 +2468,7 @@ button{ font-family:inherit; cursor:pointer; }
   .col-center{ height:62vh; min-height:420px; }
   .hero{ grid-template-columns:1fr; text-align:center; }
   .hero-copy p{ margin-left:auto; margin-right:auto; }
+  .landing-cta-row{ justify-content:center; }
   .hero-cards-wrap{ padding:8px 0 0; }
   .club-grid{ grid-template-columns:repeat(3,1fr); }
 }
@@ -2626,9 +2627,12 @@ button{ font-family:inherit; cursor:pointer; }
 }
 
 @media (max-width: 560px){
-  .hero-cards-wrap{ flex-direction:column; align-items:center; gap:28px; }
+  .hero-cards-wrap{ flex-direction:column; align-items:center; gap:20px; }
   .hero-card-slot:nth-child(2){ margin-top:0; }
-  .hero-card-slot .pc-card{ width:min(72vw, 300px); }
+  /* Réduites : à min(72vw, 300px), les cartes dominaient tout l'écran et
+     obligeaient à défiler pour voir la seconde - un format plus compact
+     reste lisible tout en laissant les deux cartes bien visibles. */
+  .hero-card-slot .pc-card{ width:min(52vw, 220px); }
 }
 
 /* Sur téléphone étroit, 8 colonnes (# Club J V N D Diff Pts) laissent bien
@@ -4321,8 +4325,14 @@ function fitPosition(cardEl){
   // Marge de sécurité : une case mesurée comme "tenant tout juste" peut
   // basculer dans le débordement après arrondi du navigateur (ex: 4 postes
   // sur une petite carte de main de draft) - on se garde toujours un peu
-  // de marge plutôt que de coller au pixel près.
-  const SAFETY = 0.94;
+  // de marge plutôt que de coller au pixel près. Resserrée après avoir
+  // mesuré un cas limite (poste sur 2 lignes, 5 postes combinés type
+  // Gerrard) qui ne débordait pas au sens strict mais frôlait la pastille
+  // de note à moins d'1px - invisible en théorie, mais qui bascule
+  // facilement en chevauchement réel selon le rendu de police du
+  // navigateur. 0.90 laisse une vraie marge visuelle, pas juste
+  // mathématique.
+  const SAFETY = 0.90;
   function fits(){
     const boxWidth = posEl.getBoundingClientRect().width;
     return boxWidth > 0 && widestSpanWidth() <= boxWidth * SAFETY;
@@ -10021,8 +10031,6 @@ function resolveSeasonEvent(optionKey){
   const pending = state.pendingSeasonEvent;
   if(!pending) return;
   const opt = pending.decision.options.find(o=>o.key===optionKey) || pending.decision.options[0];
-  const modsBefore = state.seasonModifiers.length;
-  const unavailBefore = Object.keys(state.unavailable).length;
   opt.apply();
   if(pending.decision.title === 'Coup de fatigue collectif') bumpTieredCounter('fatigueEventsHandled');
   if(pending.decision.immediate){
@@ -10034,19 +10042,6 @@ function resolveSeasonEvent(optionKey){
   const mode = pending.mode;
   state.pendingSeasonEvent = null;
   renderSeason();
-
-  // Retour visible sur ce qui vient de se passer - jusque-là le choix
-  // n'avait aucune confirmation à l'écran, on ne savait jamais si le pari
-  // avait payé ou non.
-  const newMods = state.seasonModifiers.slice(modsBefore);
-  let outcomeMsg;
-  if(newMods.length){
-    outcomeMsg = newMods.map(m=>`${m.label} (${m.delta>=0?'+':''}${m.delta} sur les ${Math.max(1, m.untilRound - pending.roundIdx)} prochaines journées)`).join(' · ');
-  } else if(Object.keys(state.unavailable).length > unavailBefore){
-    outcomeMsg = 'Un joueur est désormais indisponible suite à cette décision.';
-  } else {
-    outcomeMsg = 'Décision prise - aucun effet mesurable cette fois.';
-  }
 
   if(mode === 'bulk'){
     state.pendingBulkResume = true;
@@ -10061,15 +10056,7 @@ function resolveSeasonEvent(optionKey){
     } else {
       resumeCtxEl.style.display = 'none';
     }
-    // Le résultat du choix se lit directement dans cette même fenêtre -
-    // plus besoin d'un toast séparé, qui apparaissait assombri derrière la
-    // modale (elles se superposaient : toast en z-index 50, modale en 300).
-    document.getElementById('season-resume-outcome').textContent = outcomeMsg;
     document.getElementById('season-resume-overlay').style.display = 'flex';
-  } else {
-    // En mode journée par journée, aucune fenêtre ne s'ouvre juste après :
-    // un toast classique convient, rien ne peut le recouvrir ici.
-    toast(outcomeMsg);
   }
 }
 // Une séance de tirs au but est modélisée comme une suite de tirs
