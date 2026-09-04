@@ -13868,12 +13868,13 @@ function snapshotGameState(){
 async function pushSnapshotToServer(snap){
   if(!sbClient || !state.session) return;
   try {
-    await sbClient.from('game_saves').upsert({
+    const { error } = await sbClient.from('game_saves').upsert({
       user_id: state.session.user.id,
       state: snap,
       updated_at: new Date().toISOString()
     });
-  } catch(e){ /* pas grave : on retentera à la prochaine sauvegarde */ }
+    if(error) console.error('Échec de sauvegarde vers le compte :', error);
+  } catch(e){ console.error('Échec de sauvegarde vers le compte :', e); }
 }
 
 function saveSnapshotNow(){
@@ -13937,9 +13938,10 @@ async function pullSnapshotFromServer(){
       .select('state')
       .eq('user_id', state.session.user.id)
       .maybeSingle();
-    if(error || !data) return null;
-    return data.state;
-  } catch(e){ return null; }
+    if(error){ console.error('Échec de lecture de la sauvegarde du compte :', error); return null; }
+    if(!data) console.warn('Aucune sauvegarde trouvée pour ce compte (user_id: '+state.session.user.id+').');
+    return data ? data.state : null;
+  } catch(e){ console.error('Échec de lecture de la sauvegarde du compte :', e); return null; }
 }
 
 // Appelée juste après une connexion (ou au chargement si une session existe
