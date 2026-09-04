@@ -13952,8 +13952,22 @@ async function reconcileGameStateAfterLogin(){
   let local = null;
   try { local = JSON.parse(localStorage.getItem(PENDING_STATE_KEY) || 'null'); } catch(e){ /* ignore */ }
   const remote = await pullSnapshotFromServer();
-  let winner = null;
-  if(remote && local) winner = (remote.savedAt || 0) >= (local.savedAt || 0) ? remote : local;
+  // Une sauvegarde "vide" (ni club ni saison - un appareil jamais utilisé
+  // pour jouer, ou une carrière qui vient d'être terminée/réinitialisée)
+  // ne doit JAMAIS l'emporter sur une sauvegarde qui contient une vraie
+  // partie, même si son horodatage est plus récent : comparer savedAt
+  // seul suppose que les horloges des deux appareils sont parfaitement
+  // synchronisées, ce qui n'est pas garanti (quelques minutes d'écart
+  // suffisent à inverser le résultat) - et un cas concret l'a confirmé :
+  // une connexion Google depuis un PC "vierge" avait écrasé une vraie
+  // carrière/des succès enregistrés sur mobile, uniquement parce que
+  // l'instantané vide du PC portait un horodatage plus frais.
+  const localHasProgress = !!(local && (local.club || local.season));
+  const remoteHasProgress = !!(remote && (remote.club || remote.season));
+  let winner;
+  if(localHasProgress && !remoteHasProgress) winner = local;
+  else if(remoteHasProgress && !localHasProgress) winner = remote;
+  else if(remote && local) winner = (remote.savedAt || 0) >= (local.savedAt || 0) ? remote : local;
   else winner = remote || local;
   if(winner){
     try { localStorage.setItem(PENDING_STATE_KEY, JSON.stringify(winner)); } catch(e){ /* ignore */ }
