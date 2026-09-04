@@ -14012,7 +14012,16 @@ async function signInWithGoogle(){
   // hash (#access_token=...) au retour de Google, et les deux hash entrent
   // en conflit sinon.
   const redirectTo = window.location.origin + window.location.pathname + window.location.search;
-  saveSnapshotNow();
+  // Ne sauvegarder AVANT la redirection que s'il y a réellement une partie
+  // en cours sur cet appareil (cas : invité qui se connecte en plein
+  // milieu d'une partie) - sinon, sur un appareil "vierge" (ex: première
+  // connexion sur un nouveau PC), ça écrivait un instantané vide mais
+  // horodaté à l'instant présent. Au retour de Google, la réconciliation
+  // ne compare que les horodatages : cet instantané vide mais tout frais
+  // "gagnait" contre la vraie sauvegarde du compte (plus ancienne mais
+  // bien réelle, ex: depuis le mobile) et l'écrasait purement et
+  // simplement sur le serveur - perte de progression silencieuse.
+  if(state.club || state.season) saveSnapshotNow();
   sessionStorage.setItem('pendingGoogleAuth', '1');
   await sbClient.auth.signInWithOAuth({ provider:'google', options:{ redirectTo } });
 }
