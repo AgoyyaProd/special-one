@@ -2630,8 +2630,15 @@ button{ font-family:inherit; cursor:pointer; }
      mobile ci-dessus l'emporte réellement. */
   #pf-league-menu, #pf-club-menu{ left:0; top:calc(100% + 8px); }
   .account-title{ font-size:24px; }
-  .account-stats{ grid-template-columns:1fr 1fr; }
-  .account-stats .stat-tile:last-child{ grid-column:1 / -1; }
+  /* Repassé sur 3 colonnes (comme sur desktop, .account-stats de base) au
+     lieu de 2+1 : avec un padding déjà compact (4px) et un chiffre à
+     19px, les 3 pastilles ("saisons", "trophées", "score total") tiennent
+     très bien côte à côte même sur les téléphones les plus étroits - le
+     libellé (9px) revient juste à la ligne au besoin, sans déborder. */
+  .account-stats{ gap:8px; }
+  .stat-tile{ padding:10px 2px 8px; }
+  .stat-tile .v{ font-size:16px; }
+  .stat-tile .l{ font-size:7.5px; }
   .account-season-title{ font-size:12.5px; }
   .account-season-body{ font-size:11.5px; }
 
@@ -3377,6 +3384,16 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text);
 }
 .modal-input:focus{ outline:none; border-color:var(--club-accent, #fff); }
+/* L'icône native du sélecteur de date (calendrier) reste sur un fond clair
+   par défaut, quel que soit le thème de la page - elle ressort comme un
+   bloc décalé/mal intégré sur fond sombre. On l'inverse pour qu'elle
+   passe en blanc, cohérente avec le reste du champ. */
+input[type="date"].modal-input::-webkit-calendar-picker-indicator{
+  filter:invert(1);
+  opacity:.65;
+  cursor:pointer;
+}
+input[type="date"].modal-input::-webkit-calendar-picker-indicator:hover{ opacity:1; }
 /* Le menu déroulant natif d'un <select> s'affiche sur fond blanc côté
    navigateur, quel que soit le thème de la page - sans cette règle, le
    texte hérite de la couleur claire prévue pour un fond sombre et devient
