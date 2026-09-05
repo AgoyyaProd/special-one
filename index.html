@@ -3817,11 +3817,11 @@ select.modal-input option{ color:#111; background:#fff; }
             <input type="text" id="pseudo-input" class="modal-input" placeholder="Ton pseudo" maxlength="24">
             <div class="profile-field-hint">Affiché au Palmarès et au Panthéon - jamais ton nom ou ton email.</div>
           </div>
-          <div class="profile-field">
+          <div class="profile-field profile-field-wide">
             <label for="profile-birthdate">Date de naissance</label>
             <input type="date" id="profile-birthdate" class="modal-input">
           </div>
-          <div class="profile-field">
+          <div class="profile-field profile-field-wide">
             <label>Genre</label>
             <div class="pf-dropdown pf-dropdown-form" id="profile-gender-dropdown">
               <button type="button" class="pf-dropdown-toggle" id="profile-gender-toggle" data-value="">
@@ -4891,7 +4891,14 @@ function primeCrestCache(){
 // Fait en JS plutôt qu'en CSS pur (`zoom:calc(100vw / 2560)` sur <html>) :
 // cette formule crée une dépendance circulaire (100vw peut dépendre du
 // zoom lui-même) que les navigateurs n'évaluent pas de façon fiable.
-const DESKTOP_ZOOM_REFERENCE_WIDTH = 2560;
+// DESKTOP_ZOOM_EFFECTIVE_WIDTH (2100, < la vraie référence de conception
+// 2560) : sert uniquement au calcul du zoom, pas de la mise en page - en
+// abaissant ce chiffre, un écran de 1920px (zoom 0.75 avant) se rapproche
+// davantage de la taille "native" (zoom ~0.91), et tout le site (polices,
+// cartes, marges) grossit uniformément sans avoir à retoucher chaque page
+// une par une. Au-delà de 2100px, le zoom plafonne à 1 comme avant - les
+// écrans très larges (2560px+) affichent donc tous la même taille "native".
+const DESKTOP_ZOOM_EFFECTIVE_WIDTH = 2100;
 const DESKTOP_ZOOM_MIN_WIDTH = 1101;
 function applyDesktopZoom(){
   const w = window.innerWidth;
@@ -4908,7 +4915,7 @@ function applyDesktopZoom(){
     document.documentElement.style.removeProperty('--vh100');
     return;
   }
-  const zoom = Math.min(1, w / DESKTOP_ZOOM_REFERENCE_WIDTH);
+  const zoom = Math.min(1, w / DESKTOP_ZOOM_EFFECTIVE_WIDTH);
   document.documentElement.style.zoom = zoom;
   // --vh100 remplace 100vh partout dans la feuille de style (voir plus
   // bas) : sur un écran moins "large-écran" que la référence 2560x1440
