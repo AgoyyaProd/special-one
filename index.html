@@ -460,21 +460,19 @@ button{ font-family:inherit; cursor:pointer; }
 .gm-account-menu .gm-account-btn span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gm-account-dropdown{
   display:none;
-  position:absolute;
-  top:calc(100% + 8px);
-  right:0;
+  position:fixed;
   min-width:180px;
   background:var(--surface-2);
   border:1px solid var(--border-2);
   border-radius:var(--r-md);
   padding:6px;
   box-shadow:0 12px 32px rgba(0,0,0,.45);
-  z-index:50;
+  z-index:200;
   flex-direction:column;
   gap:2px;
   overflow:hidden;
 }
-.gm-account-menu.open .gm-account-dropdown{ display:flex; }
+.gm-account-dropdown.open{ display:flex; }
 .gm-dropdown-item{
   font-family:var(--sans);
   font-size:12.5px;
@@ -806,6 +804,14 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-faint);
   text-align:center;
 }
+.site-footer-version{
+  display:inline-block;
+  margin:0 0 0 8px;
+  padding-left:8px;
+  border-left:1px solid var(--border);
+  opacity:.7;
+}
+.site-footer-version:hover{ opacity:1; }
 @media (max-width:720px){
   .site-footer-inner{ flex-direction:column; gap:32px; }
   .site-footer-cols{ gap:32px; }
@@ -1195,7 +1201,7 @@ button{ font-family:inherit; cursor:pointer; }
   position:relative;
   overflow:hidden;
 }
-.live-team{ flex:1; text-align:left; font-family:var(--sans); font-weight:700; font-size:15px; color:var(--text); }
+.live-team{ flex:1; min-width:0; text-align:left; font-family:var(--sans); font-weight:700; font-size:15px; color:var(--text); }
 .live-team-away{ text-align:right; }
 .live-score-block{ text-align:center; flex-shrink:0; }
 .live-competition{ font-family:var(--sans); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px; }
@@ -2593,19 +2599,15 @@ button{ font-family:inherit; cursor:pointer; }
   .gm-header-actions{ overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .gm-header-actions::-webkit-scrollbar{ display:none; }
   /* overflow-x:auto ci-dessus force aussi overflow-y à se comporter comme
-     "auto" (impossible d'avoir un axe visible et l'autre non en CSS) - le
-     sous-menu du compte (position:absolute, s'étend sous le bouton) se
-     retrouvait donc découpé à la hauteur du header (~28px) et totalement
-     invisible, rendant "Se connecter"/le pseudo inutilisable sur mobile.
-     En position:fixed, il échappe à ce découpage (aucun ancêtre n'a de
-     transform/filter qui le repiègerait dans un contexte englobant). */
-  .gm-account-dropdown{
-    position:fixed;
-    top:var(--header-h);
-    right:var(--gutter);
-    left:auto;
-    margin-top:8px;
-  }
+     "auto" (impossible d'avoir un axe visible et l'autre non en CSS) - un
+     sous-menu simplement positionné en absolute sous le bouton se
+     retrouvait découpé à la hauteur du header et invisible. Voir plus haut
+     .gm-account-dropdown (position:fixed, positionné dynamiquement en JS
+     à l'ouverture - voir positionAccountDropdown()) et son déplacement
+     hors de ce conteneur dans le DOM (voir l'init en fin de script) :
+     les deux mesures combinées le sortent complètement de ce contexte de
+     défilement, sur toutes les tailles d'écran plutôt qu'un correctif
+     mobile isolé qui s'est révélé peu fiable sur certains navigateurs. */
   .league-switch{ gap:4px; margin-bottom:10px; }
   .league-switch-btn{ font-size:9.5px; padding:5px 8px; }
 
@@ -2646,6 +2648,17 @@ button{ font-family:inherit; cursor:pointer; }
   .live-controls-left .season-btn{ font-size:11px; padding:8px 10px; white-space:nowrap; }
   .live-speed-group{ gap:4px; }
   .live-speed-btn{ font-size:10.5px; padding:7px 8px; }
+  /* Bandeau de score : les noms de club longs ("Paris Saint-Germain",
+     "RC Strasbourg") débordaient (min-width:auto par défaut sur un enfant
+     flex, corrigé plus haut) et le score à 40px ne laissait aucune marge
+     pour le texte des tirs au but ("2 - 2 (tab 1-3)"), qui se retrouvait
+     coupé net. Resserré pour que tout tienne, quitte à revenir à la ligne
+     sur les noms de club les plus longs plutôt que de déborder. */
+  .live-scoreboard{ padding:14px 12px; gap:8px; }
+  .live-team{ font-size:12px; line-height:1.25; }
+  .live-competition{ font-size:9px; }
+  .live-score{ font-size:26px; }
+  .live-minute{ font-size:11px; }
 }
 
 @media (max-width: 560px){
@@ -3446,6 +3459,7 @@ select.modal-input option{ color:#111; background:#fff; }
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
             <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
             <button class="site-footer-link" data-info="faq">FAQ</button>
             <button class="site-footer-link" data-info="contact">Contact</button>
           </div>
@@ -3458,6 +3472,7 @@ select.modal-input option{ color:#111; background:#fff; }
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
+        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
       </div>
     </footer>
   </section>
@@ -3690,6 +3705,7 @@ select.modal-input option{ color:#111; background:#fff; }
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
             <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
             <button class="site-footer-link" data-info="faq">FAQ</button>
             <button class="site-footer-link" data-info="contact">Contact</button>
           </div>
@@ -3702,6 +3718,7 @@ select.modal-input option{ color:#111; background:#fff; }
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
+        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
       </div>
     </footer>
   </section>
@@ -5032,6 +5049,11 @@ function toast(msg){
 // dynamiquement dans chaque emplacement [data-footer-slot] au démarrage
 // (voir plus bas), plutôt que dupliqué en dur dans chaque section HTML,
 // pour n'avoir qu'un seul endroit à maintenir.
+// Numéro de version affiché en bas de chaque page (voir .site-footer-version
+// ci-dessous et son injection après le remplissage des footers) - unique
+// source de vérité, à mettre à jour ici uniquement lors d'une prochaine
+// version plutôt que dans chacune des copies du footer.
+const SITE_VERSION = '1.0.0';
 const SITE_FOOTER_HTML = `
     <footer class="site-footer">
       <div class="site-footer-inner">
@@ -5050,6 +5072,7 @@ const SITE_FOOTER_HTML = `
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
             <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
+            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
             <button class="site-footer-link" data-info="faq">FAQ</button>
             <button class="site-footer-link" data-info="contact">Contact</button>
           </div>
@@ -5062,6 +5085,7 @@ const SITE_FOOTER_HTML = `
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
+        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
       </div>
     </footer>
 `;
@@ -5138,6 +5162,92 @@ const INFO_PAGES = {
       <p>Ce site est un projet non-officiel, non affilié et non approuvé par l'UEFA, la FIFA, EA Sports, ni par aucun des championnats, clubs ou joueurs mentionnés. Les noms et données réelles sont utilisés à titre purement informatif et non commercial, dans un cadre de fan-projet. Aucune donnée de jeu (FIFA/FC) n'est extraite ou redistribuée : les informations utilisées (compositions d'effectifs, postes, niveaux approximatifs) sont recensées manuellement à partir de sources publiques.</p>
       <h2>Pas de publicité</h2>
       <p>Ce site ne diffuse aucune publicité et ne vend aucune donnée à des tiers.</p>
+    `
+  },
+  'nouveautes': {
+    title:'Nouveautés',
+    html:`
+      <p class="info-meta">Historique des évolutions du jeu, version par version.</p>
+
+      <h2>v1.0.0 - "Coup d'envoi"</h2>
+      <p>Premier jalon considéré comme réellement prêt : fiabilité des comptes entre appareils, expérience mobile de bout en bout, et suivi des succès enfin exhaustif.</p>
+      <h3>Sauvegardes & comptes</h3>
+      <ul>
+        <li>Correction d'un cas où une connexion depuis un nouvel appareil pouvait écraser la sauvegarde du compte par erreur.</li>
+        <li>Renforcement de la logique de synchronisation : une sauvegarde contenant une vraie partie l'emporte désormais toujours sur une sauvegarde vide.</li>
+        <li>Correction de la fiabilité du bouton "Continuer" pour les comptes connectés.</li>
+        <li>Le retour à l'accueil n'efface plus la sauvegarde en cours ; seule une fin de carrière volontaire archive la partie.</li>
+        <li>Ajout d'une confirmation avant d'écraser une carrière en cours via "Commencer".</li>
+      </ul>
+      <h3>Succès</h3>
+      <ul>
+        <li>Le Trophée des Champions et la Supercoupe d'Europe font désormais progresser les succès (ce n'était pas le cas auparavant).</li>
+        <li>Les décisions prises en direct pendant une manche de qualification européenne déclenchent correctement les succès liés au direct.</li>
+        <li>Rattrapage rétroactif des succès à partir de l'historique de carrière déjà enregistré.</li>
+        <li>Correction de la mise en page des succès sur mobile (popup de déblocage et liste sur la page compte).</li>
+      </ul>
+      <h3>Mobile</h3>
+      <ul>
+        <li>Refonte quasi complète du responsive : terrain de draft, main de cartes, boutons d'accueil et de saison, sélection de club/championnat, Panthéon, page compte, match en direct.</li>
+        <li>Position du footer uniformisée sur toutes les pages.</li>
+        <li>Contrôles du match en direct regroupés sur une seule ligne.</li>
+      </ul>
+      <h3>Interface desktop</h3>
+      <ul>
+        <li>Mise à l'échelle proportionnelle de l'interface selon la taille d'écran, pour un rendu cohérent à toute résolution.</li>
+        <li>Header, texte d'accueil, cartes vedettes et footer agrandis sur grand écran.</li>
+        <li>Cartes de draft et texte des joueurs agrandis pour rester lisibles.</li>
+      </ul>
+      <h3>Autres</h3>
+      <ul>
+        <li>Ajout d'un bouton de soutien libre (dons).</li>
+        <li>Favicon adaptatif clair/sombre selon le thème du navigateur.</li>
+        <li>Popup de bienvenue unique à la première visite.</li>
+        <li>Suppression des indications de "verdict" après une décision de saison.</li>
+      </ul>
+
+      <h2>v0.6.0 - Profondeur de carrière</h2>
+      <ul>
+        <li>Longévité de carrière avec plafond de saisons, retraite forcée et retour possible au club formateur.</li>
+        <li>Décisions de mi-temps en direct (9 événements dédiés).</li>
+        <li>Prolongations et tirs au but réellement joués en match direct.</li>
+        <li>Temps additionnel dynamique et réaliste.</li>
+        <li>Regroupement des carrières multiples dans le Palmarès.</li>
+        <li>Nombreuses corrections de fiabilité et d'affichage.</li>
+      </ul>
+
+      <h2>v0.5.0 - Compétitions européennes & succès</h2>
+      <ul>
+        <li>Coupes européennes complètes : barrages, 8es, quarts, demies en aller-retour, prolongations et tirs au but.</li>
+        <li>Trophées d'ouverture nationaux (Trophée des Champions, Community Shield, Supercoupes...).</li>
+        <li>Premier système de succès, avec popups de déblocage.</li>
+      </ul>
+
+      <h2>v0.4.0 - Refonte draft & terrain</h2>
+      <ul>
+        <li>Redesign complet de l'écran de draft/mercato.</li>
+        <li>Système de pelouses personnalisables (arrière-plan de terrain au choix).</li>
+      </ul>
+
+      <h2>v0.3.0 - Le jeu complet</h2>
+      <ul>
+        <li>Passage à un jeu multi-championnats : 5 grandes ligues européennes.</li>
+        <li>Format des compétitions européennes conforme au système actuel.</li>
+        <li>Mercato entre les saisons.</li>
+        <li>Comptes utilisateurs (email et connexion sociale).</li>
+      </ul>
+
+      <h2>v0.2.0 - Identité visuelle</h2>
+      <ul>
+        <li>Carte joueur avec recoloration dynamique par club.</li>
+        <li>Passage à une architecture plus simple et autonome.</li>
+      </ul>
+
+      <h2>v0.1.0 - Genèse</h2>
+      <ul>
+        <li>Premier moteur de jeu : formations, logique de draft, simulation de match, calendrier, classement.</li>
+        <li>Constitution des premières données de joueurs réels.</li>
+      </ul>
     `
   },
   'faq': {
@@ -10442,6 +10552,31 @@ function trackMatchResult(fx){
     if(won) unlockAchievement('le_mur');
   }
   if(myScore >= 6) unlockAchievement('festival_offensif');
+  // "Do Brazil" (succès caché) : référence au 7-1 Allemagne-Brésil,
+  // Coupe du monde 2014. "Die Ohrfeige" (succès caché) : référence au
+  // 8-2 Bayern-Barcelone, Ligue des Champions 2020 - remporté face à un
+  // club de niveau comparable ou supérieur au sien, pas n'importe quel
+  // adversaire (sinon un simple carton contre une équipe famélique
+  // suffirait, ce qui trahirait la référence).
+  if(myScore === 7 && oppScore === 1) unlockAchievement('do_brazil');
+  if(myScore === 8 && oppScore === 2){
+    const oppId = mySide === 'home' ? fx.away : fx.home;
+    const oppClub = clubById(oppId);
+    // Les clubs "reste de l'Europe" (EURO_FILLER_CLUBS, ex: Ajax, Benfica,
+    // Galatasaray...) ne sont pas dans les 5 championnats jouables donc
+    // absents de clubById() - mais ils portent déjà une force toute prête
+    // (colonne "Force" du CSV), pas besoin de la recalculer.
+    let oppStrength = null;
+    if(oppClub) oppStrength = estimateClubStrength(oppClub);
+    else {
+      const filler = EURO_FILLER_CLUBS.find(f => f.id === oppId);
+      if(filler) oppStrength = filler.strength;
+    }
+    if(oppStrength !== null){
+      const myStrength = myTeamStrength('league');
+      if(oppStrength >= myStrength - 3) unlockAchievement('die_ohrfeige');
+    }
+  }
 
   (fx.events||[]).forEach(ev=>{
     if(ev.side !== mySide) return;
@@ -10486,7 +10621,6 @@ function checkLiveMatchAchievements(lm, won){
     if(myPos === 1) unlockAchievement('le_destin');
   }
 
-  if(won && (lm._maxDeficit||0) >= 2) unlockAchievement('remontada');
   if(won && (lm._maxDeficit||0) >= 3) unlockAchievement('le_miracle');
 
   if(won && (lm._riskyChoicesThisMatch||0) >= 3) unlockAchievement('ca_passe');
@@ -12278,6 +12412,21 @@ function playKnockoutLeg1(euro, ties){
 
 // Joue la manche retour, calcule le cumul et tranche via prolongation /
 // tirs au but si nécessaire.
+// "Remontada" (succès caché) : référence au PSG 4-0 Barça (aller) suivi
+// du Barça 6-1 PSG (retour), Ligue des Champions 2017 - Barcelone
+// renverse une élimination qui semblait actée. Ici, du point de vue du
+// joueur : perdre l'aller d'au moins 4 buts d'écart, puis renverser la
+// qualification en s'imposant au retour avec au moins 5 buts d'écart.
+function checkRemontadaAchievement(tie){
+  if(!tie.leg1 || !tie.leg2 || tie.winner !== state.club.id) return;
+  const amTeamA = tie.teamA === state.club.id;
+  const leg1My = amTeamA ? tie.leg1.hg : tie.leg1.ag;
+  const leg1Opp = amTeamA ? tie.leg1.ag : tie.leg1.hg;
+  const leg2My = amTeamA ? tie.leg2.ag : tie.leg2.hg;
+  const leg2Opp = amTeamA ? tie.leg2.hg : tie.leg2.ag;
+  if((leg1Opp - leg1My) >= 4 && (leg2My - leg2Opp) >= 5) unlockAchievement('remontada');
+}
+
 function playKnockoutLeg2(euro, ties){
   ties.forEach(tie=>{
     const sA = euroStrengthOf(euro, tie.teamA), sB = euroStrengthOf(euro, tie.teamB);
@@ -12302,6 +12451,7 @@ function playKnockoutLeg2(euro, ties){
       tie.aggA += result.etA;
       tie.aggB += result.etB;
     }
+    if(euro === state.euro && (tie.teamA === state.club.id || tie.teamB === state.club.id)) checkRemontadaAchievement(tie);
   });
 }
 
@@ -12783,6 +12933,7 @@ function commitLiveEuroKnockoutLegResult(){
         tie.winner = result.winner === 'A' ? tie.teamA : tie.teamB;
         tie.aggA += result.etA; tie.aggB += result.etB;
       }
+      checkRemontadaAchievement(tie);
       // Les autres confrontations du même tour jouent aussi leur retour,
       // instantanément (cumul/prolongation/tirs au but compris pour elles).
       ties.forEach(t=>{ if(t !== tie && !t.leg2) playKnockoutLeg2(euro, [t]); });
@@ -14923,6 +15074,12 @@ document.getElementById('btn-next-matchday').addEventListener('click', handleNex
 document.querySelectorAll('[data-footer-slot]').forEach(slot=>{
   slot.innerHTML = SITE_FOOTER_HTML;
 });
+// Une seule passe après coup, une fois TOUS les footers en place (ceux
+// déjà en dur dans le HTML + ceux tout juste injectés ci-dessus dans les
+// [data-footer-slot]) - couvre donc toutes les copies d'un coup.
+document.querySelectorAll('.site-footer-version').forEach(el=>{
+  el.textContent = 'v' + SITE_VERSION;
+});
 document.querySelectorAll('.site-footer-link[data-info]').forEach(btn=>{
   btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
 });
@@ -15009,26 +15166,60 @@ document.getElementById('btn-home').addEventListener('keydown', (e)=>{
   if(e.key==='Enter' || e.key===' '){ e.preventDefault(); document.getElementById('btn-home').click(); }
 });
 const accountMenuEl = document.getElementById('account-menu');
+const accountDropdownEl = document.getElementById('account-dropdown');
+// Déplacé en toute fin de <body>, hors de .gm-header-actions (qui a besoin
+// d'un overflow-x:auto sur mobile pour laisser les 3 boutons du header
+// défiler quand ils ne tiennent pas tous - or poser un axe d'overflow sur
+// un seul sens force le navigateur à contraindre aussi l'autre, ce qui
+// masquait ce sous-menu, qui s'étend sous le bouton). Son positionnement
+// ne dépendait déjà plus de sa place dans le DOM (position:fixed calculé
+// dynamiquement, voir positionAccountDropdown()), donc ce déplacement ne
+// change rien visuellement, à part le sortir de ce contexte de défilement
+// - de façon fiable sur tous les navigateurs, contrairement à un correctif
+// scopé à un seul palier mobile qui restait fragile sur certains d'entre eux.
+document.body.appendChild(accountDropdownEl);
+function positionAccountDropdown(){
+  const btnRect = document.getElementById('btn-account-menu-toggle').getBoundingClientRect();
+  const gap = 8;
+  accountDropdownEl.style.top = (btnRect.bottom + gap) + 'px';
+  // Aligné sur le bord droit du bouton plutôt que sur sa gauche, pour
+  // rester dans l'écran même quand le bouton est collé au bord (mobile).
+  const rightEdge = window.innerWidth - btnRect.right;
+  accountDropdownEl.style.right = Math.max(8, rightEdge) + 'px';
+  accountDropdownEl.style.left = 'auto';
+}
+function closeAccountDropdown(){
+  accountMenuEl.classList.remove('open');
+  accountDropdownEl.classList.remove('open');
+}
 document.getElementById('btn-account-menu-toggle').addEventListener('click', (e)=>{
   e.stopPropagation();
   if(!state.session){ showProfileModal(); return; }
-  accountMenuEl.classList.toggle('open');
+  const willOpen = !accountMenuEl.classList.contains('open');
+  accountMenuEl.classList.toggle('open', willOpen);
+  accountDropdownEl.classList.toggle('open', willOpen);
+  if(willOpen) positionAccountDropdown();
+});
+window.addEventListener('resize', ()=>{
+  if(accountMenuEl.classList.contains('open')) positionAccountDropdown();
 });
 document.addEventListener('click', (e)=>{
-  if(!accountMenuEl.contains(e.target)) accountMenuEl.classList.remove('open');
+  if(!accountMenuEl.contains(e.target) && !accountDropdownEl.contains(e.target)){
+    closeAccountDropdown();
+  }
 });
 document.getElementById('menu-item-account').addEventListener('click', ()=>{
-  accountMenuEl.classList.remove('open');
+  closeAccountDropdown();
   showScreen('account');
   renderAccountScreen();
 });
 document.getElementById('menu-item-palmares').addEventListener('click', ()=>{
-  accountMenuEl.classList.remove('open');
+  closeAccountDropdown();
   showScreen('palmares');
   renderPalmaresScreen();
 });
 document.getElementById('menu-item-logout').addEventListener('click', ()=>{
-  accountMenuEl.classList.remove('open');
+  closeAccountDropdown();
   signOutUser();
 });
 document.getElementById('btn-pantheon').addEventListener('click', ()=>{
