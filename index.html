@@ -1199,10 +1199,11 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
 #screen-live-match.euro-ecl{ --club-accent:var(--zone-ecl); --club-primary:var(--zone-ecl); }
-/* Blocs du match en direct de coupe d'Europe : couleur de zone bien plus
-   présente qu'en championnat (où le fond ne fait qu'effleurer le noir,
-   20%/12% de mélange) - 70% de la couleur de zone, en transparence plutôt
-   qu'opacity sur tout le bloc (qui aurait aussi fait disparaître le texte). */
+/* Blocs du match en direct de coupe d'Europe : couleur de zone éclaircie
+   (mélangée vers le blanc) avant d'appliquer les 70% d'opacité - une
+   couleur saturée pure à 70% sur fond sombre reste visuellement "pleine"
+   et ne se distingue pas d'un simple aplat opaque ; le mélange vers le
+   blanc d'abord est ce qui donne ce rendu clair et translucide demandé. */
 #screen-live-match.euro-cl .live-scoreboard,
 #screen-live-match.euro-el .live-scoreboard,
 #screen-live-match.euro-ecl .live-scoreboard,
@@ -1212,13 +1213,12 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-cl .live-decision,
 #screen-live-match.euro-el .live-decision,
 #screen-live-match.euro-ecl .live-decision{
-  background:color-mix(in srgb, var(--club-primary) 70%, transparent);
+  background:color-mix(in srgb, color-mix(in srgb, var(--club-primary) 45%, white 55%) 70%, transparent);
 }
-/* Sur fond de zone maintenant bien plus vif (70% ci-dessus), le texte qui
-   reprenait --club-accent (lui-même égal à cette même couleur de zone,
-   voir plus haut) devenait quasiment illisible - bleu sur bleu en Ligue
-   des Champions, par exemple. Forcé en blanc avec une légère ombre pour
-   rester lisible quelle que soit la zone. */
+/* Fond de zone désormais clair/pastel (voir ci-dessus) : le texte blanc
+   d'origine (ou --club-accent, egal à la couleur de zone) n'aurait plus
+   assez de contraste - inversé en texte sombre, sans ombre (elle n'a plus
+   d'utilité sur un fond clair). */
 #screen-live-match.euro-cl .live-competition,
 #screen-live-match.euro-el .live-competition,
 #screen-live-match.euro-ecl .live-competition,
@@ -1233,16 +1233,45 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-ecl .live-event,
 #screen-live-match.euro-cl .live-event-minute,
 #screen-live-match.euro-el .live-event-minute,
-#screen-live-match.euro-ecl .live-event-minute{
-  color:#fff;
-  text-shadow:0 1px 3px rgba(0,0,0,.5);
+#screen-live-match.euro-ecl .live-event-minute,
+#screen-live-match.euro-cl .live-team,
+#screen-live-match.euro-el .live-team,
+#screen-live-match.euro-ecl .live-team,
+#screen-live-match.euro-cl .live-score,
+#screen-live-match.euro-el .live-score,
+#screen-live-match.euro-ecl .live-score,
+#screen-live-match.euro-cl .live-decision-text,
+#screen-live-match.euro-el .live-decision-text,
+#screen-live-match.euro-ecl .live-decision-text,
+#screen-live-match.euro-cl .live-decision-option,
+#screen-live-match.euro-el .live-decision-option,
+#screen-live-match.euro-ecl .live-decision-option{
+  color:#0a0d13;
+  text-shadow:none;
+}
+#screen-live-match.euro-cl .live-decision-option,
+#screen-live-match.euro-el .live-decision-option,
+#screen-live-match.euro-ecl .live-decision-option{
+  background:rgba(255,255,255,.35);
+  border-color:rgba(10,13,19,.25);
+}
+#screen-live-match.euro-cl .live-decision-option:hover,
+#screen-live-match.euro-el .live-decision-option:hover,
+#screen-live-match.euro-ecl .live-decision-option:hover{
+  background:rgba(255,255,255,.55);
 }
 .live-scoreboard{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:16px;
-  background:color-mix(in srgb, var(--club-primary) 20%, #0a0d13 80%);
+  /* Gris anthracite fixe à 70%, plutôt que teinté par la couleur du club
+     (rouge, bleu... selon l'équipe) - cohérent avec le fond de page déjà
+     neutralisé, sur les matchs domestiques (championnat, coupe nationale).
+     Les matchs européens gardent leur propre teinte de zone (voir plus bas
+     #screen-live-match.euro-cl/.euro-el/.euro-ecl, plus spécifique donc
+     prioritaire sur cette règle). */
+  background:color-mix(in srgb, #3d434f 70%, transparent);
   border:1px solid color-mix(in srgb, var(--club-accent) 30%, var(--border));
   border-radius:2px var(--r-lg) 2px var(--r-lg);
   padding:20px 24px;
@@ -1322,7 +1351,7 @@ button{ font-family:inherit; cursor:pointer; }
   display:flex;
   align-items:center;
   gap:12px;
-  background:color-mix(in srgb, var(--club-primary) 12%, #0a0d13 88%);
+  background:color-mix(in srgb, #3d434f 70%, transparent);
   border:1px solid color-mix(in srgb, var(--club-accent) 18%, rgba(255,255,255,.06));
   border-left:3px solid var(--club-accent);
   border-radius:2px var(--r-sm) var(--r-sm) 2px;
@@ -1552,7 +1581,7 @@ button{ font-family:inherit; cursor:pointer; }
   flex:1;
   min-height:0;
 }
-.season-panel{ padding:20px; display:flex; flex-direction:column; min-height:0; }
+.season-panel{ padding:20px; display:flex; flex-direction:column; min-height:0; min-width:0; }
 .league-switch{
   display:flex; flex-wrap:wrap; gap:6px;
   margin-bottom:12px;
