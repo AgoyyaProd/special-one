@@ -373,9 +373,13 @@ button{ font-family:inherit; cursor:pointer; }
   inset:0;
   z-index:0;
   pointer-events:none;
+  /* Fixé en gris/noir neutre (mêmes teintes que --club-primary/secondary
+     par défaut, avant sélection d'un club) au lieu de suivre la couleur du
+     club sélectionné - même fond partout, comme sur l'accueil, plutôt
+     qu'un fond qui variait du rouge au bleu au vert selon l'équipe. */
   background:
-    radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--club-primary) 55%, transparent) 0%, transparent 55%),
-    radial-gradient(circle at 88% 22%, color-mix(in srgb, var(--club-secondary) 48%, transparent) 0%, transparent 55%),
+    radial-gradient(circle at 14% 12%, color-mix(in srgb, #3d434f 55%, transparent) 0%, transparent 55%),
+    radial-gradient(circle at 88% 22%, color-mix(in srgb, #14161c 48%, transparent) 0%, transparent 55%),
     var(--bg);
 }
 
@@ -1166,7 +1170,14 @@ button{ font-family:inherit; cursor:pointer; }
      défile ici en interne plutôt que de faire grandir la page. */
   height:calc(var(--vh100, 100dvh) - var(--header-h));
   overflow-y:auto;
+  /* Barre de défilement masquée (le défilement lui-même reste actif au
+     clavier/molette/tactile) - contrairement au reste du site où une
+     barre fine et discrète (voir la règle * ::-webkit-scrollbar tout en
+     haut) passe inaperçue, celle-ci restait bien visible sur toute la
+     hauteur de l'écran de match en direct. */
+  scrollbar-width:none;
 }
+.live-shell::-webkit-scrollbar{ display:none; }
 /* Le verrouillage de hauteur/scroll vit sur .live-shell lui-même
    maintenant (voir ci-dessus) - #screen-live-match n'a plus besoin d'être
    lui-même un conteneur flex/overflow:hidden, exactement comme
@@ -1188,6 +1199,44 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
 #screen-live-match.euro-ecl{ --club-accent:var(--zone-ecl); --club-primary:var(--zone-ecl); }
+/* Blocs du match en direct de coupe d'Europe : couleur de zone bien plus
+   présente qu'en championnat (où le fond ne fait qu'effleurer le noir,
+   20%/12% de mélange) - 70% de la couleur de zone, en transparence plutôt
+   qu'opacity sur tout le bloc (qui aurait aussi fait disparaître le texte). */
+#screen-live-match.euro-cl .live-scoreboard,
+#screen-live-match.euro-el .live-scoreboard,
+#screen-live-match.euro-ecl .live-scoreboard,
+#screen-live-match.euro-cl .live-event,
+#screen-live-match.euro-el .live-event,
+#screen-live-match.euro-ecl .live-event,
+#screen-live-match.euro-cl .live-decision,
+#screen-live-match.euro-el .live-decision,
+#screen-live-match.euro-ecl .live-decision{
+  background:color-mix(in srgb, var(--club-primary) 70%, transparent);
+}
+/* Sur fond de zone maintenant bien plus vif (70% ci-dessus), le texte qui
+   reprenait --club-accent (lui-même égal à cette même couleur de zone,
+   voir plus haut) devenait quasiment illisible - bleu sur bleu en Ligue
+   des Champions, par exemple. Forcé en blanc avec une légère ombre pour
+   rester lisible quelle que soit la zone. */
+#screen-live-match.euro-cl .live-competition,
+#screen-live-match.euro-el .live-competition,
+#screen-live-match.euro-ecl .live-competition,
+#screen-live-match.euro-cl .live-minute,
+#screen-live-match.euro-el .live-minute,
+#screen-live-match.euro-ecl .live-minute,
+#screen-live-match.euro-cl .live-decision-title,
+#screen-live-match.euro-el .live-decision-title,
+#screen-live-match.euro-ecl .live-decision-title,
+#screen-live-match.euro-cl .live-event,
+#screen-live-match.euro-el .live-event,
+#screen-live-match.euro-ecl .live-event,
+#screen-live-match.euro-cl .live-event-minute,
+#screen-live-match.euro-el .live-event-minute,
+#screen-live-match.euro-ecl .live-event-minute{
+  color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+}
 .live-scoreboard{
   display:flex;
   align-items:center;
@@ -2608,8 +2657,13 @@ button{ font-family:inherit; cursor:pointer; }
      les deux mesures combinées le sortent complètement de ce contexte de
      défilement, sur toutes les tailles d'écran plutôt qu'un correctif
      mobile isolé qui s'est révélé peu fiable sur certains navigateurs. */
-  .league-switch{ gap:4px; margin-bottom:10px; }
-  .league-switch-btn{ font-size:9.5px; padding:5px 8px; }
+  /* Sur une seule ligne plutôt que de passer à la ligne (5 championnats,
+     3 compétitions européennes) - défilement horizontal discret plutôt
+     qu'un retour à la ligne qui casse le groupe en 2 rangées inégales,
+     même principe que les boutons du header plus haut. */
+  .league-switch{ gap:4px; margin-bottom:10px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .league-switch::-webkit-scrollbar{ display:none; }
+  .league-switch-btn{ font-size:9.5px; padding:5px 8px; flex-shrink:0; }
 
   .account-header{ flex-direction:column; align-items:flex-start; gap:12px; }
   /* La page Panthéon n'avait aucune adaptation mobile : la barre latérale
@@ -3394,6 +3448,14 @@ input[type="date"].modal-input::-webkit-calendar-picker-indicator{
   cursor:pointer;
 }
 input[type="date"].modal-input::-webkit-calendar-picker-indicator:hover{ opacity:1; }
+/* Volontairement pas 100% comme les autres champs (voir .modal-input) :
+   passé en pleine largeur de ligne pour corriger un vrai bug (le contrôle
+   natif du sélecteur de date rendait mal, bordures qui se chevauchaient,
+   une fois compressé sous ~180px dans une grille à 2 colonnes) - mais
+   étiré sur un mobile large, ça part dans l'autre excès et paraît
+   anormalement vide. Cette largeur reste confortablement au-dessus du
+   seuil qui posait problème, sans pour autant occuper tout l'écran. */
+#profile-birthdate.modal-input{ min-width:220px; max-width:260px; }
 /* Le menu déroulant natif d'un <select> s'affiche sur fond blanc côté
    navigateur, quel que soit le thème de la page - sans cette règle, le
    texte hérite de la couleur claire prévue pour un fond sombre et devient
@@ -8393,6 +8455,18 @@ function randomStarterPlayer(excludeGK){
   return starters[Math.floor(Math.random() * starters.length)];
 }
 
+// Pioche un titulaire d'une ligne de poste précise (DEF/MID/ATT, voir
+// POSITION_LINE) - pour les événements dont le texte suppose un poste
+// donné (ex: "votre défenseur", "votre buteur") plutôt qu'un titulaire
+// pris au hasard sans lien avec le rôle décrit. Retombe sur null si
+// l'effectif n'a personne dans cette ligne (formation atypique) - le texte
+// affiche alors un générique ("Votre défenseur") plutôt qu'un nom erroné.
+function randomPlayerByLine(line){
+  const candidates = state.slots.filter(s => s.player && playerLines(s.player).includes(line)).map(s => s.player);
+  if(!candidates.length) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
 // Pioche un joueur plausible dans l'effectif d'un club pour lui attribuer un
 // but ou une passe décisive. Pour mon propre club, on utilise le onze
 // réellement composé par le joueur ; pour l'adversaire, on pioche dans son
@@ -9057,7 +9131,7 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function unstoppableWingerDecision(lm){
-    const player = randomStarterPlayer();
+    const player = randomStarterPlayer(true); // un gardien ne fait pas "la différence sur son côté" en tant qu'ailier
     const name = player ? player.nom : 'Votre ailier';
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
@@ -9080,7 +9154,7 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function strugglingDefenderDecision(lm){
-    const player = randomStarterPlayer();
+    const player = randomPlayerByLine('DEF'); // un défenseur précisément, pas n'importe quel non-gardien
     const name = player ? player.nom : 'Votre défenseur';
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
@@ -9113,7 +9187,7 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function frustratedStrikerDecision(lm){
-    const player = randomStarterPlayer();
+    const player = randomPlayerByLine('ATT'); // un attaquant précisément, pas n'importe quel non-gardien
     const name = player ? player.nom : 'Votre buteur';
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
@@ -9140,6 +9214,135 @@ const LIVE_DECISION_BUILDERS = [
           } else {
             pushLiveEvent(lm, lm.minute, 'decision', `${name} termine la rencontre malgré une soirée frustrante, aucun remplaçant disponible.`, mySide);
           }
+        }}
+      ]
+    };
+  },
+  function confidentDefenderDecision(lm){
+    // Pendant positif de "Défenseur en difficulté" - même principe
+    // (un défenseur précis, jamais un gardien ni un joueur d'une autre
+    // ligne), mais côté relance plutôt que côté duels perdus.
+    const player = randomPlayerByLine('DEF');
+    const name = player ? player.nom : 'Votre défenseur';
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    return {
+      title:'Défenseur en confiance',
+      text:`${name} déborde de confiance dans la relance. Comment l'utiliser ?`,
+      options:[
+        { key:'short', label:'Relance courte', apply(){
+          lm[myModKey(lm)] += 3;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous demandez à ${name} de relancer court, en sécurité.`, mySide);
+        }},
+        { key:'long', label:'Relance longue', apply(){
+          if(Math.random() < 0.4){
+            lm[myModKey(lm)] += 7;
+            pushLiveEvent(lm, lm.minute, 'decision', `La relance longue de ${name} trouve directement un partenaire !`, mySide);
+          } else {
+            lm[oppModKey(lm)] += 2;
+            pushLiveEvent(lm, lm.minute, 'decision', `La relance longue de ${name} est coupée par l'adversaire.`, mySide);
+          }
+        }},
+        { key:'safe', label:'Jeu prudent', apply(){
+          lm[myModKey(lm)] += 1; lm[oppModKey(lm)] -= 2;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous demandez à ${name} de ne prendre aucun risque.`, mySide);
+        }}
+      ]
+    };
+  },
+  function dominantMidfielderDecision(lm){
+    const player = randomPlayerByLine('MID');
+    const name = player ? player.nom : 'Votre milieu';
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    return {
+      title:'Milieu dominateur',
+      text:`${name} contrôle le milieu de terrain. Comment l'utiliser ?`,
+      options:[
+        { key:'tempo', label:'Contrôler le tempo', apply(){
+          lm[myModKey(lm)] += 4; lm[oppModKey(lm)] -= 3;
+          pushLiveEvent(lm, lm.minute, 'decision', `${name} impose le rythme du match.`, mySide);
+        }},
+        { key:'push', label:'Le pousser vers l\'attaque', apply(){
+          // Option la plus tranchée des trois - conséquence directe sur une
+          // action de but plutôt qu'un simple bonus de momentum, comme
+          // demandé : soit ${name} se crée une vraie occasion, soit le
+          // milieu se retrouve dépeuplé et l'adversaire en profite.
+          if(Math.random() < 0.35){
+            lm[myModKey(lm)] += 9;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} monte et se crée une occasion nette !`, mySide);
+          } else {
+            lm[oppModKey(lm)] += 4;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} monte, mais laisse un vide exploité par l'adversaire.`, mySide);
+          }
+        }},
+        { key:'balance', label:'Garder l\'équilibre', apply(){
+          lm[myModKey(lm)] += 2;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous demandez à ${name} de garder l'équilibre entre les lignes.`, mySide);
+        }}
+      ]
+    };
+  },
+  function overwhelmedMidfielderDecision(lm){
+    // Pendant négatif de "Milieu dominateur" - même structure que
+    // "Défenseur en difficulté" (couvrir / remplacer / continuer).
+    const player = randomPlayerByLine('MID');
+    const name = player ? player.nom : 'Votre milieu';
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    return {
+      title:'Milieu débordé',
+      text:`${name} est débordé au milieu de terrain. Comment réagir ?`,
+      options:[
+        { key:'cover', label:'Le couvrir', apply(){
+          lm[oppModKey(lm)] -= 3;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous demandez à l'équipe de venir en soutien de ${name}.`, mySide);
+        }},
+        { key:'sub', label:'Le remplacer', apply(){
+          const incoming = performLiveSubstitution(lm, player);
+          if(incoming){
+            lm[oppModKey(lm)] -= 2;
+            pushLiveEvent(lm, lm.minute, 'sub', `Changement : ${incoming.nom} remplace ${name}, débordé au milieu.`, mySide);
+          } else {
+            lm[myModKey(lm)] -= 1;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} reste en difficulté, aucun remplaçant disponible.`, mySide);
+          }
+        }},
+        { key:'continue', label:'Continuer', apply(){
+          if(Math.random() < 0.35){
+            lm[oppModKey(lm)] += 6;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} continue de subir le milieu de terrain.`, mySide);
+          } else {
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} se reprend et retrouve le contrôle.`, mySide);
+          }
+        }}
+      ]
+    };
+  },
+  function sharpStrikerDecision(lm){
+    // Pendant positif de "Buteur frustré" - centré sur la notion
+    // d'attaque/but comme demandé : l'option la plus offensive a une vraie
+    // chance de se traduire directement par une occasion nette.
+    const player = randomPlayerByLine('ATT');
+    const name = player ? player.nom : 'Votre attaquant';
+    const mySide = isMyTeamHome(lm) ? 'home' : 'away';
+    return {
+      title:'Buteur affûté',
+      text:`${name} sent le but à chaque ballon. Comment l'exploiter ?`,
+      options:[
+        { key:'feed', label:'Le servir en priorité', apply(){
+          if(Math.random() < 0.45){
+            lm[myModKey(lm)] += 9;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} est trouvé en position idéale, énorme occasion !`, mySide);
+          } else {
+            lm[myModKey(lm)] += 2;
+            pushLiveEvent(lm, lm.minute, 'decision', `${name} est bien servi mais l'occasion ne se présente pas.`, mySide);
+          }
+        }},
+        { key:'crosses', label:'Multiplier les centres', apply(){
+          lm[myModKey(lm)] += 5;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous demandez à l'équipe de centrer davantage vers ${name}.`, mySide);
+        }},
+        { key:'direct', label:'Jeu direct', apply(){
+          lm[myModKey(lm)] += 3; lm[oppModKey(lm)] += 1;
+          pushLiveEvent(lm, lm.minute, 'decision', `Vous jouez plus directement pour trouver ${name} au plus vite.`, mySide);
         }}
       ]
     };
@@ -10159,7 +10362,13 @@ function renderSeasonEventModal(){
   titleEl.classList.toggle('is-rare', !!decision.rare);
 
   const ctxEl = document.getElementById('season-event-context');
-  const ctxRoundIdx = decision.contextRoundIdx !== undefined ? decision.contextRoundIdx : pending.roundIdx;
+  // Même repli que resolveSeasonEvent (roundIdx+1) : les événements sans
+  // contextRoundIdx explicite (ex: Coup de fatigue collectif) affectent la
+  // PROCHAINE journée via leurs modificateurs (addSeasonModifier(...,
+  // roundIdx+1, ...)), pas celle qui vient de se jouer - montrer ici la
+  // journée déjà disputée donnait l'impression trompeuse que la décision
+  // portait sur un match déjà terminé et connu du joueur.
+  const ctxRoundIdx = decision.contextRoundIdx !== undefined ? decision.contextRoundIdx : pending.roundIdx+1;
   const round = state.season.calendar[ctxRoundIdx];
   const myFx = round ? round.find(fx => fx.home === state.club.id || fx.away === state.club.id) : null;
   if(myFx){
@@ -12782,15 +12991,7 @@ function getDueEuroLeaguePhaseStep(){
 function resolveDueEuroLeaguePhaseStepBulk(){
   const euro = state.euro;
   const anchor = euro.schedule.leaguePhase[euro.currentRound];
-  const resultsBefore = euro.resultsByRound.length;
   simulateEuroLeagueRound(euro, anchor);
-  if(euro.resultsByRound.length > resultsBefore){
-    const lastEntry = euro.resultsByRound[euro.resultsByRound.length - 1];
-    const myFx = lastEntry.matches.find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(myFx && myFx.hg !== undefined && myFx.hg !== null){
-      toast(`${EURO_LABELS[euro.tier]} - ${lastEntry.label} : ${clubNameById(myFx.home)} ${myFx.hg} - ${myFx.ag} ${clubNameById(myFx.away)}`);
-    }
-  }
   renderSeason();
 }
 
@@ -12822,18 +13023,10 @@ const EURO_KNOCKOUT_STAGE_LABEL = { playoff:'Barrages', ro16:'Huitièmes de fina
 
 function resolveDueEuroKnockoutStep(){
   const euro = state.euro;
-  const resultsBefore = euro.resultsByRound.length;
   if(euro.stage === 'final'){
     simulateEuroFinalMatch(euro);
   } else {
     simulateEuroKnockoutLeg(euro, euro.stage, EURO_KNOCKOUT_NEXT_STAGE[euro.stage], EURO_KNOCKOUT_STAGE_LABEL[euro.stage]);
-  }
-  if(euro.resultsByRound.length > resultsBefore){
-    const lastEntry = euro.resultsByRound[euro.resultsByRound.length - 1];
-    const myFx = lastEntry.matches.find(fx => fx.home === state.club.id || fx.away === state.club.id);
-    if(myFx && myFx.hg !== undefined && myFx.hg !== null){
-      toast(`${EURO_LABELS[euro.tier]} - ${lastEntry.label} : ${clubNameById(myFx.home)} ${myFx.hg} - ${myFx.ag} ${clubNameById(myFx.away)}${myFx.aggHome!==undefined ? ` (agg ${myFx.aggHome}-${myFx.aggAway}${myFx.wentToPenalties ? ', tab '+myFx.penaltyScore : myFx.extraTimeScore ? ', a.p.' : ''})` : ''}`);
-    }
   }
   renderSeason();
 }
