@@ -625,16 +625,6 @@
             "hidden": true
         },
         {
-            "id": "le_special_one",
-            "name": "Le Special One",
-            "category": "Succès cachés",
-            "kind": "simple",
-            "grade": "Légendaire",
-            "condition": "Débloquer tous les badges au rang Légendaire, obtenir tous les succès et remporter toutes les compétitions disponibles au moins une fois.",
-            "icon": "👑",
-            "hidden": true
-        },
-        {
             "id": "do_brazil",
             "name": "Do Brazil",
             "category": "Succès cachés",
@@ -652,6 +642,16 @@
             "grade": "Légendaire",
             "condition": "Remporter un match 8-2 face à un club de niveau égal ou supérieur.",
             "icon": "🖐️",
+            "hidden": true
+        },
+        {
+            "id": "le_special_one",
+            "name": "Le Special One",
+            "category": "Succès cachés",
+            "kind": "simple",
+            "grade": "Légendaire",
+            "condition": "Débloquer tous les badges au rang Légendaire, obtenir tous les succès et remporter toutes les compétitions disponibles au moins une fois.",
+            "icon": "👑",
             "hidden": true
         }
     ]
