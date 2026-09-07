@@ -5680,14 +5680,14 @@ function showInfoPage(key){
   state.infoPage = key;
   renderInfoPage();
   showScreen('info', { skipHistory:true });
-  // Chaque page d'info a sa propre URL distincte (#info/conditions,
-  // #info/confidentialite...) plutôt qu'un seul et même #info générique
-  // partagé par toutes - sans ça, impossible de savoir sur quelle page on
+  // Chaque page d'info a sa propre URL distincte (/info/conditions,
+  // /info/confidentialite...) plutôt qu'une seule et même /info générique
+  // partagée par toutes - sans ça, impossible de savoir sur quelle page on
   // se trouve dans la barre d'adresse, de la partager en lien direct, ou
   // de naviguer correctement en arrière entre deux pages d'info.
-  const targetHash = '#info/' + key;
-  if(location.hash !== targetHash){
-    history.pushState({ screen:'info', infoPage:key }, '', targetHash);
+  const targetPath = '/info/' + key;
+  if(location.pathname !== targetPath){
+    history.pushState({ screen:'info', infoPage:key }, '', targetPath);
   }
   window.scrollTo({ top:0 });
 }
@@ -5724,22 +5724,23 @@ function showScreen(name, opts){
   state.screen = name;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  if(!opts.skipHistory && location.hash !== '#'+name){
-    history.pushState({ screen:name }, '', '#'+name);
+  const targetPath = name === 'landing' ? '/' : '/' + name;
+  if(!opts.skipHistory && location.pathname !== targetPath){
+    history.pushState({ screen:name }, '', targetPath);
   }
 }
 
 window.addEventListener('popstate', (e)=>{
-  const rawHash = location.hash ? location.hash.slice(1) : 'landing';
-  // Les pages d'info utilisent un hash composé (#info/conditions) plutôt
+  const rawPath = location.pathname.replace(/^\/+|\/+$/g, '') || 'landing';
+  // Les pages d'info utilisent un chemin composé (/info/conditions) plutôt
   // qu'un simple nom d'écran - on en extrait la clé précise avant de
   // router, pour retomber sur la bonne page (pas juste "une page d'info
   // quelconque") au clic sur précédent/suivant du navigateur.
-  let name = rawHash;
+  let name = rawPath;
   let infoKey = null;
-  if(rawHash.startsWith('info/')){
+  if(rawPath.startsWith('info/')){
     name = 'info';
-    infoKey = rawHash.slice(5);
+    infoKey = rawPath.slice(5);
   }
   if(name === 'info'){
     if(infoKey && INFO_PAGES[infoKey]) state.infoPage = infoKey;
@@ -14163,12 +14164,12 @@ function routeToRestoredScreen(snap, opts){
   // de saison avec les données de l'ancien club, effectif "vide" en
   // apparence et boutons inopérants.
   if(snap && snap.transfer && snap.club){
-    history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
+    history.replaceState({ screen:'game' }, '', '/game');
     showScreen('game', { skipHistory:true });
     applyClubTheme(snap.club);
     renderGame();
   } else if(snap && snap.season){
-    history.replaceState({ screen:'season' }, '', location.pathname + location.search + '#season');
+    history.replaceState({ screen:'season' }, '', '/season');
     showScreen('season', { skipHistory:true });
     if(snap.club) applyClubTheme(snap.club);
     if(opts.retryRecordSeason && snap.kind === 'recordSeason'){
@@ -14179,17 +14180,17 @@ function routeToRestoredScreen(snap, opts){
     }
     renderSeason();
   } else if(snap && snap.club){
-    history.replaceState({ screen:'game' }, '', location.pathname + location.search + '#game');
+    history.replaceState({ screen:'game' }, '', '/game');
     showScreen('game', { skipHistory:true });
     applyClubTheme(snap.club);
     renderGame();
   } else if(opts.fallbackAccount){
     const target = snap && snap.kind === 'viewPalmares' ? 'palmares' : 'account';
-    history.replaceState({ screen:target }, '', location.pathname + location.search + '#' + target);
+    history.replaceState({ screen:target }, '', '/' + target);
     showScreen(target, { skipHistory:true });
     if(target === 'palmares') renderPalmaresScreen(); else renderAccountScreen();
   } else {
-    history.replaceState({ screen:'landing' }, '', location.pathname + location.search + '#landing');
+    history.replaceState({ screen:'landing' }, '', '/');
     renderLanding();
   }
 }
@@ -14668,7 +14669,15 @@ function renderAchievementsGrid(){
     const prog = state.achievementProgress[a.id];
     return prog && (prog.unlocked || (prog.tier||0) > 0);
   }).length;
-  document.getElementById('achv-total').textContent = ACHIEVEMENT_DEFS.length;
+  // Le total ne compte que les succès visibles (jamais les cachés, même
+  // débloqués) - seul le nombre de succès obtenus grandit quand on en
+  // débloque un caché. Une fois la totalité des 55 récupérée, l'affichage
+  // devient volontairement "55/47" : le compteur dépasse le total plutôt
+  // que de suivre un dénominateur qui grandirait en douce, pour que ce
+  // dépassement serve justement d'indice qu'il existait des succès
+  // cachés au-delà du total annoncé.
+  const visibleTotal = ACHIEVEMENT_DEFS.filter(a => !a.hidden).length;
+  document.getElementById('achv-total').textContent = visibleTotal;
   const cats = [];
   ACHIEVEMENT_DEFS.forEach(a=>{ if(!cats.includes(a.category)) cats.push(a.category); });
   grid.innerHTML = cats.map(cat => {
@@ -15690,29 +15699,42 @@ Promise.all([loadAllClubRosters(), loadEuroFillerClubs()]).finally(()=>{
   initAuth();
   loadAchievementDefs();
 
+  // Filet de secours pour GitHub Pages (hébergement statique, aucune règle
+  // de réécriture serveur) : un lien direct ou un rechargement sur une URL
+  // "propre" comme /season passe d'abord par 404.html (aucun fichier réel
+  // à cet endroit), qui redirige ici avec le chemin d'origine encodé en
+  // paramètre - on le restaure ici AVANT toute autre logique de routage,
+  // pour que l'URL affichée redevienne /season plutôt que de rester
+  // bloquée sur /. Le hash (#access_token=... pour Supabase) traverse
+  // cette redirection sans y toucher, géré séparément plus bas.
+  const redirectParam = new URLSearchParams(location.search).get('redirect');
+  if(redirectParam){
+    history.replaceState(null, '', redirectParam + location.hash);
+  }
+
   // Ne jamais écraser le hash au démarrage s'il contient un retour de
   // connexion OAuth (#access_token=...) - sinon Supabase perd le jeton avant
   // de pouvoir l'analyser, et la connexion Google échoue silencieusement.
   // Dans ce cas, on laisse initAuth() gérer la restauration une fois la
   // session détectée.
   const isOAuthCallbackHash = /access_token=|refresh_token=|provider_token=|type=recovery|type=signup|type=magiclink/.test(location.hash);
-  const bootHash = location.hash.replace('#','');
+  const bootPath = location.pathname.replace(/^\/+|\/+$/g, '');
   if(isOAuthCallbackHash){
     renderLanding();
-  } else if(bootHash.startsWith('info/')){
+  } else if(bootPath.startsWith('info/')){
     // Lien direct vers une page d'info précise (partagé, mis en favori, ou
     // simple rafraîchissement) - un contenu statique, sans dépendance à
     // une partie en cours, donc jamais besoin de passer par la
     // restauration de sauvegarde comme pour les écrans de jeu.
-    const infoKey = bootHash.slice(5);
+    const infoKey = bootPath.slice(5);
     renderLanding();
     if(INFO_PAGES[infoKey]){
-      history.replaceState({ screen:'info', infoPage:infoKey }, '', location.pathname + location.search + '#info/' + infoKey);
+      history.replaceState({ screen:'info', infoPage:infoKey }, '', '/info/' + infoKey);
       showInfoPage(infoKey);
     }
-  } else if(bootHash && bootHash !== 'landing'){
-    // Rechargement en pleine partie (le hash pointe déjà vers un écran
-    // précis, ex: #season) : on restaure directement sans repasser par le
+  } else if(bootPath && bootPath !== 'landing'){
+    // Rechargement en pleine partie (le chemin pointe déjà vers un écran
+    // précis, ex: /season) : on restaure directement sans repasser par le
     // choix de l'accueil, pour que F5 reste transparent en cours de partie.
     const snap = restoreGameStateSnapshot();
     routeToRestoredScreen(snap, { retryRecordSeason:false, fallbackAccount:false });
