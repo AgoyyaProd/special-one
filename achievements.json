@@ -623,7 +623,18 @@
             "condition": "Marquer sur votre dernière action du dernier match de la saison pour décrocher un titre.",
             "icon": "🎬",
             "hidden": true
-        },        {
+        },
+        {
+            "id": "le_special_one",
+            "name": "Le Special One",
+            "category": "Succès cachés",
+            "kind": "simple",
+            "grade": "Légendaire",
+            "condition": "Débloquer tous les badges au rang Légendaire, obtenir tous les succès et remporter toutes les compétitions disponibles au moins une fois.",
+            "icon": "👑",
+            "hidden": true
+        },
+        {
             "id": "do_brazil",
             "name": "Do Brazil",
             "category": "Succès cachés",
@@ -643,16 +654,5 @@
             "icon": "🖐️",
             "hidden": true
         }
-        {
-            "id": "le_special_one",
-            "name": "Le Special One",
-            "category": "Succès cachés",
-            "kind": "simple",
-            "grade": "Légendaire",
-            "condition": "Débloquer tous les badges au rang Légendaire, obtenir tous les succès et remporter toutes les compétitions disponibles au moins une fois.",
-            "icon": "👑",
-            "hidden": true
-        },
-
     ]
 }
