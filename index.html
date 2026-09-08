@@ -2451,7 +2451,23 @@ button{ font-family:inherit; cursor:pointer; }
   overflow-y:auto;
   padding-top:6px;
 }
-.hand.hand-spread{ justify-content:space-between; }
+/* "space-between" (via une classe hand-spread, désormais retirée) semblait
+   bien fonctionner tant que toutes les cartes tenaient sur une seule
+   ligne - mais dès qu'il y en a assez pour passer à la ligne (5 cartes à
+   240px dans un panneau ~830px : seulement 3 par ligne), la 2e ligne,
+   incomplète, se retrouvait avec ses cartes écartées aux deux extrémités
+   au lieu de rester groupées - un grand vide au milieu, pas du tout le
+   rendu voulu. "center" reste fiable quel que soit le nombre de lignes.
+   Sur desktop uniquement (voir @media min-width:1101px plus bas), les
+   cartes restent en plus sur une seule ligne plutôt que de risquer de
+   passer à la ligne : au-delà du souci d'espacement déjà réglé, une 2e
+   ligne restait aussi hors de la zone visible du panneau (30% de hauteur,
+   défilement interne), invisible sans faire défiler manuellement. */
+@media (min-width:1101px){
+  .hand{ flex-wrap:nowrap; overflow-x:auto; overflow-y:visible; scrollbar-width:none; }
+  .hand::-webkit-scrollbar{ display:none; }
+  .hand-card{ flex-shrink:0; }
+}
 .hand-card{
   /* Base pensée pour la résolution de référence 2560px (voir
      applyDesktopZoom) - le zoom desktop réduit proportionnellement cette
@@ -6664,10 +6680,6 @@ function renderHand(){
     handEl.innerHTML = '';
     return;
   }
-  // Étalées sur toute la largeur du bloc terrain à partir de 3 cartes ;
-  // en dessous, "space-between" collerait 1-2 cartes aux bords opposés
-  // avec un grand vide au milieu - on reste alors centré comme avant.
-  handEl.classList.toggle('hand-spread', state.hand.length >= 3);
 
   handEl.innerHTML = state.hand.map((c,i)=>`
     <div class="hand-card ${state.selectedUid===c.uid?'is-selected':''}" data-uid="${c.uid}" style="animation-delay:${i*55}ms">
