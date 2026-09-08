@@ -12888,6 +12888,20 @@ function simulateEuroKnockoutLeg(euro, stage, nextStage, label){
 
 function simulateEuroFinalMatch(euro){
   euro = euro || state.euro;
+  // Filet de sécurité : ne devrait normalement jamais arriver, mais si le
+  // bracket de demi-finale n'a pas produit une affiche valide (ex: un
+  // vainqueur de confrontation resté indéfini sur un cas limite non
+  // prévu), la finale se bloquait silencieusement - impossible de la
+  // résoudre, donc impossible de terminer la saison. Mieux vaut trancher
+  // au hasard que de laisser la partie coincée indéfiniment.
+  if(!euro.finalFixture || !euro.finalFixture.home || !euro.finalFixture.away){
+    console.error('Finale européenne sans affiche valide, résolution de secours appliquée.', euro.tier, euro.finalFixture);
+    const candidate = (euro.finalFixture && (euro.finalFixture.home || euro.finalFixture.away)) || state.club.id;
+    euro.champion = candidate;
+    euro.stage = 'done';
+    state.currentSeasonEuroWinners[euro.tier] = euro.champion;
+    return;
+  }
   playEuroSingleMatch(euro.finalFixture, euro);
   euro.resultsByRound.push({ label:'Finale', matches:[{...euro.finalFixture}], roundIdx:Infinity });
   euro.champion = euro.finalFixture.winner;
