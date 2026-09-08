@@ -5177,7 +5177,7 @@ function toast(msg){
 // ci-dessous et son injection après le remplissage des footers) - unique
 // source de vérité, à mettre à jour ici uniquement lors d'une prochaine
 // version plutôt que dans chacune des copies du footer.
-const SITE_VERSION = '1.0.0';
+const SITE_VERSION = '1.1.0';
 const SITE_FOOTER_HTML = `
     <footer class="site-footer">
       <div class="site-footer-inner">
@@ -5292,6 +5292,31 @@ const INFO_PAGES = {
     title:'Nouveautés',
     html:`
       <p class="info-meta">Historique des évolutions du jeu, version par version.</p>
+
+      <h2>v1.1.0 - "Rectificatif"</h2>
+      <p>Un correctif critique qui pouvait bloquer une saison en cours de façon définitive, une bascule vers des adresses propres, et une bonne partie des irritants mobiles restants.</p>
+      <h3>Corrections critiques</h3>
+      <ul>
+        <li>Corrigé un cas où la résolution d'une finale de coupe d'Europe pouvait planter silencieusement et bloquer la progression de la saison sans aucun message d'erreur visible.</li>
+        <li>Les boutons d'action de la saison ne se désactivaient plus par erreur lorsqu'une finale restait encore à jouer après la fin du championnat.</li>
+      </ul>
+      <h3>Événements de match</h3>
+      <ul>
+        <li>Les événements liés à un poste précis (ailier, défenseur, buteur...) ne peuvent plus tomber sur un gardien par erreur.</li>
+        <li>Ajout de nouveaux événements positifs et négatifs propres à chaque ligne de poste (défense, milieu, attaque).</li>
+        <li>Deux nouveaux succès cachés, et la condition de "Remontada" révisée pour mieux coller à un vrai scénario de qualification renversée.</li>
+      </ul>
+      <h3>Adresses du site</h3>
+      <ul>
+        <li>Les adresses de chaque page sont désormais lisibles (ex: "/season") plutôt qu'un simple renvoi générique.</li>
+      </ul>
+      <h3>Interface & mobile</h3>
+      <ul>
+        <li>Correction de plusieurs cas de débordement sur mobile : noms d'équipe et libellés de compétition longs sur l'écran de match en direct, groupes d'onglets du classement.</li>
+        <li>Le fond des blocs de match en direct ne reprend plus la couleur du club sélectionné ; les matchs de coupe d'Europe ont leur propre teinte, plus claire et cohérente.</li>
+        <li>Ajustements de mise en page sur la page de profil (date de naissance, statistiques de carrière).</li>
+        <li>Le compteur de succès ne dévoile plus par avance le nombre de succès cachés restant à découvrir.</li>
+      </ul>
 
       <h2>v1.0.0 - "Coup d'envoi"</h2>
       <p>Premier jalon considéré comme réellement prêt : fiabilité des comptes entre appareils, expérience mobile de bout en bout, et suivi des succès enfin exhaustif.</p>
