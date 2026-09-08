@@ -2746,7 +2746,16 @@ button{ font-family:inherit; cursor:pointer; }
      sur les noms de club les plus longs plutôt que de déborder. */
   .live-scoreboard{ padding:14px 12px; gap:8px; }
   .live-team{ font-size:12px; line-height:1.25; }
-  .live-competition{ font-size:9px; }
+  /* Le bloc central (score + libellé de compétition) ne rétrécit jamais
+     (flex-shrink:0, volontaire pour garder le score bien visible) - mais
+     sans plafond de largeur, un libellé long ("Ligue Conférence - 8es de
+     finale - Aller") le poussait à s'élargir pour tenir sur une seule
+     ligne, écrasant les noms d'équipe de chaque côté au point de les faire
+     déborder de l'écran. Plafonné pour forcer le libellé à revenir à la
+     ligne à la place - beaucoup moins grave visuellement qu'un nom
+     d'équipe tronqué hors écran. */
+  .live-score-block{ max-width:170px; }
+  .live-competition{ font-size:9px; white-space:normal; line-height:1.3; }
   .live-score{ font-size:26px; }
   .live-minute{ font-size:11px; }
 }
