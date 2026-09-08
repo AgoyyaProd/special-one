@@ -1199,66 +1199,19 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
 #screen-live-match.euro-ecl{ --club-accent:var(--zone-ecl); --club-primary:var(--zone-ecl); }
-/* Blocs du match en direct de coupe d'Europe : couleur de zone éclaircie
-   (mélangée vers le blanc) avant d'appliquer les 70% d'opacité - une
-   couleur saturée pure à 70% sur fond sombre reste visuellement "pleine"
-   et ne se distingue pas d'un simple aplat opaque ; le mélange vers le
-   blanc d'abord est ce qui donne ce rendu clair et translucide demandé. */
+/* Même traitement que les lignes de qualification européenne du
+   classement (.st-row.st-cl/.st-el/.st-ecl) plutôt qu'un fond clair
+   distinct : fond sombre anthracite identique aux matchs domestiques,
+   avec juste une bordure de couleur de zone en accent - cohérent avec le
+   reste du site plutôt qu'un traitement à part pour l'Europe. */
 #screen-live-match.euro-cl .live-scoreboard,
 #screen-live-match.euro-el .live-scoreboard,
 #screen-live-match.euro-ecl .live-scoreboard,
 #screen-live-match.euro-cl .live-event,
 #screen-live-match.euro-el .live-event,
-#screen-live-match.euro-ecl .live-event,
-#screen-live-match.euro-cl .live-decision,
-#screen-live-match.euro-el .live-decision,
-#screen-live-match.euro-ecl .live-decision{
-  background:color-mix(in srgb, color-mix(in srgb, var(--club-primary) 45%, white 55%) 70%, transparent);
-}
-/* Fond de zone désormais clair/pastel (voir ci-dessus) : le texte blanc
-   d'origine (ou --club-accent, egal à la couleur de zone) n'aurait plus
-   assez de contraste - inversé en texte sombre, sans ombre (elle n'a plus
-   d'utilité sur un fond clair). */
-#screen-live-match.euro-cl .live-competition,
-#screen-live-match.euro-el .live-competition,
-#screen-live-match.euro-ecl .live-competition,
-#screen-live-match.euro-cl .live-minute,
-#screen-live-match.euro-el .live-minute,
-#screen-live-match.euro-ecl .live-minute,
-#screen-live-match.euro-cl .live-decision-title,
-#screen-live-match.euro-el .live-decision-title,
-#screen-live-match.euro-ecl .live-decision-title,
-#screen-live-match.euro-cl .live-event,
-#screen-live-match.euro-el .live-event,
-#screen-live-match.euro-ecl .live-event,
-#screen-live-match.euro-cl .live-event-minute,
-#screen-live-match.euro-el .live-event-minute,
-#screen-live-match.euro-ecl .live-event-minute,
-#screen-live-match.euro-cl .live-team,
-#screen-live-match.euro-el .live-team,
-#screen-live-match.euro-ecl .live-team,
-#screen-live-match.euro-cl .live-score,
-#screen-live-match.euro-el .live-score,
-#screen-live-match.euro-ecl .live-score,
-#screen-live-match.euro-cl .live-decision-text,
-#screen-live-match.euro-el .live-decision-text,
-#screen-live-match.euro-ecl .live-decision-text,
-#screen-live-match.euro-cl .live-decision-option,
-#screen-live-match.euro-el .live-decision-option,
-#screen-live-match.euro-ecl .live-decision-option{
-  color:#0a0d13;
-  text-shadow:none;
-}
-#screen-live-match.euro-cl .live-decision-option,
-#screen-live-match.euro-el .live-decision-option,
-#screen-live-match.euro-ecl .live-decision-option{
-  background:rgba(255,255,255,.35);
-  border-color:rgba(10,13,19,.25);
-}
-#screen-live-match.euro-cl .live-decision-option:hover,
-#screen-live-match.euro-el .live-decision-option:hover,
-#screen-live-match.euro-ecl .live-decision-option:hover{
-  background:rgba(255,255,255,.55);
+#screen-live-match.euro-ecl .live-event{
+  background:color-mix(in srgb, #3d434f 70%, transparent);
+  border-left:3px solid var(--club-accent);
 }
 .live-scoreboard{
   display:flex;
@@ -2471,17 +2424,19 @@ button{ font-family:inherit; cursor:pointer; }
 .hand-card{
   /* Base pensée pour la résolution de référence 2560px (voir
      applyDesktopZoom) - le zoom desktop réduit proportionnellement cette
-     taille sur les écrans plus petits (ex: ~180px à 1920px de large,
-     zoom 0.75), donc augmenter cette valeur agrandit les cartes de la
-     draft de façon cohérente à toutes les résolutions de bureau, sans
-     media query séparée à maintenir en plus du système de zoom. */
-  width:240px;
+     taille sur les écrans plus petits, donc changer cette valeur ajuste
+     les cartes de la draft de façon cohérente à toutes les résolutions de
+     bureau, sans media query séparée à maintenir en plus du système de
+     zoom. Réduit de 240 à 180 : à 240px, 5 cartes ne tenaient plus sur une
+     ligne dans le panneau (~830px de large), imposant un défilement
+     horizontal systématique - ramené à une taille plus raisonnable. */
+  width:180px;
   flex-shrink:0;
   cursor:pointer;
   transition:transform .18s ease;
   animation:dealIn .32s cubic-bezier(.2,.8,.3,1.1) backwards;
 }
-.hand-card .pc-card{ width:240px; border-width:1.3px; }
+.hand-card .pc-card{ width:180px; border-width:1.3px; }
 .hand-card:hover{ transform:translateY(-6px); }
 .hand-card.is-selected .pc-card{
   outline:3px solid var(--club-accent);
