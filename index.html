@@ -12512,6 +12512,7 @@ function resolveSuperCupForNewSeason(){
   // LDC ou Europa de la saison précédente.
 }
 function applyUefaSuperCupResult(fx){
+  ensureCurrentSeasonEuroWinners();
   state.currentSeasonEuroWinners.superCupClId = fx.home;
   state.currentSeasonEuroWinners.superCupElId = fx.away;
   state.currentSeasonEuroWinners.superCupWinner = fx.winner;
@@ -12886,8 +12887,24 @@ function simulateEuroKnockoutLeg(euro, stage, nextStage, label){
   }
 }
 
+// state.currentSeasonEuroWinners peut se retrouver à null dans certaines
+// sauvegardes (ex: partie créée avant l'initialisation systématique de ce
+// champ, ou restaurée dans un état incomplet) - un cas concret a fait
+// planter simulateEuroFinalMatch() en pleine résolution de finale
+// (TypeError sur l'assignation), bloquant la progression de la saison
+// sans aucun message visible pour le joueur. Cette fonction garantit que
+// l'objet existe avant toute écriture dedans, plutôt que de supposer
+// qu'il a toujours été correctement initialisé en début de saison.
+function ensureCurrentSeasonEuroWinners(){
+  if(!state.currentSeasonEuroWinners){
+    state.currentSeasonEuroWinners = { cl:null, el:null, ecl:null, superCupWinner:null };
+  }
+  return state.currentSeasonEuroWinners;
+}
+
 function simulateEuroFinalMatch(euro){
   euro = euro || state.euro;
+  ensureCurrentSeasonEuroWinners();
   // Filet de sécurité : ne devrait normalement jamais arriver, mais si le
   // bracket de demi-finale n'a pas produit une affiche valide (ex: un
   // vainqueur de confrontation resté indéfini sur un cas limite non
@@ -13154,6 +13171,7 @@ function commitLiveEuroKnockoutLegResult(){
   const lm = state.liveMatch;
   if(!lm || !lm.isEuroKnockout) return;
   const euro = state.euro;
+  ensureCurrentSeasonEuroWinners();
   lm.fx.hg = lm.hg; lm.fx.ag = lm.ag; lm.fx.events = lm.events; lm.fx.played = true;
   trackMatchResult(lm.fx);
 
@@ -13751,10 +13769,22 @@ function renderSeason(){
   // SEUL match à la fois, jamais deux compétitions résolues par le même
   // clic (voir startLiveMatchday/handleNextMatchday). Les onglets Ligue 1
   // / Europe ne servent qu'à consulter classement et calendrier.
+  // "seasonDone" (championnat terminé) ne veut PAS dire "plus rien à
+  // jouer cette saison" : une finale de coupe d'Europe, de coupe
+  // nationale, une supercoupe... peuvent encore être en attente après la
+  // toute dernière journée de championnat (c'est même le cas le plus
+  // fréquent, la plupart de ces finales se jouant justement après). Avant
+  // ce correctif, les deux boutons d'action se désactivaient dès le
+  // championnat fini, quel que soit ce qu'il restait à résoudre - la
+  // partie se retrouvait bloquée sans confrontation possible dès qu'une
+  // telle finale restait en attente.
+  const anyStepStillDue = getDueDomesticSuperCupStep() || getDueUefaSuperCupStep() || hasPendingEuroQualifying()
+    || getDueEuroKnockoutStep() || getDueCupStep() || getDueEuroLeaguePhaseStep();
+  const trulyDone = seasonDone && !anyStepStillDue;
   liveBtn.style.display = '';
-  liveBtn.disabled = seasonDone;
+  liveBtn.disabled = trulyDone;
   nextBtn.style.display = '';
-  nextBtn.disabled = seasonDone;
+  nextBtn.disabled = trulyDone;
   if(getDueDomesticSuperCupStep()){
     const sc = state.domesticSuperCup;
     const compTxt = sc.stage === 'semis' ? `${sc.name} - Demi-finales` : `${sc.name} - Finale`;
