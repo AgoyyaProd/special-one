@@ -1199,18 +1199,24 @@ button{ font-family:inherit; cursor:pointer; }
 #screen-live-match.euro-cl{ --club-accent:var(--zone-cl); --club-primary:var(--zone-cl); }
 #screen-live-match.euro-el{ --club-accent:var(--zone-el); --club-primary:var(--zone-el); }
 #screen-live-match.euro-ecl{ --club-accent:var(--zone-ecl); --club-primary:var(--zone-ecl); }
-/* Même traitement que les lignes de qualification européenne du
-   classement (.st-row.st-cl/.st-el/.st-ecl) plutôt qu'un fond clair
-   distinct : fond sombre anthracite identique aux matchs domestiques,
-   avec juste une bordure de couleur de zone en accent - cohérent avec le
-   reste du site plutôt qu'un traitement à part pour l'Europe. */
+/* Même traitement que les lignes de résultats de matchs européens dans le
+   panneau "Résultats" (.fx-row.euro-cl/.euro-el/.euro-ecl) : bordure
+   complète (pas juste à gauche) et fond nettement teinté par la couleur
+   de zone, plutôt que le fond anthracite quasiment neutre utilisé pour
+   les lignes de classement - cohérent avec l'autre bloc du site où
+   l'Europe est déjà mise en avant de cette façon. */
 #screen-live-match.euro-cl .live-scoreboard,
 #screen-live-match.euro-el .live-scoreboard,
 #screen-live-match.euro-ecl .live-scoreboard,
 #screen-live-match.euro-cl .live-event,
 #screen-live-match.euro-el .live-event,
 #screen-live-match.euro-ecl .live-event{
-  background:color-mix(in srgb, #3d434f 70%, transparent);
+  background:color-mix(in srgb, var(--club-accent) 16%, #3d434f 84%);
+  border:1px solid color-mix(in srgb, var(--club-accent) 45%, transparent);
+}
+#screen-live-match.euro-cl .live-event,
+#screen-live-match.euro-el .live-event,
+#screen-live-match.euro-ecl .live-event{
   border-left:3px solid var(--club-accent);
 }
 .live-scoreboard{
@@ -11960,9 +11966,29 @@ function qualifiersForLeagueTier(leagueName, tier){
 function determineEuroQualification(){
   if(state.seasonNumber === 1) return null;
   const config = EURO_SEASON_CONFIG[state.league];
-  if(!config || !state.prevSeasonStanding) return null;
+  if(!config) return null;
+  // state.prevSeasonStanding est le classement de la saison précédente,
+  // mais SEULEMENT pour le championnat où j'évoluais alors (voir
+  // state.prevSeasonLeague, posé au même moment) - après un changement de
+  // club vers un AUTRE championnat en cours de carrière (ex: Monaco en
+  // Ligue 1 -> Arsenal en Premier League), ce classement ne contient tout
+  // simplement pas mon nouveau club, donc le chercher dedans échouait
+  // toujours silencieusement (aucune qualification européenne calculée,
+  // même si le nouveau club la mériterait). On repêche alors le classement
+  // RÉEL de la saison précédente pour ce championnat via la simulation
+  // "fantôme" qui tourne en arrière-plan pour tous les championnats non
+  // joués par le joueur (state.prevOtherLeaguesData) - c'est là qu'est
+  // suivie la vraie position d'Arsenal, indépendamment de mon parcours.
+  const standingsMatchCurrentLeague = state.prevSeasonLeague === state.league;
+  const standing = standingsMatchCurrentLeague
+    ? state.prevSeasonStanding
+    : (state.prevOtherLeaguesData && state.prevOtherLeaguesData[state.league] ? state.prevOtherLeaguesData[state.league].standing : null);
+  const cupWinner = standingsMatchCurrentLeague
+    ? state.prevSeasonCupWinner
+    : (state.prevOtherLeaguesData && state.prevOtherLeaguesData[state.league] ? state.prevOtherLeaguesData[state.league].cupWinner : null);
+  if(!standing) return null;
   const hasEps = (state.epsLeagues||[]).includes(state.league);
-  const map = computeEuropeanQualifications(state.league, state.prevSeasonStanding, state.prevSeasonCupWinner, state.prevSeasonEuroWinners, hasEps);
+  const map = computeEuropeanQualifications(state.league, standing, cupWinner, state.prevSeasonEuroWinners, hasEps);
   const mine = map[state.club.id];
   if(!mine) return null;
   state.myEuroEntryRound = mine.entryRound;
