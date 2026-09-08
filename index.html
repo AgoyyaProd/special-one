@@ -7554,6 +7554,7 @@ function resetToFreshCareer(){
   state.currentSeasonEuroWinners = {};
   state.prevSeasonEuroWinners = null;
   state.epsLeagues = [];
+  state.epsLeaguesComputedForSeason = null;
   state.myEuroEntryRound = null;
   state.myClQualifyingResult = null;
   state.myEclQualifyingResult = null;
@@ -8083,6 +8084,17 @@ function enterSeason(){
   state.winStreak = 0;
   state.lossStreak = 0;
   state.fatigueLevel = 0;
+  // Filet de sécurité : state.epsLeagues n'est censé refléter QUE la place
+  // EPS calculée pour CETTE saison précise par finalizeSeasonEuroWinners()
+  // (voir epsLeaguesComputedForSeason, posé au même moment) - mais rien ne
+  // garantissait qu'elle ait bien tourné avant l'entrée dans une nouvelle
+  // saison (ex: un cas limite où les coupes d'Europe "fantômes" ne se
+  // terminaient jamais correctement). Sans remise à zéro explicite ici, une
+  // ancienne place EPS pouvait rester affichée sur le classement plusieurs
+  // saisons de suite au lieu de redescendre aux places de base.
+  if(state.epsLeaguesComputedForSeason !== state.seasonNumber){
+    state.epsLeagues = [];
+  }
   // Un seul mercato hivernal possible par saison (vérifié en direct), et
   // le bonus de fin de saison ne doit être annoncé qu'une fois avant que
   // le mercato de fin de saison ne s'ouvre réellement.
@@ -9161,7 +9173,7 @@ const LIVE_DECISION_BUILDERS = [
     };
   },
   function unstoppableWingerDecision(lm){
-    const player = randomStarterPlayer(true); // un gardien ne fait pas "la différence sur son côté" en tant qu'ailier
+    const player = randomPlayerByLine('ATT'); // un ailier précisément (ligne ATT : AD/AG/BU), pas n'importe quel non-gardien
     const name = player ? player.nom : 'Votre ailier';
     const mySide = isMyTeamHome(lm) ? 'home' : 'away';
     return {
@@ -11650,6 +11662,13 @@ function finalizeQualifyingTie(tie, clubStr, oppStr, liveResult){
     tie.extraTimeScore = result.extraTimeScore;
     tie.winner = result.winner === 'A' ? tie.clubId : tie.opponentId;
     aggClub += result.etA; aggOpp += result.etB;
+    // Même correctif que playKnockoutLeg2 (voir ce commentaire pour le
+    // détail) : le score de la manche retour elle-même doit aussi
+    // refléter la prolongation, pas seulement le cumulé affiché.
+    if(result.etA || result.etB){
+      if(tie.leg2.home === tie.clubId){ tie.leg2.hg += result.etA; tie.leg2.ag += result.etB; }
+      else { tie.leg2.hg += result.etB; tie.leg2.ag += result.etA; }
+    }
   }
   tie.aggClub = aggClub; tie.aggOpp = aggOpp;
   tie.won = tie.winner === tie.clubId;
@@ -12715,6 +12734,24 @@ function playKnockoutLeg2(euro, ties){
       // vainqueur ne soit lisible dans le score lui-même.
       tie.aggA += result.etA;
       tie.aggB += result.etB;
+      // Le score de LA MANCHE elle-même (leg2.hg/ag) doit suivre le même
+      // principe - sinon il reste figé sur le score à 90 minutes alors
+      // que le cumulé, lui, tient compte de la prolongation : un score de
+      // manche "1-0" à côté d'un cumulé "agg 3-4, a.p." qui ne colle pas,
+      // sans aucune trace de la prolongation dans le résumé du match.
+      // etA/etB sont les buts de team A/team B en prolongation ; leg2 est
+      // hébergé par teamB (home), donc etB va au score domicile, etA au
+      // score extérieur.
+      if(result.etA || result.etB){
+        tie.leg2.hg += result.etB;
+        tie.leg2.ag += result.etA;
+        const homeName = clubNameForAnyId(tie.leg2.home), awayName = clubNameForAnyId(tie.leg2.away);
+        tie.leg2.events = tie.leg2.events || [];
+        tie.leg2.events.push({ side:null, type:'ft', minute:90, text:`Fin du temps réglementaire : ${homeName} ${tie.leg2.hg-result.etB} - ${tie.leg2.ag-result.etA} ${awayName}. Place à la prolongation !` });
+        for(let i=0;i<result.etB;i++) tie.leg2.events.push({ side:'home', type:'goal', minute:91+Math.floor(Math.random()*29), text:`BUT ! ${homeName} fait trembler les filets en prolongation.` });
+        for(let i=0;i<result.etA;i++) tie.leg2.events.push({ side:'away', type:'goal', minute:91+Math.floor(Math.random()*29), text:`BUT ! ${awayName} fait trembler les filets en prolongation.` });
+        tie.leg2.events.sort((a,b)=>a.minute-b.minute);
+      }
     }
     if(euro === state.euro && (tie.teamA === state.club.id || tie.teamB === state.club.id)) checkRemontadaAchievement(tie);
   });
@@ -13212,6 +13249,13 @@ function commitLiveEuroKnockoutLegResult(){
         tie.extraTimeScore = result.extraTimeScore;
         tie.winner = result.winner === 'A' ? tie.teamA : tie.teamB;
         tie.aggA += result.etA; tie.aggB += result.etB;
+        // Même correctif que playKnockoutLeg2 : le score de la manche
+        // elle-même doit aussi refléter la prolongation, pas seulement le
+        // cumulé (voir ce commentaire là-bas pour le détail).
+        if(result.etA || result.etB){
+          tie.leg2.hg += result.etB;
+          tie.leg2.ag += result.etA;
+        }
       }
       checkRemontadaAchievement(tie);
       // Les autres confrontations du même tour jouent aussi leur retour,
@@ -14266,6 +14310,7 @@ function snapshotGameState(){
     prevSeasonEuroWinners: state.prevSeasonEuroWinners,
     currentSeasonEuroWinners: state.currentSeasonEuroWinners,
     epsLeagues: state.epsLeagues,
+    epsLeaguesComputedForSeason: state.epsLeaguesComputedForSeason,
     myEuroEntryRound: state.myEuroEntryRound,
     clQualifyingResults: state.clQualifyingResults,
     myClQualifyingResult: state.myClQualifyingResult,
@@ -14635,6 +14680,11 @@ function finalizeSeasonEuroWinners(){
   // pour tout le monde (mine + les 2 "fantômes"), sinon le coefficient
   // serait basé sur une saison européenne incomplète.
   state.epsLeagues = determineEpsLeaguesForNextSeason();
+  // Marqueur de fraîcheur : quelle saison ce calcul vise précisément (voir
+  // enterSeason(), qui s'en sert pour détecter une valeur restée collée
+  // d'une saison plus ancienne si jamais cette fonction ne s'était pas
+  // déclenchée correctement avant qu'une nouvelle saison démarre).
+  state.epsLeaguesComputedForSeason = state.seasonNumber + 1;
   showEuropeRecapPopup();
 }
 
