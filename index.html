@@ -4854,17 +4854,32 @@ async function loadClubRosterCsv(clubId){
     const text = await res.text();
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     if(lines.length < 2) return null;
+    // Colonnes possibles depuis l'ajout du "Nom d'usage" : on lit l'en-tête
+    // pour rester compatible même si un fichier n'a pas encore cette
+    // colonne (plutôt que de figer les indices en dur).
+    const header = parseCsvLine(lines[0]).map(h => h.trim());
+    const iSaison = header.indexOf('Saison');
+    const iNumero = header.indexOf('Numero');
+    const iJoueur = header.indexOf('Joueur');
+    const iUsage = header.indexOf("Nom d'usage");
+    const iNat = header.indexOf('Nationalite');
+    const iPostes = header.indexOf('Postes');
+    const iNote = header.indexOf('Note');
     return lines.slice(1).map(parseCsvLine).map(cols => {
-      const [, saison, numero, joueur, nationalite, postes, note] = cols;
-      const { prenom, nom } = splitPlayerName(joueur);
+      const joueur = cols[iJoueur] || '';
+      // Le nom d'usage prime sur le nom complet dès qu'il est renseigné
+      // (ex: "Fábio Tavares de Oliveira" -> affiché "Fabinho") ; sinon on
+      // retombe sur Prénom/Nom déduits de la colonne "Joueur".
+      const usage = iUsage >= 0 ? (cols[iUsage] || '').trim() : '';
+      const { prenom, nom } = usage ? splitPlayerName(usage) : splitPlayerName(joueur);
       return {
         prenom,
         nom,
-        poste: (postes || '').split('|').filter(Boolean).join(' - '),
-        nationalite: nationalite || '',
-        saison: saison || '',
-        note: parseInt(note, 10) || 0,
-        numero: numero || ''
+        poste: (cols[iPostes] || '').split('|').filter(Boolean).join(' - '),
+        nationalite: cols[iNat] || '',
+        saison: cols[iSaison] || '',
+        note: parseInt(cols[iNote], 10) || 0,
+        numero: cols[iNumero] || ''
       };
     });
   } catch(e){
