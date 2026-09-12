@@ -13554,11 +13554,16 @@ function renderLeaguePanels(){
       timeline.push({ type:'cup', roundIdx:cr.roundIdx, label:CUP_STAGE_LABEL[cr.stage], matches:cr.fixtures });
     });
     // Seul le premier tour (32e/16e) est tiré au sort dès le début de
-    // saison - les tours suivants dépendent des vainqueurs, donc pas
-    // encore connus.
-    const r16Played = season.cup.results.some(cr=>cr.stage==='r16');
-    if(!r16Played){
-      timeline.push({ type:'cup', roundIdx:season.cup.matchdayFor.r16, label:CUP_STAGE_LABEL.r16, matches:season.cup.bracket.r16, upcoming:true });
+    // saison - les tours suivants dépendent des vainqueurs. MAIS dès qu'un
+    // tour est joué, le suivant est immédiatement tiré (cup.stage pointe
+    // dessus et cup.bracket[stage] contient déjà les affiches) : on
+    // l'affiche donc "à venir" au lieu d'attendre qu'il soit disputé, ce
+    // qui laissait un trou dans les Résultats entre deux tours de Coupe.
+    const pendingCupStage = season.cup.stage;
+    const pendingCupFixtures = pendingCupStage ? season.cup.bracket[pendingCupStage] : null;
+    const pendingCupPlayed = pendingCupStage && season.cup.results.some(cr=>cr.stage===pendingCupStage);
+    if(pendingCupFixtures && pendingCupFixtures.length && !pendingCupPlayed){
+      timeline.push({ type:'cup', roundIdx:season.cup.matchdayFor[pendingCupStage], label:CUP_STAGE_LABEL[pendingCupStage], matches:pendingCupFixtures, upcoming:true });
     }
   }
   // Confrontations de qualification européenne (Tour LDC / Barrage
@@ -13580,6 +13585,24 @@ function renderLeaguePanels(){
       for(let ei=state.euro.currentRound; ei<state.euro.calendar.length; ei++){
         const domesticRoundIdx = state.euro.schedule.leaguePhase[ei];
         timeline.push({ type:`euro-${state.euro.tier}`, roundIdx:domesticRoundIdx, label:`${EURO_LABELS[state.euro.tier]} - Phase de ligue - J${ei+1}`, matches:state.euro.calendar[ei], upcoming:true });
+      }
+    } else {
+      // Une fois en tours à élimination, l'affiche du tour en cours est
+      // connue dès le tirage (euro[stage+'Ties'] / euro.finalFixture) mais
+      // n'apparaissait qu'une fois la manche disputée : le fil des
+      // Résultats semblait s'arrêter après la phase de ligue. On affiche
+      // donc la manche en attente, aller ou retour selon legPending.
+      const euro = state.euro, sch = euro.schedule;
+      const anchors = { playoff:[sch.playoffLeg1, sch.playoffLeg2], ro16:[sch.ro16Leg1, sch.ro16Leg2], qf:[sch.qfLeg1, sch.qfLeg2], sf:[sch.sfLeg1, sch.sfLeg2] }[euro.stage];
+      const ties = euro[euro.stage + 'Ties'];
+      if(anchors && Array.isArray(ties) && ties.length && euro.legPending){
+        const isLeg1 = euro.legPending === 'leg1';
+        // Le retour se joue chez l'équipe B : on inverse domicile/extérieur.
+        const matches = ties.map(t => isLeg1 ? { home:t.teamA, away:t.teamB } : { home:t.teamB, away:t.teamA });
+        timeline.push({ type:`euro-${euro.tier}`, roundIdx:anchors[isLeg1?0:1], label:`${EURO_LABELS[euro.tier]} - ${EURO_STAGE_LABEL[euro.stage]} - ${isLeg1?'Aller':'Retour'}`, matches, upcoming:true });
+      }
+      if(euro.stage === 'final' && euro.finalFixture && euro.finalFixture.home && euro.finalFixture.away && !euro.finalFixture.played){
+        timeline.push({ type:`euro-${euro.tier}`, roundIdx:(euro.tier==='el' ? sch.elFinal : Number.MAX_SAFE_INTEGER), label:`${EURO_LABELS[euro.tier]} - Finale`, matches:[euro.finalFixture], upcoming:true });
       }
     }
   }
