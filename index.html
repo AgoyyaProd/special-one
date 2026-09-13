@@ -5,6 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Special One - Créez le club ultime</title>
 
+<!-- Google Analytics 4 avec Consent Mode v2.
+     Le consentement démarre à "denied" : le script est chargé mais
+     n'écrit aucun cookie et n'envoie aucune donnée identifiante tant que
+     le visiteur n'a pas accepté via le bandeau (voir #consent-banner).
+     C'est ce que la réglementation européenne impose - sans ce défaut à
+     "denied", la mesure serait illicite dès la première visite.
+     REMPLACER G-XXXXXXXXXX par l'identifiant de mesure du compte GA4. -->
+<script>
+  window.GA4_MEASUREMENT_ID = 'G-K1599NRGTQ';
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    wait_for_update: 500
+  });
+  gtag('js', new Date());
+  // send_page_view:false - le jeu est une page unique, les vues sont
+  // envoyées à la main depuis showScreen() (voir trackScreenView).
+  gtag('config', window.GA4_MEASUREMENT_ID, { send_page_view:false });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K1599NRGTQ"></script>
+
 <!-- Favicon adaptatif : un seul SVG qui bascule lui-même sa couleur via un
      @media (prefers-color-scheme) intégré dans sa propre balise <style> -
      plus fiable que plusieurs <link rel="icon" media="..."> séparés
@@ -2460,6 +2485,37 @@ button{ font-family:inherit; cursor:pointer; }
   padding:20px 0;
 }
 
+/* Bandeau de consentement (RGPD) - affiché tant que le visiteur n'a pas
+   tranché. Le choix est mémorisé en localStorage, pas en cookie : rien
+   n'est écrit côté traceur avant acceptation. */
+#consent-banner{
+  position:fixed; left:16px; right:16px; bottom:16px; z-index:900;
+  display:none; gap:14px; align-items:center; flex-wrap:wrap;
+  background:color-mix(in srgb, #12151c 94%, transparent);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:var(--r-md); padding:16px 18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+  font-family:var(--sans); color:var(--text);
+  backdrop-filter:blur(8px);
+}
+#consent-banner.show{ display:flex; }
+#consent-banner .cb-text{ flex:1 1 320px; font-size:13px; line-height:1.5; color:var(--text-dim); }
+#consent-banner .cb-text strong{ color:var(--text); display:block; margin-bottom:4px; font-size:14px; }
+#consent-banner .cb-text a{ color:var(--club-accent, #6CABDD); text-decoration:underline; }
+#consent-banner .cb-actions{ display:flex; gap:8px; flex:0 0 auto; }
+#consent-banner button{
+  font-family:var(--sans); font-size:13px; font-weight:600; cursor:pointer;
+  padding:9px 16px; border-radius:var(--r-sm); border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06); color:var(--text); transition:background .15s ease;
+}
+#consent-banner button:hover{ background:rgba(255,255,255,.12); }
+#consent-banner button.cb-accept{ background:var(--club-primary, #c8102e); border-color:transparent; color:#fff; }
+#consent-banner button.cb-accept:hover{ filter:brightness(1.12); }
+@media (max-width:560px){
+  #consent-banner{ left:8px; right:8px; bottom:8px; padding:14px; }
+  #consent-banner .cb-actions{ width:100%; }
+  #consent-banner .cb-actions button{ flex:1; }
+}
 .gm-toast{
   position:fixed;
   bottom:28px; left:50%;
@@ -5486,8 +5542,12 @@ const INFO_PAGES = {
       <p>Ces données servent exclusivement à faire fonctionner le jeu : authentification, sauvegarde de votre progression, affichage de votre historique et de votre classement dans le Panthéon. Elles ne sont ni vendues, ni partagées avec des tiers à des fins commerciales.</p>
       <h2>Stockage local</h2>
       <p>Si vous jouez sans compte, votre progression est conservée localement dans votre navigateur (stockage local) et n'est jamais transmise à nos serveurs.</p>
+      <h2>Mesure d'audience</h2>
+      <p>Ce site utilise Google Analytics pour mesurer sa fréquentation et comprendre quelles parties du jeu sont utilisées, afin de l'améliorer. Cette mesure est soumise à votre consentement : aucun cookie de mesure n'est déposé et aucune donnée n'est transmise tant que vous n'avez pas accepté via le bandeau affiché à votre première visite.</p>
+      <p>Les informations transmises sont limitées à l'usage du jeu : écrans consultés, club sélectionné, saison en cours, succès débloqués. Elles ne permettent pas de vous identifier personnellement et ne sont jamais recoupées avec votre compte.</p>
+      <p>Vous pouvez revenir sur votre choix à tout moment en effaçant les données de site de votre navigateur : le bandeau vous sera alors proposé de nouveau.</p>
       <h2>Publicité</h2>
-      <p>Ce site ne diffuse aucune publicité et n'utilise aucun traceur publicitaire tiers.</p>
+      <p>Ce site ne diffuse aucune publicité et n'utilise aucun traceur publicitaire tiers. Les paramètres publicitaires de Google Analytics sont explicitement désactivés, même si vous acceptez la mesure d'audience.</p>
       <h2>Vos droits</h2>
       <p>Vous pouvez demander l'accès, la correction ou la suppression de vos données à tout moment en nous contactant à <a href="mailto:contact@specialone.fr">contact@specialone.fr</a>.</p>
       <h2>Sécurité</h2>
@@ -5836,6 +5896,74 @@ function canShowScreen(name){
   return true;
 }
 
+
+/* ====================== MESURE D'AUDIENCE (GA4) ======================
+   Le consentement est stocké en localStorage ('so_consent' = 'granted' |
+   'denied'). Tant qu'il vaut 'denied' ou n'existe pas, Consent Mode v2
+   empêche GA4 d'écrire le moindre cookie (voir le gtag('consent',
+   'default', ...) dans le <head>). Toutes les fonctions ci-dessous sont
+   sans effet si le consentement n'a pas été donné - inutile de tester
+   ailleurs dans le code. */
+const CONSENT_KEY = 'so_consent';
+
+function analyticsAllowed(){
+  try { return localStorage.getItem(CONSENT_KEY) === 'granted'; }
+  catch(e){ return false; }
+}
+
+function applyConsent(granted){
+  try { localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied'); } catch(e){}
+  if(typeof gtag !== 'function') return;
+  gtag('consent', 'update', {
+    analytics_storage: granted ? 'granted' : 'denied',
+    // Pas de publicité sur le site : ces trois-là restent refusés même
+    // après acceptation, le visiteur n'ayant consenti qu'à la mesure.
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied'
+  });
+  if(granted) trackScreenView(state.screen || 'landing');
+}
+
+function initConsentBanner(){
+  const banner = document.getElementById('consent-banner');
+  if(!banner) return;
+  let stored = null;
+  try { stored = localStorage.getItem(CONSENT_KEY); } catch(e){}
+  if(stored === 'granted'){ applyConsent(true); return; }
+  if(stored === 'denied'){ return; }
+  banner.classList.add('show');
+  document.getElementById('cb-accept').addEventListener('click', ()=>{
+    banner.classList.remove('show'); applyConsent(true);
+  });
+  document.getElementById('cb-refuse').addEventListener('click', ()=>{
+    banner.classList.remove('show'); applyConsent(false);
+  });
+  document.getElementById('cb-more').addEventListener('click', (e)=>{
+    e.preventDefault();
+    if(typeof showInfoPage === 'function') showInfoPage('confidentialite');
+  });
+}
+
+/* Vue d'écran - le jeu étant une page unique, chaque bascule d'écran
+   compte comme une page vue (c'est showScreen qui appelle ceci). */
+function trackScreenView(name){
+  if(!analyticsAllowed() || typeof gtag !== 'function') return;
+  const path = name === 'landing' ? '/' : '/' + name;
+  gtag('event', 'page_view', {
+    page_title: name,
+    page_path: path,
+    page_location: location.origin + path
+  });
+}
+
+/* Événement de jeu. params reste volontairement minimal : aucune donnée
+   personnelle, uniquement des libellés de jeu (club, saison, compétition). */
+function trackEvent(name, params){
+  if(!analyticsAllowed() || typeof gtag !== 'function') return;
+  gtag('event', name, params || {});
+}
+
 function showScreen(name, opts){
   opts = opts || {};
   state.screen = name;
@@ -5844,6 +5972,18 @@ function showScreen(name, opts){
   const targetPath = name === 'landing' ? '/' : '/' + name;
   if(!opts.skipHistory && location.pathname !== targetPath){
     history.pushState({ screen:name }, '', targetPath);
+  }
+  trackScreenView(name);
+  // Lancement d'un match en direct : un seul point d'accroche ici plutôt
+  // que sur les cinq fonctions qui ouvrent cet écran (championnat, coupe,
+  // phase de ligue, tour à élimination, supercoupes).
+  if(name === 'live-match' && state.liveMatch){
+    const lm = state.liveMatch;
+    trackEvent('live_match_start', {
+      competition: lm.isEuro ? ('euro-' + (lm.tier || '')) : (lm.competition || 'championnat'),
+      club_id: state.club ? state.club.id : '',
+      season_number: state.seasonNumber || 0
+    });
   }
 }
 
@@ -6113,6 +6253,7 @@ function renderSelect(){
       }
       state.club = c;
       applyClubTheme(state.club);
+      trackEvent('select_club', { club_id:c.id, club_name:c.name, league:state.league || '' });
       renderSelect();
     });
   });
@@ -13950,6 +14091,7 @@ function renderSeason(){
 
 function startNextSeason(){
   state.seasonNumber++;
+  trackEvent('season_start', { season_number:state.seasonNumber, club_id:state.club ? state.club.id : '' });
   enterSeason();
 }
 
@@ -14897,6 +15039,7 @@ function unlockAchievement(id){
   const prog = state.achievementProgress[id];
   if(prog && prog.unlocked) return;
   state.achievementProgress[id] = { unlocked:true, unlockedAt: Date.now() };
+  trackEvent('achievement_unlocked', { achievement_id:id, achievement_name:def.name || id });
   showAchievementPopup(id, 'Succès débloqué');
   scheduleSaveSnapshot();
 }
@@ -15144,6 +15287,7 @@ function renderAchievementCardHTML(def){
 function recordSeasonIfNeeded(){
   if(!state.season || state.season.recorded) return;
   state.season.recorded = true;
+  trackEvent('season_complete', { season_number:state.seasonNumber, club_id:state.club ? state.club.id : '', league:state.league || '' });
 
   // Les succès de fin de saison se calculent tout de suite, qu'on soit
   // connecté ou non - seule la sauvegarde en base (et les succès qui
@@ -16091,6 +16235,12 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveSnap
 Promise.all([loadAllClubRosters(), loadEuroFillerClubs()]).finally(()=>{
   initAuth();
   loadAchievementDefs();
+  // Bandeau de consentement : appelé ici (et non en haut du script) car le
+  // bandeau est déclaré plus bas dans la page, après la fermeture du bloc
+  // de script - il n'existe donc pas encore au moment où le script
+  // s'exécute. Ce bloc-ci, lui, tourne après la résolution des fetch, donc
+  // une fois le DOM entièrement analysé.
+  initConsentBanner();
 
   // Filet de secours pour GitHub Pages (hébergement statique, aucune règle
   // de réécriture serveur) : un lien direct ou un rechargement sur une URL
@@ -16141,5 +16291,15 @@ Promise.all([loadAllClubRosters(), loadEuroFillerClubs()]).finally(()=>{
 
 </script>
 
+<div id="consent-banner" role="dialog" aria-live="polite" aria-label="Consentement aux cookies de mesure">
+  <div class="cb-text">
+    <strong>Cookies de mesure d'audience</strong>
+    Ce site utilise Google Analytics pour comprendre comment le jeu est utilisé et l'améliorer. Aucune donnée n'est collectée tant que vous n'avez pas accepté. <a href="#" id="cb-more">En savoir plus</a>
+  </div>
+  <div class="cb-actions">
+    <button type="button" id="cb-refuse">Refuser</button>
+    <button type="button" class="cb-accept" id="cb-accept">Accepter</button>
+  </div>
+</div>
 </body>
 </html>
