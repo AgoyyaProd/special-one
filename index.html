@@ -8325,7 +8325,16 @@ function clubTrigramById(id){
 
 function startLiveMatchday(){
   const season = state.season;
-  if(!season || season.currentRound >= season.calendar.length) return;
+  // Le garde-fou "plus de journée de championnat" ne doit PAS bloquer
+  // l'accès aux étapes hors championnat : une finale de coupe d'Europe,
+  // un tour de coupe nationale ou une supercoupe se jouent justement
+  // APRÈS la dernière journée. Placé tout en tête comme avant, il faisait
+  // sortir la fonction avant même d'avoir testé ces étapes - le bouton
+  // "Jouer en direct" s'affichait bien mais le clic ne faisait rien
+  // (alors que "Match suivant", qui teste ces étapes en premier,
+  // fonctionnait). Il est désormais appliqué juste avant la partie
+  // championnat, en bas de la fonction.
+  if(!season) return;
   const roundIdx = season.currentRound;
 
   // Trophée d'ouverture de saison puis Supercoupe d'Europe occupent le
@@ -8396,6 +8405,9 @@ function startLiveMatchday(){
     return;
   }
 
+  // Championnat : c'est seulement ici qu'une journée restante est
+  // nécessaire (voir le commentaire en tête de fonction).
+  if(roundIdx >= season.calendar.length) return;
   const round = season.calendar[roundIdx];
   const myFixture = round.find(fx => fx.home === state.club.id || fx.away === state.club.id);
   if(!myFixture){
