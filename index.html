@@ -55,9 +55,10 @@
      le visiteur n'a pas accepté via le bandeau (voir #consent-banner).
      C'est ce que la réglementation européenne impose - sans ce défaut à
      "denied", la mesure serait illicite dès la première visite.
-     REMPLACER G-XXXXXXXXXX par l'identifiant de mesure du compte GA4. -->
+     L'identifiant de mesure apparaît à deux endroits ci-dessous (la
+     constante et l'URL du script) : les deux doivent rester identiques. -->
 <script>
-  window.GA4_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+  window.GA4_MEASUREMENT_ID = 'G-K1599NRGTQ';
   window.dataLayer = window.dataLayer || [];
   function gtag(){ dataLayer.push(arguments); }
   gtag('consent', 'default', {
@@ -72,16 +73,26 @@
   // envoyées à la main depuis showScreen() (voir trackScreenView).
   gtag('config', window.GA4_MEASUREMENT_ID, { send_page_view:false });
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K1599NRGTQ"></script>
 
-<!-- Favicon adaptatif : un seul SVG qui bascule lui-même sa couleur via un
-     @media (prefers-color-scheme) intégré dans sa propre balise <style> -
-     plus fiable que plusieurs <link rel="icon" media="..."> séparés
-     (Firefox notamment ignore le media sur <link rel="icon"> et affiche
-     systématiquement le dernier <link> déclaré, peu importe le thème -
-     d'où l'icône sombre invisible sur fond sombre auparavant). Fichier sur
-     la branche main du repo, à la racine à côté d'index.html. -->
-<link rel="icon" type="image/svg+xml" href="SpecialOne_Adaptive.svg">
+<!-- ============================ ICÔNES ============================
+     Le SVG adaptatif reste servi en priorité aux navigateurs modernes : il
+     bascule sa couleur via un @media (prefers-color-scheme) intégré à son
+     propre <style>, plus fiable que plusieurs <link rel="icon" media="...">
+     séparés (Firefox ignore le media et retient le dernier <link>).
+
+     MAIS il ne suffit pas pour Google : son robot n'évalue pas
+     prefers-color-scheme (il verrait donc le logo noir) et attend une icône
+     carrée d'un multiple de 48 px. Sans /favicon.ico à la racine, il
+     affichait son icône générique dans les résultats de recherche. D'où les
+     versions matricielles ci-dessous - logo blanc fixe sur fond de marque,
+     lisible aussi bien sur interface claire que sombre. -->
+<link rel="icon" type="image/svg+xml" href="/SpecialOne_Adaptive.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png">
+<link rel="manifest" href="/site.webmanifest">
 
 <link rel="stylesheet" href="https://use.typekit.net/dee3jbl.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
