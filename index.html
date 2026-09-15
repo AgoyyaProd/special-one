@@ -3,7 +3,51 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Special One - Créez le club ultime</title>
+<title>The Special One - Jeu de gestion football gratuit en ligne</title>
+
+<!-- ===================== RÉFÉRENCEMENT / PARTAGE =====================
+     Le titre et la description ciblent les recherches réelles ("jeu de
+     gestion football", "gratuit", "navigateur") plutôt que le seul nom du
+     site, inconnu des moteurs. Les balises og: et twitter: pilotent
+     l'aperçu affiché quand le lien est collé sur Discord, Twitter, Reddit
+     ou WhatsApp - c'est par là que passe l'essentiel du trafic d'un jeu
+     de navigateur, bien avant Google. -->
+<meta name="description" content="Composez le XI ultime de votre club favori en mélangeant 22 saisons de joueurs réels, puis simulez la saison : championnat, coupes et Ligue des Champions. Gratuit, sans inscription, directement dans le navigateur." />
+<link rel="canonical" href="https://specialone.fr/" />
+<meta name="theme-color" content="#0d0f14" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="The Special One" />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:url" content="https://specialone.fr/" />
+<meta property="og:title" content="The Special One - Créez le club ultime" />
+<meta property="og:description" content="Mélangez les plus grandes générations de votre club favori, composez le XI parfait et simulez la saison idéale. Gratuit, dans le navigateur." />
+<meta property="og:image" content="https://specialone.fr/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="The Special One - jeu de gestion football" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Special One - Créez le club ultime" />
+<meta name="twitter:description" content="Mélangez les plus grandes générations de votre club favori, composez le XI parfait et simulez la saison idéale." />
+<meta name="twitter:image" content="https://specialone.fr/og-image.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "The Special One",
+  "url": "https://specialone.fr/",
+  "image": "https://specialone.fr/og-image.png",
+  "description": "Jeu de gestion football gratuit dans le navigateur : composez le XI ultime de votre club en mélangeant 22 saisons de joueurs réels, puis simulez championnat, coupes et Ligue des Champions.",
+  "inLanguage": "fr",
+  "genre": ["Gestion", "Sport", "Football"],
+  "gamePlatform": "Navigateur web",
+  "applicationCategory": "Game",
+  "operatingSystem": "Tout navigateur moderne",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
 
 <!-- Google Analytics 4 avec Consent Mode v2.
      Le consentement démarre à "denied" : le script est chargé mais
@@ -13,7 +57,7 @@
      "denied", la mesure serait illicite dès la première visite.
      REMPLACER G-XXXXXXXXXX par l'identifiant de mesure du compte GA4. -->
 <script>
-  window.GA4_MEASUREMENT_ID = 'G-K1599NRGTQ';
+  window.GA4_MEASUREMENT_ID = 'G-XXXXXXXXXX';
   window.dataLayer = window.dataLayer || [];
   function gtag(){ dataLayer.push(arguments); }
   gtag('consent', 'default', {
@@ -28,7 +72,7 @@
   // envoyées à la main depuis showScreen() (voir trackScreenView).
   gtag('config', window.GA4_MEASUREMENT_ID, { send_page_view:false });
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K1599NRGTQ"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 
 <!-- Favicon adaptatif : un seul SVG qui bascule lui-même sa couleur via un
      @media (prefers-color-scheme) intégré dans sa propre balise <style> -
@@ -13555,6 +13599,25 @@ function scrollContainerToElement(container, el){
   const elRect = el.getBoundingClientRect();
   container.scrollTop += (elRect.top - containerRect.top);
 }
+
+// Quand on déplie le détail d'un match, le contenu apparaît SOUS la ligne
+// cliquée. Si cette ligne est déjà en bas de la zone visible, le détail
+// s'ouvre hors champ : le chevron pivote mais rien ne bouge à l'écran, et
+// on croit que le clic n'a pas fonctionné. Le conteneur qui défile varie
+// selon la largeur d'écran (la liste elle-même sur grand écran, la page
+// entière sinon), d'où scrollIntoView qui remonte tout seul jusqu'au bon
+// ancêtre scrollable. 'toggle' ne remonte pas naturellement : d'où la
+// capture (3e argument à true).
+document.addEventListener('toggle', (e)=>{
+  const det = e.target;
+  if(!det || !det.classList || !det.classList.contains('fx-details') || !det.open) return;
+  if(!det.closest('.results-list')) return;
+  requestAnimationFrame(()=>{
+    const r = det.getBoundingClientRect();
+    const horsChamp = r.bottom > window.innerHeight || r.top < 0;
+    if(horsChamp) det.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  });
+}, true);
 
 function renderLeaguePanels(){
   const season = state.season;
