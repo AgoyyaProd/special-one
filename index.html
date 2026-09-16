@@ -7211,7 +7211,13 @@ const TROPHY_BASE_WEIGHT = {
 // favori (résultat largement attendu) - distingue une surperformance
 // réelle d'un simple bon classement avec l'effectif le plus fort.
 function computeTrophyScore(myClubStrength, leagueAvgStrength, trophiesWon){
-  const underdogFactor = Math.max(0.6, Math.min(1.8, 1.5 - (myClubStrength - leagueAvgStrength) / 20));
+  // Plage resserrée à [0,9 - 1,3] (auparavant [0,6 - 1,8], soit un rapport de
+  // 3 entre un petit club et un gros). L'envergure du club est DÉJÀ prise en
+  // compte par la limite tolérable dans computeSeasonPerformanceScore : la
+  // cumuler ici une seconde fois écrasait tout, un petit club marquant le
+  // maximum sur un seul titre pendant qu'un gros club auteur d'un triplé
+  // plafonnait bien plus bas. Un seul mécanisme d'ajustement suffit.
+  const underdogFactor = Math.max(0.9, Math.min(1.3, 1.5 - (myClubStrength - leagueAvgStrength) / 20));
   let total = 0;
   trophiesWon.forEach(key => { total += (TROPHY_BASE_WEIGHT[key] || 0) * underdogFactor; });
   return total;
@@ -7221,11 +7227,22 @@ function computeTrophyScore(myClubStrength, leagueAvgStrength, trophiesWon){
 // pondérée par son envergure, voir myTolerableRankLimit) - normalisée sur
 // une échelle -100/+100 comparable d'une saison à l'autre quel que soit le
 // nombre de clubs du championnat.
+// Le score de performance est VOLONTAIREMENT plafonné plus bas que le score
+// combiné final (60 contre 100) : il ne doit occuper qu'une partie du total,
+// le reste revenant aux trophées.
+//
+// Avant, il montait lui aussi à 100 avec un multiplicateur de 220. Résultat :
+// un club moyen 5e sans le moindre trophée marquait 97,8/100, et n'importe
+// quel non-favori sacré champion saturait le total AVANT même qu'on compte
+// ses titres - le palmarès devenait littéralement invisible dans la carrière.
+// Multiplicateur ramené à 105 et plafond à 60 : bien classer reste payant,
+// mais gagner quelque chose fait désormais la différence.
+const PERF_SCORE_CAP = 60;
 function computeSeasonPerformanceScore(myPos, totalClubs, tolerableLimit){
   if(!myPos || !totalClubs) return 0;
   const rankDelta = tolerableLimit - myPos; // >0 = mieux que la limite tolérable
   const normalized = rankDelta / totalClubs;
-  return Math.max(-100, Math.min(100, normalized * 220));
+  return Math.max(-PERF_SCORE_CAP, Math.min(PERF_SCORE_CAP, normalized * 105));
 }
 
 // Dynamique = tendance lissée sur plusieurs saisons (jusqu'à 6 gardées en
@@ -7269,7 +7286,12 @@ function updateCareerStreaks(career, score){
 // bond sur une seule saison isolée, mais les tendances cumulées (séries de
 // progression/déclin/stagnation) pèsent plus lourd que le résultat brut.
 function updateCareerReputation(career, perfScore, trophyScore){
-  let delta = perfScore * 0.12 + trophyScore * 0.35;
+  // Pondération réajustée (0,20/0,30 au lieu de 0,12/0,35) après la
+  // recalibration des deux scores : perfScore plafonne désormais à 60 au
+  // lieu de 100 et trophyScore a une amplitude plus faible. Sans cet
+  // ajustement, la réputation évoluait deux fois moins vite qu'avant - et
+  // surtout un gros club en échec n'était presque plus sanctionné.
+  let delta = perfScore * 0.20 + trophyScore * 0.30;
   if(career.progressionStreak >= 2) delta += 4;
   if(career.declineStreak >= 2) delta -= 4;
   if(career.stagnationStreak >= 3) delta -= 2.5;
@@ -7346,7 +7368,9 @@ function updateCareerAfterSeason(myPos, totalClubs, trophiesWon){
   // Le score combiné penche performance + trophées, mais les trophées ne
   // dominent jamais totalement (une superbe saison sans titre doit rester
   // valorisée, cf. absence de trophée != absence de performance).
-  const combinedScore = Math.max(-100, Math.min(100, perfScore + trophyScore * 0.6));
+  // Trophées à 0,55 : calibré pour qu'une saison exceptionnelle (titre +
+  // C1 + coupe) atteigne 100 sans que le classement seul y parvienne.
+  const combinedScore = Math.max(-100, Math.min(100, perfScore + trophyScore * 0.55));
 
   updateCareerMomentum(career, combinedScore);
   const seasonKind = updateCareerStreaks(career, combinedScore);
@@ -14940,9 +14964,32 @@ function computeEuroJourney(){
 function computeEuroScore(journey){
   if(!journey) return 0;
   let score = EURO_TIER_BASE[journey.tier] || 0;
-  journey.wins.forEach(w=>{ score += Math.round(w.oppStrength / 4); });
+  // Diviseur porté de 4 à 8 : à /4, une victoire européenne rapportait ~23
+  // points contre 4 pour une victoire de championnat, soit six fois plus.
+  // L'Europe pesait à elle seule 60 % du score maximal d'une saison, si bien
+  // qu'un titre national sans campagne européenne ne pouvait pas rivaliser
+  // avec un simple bon parcours en C1. À /8 le rapport reste favorable à
+  // l'Europe (adversaires plus forts) sans écraser le reste.
+  journey.wins.forEach(w=>{ score += Math.round(w.oppStrength / 8); });
   if(journey.champion) score += EURO_TIER_WIN_BONUS[journey.tier] || 0;
   return score;
+}
+
+// Correction d'envergure du Panthéon.
+//
+// Le score du Panthéon est un cumul brut, sans aucune pondération : à qualité
+// de jeu égale, un coach du Real Madrid y devançait structurellement un coach
+// de Nice, simplement parce que son effectif gagne plus de matchs et va plus
+// loin en Europe. Le classement récompensait donc le choix du club autant que
+// la performance.
+//
+// Ce coefficient rééquilibre selon la force du club (75 à 92 dans le jeu,
+// médiane 84) : environ +22 % pour le plus petit, -15 % pour le plus gros.
+// Volontairement modéré - il corrige le biais sans inverser le rapport, une
+// grande saison avec un gros club devant rester une grande saison.
+function pantheonScaleFactor(clubStrength){
+  const s = Number(clubStrength) || 84;
+  return Math.max(0.85, Math.min(1.25, 1 + (84 - s) * 0.025));
 }
 
 function computeSeasonScore(){
@@ -14950,9 +14997,13 @@ function computeSeasonScore(){
   const myPos = standing.findIndex(s=>s.id===state.club.id) + 1;
   const cupJourney = computeCupJourney();
   const euroJourney = computeEuroJourney();
-  const league = computeLeagueScore(standing, myPos);
-  const cup = computeCupScore(cupJourney);
-  const euro = computeEuroScore(euroJourney);
+  // Le coefficient s'applique aux TROIS composantes, pas au seul total :
+  // le détail affiché dans le Panthéon (Championnat · Coupe · Europe) doit
+  // continuer à faire exactement la somme annoncée.
+  const f = pantheonScaleFactor(estimateClubStrength(state.club));
+  const league = Math.round(computeLeagueScore(standing, myPos) * f);
+  const cup = Math.round(computeCupScore(cupJourney) * f);
+  const euro = Math.round(computeEuroScore(euroJourney) * f);
   return { league, cup, euro, total: league + cup + euro, cupJourney, euroJourney };
 }
 
