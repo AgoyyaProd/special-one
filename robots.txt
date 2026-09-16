@@ -11,4 +11,4 @@ Disallow: /account
 Disallow: /coach-quiz
 Disallow: /palmares
 
-Sitemap: https://specialone.fr/sitemap.xml
+Sitemap: https://www.specialone.fr/sitemap.xml
