@@ -876,6 +876,10 @@ button{ font-family:inherit; cursor:pointer; }
   text-align:left;
   margin-bottom:10px;
   transition:color .15s;
+  /* Ces éléments sont désormais des <a> (pour que Google suive les liens
+     vers /info/) : on neutralise le soulignement par défaut afin de garder
+     exactement le rendu qu'avaient les <button>. */
+  text-decoration:none;
 }
 .site-footer-link:hover{ color:var(--club-accent); }
 .site-footer-bottom{
@@ -3657,27 +3661,27 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="site-footer-cols">
           <div class="site-footer-col">
             <div class="site-footer-col-title">Le jeu</div>
-            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
-            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
-            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
+            <a class="site-footer-link" href="/info/comment-jouer/" data-info="comment-jouer">Comment jouer</a>
+            <a class="site-footer-link" href="/info/database-joueurs/" data-info="database-joueurs">Base de données des joueurs</a>
+            <a class="site-footer-link" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
-            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
-            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
-            <button class="site-footer-link" data-info="faq">FAQ</button>
-            <button class="site-footer-link" data-info="contact">Contact</button>
+            <a class="site-footer-link" href="/info/a-propos/" data-info="a-propos">À propos du projet</a>
+            <a class="site-footer-link" href="/info/nouveautes/" data-info="nouveautes">Nouveautés</a>
+            <a class="site-footer-link" href="/info/faq/" data-info="faq">FAQ</a>
+            <a class="site-footer-link" href="/info/contact/" data-info="contact">Contact</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">Légal</div>
-            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
-            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
+            <a class="site-footer-link" href="/info/conditions/" data-info="conditions">Conditions d'utilisation</a>
+            <a class="site-footer-link" href="/info/confidentialite/" data-info="confidentialite">Confidentialité</a>
           </div>
         </div>
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
-        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
+        <a class="site-footer-link site-footer-version" href="/info/nouveautes/" data-info="nouveautes"></a>
       </div>
     </footer>
   </section>
@@ -3903,27 +3907,27 @@ select.modal-input option{ color:#111; background:#fff; }
         <div class="site-footer-cols">
           <div class="site-footer-col">
             <div class="site-footer-col-title">Le jeu</div>
-            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
-            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
-            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
+            <a class="site-footer-link" href="/info/comment-jouer/" data-info="comment-jouer">Comment jouer</a>
+            <a class="site-footer-link" href="/info/database-joueurs/" data-info="database-joueurs">Base de données des joueurs</a>
+            <a class="site-footer-link" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
-            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
-            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
-            <button class="site-footer-link" data-info="faq">FAQ</button>
-            <button class="site-footer-link" data-info="contact">Contact</button>
+            <a class="site-footer-link" href="/info/a-propos/" data-info="a-propos">À propos du projet</a>
+            <a class="site-footer-link" href="/info/nouveautes/" data-info="nouveautes">Nouveautés</a>
+            <a class="site-footer-link" href="/info/faq/" data-info="faq">FAQ</a>
+            <a class="site-footer-link" href="/info/contact/" data-info="contact">Contact</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">Légal</div>
-            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
-            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
+            <a class="site-footer-link" href="/info/conditions/" data-info="conditions">Conditions d'utilisation</a>
+            <a class="site-footer-link" href="/info/confidentialite/" data-info="confidentialite">Confidentialité</a>
           </div>
         </div>
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
-        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
+        <a class="site-footer-link site-footer-version" href="/info/nouveautes/" data-info="nouveautes"></a>
       </div>
     </footer>
   </section>
@@ -4200,7 +4204,7 @@ select.modal-input option{ color:#111; background:#fff; }
   <div class="modal-overlay" id="welcome-modal" style="display:none">
     <div class="modal-box">
       <div class="modal-text" style="font-weight:700; color:var(--text); margin-bottom:4px;">Bienvenue sur The Special One !</div>
-      <div class="modal-text">Ce site est développé par un seul passionné, sur son temps libre - il n'est affilié ni à EA Sports, ni à la FIFA, ni à aucun club ou championnat mentionné. Le jeu évolue encore : il est possible que vous croisiez un bug de temps en temps. Si c'est le cas, ou si vous avez une suggestion, la page <button class="site-footer-link" data-info="contact" id="welcome-contact-link" style="display:inline; margin:0; color:var(--club-accent);">Contact</button> est là pour ça.</div>
+      <div class="modal-text">Ce site est développé par un seul passionné, sur son temps libre - il n'est affilié ni à EA Sports, ni à la FIFA, ni à aucun club ou championnat mentionné. Le jeu évolue encore : il est possible que vous croisiez un bug de temps en temps. Si c'est le cas, ou si vous avez une suggestion, la page <a class="site-footer-link" href="/info/contact/" data-info="contact" id="welcome-contact-link" style="display:inline; margin:0; color:var(--club-accent);">Contact</a> est là pour ça.</div>
       <div class="modal-text" style="margin-top:10px;">Je vous souhaite une très belle carrière... et qui sait, peut-être deviendrez-vous, vous aussi, le prochain Special One.</div>
       <button class="season-btn season-btn-primary" id="btn-welcome-close" style="margin-top:16px; width:100%">C'est parti !</button>
     </div>
@@ -5292,27 +5296,27 @@ const SITE_FOOTER_HTML = `
         <div class="site-footer-cols">
           <div class="site-footer-col">
             <div class="site-footer-col-title">Le jeu</div>
-            <button class="site-footer-link" data-info="comment-jouer">Comment jouer</button>
-            <button class="site-footer-link" data-info="database-joueurs">Base de données des joueurs</button>
-            <button class="site-footer-link" data-info="clubs-europeens">Clubs européens</button>
+            <a class="site-footer-link" href="/info/comment-jouer/" data-info="comment-jouer">Comment jouer</a>
+            <a class="site-footer-link" href="/info/database-joueurs/" data-info="database-joueurs">Base de données des joueurs</a>
+            <a class="site-footer-link" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">À propos</div>
-            <button class="site-footer-link" data-info="a-propos">À propos du projet</button>
-            <button class="site-footer-link" data-info="nouveautes">Nouveautés</button>
-            <button class="site-footer-link" data-info="faq">FAQ</button>
-            <button class="site-footer-link" data-info="contact">Contact</button>
+            <a class="site-footer-link" href="/info/a-propos/" data-info="a-propos">À propos du projet</a>
+            <a class="site-footer-link" href="/info/nouveautes/" data-info="nouveautes">Nouveautés</a>
+            <a class="site-footer-link" href="/info/faq/" data-info="faq">FAQ</a>
+            <a class="site-footer-link" href="/info/contact/" data-info="contact">Contact</a>
           </div>
           <div class="site-footer-col">
             <div class="site-footer-col-title">Légal</div>
-            <button class="site-footer-link" data-info="conditions">Conditions d'utilisation</button>
-            <button class="site-footer-link" data-info="confidentialite">Confidentialité</button>
+            <a class="site-footer-link" href="/info/conditions/" data-info="conditions">Conditions d'utilisation</a>
+            <a class="site-footer-link" href="/info/confidentialite/" data-info="confidentialite">Confidentialité</a>
           </div>
         </div>
       </div>
       <div class="site-footer-bottom">
         <span>&copy; 2026 The Special One - Projet personnel, non affilié à EA Sports, la FIFA ou aux clubs et compétitions mentionnés.</span>
-        <button class="site-footer-link site-footer-version" data-info="nouveautes"></button>
+        <a class="site-footer-link site-footer-version" href="/info/nouveautes/" data-info="nouveautes"></a>
       </div>
     </footer>
 `;
@@ -5334,7 +5338,7 @@ const INFO_PAGES = {
       <p>Une fois l'effectif complet, la saison démarre : championnat en aller-retour, coupe nationale à élimination directe (16 clubs), trophée d'avant-saison face au vainqueur de la coupe précédente. Chaque match peut être joué en direct (avec de vraies décisions tactiques en cours de match : changements, gestion du score, gestion des cartons...) ou simulé instantanément.</p>
 
       <h2>5. Qualifiez-vous pour l'Europe</h2>
-      <p>Selon votre classement en fin de saison, vous pouvez viser la Ligue des Champions, la Ligue Europa ou la Ligue Conférence l'année suivante. Certaines places passent par un tour de qualification aller-retour (jouable en direct) avant même le début de la phase de ligue. Consultez la page <button class="site-footer-link" style="display:inline;margin:0" data-info="clubs-europeens">Clubs européens</button> pour le détail complet du système.</p>
+      <p>Selon votre classement en fin de saison, vous pouvez viser la Ligue des Champions, la Ligue Europa ou la Ligue Conférence l'année suivante. Certaines places passent par un tour de qualification aller-retour (jouable en direct) avant même le début de la phase de ligue. Consultez la page <a class="site-footer-link" style="display:inline;margin:0" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a> pour le détail complet du système.</p>
 
       <h2>6. Gérez le mercato</h2>
       <p>Entre chaque saison, un mercato vous permet d'échanger jusqu'à 3 joueurs de votre effectif (4 en cas de très bons résultats). Un mercato hivernal exceptionnel (1 seul joueur) peut aussi s'ouvrir en cours de saison si le conseil d'administration s'inquiète de vos résultats. Après plusieurs bonnes saisons consécutives, un club légèrement plus huppé que le vôtre peut même venir vous chercher comme entraîneur - à vous d'accepter ou de rester fidèle à votre club.</p>
@@ -5524,7 +5528,7 @@ const INFO_PAGES = {
       <p>Oui, après plusieurs bonnes saisons consécutives, un club légèrement au-dessus du vôtre peut vous approcher avant le mercato. Si vous acceptez, vous héritez de son effectif réel puis disposez d'un mercato pour l'améliorer.</p>
 
       <h3>Un bug ou une suggestion ?</h3>
-      <p>Écrivez-nous via la page <button class="site-footer-link" style="display:inline;margin:0" data-info="contact">Contact</button>.</p>
+      <p>Écrivez-nous via la page <a class="site-footer-link" style="display:inline;margin:0" href="/info/contact/" data-info="contact">Contact</a>.</p>
     `
   },
   'contact': {
@@ -5618,7 +5622,7 @@ function renderInfoPage(){
   const contentEl = document.getElementById('info-content');
   contentEl.innerHTML = page.html;
   contentEl.querySelectorAll('[data-info]').forEach(btn=>{
-    btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); showInfoPage(btn.dataset.info); });
   });
   const contactForm = document.getElementById('contact-form');
   if(contactForm) contactForm.addEventListener('submit', submitContactForm);
@@ -15724,8 +15728,14 @@ document.querySelectorAll('[data-footer-slot]').forEach(slot=>{
 document.querySelectorAll('.site-footer-version').forEach(el=>{
   el.textContent = 'v' + SITE_VERSION;
 });
+// Les liens du pied de page sont de vrais <a href="/info/..."> : Google peut
+// ainsi les suivre et découvrir les pages de contenu (avant, c'étaient des
+// <button data-info> que le robot ne voit pas comme des liens - d'où le
+// "Aucune page d'origine détectée" dans la Search Console). preventDefault
+// conserve la navigation interne sans rechargement ; un clic milieu ou
+// Ctrl+clic ouvre quand même la page statique dans un nouvel onglet.
 document.querySelectorAll('.site-footer-link[data-info]').forEach(btn=>{
-  btn.addEventListener('click', ()=> showInfoPage(btn.dataset.info));
+  btn.addEventListener('click', (e)=>{ e.preventDefault(); showInfoPage(btn.dataset.info); });
 });
 document.getElementById('btn-info-back').addEventListener('click', ()=>{
   if(history.length > 1) history.back();
