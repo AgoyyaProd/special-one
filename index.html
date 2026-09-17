@@ -14752,6 +14752,61 @@ async function pullSnapshotFromServer(){
   } catch(e){ console.error('Échec de lecture de la sauvegarde du compte :', e); return null; }
 }
 
+// Les succès (et les compteurs de carrière qui alimentent les succès à
+// paliers) ne doivent JAMAIS régresser : une fois un succès débloqué (ou un
+// palier atteint), il doit le rester pour toujours, quel que soit l'appareil
+// où on se connecte ensuite. Choisir "le gagnant" de la réconciliation en
+// bloc (voir plus bas) ne suffit pas à le garantir : si la sauvegarde
+// perdante avait débloqué des succès que la gagnante n'a pas encore (ex :
+// jouées sur deux appareils, ou une sauvegarde poussée en retard suite à une
+// coupure réseau), ils étaient purement effacés - exactement le bug déjà vu
+// une fois ("une connexion Google depuis un PC vierge avait écrasé une
+// vraie carrière/des succès enregistrés sur mobile") et qui s'est reproduit
+// depuis. On fusionne donc toujours les deux côtés en gardant le meilleur
+// de chaque succès/compteur, indépendamment de qui "gagne" par ailleurs.
+function mergeAchievementProgress(a, b){
+  const merged = {};
+  const ids = new Set([...Object.keys(a||{}), ...Object.keys(b||{})]);
+  ids.forEach(id=>{
+    const pa = (a||{})[id], pb = (b||{})[id];
+    if(!pa){ merged[id] = pb; return; }
+    if(!pb){ merged[id] = pa; return; }
+    if(typeof pa.tier === 'number' || typeof pb.tier === 'number'){
+      // Succès à paliers : on garde le palier le plus avancé.
+      const best = (pa.tier||0) >= (pb.tier||0) ? pa : pb;
+      merged[id] = { tier: Math.max(pa.tier||0, pb.tier||0), unlockedAt: best.unlockedAt };
+    } else {
+      // Succès simple : débloqué si débloqué d'un côté ou de l'autre, en
+      // gardant la date la plus ancienne (la vraie date d'obtention).
+      const unlocked = !!(pa.unlocked || pb.unlocked);
+      const dates = [pa.unlockedAt, pb.unlockedAt].filter(d=>d);
+      merged[id] = { unlocked, unlockedAt: dates.length ? Math.min(...dates) : undefined };
+    }
+  });
+  return merged;
+}
+
+// Même logique pour les compteurs de carrière (nombre de victoires, buts,
+// etc.) : ce sont des cumuls qui ne devraient jamais redescendre, donc on
+// garde toujours la plus grande valeur des deux côtés plutôt que celle du
+// "gagnant". Gère aussi l'unique compteur imbriqué (profile).
+function mergeCareerStats(a, b){
+  const merged = { ...(a||{}) };
+  Object.keys(b||{}).forEach(key=>{
+    const va = merged[key], vb = b[key];
+    if(typeof vb === 'number'){
+      merged[key] = Math.max(typeof va === 'number' ? va : 0, vb);
+    } else if(vb && typeof vb === 'object' && !Array.isArray(vb)){
+      const nested = { ...(va && typeof va === 'object' ? va : {}) };
+      Object.keys(vb).forEach(k=>{ nested[k] = Math.max(typeof nested[k]==='number'?nested[k]:0, typeof vb[k]==='number'?vb[k]:0); });
+      merged[key] = nested;
+    } else if(va === undefined){
+      merged[key] = vb;
+    }
+  });
+  return merged;
+}
+
 // Appelée juste après une connexion (ou au chargement si une session existe
 // déjà) : compare la sauvegarde de ce navigateur et celle du compte, et
 // applique la plus récente des deux - pour retrouver sa partie même en se
@@ -14778,6 +14833,16 @@ async function reconcileGameStateAfterLogin(){
   else if(remote && local) winner = (remote.savedAt || 0) >= (local.savedAt || 0) ? remote : local;
   else winner = remote || local;
   if(winner){
+    // Le "gagnant" ci-dessus tranche pour le reste de la partie (club,
+    // saison...), mais succès et compteurs de carrière se fusionnent
+    // toujours à part - voir mergeAchievementProgress/mergeCareerStats.
+    if(local || remote){
+      winner = {
+        ...winner,
+        achievementProgress: mergeAchievementProgress(local && local.achievementProgress, remote && remote.achievementProgress),
+        careerStats: mergeCareerStats(local && local.careerStats, remote && remote.careerStats)
+      };
+    }
     try { localStorage.setItem(PENDING_STATE_KEY, JSON.stringify(winner)); } catch(e){ /* ignore */ }
     applyGameStateSnapshot(winner);
     pushSnapshotToServer(winner); // pour que le serveur reflète aussi le gagnant (ex : local plus récent)
@@ -14975,21 +15040,44 @@ function computeEuroScore(journey){
   return score;
 }
 
-// Correction d'envergure du Panthéon.
+// Coefficient d'envergure du Panthéon.
 //
-// Le score du Panthéon est un cumul brut, sans aucune pondération : à qualité
-// de jeu égale, un coach du Real Madrid y devançait structurellement un coach
-// de Nice, simplement parce que son effectif gagne plus de matchs et va plus
-// loin en Europe. Le classement récompensait donc le choix du club autant que
-// la performance.
+// Le Panthéon doit refléter le niveau des équipes construites : à saison
+// identique (mêmes victoires, même parcours coupe et Europe), un effectif
+// plus fort doit ressortir avec un meilleur score. Mais "le niveau de
+// l'équipe construite" ne se limite pas au club choisi - il dépend aussi de
+// LA DRAFT : deux coachs du même club peuvent finir avec des onzes très
+// différents selon les cartes tirées et les choix faits. Le coefficient se
+// base donc sur la force réelle du onze titulaire draftés (voir
+// draftedSquadStrength ci-dessous), pas sur une force de club fixe.
 //
-// Ce coefficient rééquilibre selon la force du club (75 à 92 dans le jeu,
-// médiane 84) : environ +22 % pour le plus petit, -15 % pour le plus gros.
-// Volontairement modéré - il corrige le biais sans inverser le rapport, une
-// grande saison avec un gros club devant rester une grande saison.
-function pantheonScaleFactor(clubStrength){
-  const s = Number(clubStrength) || 84;
-  return Math.max(0.85, Math.min(1.25, 1 + (84 - s) * 0.025));
+// Comme le vivier de cartes proposées en draft reste celui du club
+// (activePool = CLUB_ROSTERS[club.id]), un Real Madrid tire structurellement
+// des onzes plus forts qu'un Nice - l'effet "gros club > petit club" reste
+// donc présent en moyenne. Mais à l'intérieur d'un même club, un excellent
+// draft (les meilleures cartes du vivier, bien placées) fait monter le
+// coefficient, et un draft raté le fait descendre : la performance du
+// joueur en phase de draft compte donc aussi dans le score final.
+//
+// Bornes et pente identiques à avant (échelle des `note` de joueur, médiane
+// ~84, mêmes ordres de grandeur que l'ancienne force de club) : jusqu'à
+// -15 % pour un onze faible, +25 % pour un onze exceptionnel (11 titulaires
+// proches de 90+, cf. l'achievement "équipe de rêve").
+function pantheonScaleFactor(squadStrength){
+  const s = Number(squadStrength) || 84;
+  return Math.max(0.85, Math.min(1.25, 1 + (s - 84) * 0.025));
+}
+
+// Force réelle du onze titulaire tel que draftés par le joueur, plutôt que
+// la force historique moyenne du club (estimateClubStrength) - c'est cette
+// valeur qui doit peser sur le Panthéon puisqu'on veut que la draft compte.
+// Fallback sur la force du club si l'effectif n'est pas encore complet
+// (ne devrait pas arriver à l'appel réel de computeSeasonScore, en fin de
+// saison).
+function draftedSquadStrength(){
+  const filled = state.slots.filter(s=>s.player);
+  if(!filled.length) return estimateClubStrength(state.club);
+  return filled.reduce((a,s)=>a+s.player.note, 0) / filled.length;
 }
 
 function computeSeasonScore(){
@@ -15000,7 +15088,7 @@ function computeSeasonScore(){
   // Le coefficient s'applique aux TROIS composantes, pas au seul total :
   // le détail affiché dans le Panthéon (Championnat · Coupe · Europe) doit
   // continuer à faire exactement la somme annoncée.
-  const f = pantheonScaleFactor(estimateClubStrength(state.club));
+  const f = pantheonScaleFactor(draftedSquadStrength());
   const league = Math.round(computeLeagueScore(standing, myPos) * f);
   const cup = Math.round(computeCupScore(cupJourney) * f);
   const euro = Math.round(computeEuroScore(euroJourney) * f);
