@@ -5475,7 +5475,7 @@ const INFO_PAGES = {
       <h2>v0.5.0 - Compétitions européennes & succès</h2>
       <ul>
         <li>Coupes européennes complètes : barrages, 8es, quarts, demies en aller-retour, prolongations et tirs au but.</li>
-        <li>Trophées d'ouverture nationaux (Supercoupe de France, Community Shield, Supercoupes...).</li>
+        <li>Trophées d'ouverture nationaux (Supercoupe de France, Supercoupe d'Angleterre, Supercoupes...).</li>
         <li>Premier système de succès, avec popups de déblocage.</li>
       </ul>
 
@@ -5580,7 +5580,7 @@ const INFO_PAGES = {
       <h2>Soutien au projet (dons)</h2>
       <p>The Special One reste entièrement gratuit et ne nécessite aucun paiement pour être utilisé. Un lien de don volontaire vers la plateforme tierce Ko-fi est proposé pour celles et ceux qui souhaitent soutenir le développement du projet. Ces dons sont libres, non remboursables, et n'accordent aucun avantage de jeu, aucun contenu exclusif ni aucun accès particulier - ils ne financent que la poursuite du projet. Le traitement du paiement est intégralement géré par Ko-fi et son prestataire de paiement, conformément à leurs propres conditions d'utilisation ; aucune information de paiement ne transite par ou n'est conservée sur The Special One.</p>
       <h2>Contenu et propriété intellectuelle</h2>
-      <p>Les noms de championnats, clubs et joueurs réels sont utilisés à titre informatif dans le cadre d'un projet de fan non commercial. Le code, les visuels et les textes propres au site restent la propriété de leur auteur. Aucune garantie n'est donnée quant à l'exactitude des données historiques utilisées.</p>
+      <p>Les noms des championnats, clubs et coupes présents dans le jeu sont des créations originales. Les effectifs de joueurs proposés à la draft s'inspirent de compositions réelles, utilisées à titre informatif dans le cadre d'un projet de fan non commercial. Le code, les visuels et les textes propres au site restent la propriété de leur auteur. Aucune garantie n'est donnée quant à l'exactitude des données historiques utilisées.</p>
       <h2>Disponibilité</h2>
       <p>Le service est fourni sans garantie de disponibilité continue. Des interruptions, pertes de données ou modifications peuvent survenir sans préavis.</p>
       <h2>Limitation de responsabilité</h2>
@@ -12720,7 +12720,7 @@ function getDueDomesticSuperCupStep(){
 }
 function resolveDueDomesticSuperCupStepBulk(){
   const sc = state.domesticSuperCup;
-  // Le trophée d'ouverture (Supercoupe de France, Community Shield...)
+  // Le trophée d'ouverture (Supercoupe de France, Supercoupe d'Angleterre...)
   // n'alimentait jusqu'ici jamais le suivi des succès (matchesPlayed,
   // premiere_victoire, verrouille...) - ni en instantané ni en direct
   // (voir aussi commitLiveDomesticSuperCupMatchResult) : trackMatchResult
