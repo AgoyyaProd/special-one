@@ -5284,7 +5284,7 @@ function toast(msg){
 // ci-dessous et son injection après le remplissage des footers) - unique
 // source de vérité, à mettre à jour ici uniquement lors d'une prochaine
 // version plutôt que dans chacune des copies du footer.
-const SITE_VERSION = '1.1.0';
+const SITE_VERSION = '1.2.0';
 const SITE_FOOTER_HTML = `
     <footer class="site-footer">
       <div class="site-footer-inner">
@@ -5399,6 +5399,24 @@ const INFO_PAGES = {
     title:'Nouveautés',
     html:`
       <p class="info-meta">Historique des évolutions du jeu, version par version.</p>
+
+      <h2>v1.2.0 - "Nouvelle identité"</h2>
+      <p>Tous les championnats, clubs et coupes du jeu portent désormais des noms originaux, et quelques corrections de fond sur les pages du site.</p>
+      <h3>Noms et identité</h3>
+      <ul>
+        <li>Les 5 championnats portent désormais des noms génériques (D1 France, D1 Angleterre, D1 Espagne, D1 Allemagne, D1 Italie) plutôt que les noms réels des compétitions.</li>
+        <li>Les 3 coupes européennes sont renommées Coupe des Champions, Coupe d'Europe et Coupe Conférence, et les 5 supercoupes nationales portent désormais toutes le nom "Supercoupe de/d'un pays".</li>
+        <li>Le trophée d'ouverture européen devient la Supercoupe Continentale.</li>
+        <li>Mise à jour du texte "Avertissement" (page À propos) et des conditions d'utilisation pour refléter ce nouveau nommage.</li>
+      </ul>
+      <h3>Corrections</h3>
+      <ul>
+        <li>Les pages du pied de page (À propos, FAQ, Contact...) affichaient parfois un contenu obsolète après un rechargement (F5), indépendamment du cache du navigateur - corrigé.</li>
+      </ul>
+      <h3>Interface</h3>
+      <ul>
+        <li>Logos de club agrandis sur l'écran de sélection.</li>
+      </ul>
 
       <h2>v1.1.0 - "Rectificatif"</h2>
       <p>Un correctif critique qui pouvait bloquer une saison en cours de façon définitive, une bascule vers des adresses propres, et une bonne partie des irritants mobiles restants.</p>
