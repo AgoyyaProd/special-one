@@ -19,6 +19,15 @@
 <meta name="twitter:title" content="Clubs européens" />
 <meta name="twitter:description" content="Comment fonctionnent les qualifications et les 3 compétitions européennes (Coupe des Champions, Coupe d&#x27;Europe, Coupe Conférence) dans The Special One." />
 <meta name="twitter:image" content="https://www.specialone.fr/og-image.png" />
+<script>
+  // Cette page statique existe pour le référencement et les aperçus sociaux
+  // (Google, Twitter, Facebook...), qui ne l'exécutent pas et voient donc le
+  // contenu ci-dessous tel quel. Un vrai navigateur, lui, doit toujours
+  // retomber sur l'application complète plutôt que sur ce gabarit allégé -
+  // même redirection que 404.html, pour un rendu identique avec ou sans "/"
+  // final dans l'URL.
+  location.replace('/?redirect=' + encodeURIComponent(location.pathname + location.search) + location.hash);
+</script>
 <style>
   :root{ color-scheme:dark; }
   body{ margin:0; background:#0a0e1a; color:#f5f6f8;

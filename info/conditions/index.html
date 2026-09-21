@@ -19,6 +19,15 @@
 <meta name="twitter:title" content="Conditions d&#x27;utilisation" />
 <meta name="twitter:description" content="Les conditions d&#x27;utilisation de The Special One, jeu de gestion football gratuit en ligne." />
 <meta name="twitter:image" content="https://www.specialone.fr/og-image.png" />
+<script>
+  // Cette page statique existe pour le référencement et les aperçus sociaux
+  // (Google, Twitter, Facebook...), qui ne l'exécutent pas et voient donc le
+  // contenu ci-dessous tel quel. Un vrai navigateur, lui, doit toujours
+  // retomber sur l'application complète plutôt que sur ce gabarit allégé -
+  // même redirection que 404.html, pour un rendu identique avec ou sans "/"
+  // final dans l'URL.
+  location.replace('/?redirect=' + encodeURIComponent(location.pathname + location.search) + location.hash);
+</script>
 <style>
   :root{ color-scheme:dark; }
   body{ margin:0; background:#0a0e1a; color:#f5f6f8;
