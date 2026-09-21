@@ -33,8 +33,8 @@ Newcastle United,2005-2006,26,Peter Ramage,,England,DC,68
 Newcastle United,2005-2006,27,Steven Taylor,,England,DC,70
 Newcastle United,2005-2006,33,Celestine Babayaro,,Nigeria,DG,77
 Newcastle United,2005-2006,4,Nolberto Solano,,Peru,MD,74
-Newcastle United,2005-2006,5,Emre Belozoglu,Emre,Turkey,MOC|MC,80
-Newcastle United,2005-2006,8,Kieron Dyer,,England,MD,84
+Newcastle United,2005-2006,5,Emre Belozoglu,Emre,Turkey,MOC|MC|MG,80
+Newcastle United,2005-2006,8,Kieron Dyer,,England,MD|MC,84
 Newcastle United,2005-2006,11,Lee Bowyer,,England,MC,80
 Newcastle United,2005-2006,14,Charles N'Zogbia,,France,MG,69
 Newcastle United,2005-2006,15,Amdy Faye,,Senegal,MDC,77
@@ -56,15 +56,15 @@ Newcastle United,2006-2007,26,Peter Ramage,,England,DC,73
 Newcastle United,2006-2007,27,Steven Taylor,,England,DC,79
 Newcastle United,2006-2007,33,Celestine Babayaro,,Nigeria,DG,71
 Newcastle United,2006-2007,34,Olivier Bernard,,France,DG,65
-Newcastle United,2006-2007,5,Emre Belozoglu,Emre,Turkey,MOC|MC,79
-Newcastle United,2006-2007,8,Kieron Dyer,,England,MD,76
+Newcastle United,2006-2007,5,Emre Belozoglu,Emre,Turkey,MOC|MC|MG,79
+Newcastle United,2006-2007,8,Kieron Dyer,,England,MD|MC,76
 Newcastle United,2006-2007,11,Damien Duff,,Republic of Ireland,AG|MG,81
 Newcastle United,2006-2007,14,Charles N'Zogbia,,France,MG,74
 Newcastle United,2006-2007,16,James Milner,,England,MD|AD,76
 Newcastle United,2006-2007,17,Scott Parker,,England,MC,81
 Newcastle United,2006-2007,21,Lee Clark,,England,MC,68
 Newcastle United,2006-2007,22,Nicky Butt,,England,MC,73
-Newcastle United,2006-2007,7,Albert Luque,,Spain,AG,79
+Newcastle United,2006-2007,7,Albert Luque,,Spain,AG|MG,79
 Newcastle United,2006-2007,9,Obafemi Martins,,Nigeria,BU,81
 Newcastle United,2006-2007,10,Michael Owen,,England,BU,85
 Newcastle United,2006-2007,20,Antoine Sibierski,,France,MC,64
@@ -169,9 +169,9 @@ Newcastle United,2010-2011,22,Stephen Ireland,,Republic of Ireland,MOC,67
 Newcastle United,2010-2011,24,Cheick Tiote,,Ivory Coast,MDC,73
 Newcastle United,2010-2011,25,Kazenga LuaLua,,RD Congo,AG,58
 Newcastle United,2010-2011,29,Haris Vuckic,,Slovenia,MOC,64
-Newcastle United,2010-2011,37,Hatem Ben Arfa,,France,AG|MOC,78
+Newcastle United,2010-2011,37,Hatem Ben Arfa,,France,AG|MOC|AD,78
 Newcastle United,2010-2011,44,Sammy Ameobi,,England,AG,50
-Newcastle United,2010-2011,11,Peter Lovenkrands,,Denmark,AG,75
+Newcastle United,2010-2011,11,Peter Lovenkrands,,Denmark,AG|BU,75
 Newcastle United,2010-2011,20,Leon Best,,Republic of Ireland,BU,69
 Newcastle United,2010-2011,23,Shola Ameobi,,Nigeria,BU,70
 Newcastle United,2010-2011,30,Nile Ranger,,England,BU,69
@@ -191,14 +191,14 @@ Newcastle United,2011-2012,4,Yohan Cabaye,,France,MC|MOC,80
 Newcastle United,2011-2012,8,Danny Guthrie,,England,MC,74
 Newcastle United,2011-2012,13,Mehdi Abeid,,Algeria,MC,60
 Newcastle United,2011-2012,15,Dan Gosling,,England,MC,73
-Newcastle United,2011-2012,18,Jonas Gutierrez,,Argentina,MD|DD,78
+Newcastle United,2011-2012,18,Jonas Gutierrez,,Argentina,MD|DD|MG,78
 Newcastle United,2011-2012,22,Sylvain Marveaux,,France,MG|MOC,75
-Newcastle United,2011-2012,24,Cheick Tiote,,Ivory Coast,MDC,78
+Newcastle United,2011-2012,24,Cheick Tiote,,Ivory Coast,MDC|MC,78
 Newcastle United,2011-2012,25,Gabriel Obertan,,France,AD,70
 Newcastle United,2011-2012,28,Sammy Ameobi,,England,AG,63
 Newcastle United,2011-2012,29,Haris Vuckic,,Slovenia,MOC,64
 Newcastle United,2011-2012,9,Papiss Cisse,Papiss Cisse,Senegal,BU,81
-Newcastle United,2011-2012,10,Hatem Ben Arfa,,France,AG|MOC,79
+Newcastle United,2011-2012,10,Hatem Ben Arfa,,France,AG|MOC|AD,79
 Newcastle United,2011-2012,11,Peter Lovenkrands,,Denmark,AG,71
 Newcastle United,2011-2012,19,Demba Ba,,Senegal,BU,82
 Newcastle United,2011-2012,20,Leon Best,,Republic of Ireland,BU,73
@@ -207,7 +207,7 @@ Newcastle United,2012-2013,1,Tim Krul,,Netherlands,G,79
 Newcastle United,2012-2013,21,Rob Elliot,,Republic of Ireland,G,66
 Newcastle United,2012-2013,37,Steve Harper,,England,G,69
 Newcastle United,2012-2013,2,Fabricio Coloccini,,Argentina,DC,81
-Newcastle United,2012-2013,3,Davide Santon,,Italy,DD,75
+Newcastle United,2012-2013,3,Davide Santon,,Italy,DD|DG,75
 Newcastle United,2012-2013,5,Danny Simpson,,England,DD,75
 Newcastle United,2012-2013,6,Mike Williamson,,England,DC,74
 Newcastle United,2012-2013,13,Mapou Yanga-Mbiwa,,France,DC,78
@@ -223,10 +223,10 @@ Newcastle United,2012-2013,36,Paul Dummett,,Wales,DG,52
 Newcastle United,2012-2013,4,Yohan Cabaye,,France,MC|MOC,81
 Newcastle United,2012-2013,7,Moussa Sissoko,,France,MC|MD,75
 Newcastle United,2012-2013,8,Vurnon Anita,,Netherlands,MDC,74
-Newcastle United,2012-2013,10,Hatem Ben Arfa,,France,AG|MOC,81
+Newcastle United,2012-2013,10,Hatem Ben Arfa,,France,AG|MOC|AD,81
 Newcastle United,2012-2013,15,Dan Gosling,,England,MC,73
 Newcastle United,2012-2013,17,Romain Amalfitano,,France,MC,68
-Newcastle United,2012-2013,18,Jonas Gutierrez,,Argentina,MD|DD,76
+Newcastle United,2012-2013,18,Jonas Gutierrez,,Argentina,MD|DD|MG,76
 Newcastle United,2012-2013,20,Gael Bigirimana,,Burundi,MC,63
 Newcastle United,2012-2013,22,Sylvain Marveaux,,France,MG,75
 Newcastle United,2012-2013,24,Cheick Tiote,,Ivory Coast,MDC,80
@@ -252,7 +252,7 @@ Newcastle United,2013-2014,34,James Tavernier,,England,DD,63
 Newcastle United,2013-2014,36,Paul Dummett,,Wales,DG,64
 Newcastle United,2013-2014,7,Moussa Sissoko,,France,MC|MD,75
 Newcastle United,2013-2014,8,Vurnon Anita,,Netherlands,MDC,75
-Newcastle United,2013-2014,10,Hatem Ben Arfa,,France,AG|MOC,79
+Newcastle United,2013-2014,10,Hatem Ben Arfa,,France,AG|MOC|MD,79
 Newcastle United,2013-2014,15,Dan Gosling,,England,MC,72
 Newcastle United,2013-2014,17,Romain Amalfitano,,France,MC,68
 Newcastle United,2013-2014,18,Jonas Gutierrez,,Argentina,MD,73
@@ -278,9 +278,9 @@ Newcastle United,2014-2015,27,Steven Taylor,,England,DC,75
 Newcastle United,2014-2015,33,Curtis Good,,Australia,DC,61
 Newcastle United,2014-2015,36,Paul Dummett,,Wales,DG,68
 Newcastle United,2014-2015,39,Shane Ferguson,,Northern Ireland,DG,65
-Newcastle United,2014-2015,7,Moussa Sissoko,,France,MC|MD,77
+Newcastle United,2014-2015,7,Moussa Sissoko,,France,MC|MD|MOC,77
 Newcastle United,2014-2015,8,Vurnon Anita,,Netherlands,MDC,74
-Newcastle United,2014-2015,10,Siem de Jong,,Netherlands,MOC,77
+Newcastle United,2014-2015,10,Siem de Jong,,Netherlands,MOC|BU,77
 Newcastle United,2014-2015,14,Jack Colback,,England,MC,73
 Newcastle United,2014-2015,18,Jonas Gutierrez,,Argentina,MD,73
 Newcastle United,2014-2015,20,Remy Cabella,,France,MOC,62
@@ -304,11 +304,11 @@ Newcastle United,2015-2016,19,Massadio Haidara,,France,DG,72
 Newcastle United,2015-2016,22,Daryl Janmaat,,Netherlands,DD,77
 Newcastle United,2015-2016,27,Steven Taylor,,England,DC,73
 Newcastle United,2015-2016,4,Jack Colback,,England,MC|MDC,76
-Newcastle United,2015-2016,5,Georginio Wijnaldum,,Netherlands,MOC|MC,80
+Newcastle United,2015-2016,5,Georginio Wijnaldum,,Netherlands,MOC|MC|MG,80
 Newcastle United,2015-2016,7,Moussa Sissoko,,France,MC|MD,79
 Newcastle United,2015-2016,8,Vurnon Anita,,Netherlands,MDC,73
-Newcastle United,2015-2016,10,Siem de Jong,,Netherlands,MOC,76
-Newcastle United,2015-2016,11,Yoan Gouffran,,France,AG|BU,75
+Newcastle United,2015-2016,10,Siem de Jong,,Netherlands,MOC|BU,76
+Newcastle United,2015-2016,11,Yoan Gouffran,,France,AG|BU|MG,75
 Newcastle United,2015-2016,12,Jonjo Shelvey,,England,MC,77
 Newcastle United,2015-2016,16,Rolando Aarons,,England,AG,71
 Newcastle United,2015-2016,20,Florian Thauvin,,France,AD,44
@@ -332,13 +332,13 @@ Newcastle United,2016-2017,22,DeAndre Yedlin,,United States,DD,72
 Newcastle United,2016-2017,27,Jesus Gamez,,Spain,DD,76
 Newcastle United,2016-2017,4,Jack Colback,,England,MC,73
 Newcastle United,2016-2017,8,Vurnon Anita,,Netherlands,MDC,73
-Newcastle United,2016-2017,11,Matt Ritchie,,Scotland,MG|AG,76
+Newcastle United,2016-2017,11,Matt Ritchie,,Scotland,MG|AG|MD,76
 Newcastle United,2016-2017,12,Jonjo Shelvey,,England,MC,77
 Newcastle United,2016-2017,14,Isaac Hayden,,England,MDC,69
 Newcastle United,2016-2017,15,Mohamed Diame,,Senegal,MC,74
 Newcastle United,2016-2017,16,Rolando Aarons,,England,AG,72
 Newcastle United,2016-2017,20,Yoan Gouffran,,France,AG,74
-Newcastle United,2016-2017,30,Christian Atsu,,Ghana,AG|MG,75
+Newcastle United,2016-2017,30,Christian Atsu,,Ghana,AG|MG|MD,75
 Newcastle United,2016-2017,9,Dwight Gayle,,England,BU,75
 Newcastle United,2016-2017,17,Ayoze Perez,,Spain,BU,74
 Newcastle United,2016-2017,45,Aleksandar Mitrovic,,Serbia,BU,75
@@ -357,7 +357,7 @@ Newcastle United,2017-2018,27,Jesus Gamez,,Spain,DD,72
 Newcastle United,2017-2018,7,Jacob Murphy,,England,AD,72
 Newcastle United,2017-2018,8,Jonjo Shelvey,,England,MC,78
 Newcastle United,2017-2018,10,Mohamed Diame,,Senegal,MC,74
-Newcastle United,2017-2018,11,Matt Ritchie,,Scotland,MG|AG,76
+Newcastle United,2017-2018,11,Matt Ritchie,,Scotland,MG|AG|MD,76
 Newcastle United,2017-2018,14,Isaac Hayden,,England,MDC,72
 Newcastle United,2017-2018,15,Kenedy,Kenedy,Brazil,DG|MG,75
 Newcastle United,2017-2018,23,Mikel Merino,,Spain,MC,62
@@ -380,7 +380,7 @@ Newcastle United,2018-2019,22,DeAndre Yedlin,,United States,DD,76
 Newcastle United,2018-2019,4,Ki Sung-yueng,,South Korea,MDC,62
 Newcastle United,2018-2019,8,Jonjo Shelvey,,England,MC,78
 Newcastle United,2018-2019,10,Mohamed Diame,,Senegal,MC,75
-Newcastle United,2018-2019,11,Matt Ritchie,,Scotland,MG|AG,77
+Newcastle United,2018-2019,11,Matt Ritchie,,Scotland,MG|AG|MD,77
 Newcastle United,2018-2019,14,Isaac Hayden,,England,MDC,74
 Newcastle United,2018-2019,15,Kenedy,Kenedy,Brazil,DG|MG,75
 Newcastle United,2018-2019,24,Miguel Almiron,,Paraguay,MOC|MD,81
@@ -394,17 +394,17 @@ Newcastle United,2019-2020,1,Martin Dubravka,,Slovakia,G,82
 Newcastle United,2019-2020,21,Rob Elliot,,Republic of Ireland,G,69
 Newcastle United,2019-2020,26,Karl Darlow,,England,G,73
 Newcastle United,2019-2020,2,Ciaran Clark,,Republic of Ireland,DC,77
-Newcastle United,2019-2020,3,Paul Dummett,,Wales,DG,76
+Newcastle United,2019-2020,3,Paul Dummett,,Wales,DG|DC,76
 Newcastle United,2019-2020,5,Fabian Schar,,Switzerland,DC,79
 Newcastle United,2019-2020,6,Jamaal Lascelles,,England,DC,78
 Newcastle United,2019-2020,17,Emil Krafth,,Sweden,DD,73
 Newcastle United,2019-2020,18,Federico Fernandez,,Argentina,DC,78
-Newcastle United,2019-2020,19,Javier Manquillo,,Spain,DD,75
-Newcastle United,2019-2020,22,DeAndre Yedlin,,United States,DD,75
+Newcastle United,2019-2020,19,Javier Manquillo,,Spain,DD|MDD,75
+Newcastle United,2019-2020,22,DeAndre Yedlin,,United States,DD|MDD,75
 Newcastle United,2019-2020,28,Danny Rose,,England,DG,58
 Newcastle United,2019-2020,8,Jonjo Shelvey,,England,MC,78
 Newcastle United,2019-2020,10,Allan Saint-Maximin,,France,AG|MG,80
-Newcastle United,2019-2020,11,Matt Ritchie,,Scotland,MG|AG,75
+Newcastle United,2019-2020,11,Matt Ritchie,,Scotland,MG|AG|MDG,75
 Newcastle United,2019-2020,14,Isaac Hayden,,England,MDC,76
 Newcastle United,2019-2020,24,Miguel Almiron,,Paraguay,MOC|MD,78
 Newcastle United,2019-2020,30,Christian Atsu,,Ghana,AG,74
@@ -457,7 +457,7 @@ Newcastle United,2021-2022,8,Jonjo Shelvey,,England,MC,76
 Newcastle United,2021-2022,10,Allan Saint-Maximin,,France,AG|MG,81
 Newcastle United,2021-2022,11,Matt Ritchie,,Scotland,MG,73
 Newcastle United,2021-2022,14,Isaac Hayden,,England,MDC,76
-Newcastle United,2021-2022,21,Ryan Fraser,,Scotland,AG|MG,77
+Newcastle United,2021-2022,21,Ryan Fraser,,Scotland,AG|MG|MD,77
 Newcastle United,2021-2022,23,Jacob Murphy,,England,AD,74
 Newcastle United,2021-2022,24,Miguel Almiron,,Paraguay,MOC|MD,78
 Newcastle United,2021-2022,28,Joe Willock,,England,MC,75
@@ -485,7 +485,7 @@ Newcastle United,2022-2023,10,Allan Saint-Maximin,,France,AG|MG,81
 Newcastle United,2022-2023,11,Matt Ritchie,,Scotland,MG,72
 Newcastle United,2022-2023,21,Ryan Fraser,,Scotland,AG,74
 Newcastle United,2022-2023,23,Jacob Murphy,,England,AD|MD,76
-Newcastle United,2022-2023,24,Miguel Almiron,,Paraguay,MOC|MD,80
+Newcastle United,2022-2023,24,Miguel Almiron,,Paraguay,MOC|MD|AD,80
 Newcastle United,2022-2023,28,Joe Willock,,England,MC,78
 Newcastle United,2022-2023,36,Sean Longstaff,,England,MC,78
 Newcastle United,2022-2023,39,Bruno Guimaraes,,Brazil,MC|MDC,84
@@ -509,7 +509,7 @@ Newcastle United,2023-2024,10,Anthony Gordon,,England,AG|MG,80
 Newcastle United,2023-2024,11,Matt Ritchie,,Scotland,MG,71
 Newcastle United,2023-2024,15,Harvey Barnes,,England,AG|MG,80
 Newcastle United,2023-2024,23,Jacob Murphy,,England,AD|MD,76
-Newcastle United,2023-2024,24,Miguel Almiron,,Paraguay,MOC|MD,79
+Newcastle United,2023-2024,24,Miguel Almiron,,Paraguay,MOC|MD|AD,79
 Newcastle United,2023-2024,28,Joe Willock,,England,MC,78
 Newcastle United,2023-2024,32,Elliot Anderson,,Scotland,MC,60
 Newcastle United,2023-2024,36,Sean Longstaff,,England,MC,77
