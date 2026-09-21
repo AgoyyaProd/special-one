@@ -12,7 +12,7 @@
      l'aperçu affiché quand le lien est collé sur Discord, Twitter, Reddit
      ou WhatsApp - c'est par là que passe l'essentiel du trafic d'un jeu
      de navigateur, bien avant Google. -->
-<meta name="description" content="Composez le XI ultime de votre club en mélangeant 22 saisons de joueurs réels, puis simulez championnat, coupes et Ligue des Champions. Gratuit, sans compte." />
+<meta name="description" content="Composez le XI ultime de votre club en mélangeant 22 saisons de joueurs réels, puis simulez championnat, coupes et Coupe des Champions. Gratuit, sans compte." />
 <link rel="canonical" href="https://www.specialone.fr/" />
 <meta name="theme-color" content="#0d0f14" />
 
@@ -39,7 +39,7 @@
   "name": "The Special One",
   "url": "https://www.specialone.fr/",
   "image": "https://www.specialone.fr/og-image.png",
-  "description": "Jeu de gestion football gratuit dans le navigateur : composez le XI ultime de votre club en mélangeant 22 saisons de joueurs réels, puis simulez championnat, coupes et Ligue des Champions.",
+  "description": "Jeu de gestion football gratuit dans le navigateur : composez le XI ultime de votre club en mélangeant 22 saisons de joueurs réels, puis simulez championnat, coupes et Coupe des Champions.",
   "inLanguage": "fr",
   "genre": ["Gestion", "Sport", "Football"],
   "gamePlatform": "Navigateur web",
@@ -1681,7 +1681,7 @@ button{ font-family:inherit; cursor:pointer; }
 .st-row.st-cl{ border-left:3px solid var(--zone-cl); background:color-mix(in srgb, var(--zone-cl) 10%, transparent); }
 /* Place LDC via tour de qualification (pas de qualification directe) -
    même bleu que st-cl mais éclairci, pour la distinguer d'un coup d'oeil
-   dans le classement (ex: 4e de Ligue 1, Tour 3). */
+   dans le classement (ex: 4e de D1 France, Tour 3). */
 .st-row.st-cl-quali{ border-left:3px solid color-mix(in srgb, var(--zone-cl) 60%, white); background:color-mix(in srgb, var(--zone-cl) 6%, transparent); }
 .st-row.st-el{ border-left:3px solid var(--zone-el); background:color-mix(in srgb, var(--zone-el) 10%, transparent); }
 .st-row.st-ecl{ border-left:3px solid var(--zone-ecl); background:color-mix(in srgb, var(--zone-ecl) 10%, transparent); }
@@ -2695,9 +2695,9 @@ button{ font-family:inherit; cursor:pointer; }
   .select-wrap{ padding:32px var(--gutter) 60px; }
   .select-title{ font-size:24px; }
   .league-grid{ gap:8px; margin-bottom:32px; }
-  /* Logos seuls sur mobile - avec le nom en plus (ex: "Bundesliga",
-     "Premier League"), la grille à 5 colonnes égales n'a jamais assez de
-     place et débordait de l'écran (Serie A coupé à droite) : le texte,
+  /* Logos seuls sur mobile - avec le nom en plus (ex: "D1 Allemagne",
+     "D1 Angleterre"), la grille à 5 colonnes égales n'a jamais assez de
+     place et débordait de l'écran (D1 Italie coupé à droite) : le texte,
      non compressible par défaut dans une grille, forçait chaque colonne
      bien au-delà de sa part équitable. */
   .league-pill{ padding:10px 4px; font-size:13px; gap:0; min-width:0; }
@@ -2840,7 +2840,7 @@ button{ font-family:inherit; cursor:pointer; }
   .live-team{ font-size:12px; line-height:1.25; }
   /* Le bloc central (score + libellé de compétition) ne rétrécit jamais
      (flex-shrink:0, volontaire pour garder le score bien visible) - mais
-     sans plafond de largeur, un libellé long ("Ligue Conférence - 8es de
+     sans plafond de largeur, un libellé long ("Coupe Conférence - 8es de
      finale - Aller") le poussait à s'élargir pour tenir sur une seule
      ligne, écrasant les noms d'équipe de chaque côté au point de les faire
      déborder de l'écran. Plafonné pour forcer le libellé à revenir à la
@@ -3876,9 +3876,9 @@ select.modal-input option{ color:#111; background:#fff; }
           <div class="euro-tab-group" id="euro-tab-group" style="display:none">
             <div class="euro-tab-label">Coupe d'Europe</div>
             <div class="league-switch">
-              <button class="league-switch-btn" id="euro-tab-cl" data-tier="cl">Ligue des Champions</button>
-              <button class="league-switch-btn" id="euro-tab-el" data-tier="el">Ligue Europa</button>
-              <button class="league-switch-btn" id="euro-tab-ecl" data-tier="ecl">Ligue Conférence</button>
+              <button class="league-switch-btn" id="euro-tab-cl" data-tier="cl">Coupe des Champions</button>
+              <button class="league-switch-btn" id="euro-tab-el" data-tier="el">Coupe d'Europe</button>
+              <button class="league-switch-btn" id="euro-tab-ecl" data-tier="ecl">Coupe Conférence</button>
             </div>
           </div>
           <div class="supercup-banner" id="supercup-banner" style="display:none"></div>
@@ -4101,11 +4101,11 @@ select.modal-input option{ color:#111; background:#fff; }
             </button>
             <div class="pf-dropdown-menu pantheon-submenu" id="pf-league-menu">
               <button class="pf-dropdown-option is-active" data-value="">Tous les championnats</button>
-              <button class="pf-dropdown-option" data-value="Ligue 1">Ligue 1</button>
-              <button class="pf-dropdown-option" data-value="Premier League">Premier League</button>
-              <button class="pf-dropdown-option" data-value="La Liga">La Liga</button>
-              <button class="pf-dropdown-option" data-value="Bundesliga">Bundesliga</button>
-              <button class="pf-dropdown-option" data-value="Serie A">Serie A</button>
+              <button class="pf-dropdown-option" data-value="D1 France">D1 France</button>
+              <button class="pf-dropdown-option" data-value="D1 Angleterre">D1 Angleterre</button>
+              <button class="pf-dropdown-option" data-value="D1 Espagne">D1 Espagne</button>
+              <button class="pf-dropdown-option" data-value="D1 Allemagne">D1 Allemagne</button>
+              <button class="pf-dropdown-option" data-value="D1 Italie">D1 Italie</button>
             </div>
           </div>
 
@@ -4765,15 +4765,15 @@ Object.assign(flagGradients, {
 
 // ---------------------------- CLUBS DATA ----------------------------
 const LEAGUE_LOGOS = {
-  "Ligue 1": "data/logos/league-ligue1.svg",
-  "Premier League": "data/logos/league-premier-league.svg",
-  "La Liga": "data/logos/league-la-liga.svg",
-  "Bundesliga": "data/logos/league-bundesliga.svg",
-  "Serie A": "data/logos/league-serie-a.svg"
+  "D1 France": "data/logos/league-ligue1.svg",
+  "D1 Angleterre": "data/logos/league-premier-league.svg",
+  "D1 Espagne": "data/logos/league-la-liga.svg",
+  "D1 Allemagne": "data/logos/league-bundesliga.svg",
+  "D1 Italie": "data/logos/league-serie-a.svg"
 };
 
 const LEAGUES = {
-  "Ligue 1": [
+  "D1 France": [
     { id:"psg", name:"Paris", trigram:"PSG", primary:"#0B3D91", secondary:"#C1121F", accent:"#F5B700",
       logo:"data/logos/psg.svg" },
     { id:"om", name:"Marseille", trigram:"OM", primary:"#0A2A6B", secondary:"#ffffff", accent:"#67C6E3",
@@ -4801,7 +4801,7 @@ const LEAGUES = {
     { id:"sdr", name:"Reims", trigram:"SDR", primary:"#E4003C", secondary:"#ffffff", accent:"#0a0d13", strength:70 , playable:false },
     { id:"fcl", name:"Lorient", trigram:"FCL", primary:"#F47B20", secondary:"#000000", accent:"#ffffff", strength:70 , playable:false }
   ],
-  "Premier League": [
+  "D1 Angleterre": [
     { id:"mci", name:"Manchester Blue", trigram:"MCI", primary:"#6CABDD", secondary:"#1C2C5B", accent:"#ffffff",
       logo:"data/logos/mci.svg" , strength:88 },
     { id:"liv", name:"Liverpool Red", trigram:"LIV", primary:"#C8102E", secondary:"#00B2A9", accent:"#ffffff",
@@ -4831,7 +4831,7 @@ const LEAGUES = {
     { id:"sou", name:"Southampton", trigram:"SOU", primary:"#D71920", secondary:"#ffffff", accent:"#0a0d13", strength:66 , playable:false },
     { id:"sun", name:"Sunderland", trigram:"SUN", primary:"#EB172F", secondary:"#ffffff", accent:"#0a0d13", strength:73 , playable:false },
   ],
-  "La Liga": [
+  "D1 Espagne": [
     { id:"rma", name:"Madrid Blancos", trigram:"RMA", primary:"#7C8AA5", secondary:"#0B2A6B", accent:"#FEBE10",
       logo:"data/logos/rma.svg" , strength:92 , playable:true },
     { id:"fcb", name:"Barcelona", trigram:"FCB", primary:"#2563EB", secondary:"#7A1128", accent:"#FFC72C",
@@ -4861,7 +4861,7 @@ const LEAGUES = {
     { id:"leg", name:"Leganes", trigram:"LEG", primary:"#00549F", secondary:"#ffffff", accent:"#0a0d13", strength:63 , playable:false },
     { id:"vll", name:"Valladolid", trigram:"VLL", primary:"#5F259F", secondary:"#ffffff", accent:"#0a0d13", strength:64 , playable:false }
   ],
-  "Bundesliga": [
+  "D1 Allemagne": [
     { id:"fcb2", name:"Munich", trigram:"FCB", primary:"#DC052D", secondary:"#0066B2", accent:"#ffffff",
       logo:"data/logos/fcb2.svg" , strength:91 , playable:true },
     { id:"bvb", name:"Dortmund", trigram:"BVB", primary:"#FDE100", secondary:"#000000", accent:"#ffffff",
@@ -4889,7 +4889,7 @@ const LEAGUES = {
     { id:"vfl", name:"Bochum", trigram:"VFL", primary:"#1C63B7", secondary:"#ffffff", accent:"#0a0d13", strength:65 , playable:false },
     { id:"ksv", name:"Kiel", trigram:"KSV", primary:"#004B93", secondary:"#C8102E", accent:"#ffffff", strength:63 , playable:false }
   ],
-  "Serie A": [
+  "D1 Italie": [
     { id:"juv", name:"Turin FC", trigram:"JUV", primary:"#3D3D3D", secondary:"#000000", accent:"#c0c0c0",
       logo:"data/logos/juv.svg" , strength:86 , playable:false, comingSoon:true },
     { id:"int", name:"Internazionale FC", trigram:"INT", primary:"#0068A8", secondary:"#000000", accent:"#ffffff",
@@ -5326,7 +5326,7 @@ const INFO_PAGES = {
     title:'Comment jouer',
     html:`
       <h2>1. Choisissez votre club</h2>
-      <p>Sélectionnez l'un des 5 grands championnats européens (Ligue 1, Premier League, La Liga, Bundesliga, Serie A), puis un club parmi ceux marqués comme jouables. Les clubs affichés en grisé avec la mention "Bientôt disponible" n'ont pas encore leur base de données de joueurs constituée - ils arriveront progressivement.</p>
+      <p>Sélectionnez l'un des 5 grands championnats européens (D1 France, D1 Angleterre, D1 Espagne, D1 Allemagne, D1 Italie), puis un club parmi ceux marqués comme jouables. Les clubs affichés en grisé avec la mention "Bientôt disponible" n'ont pas encore leur base de données de joueurs constituée - ils arriveront progressivement.</p>
 
       <h2>2. Composez votre système</h2>
       <p>Avant la draft, choisissez votre formation tactique parmi plusieurs schémas classiques (4-3-3, 4-4-2, 4-2-3-1, 3-5-2...). Le terrain se redessine aussitôt avec les postes correspondants.</p>
@@ -5338,7 +5338,7 @@ const INFO_PAGES = {
       <p>Une fois l'effectif complet, la saison démarre : championnat en aller-retour, coupe nationale à élimination directe (16 clubs), trophée d'avant-saison face au vainqueur de la coupe précédente. Chaque match peut être joué en direct (avec de vraies décisions tactiques en cours de match : changements, gestion du score, gestion des cartons...) ou simulé instantanément.</p>
 
       <h2>5. Qualifiez-vous pour l'Europe</h2>
-      <p>Selon votre classement en fin de saison, vous pouvez viser la Ligue des Champions, la Ligue Europa ou la Ligue Conférence l'année suivante. Certaines places passent par un tour de qualification aller-retour (jouable en direct) avant même le début de la phase de ligue. Consultez la page <a class="site-footer-link" style="display:inline;margin:0" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a> pour le détail complet du système.</p>
+      <p>Selon votre classement en fin de saison, vous pouvez viser la Coupe des Champions, la Coupe d'Europe ou la Coupe Conférence l'année suivante. Certaines places passent par un tour de qualification aller-retour (jouable en direct) avant même le début de la phase de ligue. Consultez la page <a class="site-footer-link" style="display:inline;margin:0" href="/info/clubs-europeens/" data-info="clubs-europeens">Clubs européens</a> pour le détail complet du système.</p>
 
       <h2>6. Gérez le mercato</h2>
       <p>Entre chaque saison, un mercato vous permet d'échanger jusqu'à 3 joueurs de votre effectif (4 en cas de très bons résultats). Un mercato hivernal exceptionnel (1 seul joueur) peut aussi s'ouvrir en cours de saison si le conseil d'administration s'inquiète de vos résultats. Après plusieurs bonnes saisons consécutives, un club légèrement plus huppé que le vôtre peut même venir vous chercher comme entraîneur - à vous d'accepter ou de rester fidèle à votre club.</p>
@@ -5369,19 +5369,19 @@ const INFO_PAGES = {
     html:`
       <p class="info-meta">Fonctionnement des qualifications et compétitions européennes.</p>
       <h2>Qualification par le classement</h2>
-      <p>À la fin de chaque saison, le classement final du championnat détermine les qualifiés européens de la saison suivante : les premières places donnent accès à la Ligue des Champions (phase de ligue directe, ou tour de qualification pour certains championnats selon leur niveau), les places suivantes à la Ligue Europa, puis à la Ligue Conférence.</p>
+      <p>À la fin de chaque saison, le classement final du championnat détermine les qualifiés européens de la saison suivante : les premières places donnent accès à la Coupe des Champions (phase de ligue directe, ou tour de qualification pour certains championnats selon leur niveau), les places suivantes à la Coupe d'Europe, puis à la Coupe Conférence.</p>
 
       <h2>Vainqueurs de coupes</h2>
-      <p>Le vainqueur de la coupe nationale obtient une place en Ligue Europa. Les vainqueurs des coupes d'Europe de la saison précédente (Ligue des Champions, Ligue Europa) sont assurés d'une place en phase de ligue de Ligue des Champions la saison suivante ; le vainqueur de la Ligue Conférence obtient une place en Ligue Europa. En cas de double qualification, seule la meilleure place est conservée et l'autre est redistribuée au club suivant éligible.</p>
+      <p>Le vainqueur de la coupe nationale obtient une place en Coupe d'Europe. Les vainqueurs des coupes d'Europe de la saison précédente (Coupe des Champions, Coupe d'Europe) sont assurés d'une place en phase de ligue de Coupe des Champions la saison suivante ; le vainqueur de la Coupe Conférence obtient une place en Coupe d'Europe. En cas de double qualification, seule la meilleure place est conservée et l'autre est redistribuée au club suivant éligible.</p>
 
       <h2>European Performance Spot (EPS)</h2>
-      <p>Un coefficient de performance est calculé chaque saison pour chaque championnat, à partir des résultats réels de ses clubs engagés en Europe (victoire, nul, défaite, bonus de classement en phase de ligue, bonus de parcours en phase à élimination directe). Les deux championnats les mieux classés sur ce coefficient obtiennent une place supplémentaire en Ligue des Champions la saison suivante.</p>
+      <p>Un coefficient de performance est calculé chaque saison pour chaque championnat, à partir des résultats réels de ses clubs engagés en Europe (victoire, nul, défaite, bonus de classement en phase de ligue, bonus de parcours en phase à élimination directe). Les deux championnats les mieux classés sur ce coefficient obtiennent une place supplémentaire en Coupe des Champions la saison suivante.</p>
 
       <h2>Tours de qualification</h2>
-      <p>Certaines places passent par un tour de qualification aller-retour avant la phase de ligue (tour de Ligue des Champions pour les championnats à coefficient plus faible, barrage systématique pour la Ligue Conférence). Si votre club est concerné, chaque manche se joue en direct comme un vrai match. En cas de défaite, une élimination en tour de Ligue des Champions redescend en Ligue Europa ; une défaite au barrage de Ligue Conférence signifie une saison sans coupe d'Europe.</p>
+      <p>Certaines places passent par un tour de qualification aller-retour avant la phase de ligue (tour de Coupe des Champions pour les championnats à coefficient plus faible, barrage systématique pour la Coupe Conférence). Si votre club est concerné, chaque manche se joue en direct comme un vrai match. En cas de défaite, une élimination en tour de Coupe des Champions redescend en Coupe d'Europe ; une défaite au barrage de Coupe Conférence signifie une saison sans coupe d'Europe.</p>
 
       <h2>Format des compétitions</h2>
-      <p>Une fois qualifiées, les 3 coupes suivent le format actuel de l'UEFA : phase de ligue à 36 clubs, barrage pour les places 9 à 24, puis 8es, quarts, demies et finale à élimination directe (aller-retour, prolongation et tirs au but en cas d'égalité).</p>
+      <p>Une fois qualifiées, les 3 coupes suivent un format inspiré des grandes compétitions européennes de clubs : phase de ligue à 36 clubs, barrage pour les places 9 à 24, puis 8es, quarts, demies et finale à élimination directe (aller-retour, prolongation et tirs au but en cas d'égalité).</p>
     `
   },
   'a-propos': {
@@ -5390,7 +5390,7 @@ const INFO_PAGES = {
       <p><strong>The Special One</strong> est un projet personnel, développé par passion pour le football et les jeux de gestion. L'idée : composer une équipe de légende en piochant des joueurs à travers toute l'histoire récente d'un club, puis vivre une carrière de A à Z - de la draft jusqu'au sommet de l'Europe.</p>
       <p>Le projet s'inspire de jeux communautaires comme onze-de-reve.fr, en y ajoutant une simulation de saison complète (championnat, coupes nationales, coupes d'Europe, mercatos, progression de carrière).</p>
       <h2>Avertissement</h2>
-      <p>Ce site est un projet non-officiel, non affilié et non approuvé par l'UEFA, la FIFA, EA Sports, ni par aucun des championnats, clubs ou joueurs mentionnés. Les noms et données réelles sont utilisés à titre purement informatif et non commercial, dans un cadre de fan-projet. Aucune donnée de jeu (FIFA/FC) n'est extraite ou redistribuée : les informations utilisées (compositions d'effectifs, postes, niveaux approximatifs) sont recensées manuellement à partir de sources publiques.</p>
+      <p>Ce site est un projet personnel, non-officiel, non affilié et non approuvé par l'UEFA, la FIFA, EA Sports, ni par aucune des instances, championnats ou clubs réels dont il s'inspire. Les noms des championnats, clubs et coupes présents dans le jeu sont des créations originales. Les effectifs de joueurs proposés à la draft s'inspirent de compositions réelles, recensées manuellement à partir de sources publiques, à titre purement informatif et non commercial, dans un cadre de fan-projet. Aucune donnée de jeu (FIFA/FC) n'est extraite ou redistribuée.</p>
       <h2>Pas de publicité</h2>
       <p>Ce site ne diffuse aucune publicité et ne vend aucune donnée à des tiers.</p>
     `
@@ -5437,7 +5437,7 @@ const INFO_PAGES = {
       </ul>
       <h3>Succès</h3>
       <ul>
-        <li>Le Trophée des Champions et la Supercoupe d'Europe font désormais progresser les succès (ce n'était pas le cas auparavant).</li>
+        <li>Le Supercoupe de France et la Supercoupe Continentale font désormais progresser les succès (ce n'était pas le cas auparavant).</li>
         <li>Les décisions prises en direct pendant une manche de qualification européenne déclenchent correctement les succès liés au direct.</li>
         <li>Rattrapage rétroactif des succès à partir de l'historique de carrière déjà enregistré.</li>
         <li>Correction de la mise en page des succès sur mobile (popup de déblocage et liste sur la page compte).</li>
@@ -5475,7 +5475,7 @@ const INFO_PAGES = {
       <h2>v0.5.0 - Compétitions européennes & succès</h2>
       <ul>
         <li>Coupes européennes complètes : barrages, 8es, quarts, demies en aller-retour, prolongations et tirs au but.</li>
-        <li>Trophées d'ouverture nationaux (Trophée des Champions, Community Shield, Supercoupes...).</li>
+        <li>Trophées d'ouverture nationaux (Supercoupe de France, Community Shield, Supercoupes...).</li>
         <li>Premier système de succès, avec popups de déblocage.</li>
       </ul>
 
@@ -8561,7 +8561,7 @@ function startLiveMatchday(){
   if(!season) return;
   const roundIdx = season.currentRound;
 
-  // Trophée d'ouverture de saison puis Supercoupe d'Europe occupent le
+  // Trophée d'ouverture de saison puis Supercoupe Continentale occupent le
   // tout premier clic de la saison, avant même les qualifications
   // européennes - ce sont les tout premiers matchs joués, avant la reprise
   // de toute compétition continentale.
@@ -8769,7 +8769,7 @@ function randomPlayerByLine(line){
 // Pioche un joueur plausible dans l'effectif d'un club pour lui attribuer un
 // but ou une passe décisive. Pour mon propre club, on utilise le onze
 // réellement composé par le joueur ; pour l'adversaire, on pioche dans son
-// effectif historique réel s'il est disponible (tous les clubs de Ligue 1
+// effectif historique réel s'il est disponible (tous les clubs de D1 France
 // en ont un), sinon on renonce à nommer qui que ce soit.
 function clubPlayerPool(clubId){
   if(clubId === state.club.id){
@@ -11087,7 +11087,7 @@ function trackMatchResult(fx){
   if(myScore >= 6) unlockAchievement('festival_offensif');
   // "Do Brazil" (succès caché) : référence au 7-1 Allemagne-Brésil,
   // Coupe du monde 2014. "Die Ohrfeige" (succès caché) : référence au
-  // 8-2 Bayern-Barcelone, Ligue des Champions 2020 - remporté face à un
+  // 8-2 Bayern-Barcelone, Coupe des Champions 2020 - remporté face à un
   // club de niveau comparable ou supérieur au sien, pas n'importe quel
   // adversaire (sinon un simple carton contre une équipe famélique
   // suffirait, ce qui trahirait la référence).
@@ -11409,11 +11409,11 @@ function renderLiveMatch(){
         ? `${lm.minute}' (prolongation)`
         : formatLiveMatchMinute(lm);
   document.getElementById('live-competition-label').textContent = lm.isQualifying
-    ? `${lm.euroTier==='cl' ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Ligue Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
+    ? `${lm.euroTier==='cl' ? `Coupe des Champions - ${EURO_ENTRY_ROUND_LABEL[lm.qualifyingTie.stage]}` : 'Barrage Coupe Conférence'} - ${lm.qualifyingLeg === 'leg1' ? 'Aller' : 'Retour'}`
     : lm.isDomesticSuperCup
       ? `${state.domesticSuperCup.name}${lm.domesticSuperCupStage === 'semis' ? ' - Demi-finales' : ' - Finale'}`
       : lm.isUefaSuperCup
-        ? "Supercoupe d'Europe"
+        ? "Supercoupe Continentale"
         : lm.isCup
           ? CUP_STAGE_LABEL[lm.cupStage] || lm.cupStage
           : lm.isEuroKnockout
@@ -11551,7 +11551,7 @@ function zoneClassMap(){
 
 // Bleu LDC plus clair pour une place obtenue via un tour de qualification
 // (pas de qualification directe en phase de ligue) - ex: la 4e place de
-// Ligue 1, au Tour 3 - pour la distinguer d'un coup d'oeil dans le
+// D1 France, au Tour 3 - pour la distinguer d'un coup d'oeil dans le
 // classement.
 function zoneClassForQualification(qual){
   if(qual.competition === 'cl' && qual.entryRound !== 'leaguePhase') return 'st-cl-quali';
@@ -11559,12 +11559,12 @@ function zoneClassForQualification(qual){
 }
 
 // ---------- Compétitions européennes (format UEFA 2024+) ----------
-const EURO_LABELS = { cl:'Ligue des Champions', el:'Ligue Europa', ecl:'Ligue Conférence' };
+const EURO_LABELS = { cl:'Coupe des Champions', el:"Coupe d'Europe", ecl:'Coupe Conférence' };
 
-// Tours d'entrée possibles en Ligue des Champions - une qualification pour
+// Tours d'entrée possibles en Coupe des Champions - une qualification pour
 // un tour de qualification reste une qualification LDC (competition:'cl'),
 // mais le moteur conserve précisément le tour d'entrée du club. L'Europa
-// League et la Ligue Conférence utilisent toujours 'leaguePhase' comme
+// League et la Coupe Conférence utilisent toujours 'leaguePhase' comme
 // tour d'entrée (leurs propres tours de qualification ne sont pas modélisés
 // pour l'instant, mais la structure permet de les ajouter sans rien casser
 // ailleurs).
@@ -11603,7 +11603,7 @@ function euroTierRankOf(competition, entryRound){
 // faible que les 4 autres) ; Italie/Espagne/Angleterre/Allemagne 1re-4e en
 // LDC phase de ligue directe. Pour les 5 championnats : la place suivante
 // (5e pour la France, 5e aussi pour les 4 autres puisqu'ils ont 1 place LDC
-// de plus) va en Ligue Europa, puis la place d'après en Ligue Conférence
+// de plus) va en Coupe d'Europe, puis la place d'après en Coupe Conférence
 // (barrage) - le vainqueur de la Coupe Nationale obtient toujours une
 // place Europa en plus (redistribuée en cascade s'il est déjà mieux
 // qualifié, cf. moteur de qualification). L'éventuel écart supplémentaire
@@ -11611,18 +11611,18 @@ function euroTierRankOf(competition, entryRound){
 // la réalité) vient désormais entièrement de l'EPS calculé dynamiquement
 // chaque saison, plutôt que d'un quota codé en dur et figé.
 const EURO_SEASON_CONFIG = {
-  // La Ligue 1 a un coefficient UEFA plus faible que les 4 autres grands
+  // La D1 France a un coefficient UEFA plus faible que les 4 autres grands
   // championnats - ses places LDC sont donc plus disputées : 3 places en
   // phase de ligue directe (1re-3e), la 4e place passe par le tour 3 de
   // qualification plutôt qu'une qualification directe. 5e -> Europa,
   // 6e -> Conférence (barrage).
-  "Ligue 1":        { cl:{ leaguePhase:3, playoff:0, round3:1, round2:0 }, el:1, ecl:1 },
+  "D1 France":        { cl:{ leaguePhase:3, playoff:0, round3:1, round2:0 }, el:1, ecl:1 },
   // 1re-4e en LDC phase de ligue directe. 5e -> Europa, 6e -> Conférence
   // (barrage).
-  "Premier League": { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "La Liga":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "Bundesliga":     { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "Serie A":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 }
+  "D1 Angleterre": { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Espagne":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Allemagne":     { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Italie":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 }
 };
 
 function clTotalSlots(config){
@@ -11796,7 +11796,7 @@ function computeEuropeanQualifications(leagueName, standing, cupWinnerId, euroWi
 // opposer deux clubs suivis entre eux à ce stade. Le vainqueur rejoint la
 // phase de ligue LDC (l'adversaire filler prend alors la place du club
 // battu) ; le perdant, s'il s'agit d'un club d'un de nos championnats, est
-// automatiquement reversé en Ligue Europa.
+// automatiquement reversé en Coupe d'Europe.
 // Construit les confrontations aller-retour de qualification européenne
 // pour la saison (Tour LDC + Barrage Conférence confondus), SANS encore les
 // jouer - juste le tirage de l'adversaire "reste de l'Europe" pour chaque
@@ -11850,7 +11850,7 @@ function buildEuroQualifyingTies(){
     qualifiersForLeagueTier(leagueName, 'cl')
       .filter(q => q.entryRound !== 'leaguePhase')
       .forEach(({id, entryRound})=> makeTie(id, leagueName, 'cl', entryRound));
-    // Barrage de qualification Ligue Conférence : contrairement au tour
+    // Barrage de qualification Coupe Conférence : contrairement au tour
     // LDC, TOUS les qualifiés Conférence de nos 5 championnats y passent
     // systématiquement - jamais de qualification directe pour l'ECL. Et il
     // n'y a RIEN en dessous de la Conférence : un club qui perd ce barrage
@@ -12108,13 +12108,13 @@ function finalizeEuroQualifyingAndEnterEuro(){
     const roundLabel = EURO_ENTRY_ROUND_LABEL[q.stage];
     const aggTxt = `${q.aggClub}-${q.aggOpp}${q.wentToPenalties ? ` (tab ${q.penaltyScore})` : ''}`;
     if(q.won) toast(`Qualification LDC (${roundLabel}) : victoire ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous rejoignez la phase de ligue !`);
-    else toast(`Qualification LDC (${roundLabel}) : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous êtes reversé en Ligue Europa.`);
+    else toast(`Qualification LDC (${roundLabel}) : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous êtes reversé en Coupe d'Europe.`);
   }
   if(state.myEclQualifyingResult){
     const q = state.myEclQualifyingResult;
     const aggTxt = `${q.aggClub}-${q.aggOpp}${q.wentToPenalties ? ` (tab ${q.penaltyScore})` : ''}`;
-    if(q.won) toast(`Barrage Ligue Conférence : victoire ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous rejoignez la phase de championnat !`);
-    else toast(`Barrage Ligue Conférence : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous ne disputerez aucune coupe d'Europe cette saison.`);
+    if(q.won) toast(`Barrage Coupe Conférence : victoire ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous rejoignez la phase de championnat !`);
+    else toast(`Barrage Coupe Conférence : défaite ${aggTxt} sur l'ensemble des 2 manches contre ${q.opponentName} - vous ne disputerez aucune coupe d'Europe cette saison.`);
   }
 }
 
@@ -12128,8 +12128,8 @@ function qualifyingTimelineEntriesForClub(clubId){
   const clubTies = state.euroQualifying.ties.filter(t=>t.clubId===clubId);
   clubTies.forEach((tie, stageIdx)=>{
     const label = tie.competition === 'cl'
-      ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[tie.stage]}`
-      : 'Barrage Ligue Conférence';
+      ? `Coupe des Champions - ${EURO_ENTRY_ROUND_LABEL[tie.stage]}`
+      : 'Barrage Coupe Conférence';
     const baseIdx = -10 + stageIdx*2; // 2 crans par tour (aller/retour), toujours avant le reste du fil
     if(tie.leg1){
       entries.push({ type:'euro-quali', roundIdx:baseIdx, label:`${label} - Aller`, matches:[tie.leg1] });
@@ -12222,7 +12222,7 @@ function determineEuroQualification(){
   // mais SEULEMENT pour le championnat où j'évoluais alors (voir
   // state.prevSeasonLeague, posé au même moment) - après un changement de
   // club vers un AUTRE championnat en cours de carrière (ex: Monaco en
-  // Ligue 1 -> Arsenal en Premier League), ce classement ne contient tout
+  // D1 France -> Arsenal en D1 Angleterre), ce classement ne contient tout
   // simplement pas mon nouveau club, donc le chercher dedans échouait
   // toujours silencieusement (aucune qualification européenne calculée,
   // même si le nouveau club la mériterait). On repêche alors le classement
@@ -12518,7 +12518,7 @@ function clubNameForAnyId(id){
     }
   }
   // Dernier filet : le vainqueur LDC/Europa de la saison précédente (voir
-  // finalizeSeasonEuroWinners) - la Supercoupe d'Europe se joue une fois
+  // finalizeSeasonEuroWinners) - la Supercoupe Continentale se joue une fois
   // les données de l'ancienne saison remises à zéro pour la nouvelle,
   // moment où un club hors des 5 grands championnats ne serait plus
   // résolvable par aucun des filets ci-dessus.
@@ -12542,35 +12542,35 @@ function initShadowEuroCompetitions(playedTier){
   });
 }
 
-// Supercoupe d'Europe : en réalité, elle oppose les vainqueurs de la LDC et
+// Supercoupe Continentale : en réalité, elle oppose les vainqueurs de la LDC et
 // de l'Europa League de la saison PRÉCÉDENTE, et se joue juste avant que la
 // nouvelle saison ne démarre - jamais la même saison que celle où ces
 // coupes ont été remportées.
 // Trophée d'ouverture de saison, propre à chaque championnat - opposant le
 // champion en titre au vainqueur de la coupe nationale (ou, pour l'Italie
 // et l'Espagne, un Final Four avec aussi le dauphin et le finaliste de
-// coupe). Se joue juste après la Supercoupe d'Europe, donc avant le début
+// coupe). Se joue juste après la Supercoupe Continentale, donc avant le début
 // du championnat.
 const DOMESTIC_SUPER_CUP_NAME = {
-  'Ligue 1': 'Trophée des Champions',
-  'Premier League': 'FA Community Shield',
-  'Bundesliga': 'DFL-Supercup',
-  'Serie A': 'Supercoppa Italiana',
-  'La Liga': 'Supercopa de España'
+  'D1 France': 'Supercoupe de France',
+  'D1 Angleterre': "Supercoupe d'Angleterre",
+  'D1 Allemagne': "Supercoupe d'Allemagne",
+  'D1 Italie': "Supercoupe d'Italie",
+  'D1 Espagne': "Supercoupe d'Espagne"
 };
 const DOMESTIC_SUPER_CUP_BADGE = {
-  'Ligue 1': 'TC',
-  'Premier League': 'CS',
-  'Bundesliga': 'SU',
-  'Serie A': 'SI',
-  'La Liga': 'SE'
+  'D1 France': 'FR',
+  'D1 Angleterre': 'EN',
+  'D1 Allemagne': 'DE',
+  'D1 Italie': 'IT',
+  'D1 Espagne': 'ES'
 };
 const DOMESTIC_SUPER_CUP_FORMAT = {
-  'Ligue 1': 'duel',
-  'Premier League': 'duel',
-  'Bundesliga': 'duel',
-  'Serie A': 'finalfour',
-  'La Liga': 'finalfour'
+  'D1 France': 'duel',
+  'D1 Angleterre': 'duel',
+  'D1 Allemagne': 'duel',
+  'D1 Italie': 'finalfour',
+  'D1 Espagne': 'finalfour'
 };
 
 // Simule UNE rencontre de trophée d'ouverture (aussi bien le duel simple
@@ -12639,7 +12639,7 @@ function resolveSuperCupFixturesInstantly(sc){
 function computeDomesticSuperCup(leagueName, standing, cupWinner, cupFinalist){
   if(!standing || !standing.length) return null;
   const format = DOMESTIC_SUPER_CUP_FORMAT[leagueName] || 'duel';
-  const name = DOMESTIC_SUPER_CUP_NAME[leagueName] || 'Trophée des Champions';
+  const name = DOMESTIC_SUPER_CUP_NAME[leagueName] || 'Supercoupe de France';
   const badge = DOMESTIC_SUPER_CUP_BADGE[leagueName] || 'TC';
   const champion = standing[0].id;
   const runnerUp = standing[1] ? standing[1].id : null;
@@ -12720,7 +12720,7 @@ function getDueDomesticSuperCupStep(){
 }
 function resolveDueDomesticSuperCupStepBulk(){
   const sc = state.domesticSuperCup;
-  // Le trophée d'ouverture (Trophée des Champions, Community Shield...)
+  // Le trophée d'ouverture (Supercoupe de France, Community Shield...)
   // n'alimentait jusqu'ici jamais le suivi des succès (matchesPlayed,
   // premiere_victoire, verrouille...) - ni en instantané ni en direct
   // (voir aussi commitLiveDomesticSuperCupMatchResult) : trackMatchResult
@@ -12812,7 +12812,7 @@ function getDueUefaSuperCupStep(){
 function resolveDueUefaSuperCupStepBulk(){
   const fx = state.uefaSuperCupFixture;
   // Même trou de suivi que le trophée d'ouverture (voir
-  // resolveDueDomesticSuperCupStepBulk) : la Supercoupe d'Europe ne fait
+  // resolveDueDomesticSuperCupStepBulk) : la Supercoupe Continentale ne fait
   // qu'apparaître dans state.currentSeasonEuroWinners.superCupWinner, sans
   // jamais alimenter matchesPlayed/premiere_victoire/etc. via
   // trackMatchResult - même en direct (voir
@@ -12974,7 +12974,7 @@ function playKnockoutLeg1(euro, ties){
 // Joue la manche retour, calcule le cumul et tranche via prolongation /
 // tirs au but si nécessaire.
 // "Remontada" (succès caché) : référence au PSG 4-0 Barça (aller) suivi
-// du Barça 6-1 PSG (retour), Ligue des Champions 2017 - Barcelone
+// du Barça 6-1 PSG (retour), Coupe des Champions 2017 - Barcelone
 // renverse une élimination qui semblait actée. Ici, du point de vue du
 // joueur : perdre l'aller d'au moins 4 buts d'écart, puis renverser la
 // qualification en s'imposant au retour avec au moins 5 buts d'écart.
@@ -13378,7 +13378,7 @@ function getDueEuroKnockoutStep(){
   if(euro.stage === 'final'){
     // L'Europa League a une journée d'attente précise avant sa finale
     // (elle se joue avant la toute dernière journée du championnat). La
-    // Ligue des Champions et la Ligue Conférence, elles, se jouent
+    // Coupe des Champions et la Coupe Conférence, elles, se jouent
     // toujours APRÈS la fin complète du championnat national (jamais
     // avant, même si les demi-finales sont déjà bouclées plus tôt) - dès
     // que le championnat est terminé, la finale devient immédiatement
@@ -13599,10 +13599,10 @@ function euroTrophyBadgesHtml(clubId, euroFullyDone){
   const w = state.currentSeasonEuroWinners;
   if(!w) return '';
   let html = '';
-  if(w.cl === clubId) html += ` <span class="st-badge st-badge-c1" title="Vainqueur de la Ligue des Champions">C1</span>`;
-  if(w.el === clubId) html += ` <span class="st-badge st-badge-c3" title="Vainqueur de la Ligue Europa">C3</span>`;
-  if(w.ecl === clubId) html += ` <span class="st-badge st-badge-c4" title="Vainqueur de la Ligue Conférence">C4</span>`;
-  if(w.superCupWinner === clubId) html += ` <span class="st-badge st-badge-sc" title="Vainqueur de la Supercoupe d'Europe">SC</span>`;
+  if(w.cl === clubId) html += ` <span class="st-badge st-badge-c1" title="Vainqueur de la Coupe des Champions">C1</span>`;
+  if(w.el === clubId) html += ` <span class="st-badge st-badge-c3" title="Vainqueur de la Coupe d'Europe">C3</span>`;
+  if(w.ecl === clubId) html += ` <span class="st-badge st-badge-c4" title="Vainqueur de la Coupe Conférence">C4</span>`;
+  if(w.superCupWinner === clubId) html += ` <span class="st-badge st-badge-sc" title="Vainqueur de la Supercoupe Continentale">SC</span>`;
   return html;
 }
 
@@ -13707,18 +13707,18 @@ function renderLeaguePanels(){
     </div>
   ` + rows + `
     <div class="st-legend">
-      <span class="st-legend-item"><i class="st-dot st-cl"></i>Ligue des Champions</span>
+      <span class="st-legend-item"><i class="st-dot st-cl"></i>Coupe des Champions</span>
       ${hasQualiSlot ? `<span class="st-legend-item"><i class="st-dot st-cl-quali"></i>LDC - Tour de qualification</span>` : ''}
-      <span class="st-legend-item"><i class="st-dot st-el"></i>Ligue Europa</span>
-      <span class="st-legend-item"><i class="st-dot st-ecl"></i>Ligue Conférence</span>
+      <span class="st-legend-item"><i class="st-dot st-el"></i>Coupe d'Europe</span>
+      <span class="st-legend-item"><i class="st-dot st-ecl"></i>Coupe Conférence</span>
     </div>
     <div class="st-legend">
       <span class="st-legend-item"><span class="st-badge st-badge-champ">C</span>Championnat</span>
       <span class="st-legend-item"><span class="st-badge st-badge-cup">CN</span>Coupe Nationale</span>
-      <span class="st-legend-item"><span class="st-badge st-badge-c1">C1</span>Ligue des Champions</span>
-      <span class="st-legend-item"><span class="st-badge st-badge-c3">C3</span>Ligue Europa</span>
-      <span class="st-legend-item"><span class="st-badge st-badge-c4">C4</span>Ligue Conférence</span>
-      <span class="st-legend-item"><span class="st-badge st-badge-sc">SC</span>Supercoupe d'Europe</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c1">C1</span>Coupe des Champions</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c3">C3</span>Coupe d'Europe</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-c4">C4</span>Coupe Conférence</span>
+      <span class="st-legend-item"><span class="st-badge st-badge-sc">SC</span>Supercoupe Continentale</span>
       ${viewedSuperCup ? `<span class="st-legend-item"><span class="st-badge st-badge-tc">${viewedSuperCup.badge || DOMESTIC_SUPER_CUP_BADGE[viewLeague] || 'TC'}</span>${viewedSuperCup.name}</span>` : ''}
     </div>
   `;
@@ -13873,7 +13873,7 @@ function renderLeaguePanels(){
     }
   }
   if(state.uefaSuperCupFixture){
-    timeline.push({ type:'supercup', roundIdx:-1.5, label:"Supercoupe d'Europe", matches:[state.uefaSuperCupFixture], upcoming:!state.uefaSuperCupFixture.played });
+    timeline.push({ type:'supercup', roundIdx:-1.5, label:"Supercoupe Continentale", matches:[state.uefaSuperCupFixture], upcoming:!state.uefaSuperCupFixture.played });
   }
   timeline.sort((a,b)=>a.roundIdx - b.roundIdx);
 
@@ -13893,7 +13893,7 @@ function renderLeaguePanels(){
       ${entry.matches.map(fx=>{
         // fx.homeName/awayName (posés à la clôture de la saison précédente,
         // voir finalizeSeasonEuroWinners) priment sur resolveClub() - la
-        // Supercoupe d'Europe se joue une fois les données de l'ancienne
+        // Supercoupe Continentale se joue une fois les données de l'ancienne
         // saison remises à zéro, où un club hors des 5 grands championnats
         // ne serait plus résolvable autrement.
         const home = fx.homeName ? { name:fx.homeName } : resolveClub(fx.home);
@@ -13995,19 +13995,19 @@ function renderEuroPanels(){
   table.innerHTML = '';
   resultsEl.innerHTML = '';
 
-  // Supercoupe d'Europe : uniquement montrée sur les onglets LDC et Europa
+  // Supercoupe Continentale : uniquement montrée sur les onglets LDC et Europa
   // (ce sont les deux compétitions concernées), jamais sur Conférence.
   const showSuperCup = viewTier === 'cl' || viewTier === 'el';
   const superCupReady = showSuperCup && winners.superCupWinner && winners.superCupClId && winners.superCupElId && winners.superCupScore;
   if(superCupReady){
     supercupBanner.style.display = '';
-    supercupBanner.innerHTML = `<span class="l">Supercoupe d'Europe</span><span>${clubNameForAnyId(winners.superCupClId)} vs ${clubNameForAnyId(winners.superCupElId)}</span>`;
+    supercupBanner.innerHTML = `<span class="l">Supercoupe Continentale</span><span>${clubNameForAnyId(winners.superCupClId)} vs ${clubNameForAnyId(winners.superCupElId)}</span>`;
   } else {
     supercupBanner.style.display = 'none';
   }
   const isMySuperCup = winners.superCupClId === state.club.id || winners.superCupElId === state.club.id;
   const supercupResultHTML = superCupReady ? `
-    <div class="rd-heading">Supercoupe d'Europe</div>
+    <div class="rd-heading">Supercoupe Continentale</div>
     <div class="fx-row ${isMySuperCup ? 'fx-me' : ''}">
       <div class="fx-home">${clubNameForAnyId(winners.superCupClId)}</div>
       <div class="fx-score">${winners.superCupScore.clGoals} - ${winners.superCupScore.elGoals}</div>
@@ -14122,7 +14122,7 @@ function renderSeason(){
   // suivant" gèrent aussi bien le championnat que la coupe nationale et
   // l'Europe en interne, selon ce qui est prévu ensuite - mais toujours UN
   // SEUL match à la fois, jamais deux compétitions résolues par le même
-  // clic (voir startLiveMatchday/handleNextMatchday). Les onglets Ligue 1
+  // clic (voir startLiveMatchday/handleNextMatchday). Les onglets D1 France
   // / Europe ne servent qu'à consulter classement et calendrier.
   // "seasonDone" (championnat terminé) ne veut PAS dire "plus rien à
   // jouer cette saison" : une finale de coupe d'Europe, de coupe
@@ -14146,7 +14146,7 @@ function renderSeason(){
     nextBtn.textContent = compTxt;
     liveBtn.textContent = `Jouer en direct (${compTxt})`;
   } else if(getDueUefaSuperCupStep()){
-    const compTxt = "Supercoupe d'Europe";
+    const compTxt = "Supercoupe Continentale";
     nextBtn.textContent = compTxt;
     liveBtn.textContent = `Jouer en direct (${compTxt})`;
   } else if(hasPendingEuroQualifying()){
@@ -15101,7 +15101,7 @@ function finalizeSeasonEuroWinners(){
   state.prevSeasonEuroWinners = { ...state.currentSeasonEuroWinners };
   // Noms résolus et figés ICI, tant que les données de la saison qui
   // vient de se terminer (state.euro/state.shadowEuro) sont encore
-  // intactes - la Supercoupe d'Europe de la saison suivante (voir
+  // intactes - la Supercoupe Continentale de la saison suivante (voir
   // resolveSuperCupForNewSeason) se joue APRÈS la remise à zéro de ces
   // données pour la nouvelle saison, donc re-résoudre le nom à ce
   // moment-là échouerait pour un club qui n'est pas dans les 5 grands
@@ -15515,8 +15515,8 @@ function recordSeasonIfNeeded(){
   const cupWon = !!(state.season.cup && state.season.cup.champion === state.club.id);
   const superCupWon = !!(state.currentSeasonEuroWinners && state.currentSeasonEuroWinners.superCupWinner === state.club.id);
   const euroWon = !!(state.euro && state.euro.champion === state.club.id);
-  // Trophée d'ouverture de saison (Trophée des Champions en France, etc.)
-  // - distinct de la Supercoupe d'Europe (superCupWon ci-dessus).
+  // Trophée d'ouverture de saison (Supercoupe de France en France, etc.)
+  // - distinct de la Supercoupe Continentale (superCupWon ci-dessus).
   const domesticSuperCupWon = !!(state.domesticSuperCup && state.domesticSuperCup.champion === state.club.id);
 
   // Met à jour le système de carrière (performance vs attentes, trophées
@@ -15794,7 +15794,7 @@ async function renderPalmaresScreen(){
       const seasonCardsHtml = rows.slice().sort((a,b)=>b.season_number-a.season_number).map(r=>{
         const posLabel = r.position===1 ? '1er' : `${r.position}e`;
         const euroLine = r.euro_result
-          ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}${r.euro_result.superCupWon ? " · Supercoupe d'Europe remportée 🏆" : ''}`
+          ? `${EURO_LABELS[r.euro_result.tier]} : ${r.euro_result.won ? 'Vainqueur 🏆' : (r.euro_result.stage==='done' ? 'Non remportée' : 'Interrompue')}${r.euro_result.superCupWon ? " · Supercoupe Continentale remportée 🏆" : ''}`
           : "Pas d'Europe cette saison-là";
         const scoreLine = r.score
           ? `Score de la saison : <strong>${r.score.total} pts</strong> (Championnat ${r.score.league} · Coupe ${r.score.cup} · Europe ${r.score.euro})`
@@ -15812,7 +15812,7 @@ async function renderPalmaresScreen(){
             <div class="account-season-body">
               <div>Classement : ${posLabel} / ${r.total_clubs} (${r.points ?? '-'} pts)</div>
               <div>Coupe Nationale : ${r.cup_won ? 'Remportée 🏆' : 'Non remportée'}</div>
-              ${r.domestic_super_cup_won ? `<div>${DOMESTIC_SUPER_CUP_NAME[r.league] || 'Trophée des Champions'} : Remporté 🏆</div>` : ''}
+              ${r.domestic_super_cup_won ? `<div>${DOMESTIC_SUPER_CUP_NAME[r.league] || 'Supercoupe de France'} : Remporté 🏆</div>` : ''}
               <div>${euroLine}</div>
               ${scoreLine ? `<div>${scoreLine}</div>` : ''}
             </div>
@@ -16189,8 +16189,8 @@ function renderSeasonTrophiesHTML(){
     const myTies = state.euroQualifying.ties.filter(t=>t.isMine);
     const myTie = myTies.find(t=>!t.resolved) || myTies[myTies.length-1];
     const label = myTie.competition === 'cl'
-      ? `Ligue des Champions - ${EURO_ENTRY_ROUND_LABEL[myTie.stage]}`
-      : 'Barrage Ligue Conférence';
+      ? `Coupe des Champions - ${EURO_ENTRY_ROUND_LABEL[myTie.stage]}`
+      : 'Barrage Coupe Conférence';
     rows.push({ label, value: myTie.leg2 ? 'Résultat en cours de traitement' : (myTie.leg1 ? 'Retour à jouer' : 'Aller à jouer') });
   } else {
     rows.push({ label:"Coupes d'Europe", value:'Non disputées cette saison' });
@@ -16198,7 +16198,7 @@ function renderSeasonTrophiesHTML(){
   if(winners.superCupWinner){
     const isMe = winners.superCupClId === state.club.id || winners.superCupElId === state.club.id;
     rows.push({
-      label:"Supercoupe d'Europe",
+      label:"Supercoupe Continentale",
       value: winners.superCupWinner === state.club.id
         ? 'Vainqueur \uD83C\uDFC6'
         : (isMe ? 'Finaliste' : `${clubNameForAnyId(winners.superCupWinner)} vainqueur`)
