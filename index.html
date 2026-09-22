@@ -11624,18 +11624,20 @@ function euroTierRankOf(competition, entryRound){
 // modifiable saison après saison sans toucher au moteur de qualification.
 // `cl` se décompose en 4 sous-paliers d'entrée (place directe en phase de
 // ligue, barrage, tour 3, tour 2) ; leur somme donne le nombre total de
-// places LDC du championnat. Base retenue : France 1re-3e en LDC phase de
-// ligue directe + 4e via le Tour 3 de qualification (coefficient UEFA plus
-// faible que les 4 autres) ; Italie/Espagne/Angleterre/Allemagne 1re-4e en
-// LDC phase de ligue directe. Pour les 5 championnats : la place suivante
-// (5e pour la France, 5e aussi pour les 4 autres puisqu'ils ont 1 place LDC
-// de plus) va en Coupe d'Europe, puis la place d'après en Coupe Conférence
-// (barrage) - le vainqueur de la Coupe Nationale obtient toujours une
-// place Europa en plus (redistribuée en cascade s'il est déjà mieux
-// qualifié, cf. moteur de qualification). L'éventuel écart supplémentaire
-// entre championnats (ex : l'Angleterre à 5-6 places LDC en 2025-2026 dans
-// la réalité) vient désormais entièrement de l'EPS calculé dynamiquement
-// chaque saison, plutôt que d'un quota codé en dur et figé.
+// places LDC du championnat. Base retenue (SANS EPS) : France 1re-3e en LDC
+// phase de ligue directe + 4e via le Tour 3 de qualification (coefficient
+// UEFA plus faible que les 4 autres) ; Italie/Espagne/Angleterre/Allemagne
+// 1re-3e en LDC phase de ligue directe + 4e via un barrage. Pour les 5
+// championnats : la place suivante (5e) va en Coupe d'Europe, puis la place
+// d'après en Coupe Conférence (barrage) - le vainqueur de la Coupe Nationale
+// obtient toujours une place Europa en plus (redistribuée en cascade s'il
+// est déjà mieux qualifié, cf. moteur de qualification). L'EPS, quand un
+// championnat en bénéficie cette saison-là, fait passer sa 4e place de
+// barrage à qualification directe (voir computeEuropeanQualifications) - la
+// place de barrage libérée redescend alors automatiquement à la 5e place par
+// la cascade de redistribution ; sans EPS, ce même championnat retombe tout
+// seul sur cette base de 3 directes + 1 barrage, sans rien à réinitialiser
+// à la main d'une saison à l'autre.
 const EURO_SEASON_CONFIG = {
   // La D1 France a un coefficient UEFA plus faible que les 4 autres grands
   // championnats - ses places LDC sont donc plus disputées : 3 places en
@@ -11643,12 +11645,13 @@ const EURO_SEASON_CONFIG = {
   // qualification plutôt qu'une qualification directe. 5e -> Europa,
   // 6e -> Conférence (barrage).
   "D1 France":        { cl:{ leaguePhase:3, playoff:0, round3:1, round2:0 }, el:1, ecl:1 },
-  // 1re-4e en LDC phase de ligue directe. 5e -> Europa, 6e -> Conférence
-  // (barrage).
-  "D1 Angleterre": { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "D1 Espagne":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "D1 Allemagne":     { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 },
-  "D1 Italie":        { cl:{ leaguePhase:4, playoff:0, round3:0, round2:0 }, el:1, ecl:1 }
+  // 1re-3e en LDC phase de ligue directe, 4e via un barrage LDC. 5e -> Europa,
+  // 6e -> Conférence (barrage). Avec l'EPS cette saison-là : la 4e passe en
+  // qualification directe et la 5e devient le nouveau barrage LDC.
+  "D1 Angleterre": { cl:{ leaguePhase:3, playoff:1, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Espagne":        { cl:{ leaguePhase:3, playoff:1, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Allemagne":     { cl:{ leaguePhase:3, playoff:1, round3:0, round2:0 }, el:1, ecl:1 },
+  "D1 Italie":        { cl:{ leaguePhase:3, playoff:1, round3:0, round2:0 }, el:1, ecl:1 }
 };
 
 function clTotalSlots(config){
