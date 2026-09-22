@@ -8,14 +8,14 @@ Atlético Madrid,2004-2005,12,Sergi Barjuan,Sergi,Spain,DG,81
 Atlético Madrid,2004-2005,19,Salva Ballesta,Salva,Spain,BU,81
 Atlético Madrid,2004-2005,5,José Antonio García Calvo,,Spain,DC,81
 Atlético Madrid,2004-2005,8,Kizito Musampa,,Netherlands,MG,80
-Atlético Madrid,2004-2005,14,Diego Simeone,,Argentina,MDC,79
+Atlético Madrid,2004-2005,14,Diego Simeone,,Argentina,MDC|MC,79
 Atlético Madrid,2004-2005,20,Veljko Paunović,,Serbia,MOC,78
 Atlético Madrid,2004-2005,25,Leo Franco,,Argentina,G,77
 Atlético Madrid,2004-2005,10,Jorge Otero,Jorge,Spain,MOC,77
 Atlético Madrid,2004-2005,15,Roberto Aguilera,Aguilera,Spain,DD,76
 Atlético Madrid,2004-2005,2,Javi Velasco,Velasco,Spain,DD,76
 Atlético Madrid,2004-2005,1,Sergio Aragoneses,Sergio,Spain,G,75
-Atlético Madrid,2004-2005,4,Gonzalo Colsa,,Spain,MDC,75
+Atlético Madrid,2004-2005,4,Gonzalo Colsa,,Spain,MDC|MC,75
 Atlético Madrid,2004-2005,3,Antonio López,,Spain,DG,75
 Atlético Madrid,2004-2005,24,Álvaro Novo,A. Novo,Spain,MD,74
 Atlético Madrid,2004-2005,30,Ángel Arizmendi,Arizmendi,Spain,BU,74
@@ -33,7 +33,7 @@ Atlético Madrid,2005-2006,21,Luis Perea,,Colombia,DC|DD,81
 Atlético Madrid,2005-2006,23,Peter Luccin,,France,MC|MDC,79
 Atlético Madrid,2005-2006,25,Leo Franco,,Argentina,G,78
 Atlético Madrid,2005-2006,11,Maxi Rodríguez,,Argentina,AD|MD,77
-Atlético Madrid,2005-2006,4,Gonzalo Colsa,,Spain,MDC,77
+Atlético Madrid,2005-2006,4,Gonzalo Colsa,,Spain,MDC|MC,77
 Atlético Madrid,2005-2006,2,Javi Velasco,Velasco,Spain,DD,76
 Atlético Madrid,2005-2006,17,Luciano Galletti,,Argentina,MD,75
 Atlético Madrid,2005-2006,3,Antonio López,,Spain,DG,75
@@ -61,7 +61,7 @@ Atlético Madrid,2006-2007,14,Zé Castro,,Portugal,DC,77
 Atlético Madrid,2006-2007,2,Giourkas Seitaridis,,Greece,DD,76
 Atlético Madrid,2006-2007,20,Sergio Agüero,,Argentina,MOC|BU,76
 Atlético Madrid,2006-2007,4,Pernía,,Argentina,DG,75
-Atlético Madrid,2006-2007,15,Jurado,,Spain,MOC,75
+Atlético Madrid,2006-2007,15,Jurado,,Spain,MOC|MG|MD,75
 Atlético Madrid,2006-2007,12,Javi Velasco,Velasco,Spain,DD,73
 Atlético Madrid,2006-2007,3,Antonio López,,Spain,DG,73
 Atlético Madrid,2006-2007,16,Kizito Musampa,,Netherlands,MG,72
@@ -83,7 +83,7 @@ Atlético Madrid,2007-2008,11,Maxi Rodríguez,,Argentina,MD|AD,81
 Atlético Madrid,2007-2008,12,Fabiano Eller,,Brazil,DC,77
 Atlético Madrid,2007-2008,13,Christian Abbiati,,Italy,G,82
 Atlético Madrid,2007-2008,14,Zé Castro,,Portugal,DC,77
-Atlético Madrid,2007-2008,15,Jurado,,Spain,MOC,78
+Atlético Madrid,2007-2008,15,Jurado,,Spain,MOC|MG|MD,78
 Atlético Madrid,2007-2008,16,Cléber Santana,,Brazil,MOC|MC,77
 Atlético Madrid,2007-2008,17,Reyes,José Antonio Reyes,Spain,BU|MG,81
 Atlético Madrid,2007-2008,18,Maniche,,Portugal,MC,83
@@ -92,19 +92,19 @@ Atlético Madrid,2007-2008,20,Mista,,Spain,AG,79
 Atlético Madrid,2007-2008,21,Luis Perea,,Colombia,DC|DD,80
 Atlético Madrid,2007-2008,22,Pablo García,Pablo,Uruguay,DC,79
 Atlético Madrid,2007-2008,23,Javi Valera,Valera,Spain,MD|DD,71
-Atlético Madrid,2007-2008,24,Simão Sabrosa,Simão,Portugal,MG,82
+Atlético Madrid,2007-2008,24,Simão Sabrosa,Simão,Portugal,MG|MOC,82
 Atlético Madrid,2007-2008,25,Leonardo Franco,Leo Franco,Argentina,G,79
-Atlético Madrid,2008-2009,20,Simão Sabrosa,Simão,Portugal,MG,84
+Atlético Madrid,2008-2009,20,Simão Sabrosa,Simão,Portugal,MG|MOC,84
 Atlético Madrid,2008-2009,10,Sergio Agüero,,Argentina,BU|MOC,84
 Atlético Madrid,2008-2009,7,Diego Forlán,,Uruguay,BU,83
 Atlético Madrid,2008-2009,11,Maxi Rodríguez,,Argentina,MD|AD,82
 Atlético Madrid,2008-2009,6,Tomáš Ujfaluši,,Czech Republic,DC|DD,81
 Atlético Madrid,2008-2009,1,Grégory Coupet,,France,G,79
 Atlético Madrid,2008-2009,18,Maniche,,Portugal,MC,79
-Atlético Madrid,2008-2009,14,Florent Sinama Pongolle,,France,BU,79
+Atlético Madrid,2008-2009,14,Florent Sinama Pongolle,,France,BU|MD,79
 Atlético Madrid,2008-2009,9,Luis García,,Spain,MD,79
 Atlético Madrid,2008-2009,25,Leonardo Franco,Leo Franco,Argentina,G,79
-Atlético Madrid,2008-2009,15,John Heitinga,,Netherlands,DD,78
+Atlético Madrid,2008-2009,15,John Heitinga,,Netherlands,DD|MDC,78
 Atlético Madrid,2008-2009,12,Paulo Assunção,,Brazil,MC|MDC,78
 Atlético Madrid,2008-2009,5,Thiago Motta,,Brazil,MDC,77
 Atlético Madrid,2008-2009,2,Giourkas Seitaridis,,Greece,DD,77
@@ -121,19 +121,19 @@ Atlético Madrid,2008-2009,27,Bernabé Barragán,Bernabé,Spain,G,67
 Atlético Madrid,2008-2009,29,César Ortiz,César,Spain,DC,66
 Atlético Madrid,2008-2009,30,Joshua Cazorla,Joshua,Spain,MOC,66
 Atlético Madrid,2009-2010,7,Diego Forlán,,Uruguay,BU,86
-Atlético Madrid,2009-2010,20,Simão Sabrosa,Simão,Portugal,MG,84
+Atlético Madrid,2009-2010,20,Simão Sabrosa,Simão,Portugal,MG|MOC,84
 Atlético Madrid,2009-2010,11,Maxi Rodríguez,,Argentina,MD|AD,84
 Atlético Madrid,2009-2010,10,Sergio Agüero,,Argentina,BU|MOC,84
 Atlético Madrid,2009-2010,19,Reyes,José Antonio Reyes,Spain,MG|BU,82
 Atlético Madrid,2009-2010,1,Sergio Asenjo,,Spain,G,81
 Atlético Madrid,2009-2010,17,Tomáš Ujfaluši,,Czech Republic,DC|DD,80
-Atlético Madrid,2009-2010,9,Jurado,,Spain,MOC,80
-Atlético Madrid,2009-2010,14,Florent Sinama Pongolle,,France,BU,78
+Atlético Madrid,2009-2010,9,Jurado,,Spain,MOC|MG|MD,80
+Atlético Madrid,2009-2010,14,Florent Sinama Pongolle,,France,BU|MD,78
 Atlético Madrid,2009-2010,16,Juanito,,Spain,DC,78
 Atlético Madrid,2009-2010,12,Paulo Assunção,,Brazil,MC|MDC,78
 Atlético Madrid,2009-2010,8,Raúl García,,Spain,MC|MOC|MD|MDC,78
 Atlético Madrid,2009-2010,21,Luis Perea,,Colombia,DC|DD,77
-Atlético Madrid,2009-2010,22,Pablo Barrios,Pablo,Spain,DC,76
+Atlético Madrid,2009-2010,22,Pablo Barrios,Pablo,Spain,DC|MDC|MD|MOC,76
 Atlético Madrid,2009-2010,3,Antonio López,,Spain,DG,75
 Atlético Madrid,2009-2010,23,Cléber Santana,,Brazil,MC|MOC,75
 Atlético Madrid,2009-2010,4,Pernía,,Argentina,DG,73
@@ -149,9 +149,9 @@ Atlético Madrid,2009-2010,27,Sergio González,Keko,Spain,MD,60
 Atlético Madrid,2009-2010,28,Borja Bastón,,Spain,BU,58
 Atlético Madrid,2010-2011,7,Diego Forlán,,Uruguay,BU,87
 Atlético Madrid,2010-2011,10,Sergio Agüero,,Argentina,BU|MOC,84
-Atlético Madrid,2010-2011,20,Simão Sabrosa,Simão,Portugal,MG,82
+Atlético Madrid,2010-2011,20,Simão Sabrosa,Simão,Portugal,MG|MOC,82
 Atlético Madrid,2010-2011,19,José Antonio Reyes,Reyes,Spain,MD|AD,82
-Atlético Madrid,2010-2011,14,Filipe Luís,,Brazil,DG,81
+Atlético Madrid,2010-2011,14,Filipe Luís,,Brazil,DG|MDG|MG,81
 Atlético Madrid,2010-2011,15,Diego Godín,,Uruguay,DC,81
 Atlético Madrid,2010-2011,17,Tomáš Ujfaluši,,Czech Republic,DD|DC,79
 Atlético Madrid,2010-2011,5,Tiago Mendes,Tiago,Portugal,MC|MDC,78
@@ -164,7 +164,7 @@ Atlético Madrid,2010-2011,4,Mario Suárez,,Spain,MC|MDC,76
 Atlético Madrid,2010-2011,1,Sergio Asenjo,,Spain,G,76
 Atlético Madrid,2010-2011,16,Juanfran,Juanfran,Spain,DC|DD|MD,75
 Atlético Madrid,2010-2011,8,Raúl García,,Spain,MC|MOC|MD|MDC,75
-Atlético Madrid,2010-2011,22,Diego Costa,,Brazil,BU,74
+Atlético Madrid,2010-2011,22,Diego Costa,,Brazil,BU|MOC,74
 Atlético Madrid,2010-2011,11,Paco Mérida,Mérida,Spain,MOC,74
 Atlético Madrid,2010-2011,2,Javi Valera,Valera,Spain,MD|DD,73
 Atlético Madrid,2010-2011,6,Ignacio Camacho,Camacho,Spain,MDC,72
@@ -186,7 +186,7 @@ Atlético Madrid,2011-2012,20,Juanfran,Juanfran,Spain,DD|DC|MD,78
 Atlético Madrid,2011-2012,14,Gabi,Gabi,Spain,MC|MDC,78
 Atlético Madrid,2011-2012,23,Miranda,,Brazil,DC,78
 Atlético Madrid,2011-2012,18,Álvaro Domínguez,Álvaro,Spain,DC|DG,78
-Atlético Madrid,2011-2012,6,Filipe Luís,,Brazil,DG,77
+Atlético Madrid,2011-2012,6,Filipe Luís,,Brazil,DG|MDG|MG,77
 Atlético Madrid,2011-2012,7,Adrián López,,Spain,BU|AG|MOC,77
 Atlético Madrid,2011-2012,8,Eduardo Salvio,,Argentina,AD|MD,77
 Atlético Madrid,2011-2012,4,Mario Suárez,,Spain,MDC|MC,76
@@ -204,9 +204,9 @@ Atlético Madrid,2012-2013,9,Radamel Falcao,Falcao,Colombia,BU,90
 Atlético Madrid,2012-2013,10,Arda Turan,,Turkey,MD|MOC|MG,84
 Atlético Madrid,2012-2013,13,Thibaut Courtois,,Belgium,G,83
 Atlético Madrid,2012-2013,2,Diego Godín,,Uruguay,DC,82
-Atlético Madrid,2012-2013,21,Emre Belözoğlu,Emre,Turkey,MC,81
-Atlético Madrid,2012-2013,3,Filipe Luís,,Brazil,DG,81
-Atlético Madrid,2012-2013,19,Diego Costa,,Brazil,BU,81
+Atlético Madrid,2012-2013,21,Emre Belözoğlu,Emre,Turkey,MC|MG|MDC,81
+Atlético Madrid,2012-2013,3,Filipe Luís,,Brazil,DG|MDG|MG,81
+Atlético Madrid,2012-2013,19,Diego Costa,,Brazil,BU|MOC,81
 Atlético Madrid,2012-2013,5,Tiago Mendes,Tiago,Portugal,MC|MDC,80
 Atlético Madrid,2012-2013,14,Gabi,Gabi,Spain,MC|MDC,80
 Atlético Madrid,2012-2013,23,Miranda,,Brazil,DC,80
@@ -225,18 +225,18 @@ Atlético Madrid,2012-2013,30,Óliver Torres,Óliver,Spain,MOC|MC,70
 Atlético Madrid,2012-2013,48,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,64
 Atlético Madrid,2012-2013,37,Thomas Partey,,Ghana,MDC|MC,62
 Atlético Madrid,2013-2014,10,Arda Turan,,Turkey,MD|MOC|MG,85
-Atlético Madrid,2013-2014,19,Diego Costa,,Spain,BU,84
+Atlético Madrid,2013-2014,19,Diego Costa,,Spain,BU|MOC,84
 Atlético Madrid,2013-2014,13,Thibaut Courtois,,Belgium,G,84
 Atlético Madrid,2013-2014,9,David Villa,,Spain,BU,83
 Atlético Madrid,2013-2014,21,Diego Ribas,Diego,Brazil,MOC|MD|MG,83
-Atlético Madrid,2013-2014,3,Filipe Luís,,Brazil,DG,82
+Atlético Madrid,2013-2014,3,Filipe Luís,,Brazil,DG|MDG|MG,82
 Atlético Madrid,2013-2014,2,Diego Godín,,Uruguay,DC,82
 Atlético Madrid,2013-2014,6,Jorge Resurrección,Koke,Spain,MG|MD|MC|MDC,82
 Atlético Madrid,2013-2014,14,Gabi,Gabi,Spain,MDC|MC,81
 Atlético Madrid,2013-2014,23,Miranda,,Brazil,DC,81
 Atlético Madrid,2013-2014,5,Tiago Mendes,Tiago,Portugal,MDC|MC,80
 Atlético Madrid,2013-2014,11,Cristian Rodríguez,,Uruguay,MG,80
-Atlético Madrid,2013-2014,24,Martín Demichelis,Demichelis,Argentina,DC,79
+Atlético Madrid,2013-2014,24,Martín Demichelis,Demichelis,Argentina,DC|MDC,79
 Atlético Madrid,2013-2014,20,Juanfran,Juanfran,Spain,DD|DC|MD,79
 Atlético Madrid,2013-2014,8,Raúl García,,Spain,MD|MOC|MC|MDC,79
 Atlético Madrid,2013-2014,4,Mario Suárez,,Spain,MC|MDC,78
@@ -266,8 +266,8 @@ Atlético Madrid,2014-2015,8,Raúl García,,Spain,MOC|MC|MD|MDC,79
 Atlético Madrid,2014-2015,18,Jesús Gámez,,Spain,DG|DD,78
 Atlético Madrid,2014-2015,21,Cristian Rodríguez,,Uruguay,MG,78
 Atlético Madrid,2014-2015,12,Toby Alderweireld,,Belgium,DC,78
-Atlético Madrid,2014-2015,3,Guilherme Siqueira,Guilherme,Brazil,DG,77
-Atlético Madrid,2014-2015,15,Cristian Ansaldi,Ansaldi,Argentina,DG,77
+Atlético Madrid,2014-2015,3,Guilherme Siqueira,Guilherme,Brazil,DG|MG,77
+Atlético Madrid,2014-2015,15,Cristian Ansaldi,Ansaldi,Argentina,DG|MDG|MG,77
 Atlético Madrid,2014-2015,22,Emiliano Insúa,Insúa,Argentina,DG|MDG,77
 Atlético Madrid,2014-2015,13,Jan Oblak,,Slovenia,G,77
 Atlético Madrid,2014-2015,17,Saúl Ñíguez,Saúl,Spain,MDC|MG|MD|MC,75
@@ -280,7 +280,7 @@ Atlético Madrid,2015-2016,2,Diego Godín,,Uruguay,DC,86
 Atlético Madrid,2015-2016,7,Antoine Griezmann,,France,BU|AD|AG,84
 Atlético Madrid,2015-2016,6,Jorge Resurrección,Koke,Spain,MD|MG|MC|MDC,83
 Atlético Madrid,2015-2016,11,Jackson Martínez,,Colombia,BU,83
-Atlético Madrid,2015-2016,3,Filipe Luís,,Brazil,DG,82
+Atlético Madrid,2015-2016,3,Filipe Luís,,Brazil,DG|MDG|MG,82
 Atlético Madrid,2015-2016,13,Jan Oblak,,Slovenia,G,82
 Atlético Madrid,2015-2016,20,Juanfran,Juanfran,Spain,DD|DC|MD,81
 Atlético Madrid,2015-2016,14,Gabi,Gabi,Spain,MC|MDC,81
@@ -291,11 +291,11 @@ Atlético Madrid,2015-2016,5,Tiago Mendes,Tiago,Portugal,MC|MDC,80
 Atlético Madrid,2015-2016,1,Miguel Ángel Moyá,Moyá,Spain,G,80
 Atlético Madrid,2015-2016,21,Yannick Carrasco,,Belgium,MG|AG|MDG,80
 Atlético Madrid,2015-2016,9,Fernando Torres,,Spain,BU,79
-Atlético Madrid,2015-2016,12,Augusto Fernández,,Argentina,MC,79
+Atlético Madrid,2015-2016,12,Augusto Fernández,,Argentina,MC|MD|MDC,79
 Atlético Madrid,2015-2016,17,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,79
 Atlético Madrid,2015-2016,18,Jesús Gámez,,Spain,DD|DG,78
-Atlético Madrid,2015-2016,4,Guilherme Siqueira,Guilherme,Brazil,DG,78
-Atlético Madrid,2015-2016,23,Luciano Vietto,,Argentina,BU,78
+Atlético Madrid,2015-2016,4,Guilherme Siqueira,Guilherme,Brazil,DG|MG,78
+Atlético Madrid,2015-2016,23,Luciano Vietto,,Argentina,BU|MOC|AG|MG,78
 Atlético Madrid,2015-2016,10,Óliver Torres,Óliver,Spain,MC|MOC,78
 Atlético Madrid,2015-2016,16,Ángel Correa,,Argentina,BU|MD,77
 Atlético Madrid,2015-2016,22,Thomas Partey,,Ghana,MDC|MC,74
@@ -303,8 +303,8 @@ Atlético Madrid,2015-2016,19,Lucas Hernández,,France,DC|DG,74
 Atlético Madrid,2016-2017,2,Diego Godín,,Uruguay,DC,88
 Atlético Madrid,2016-2017,7,Antoine Griezmann,,France,BU|AD|AG,88
 Atlético Madrid,2016-2017,13,Jan Oblak,,Slovenia,G,87
-Atlético Madrid,2016-2017,3,Filipe Luís,,Brazil,DG,85
-Atlético Madrid,2016-2017,23,Nicolás Gaitán,,Argentina,MG,84
+Atlético Madrid,2016-2017,3,Filipe Luís,,Brazil,DG|MDG|MG,85
+Atlético Madrid,2016-2017,23,Nicolás Gaitán,,Argentina,MG|MOC|MD,84
 Atlético Madrid,2016-2017,6,Jorge Resurrección,Koke,Spain,MD|MG|MC|MDC,84
 Atlético Madrid,2016-2017,10,Yannick Carrasco,,Belgium,MG|AG|MDG,84
 Atlético Madrid,2016-2017,20,Juanfran,Juanfran,Spain,DD|DC|MD,83
@@ -315,9 +315,9 @@ Atlético Madrid,2016-2017,15,Stefan Savić,,Montenegro,DC,82
 Atlético Madrid,2016-2017,5,Tiago Mendes,Tiago,Portugal,MC|MDC,81
 Atlético Madrid,2016-2017,9,Fernando Torres,,Spain,BU,81
 Atlético Madrid,2016-2017,1,Miguel Ángel Moyá,Moyá,Spain,G,81
-Atlético Madrid,2016-2017,12,Augusto Fernández,,Argentina,MC,81
+Atlético Madrid,2016-2017,12,Augusto Fernández,,Argentina,MC|MD|MDC,81
 Atlético Madrid,2016-2017,8,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,80
-Atlético Madrid,2016-2017,16,Šime Vrsaljko,,Croatia,DD,79
+Atlético Madrid,2016-2017,16,Šime Vrsaljko,,Croatia,DD|MD,79
 Atlético Madrid,2016-2017,17,Óliver Torres,Óliver,Spain,MC|MOC,79
 Atlético Madrid,2016-2017,11,Ángel Correa,,Argentina,BU|MD,79
 Atlético Madrid,2016-2017,22,Thomas Partey,,Ghana,MDC|MC,76
@@ -327,8 +327,8 @@ Atlético Madrid,2016-2017,18,Diogo Teixeira da Silva,Diogo Jota,Portugal,BU|AG,
 Atlético Madrid,2017-2018,13,Jan Oblak,,Slovenia,G,89
 Atlético Madrid,2017-2018,2,Diego Godín,,Uruguay,DC,88
 Atlético Madrid,2017-2018,7,Antoine Griezmann,,France,BU|AD|AG,88
-Atlético Madrid,2017-2018,3,Filipe Luís,,Brazil,DG,86
-Atlético Madrid,2017-2018,18,Diego Costa,,Spain,BU,85
+Atlético Madrid,2017-2018,3,Filipe Luís,,Brazil,DG|MDG|MG,86
+Atlético Madrid,2017-2018,18,Diego Costa,,Spain,BU|MOC,85
 Atlético Madrid,2017-2018,6,Jorge Resurrección,Koke,Spain,MG|MD|MC|MDC,85
 Atlético Madrid,2017-2018,10,Yannick Carrasco,,Belgium,MG|AG|MDG,85
 Atlético Madrid,2017-2018,8,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,84
@@ -336,24 +336,24 @@ Atlético Madrid,2017-2018,23,Vitolo,Vitolo,Spain,MG|MD|BU,83
 Atlético Madrid,2017-2018,24,José María Giménez,,Uruguay,DC,83
 Atlético Madrid,2017-2018,20,Juanfran,Juanfran,Spain,DD|DC|MD,82
 Atlético Madrid,2017-2018,21,Kevin Gameiro,,France,BU|MOC,82
-Atlético Madrid,2017-2018,22,Nicolás Gaitán,,Argentina,MG,82
+Atlético Madrid,2017-2018,22,Nicolás Gaitán,,Argentina,MG|MOC|MD,82
 Atlético Madrid,2017-2018,15,Stefan Savić,,Montenegro,DC,82
 Atlético Madrid,2017-2018,14,Gabi,Gabi,Spain,MC|MDC,81
 Atlético Madrid,2017-2018,9,Fernando Torres,,Spain,BU,80
 Atlético Madrid,2017-2018,1,Miguel Ángel Moyá,Moyá,Spain,G,80
-Atlético Madrid,2017-2018,16,Šime Vrsaljko,,Croatia,DD,80
+Atlético Madrid,2017-2018,16,Šime Vrsaljko,,Croatia,DD|MD,80
 Atlético Madrid,2017-2018,5,Thomas Partey,,Ghana,MDC|MC,80
 Atlético Madrid,2017-2018,11,Ángel Correa,,Argentina,MD|BU,80
 Atlético Madrid,2017-2018,19,Lucas Hernández,,France,DC|DG,79
-Atlético Madrid,2017-2018,17,Luciano Vietto,,Argentina,BU,78
-Atlético Madrid,2017-2018,4,Guilherme Siqueira,Guilherme,Brazil,DG,75
+Atlético Madrid,2017-2018,17,Luciano Vietto,,Argentina,BU|MOC|AG|MG,78
+Atlético Madrid,2017-2018,4,Guilherme Siqueira,Guilherme,Brazil,DG|MG,75
 Atlético Madrid,2018-2019,13,Jan Oblak,,Slovenia,G,91
 Atlético Madrid,2018-2019,2,Diego Godín,,Uruguay,DC,90
 Atlético Madrid,2018-2019,7,Antoine Griezmann,,France,BU|AD|AG,89
-Atlético Madrid,2018-2019,3,Filipe Luís,,Brazil,DG,85
+Atlético Madrid,2018-2019,3,Filipe Luís,,Brazil,DG|MDG|MG,85
 Atlético Madrid,2018-2019,6,Jorge Resurrección,Koke,Spain,MD|MG|MC|MDC,85
 Atlético Madrid,2018-2019,8,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,85
-Atlético Madrid,2018-2019,19,Diego Costa,,Spain,BU,84
+Atlético Madrid,2018-2019,19,Diego Costa,,Spain,BU|MOC,84
 Atlético Madrid,2018-2019,24,José María Giménez,,Uruguay,DC,84
 Atlético Madrid,2018-2019,15,Stefan Savić,,Montenegro,DC,83
 Atlético Madrid,2018-2019,11,Thomas Lemar,,France,MG|MC,83
@@ -367,7 +367,7 @@ Atlético Madrid,2018-2019,23,Vitolo,Vitolo,Spain,MG|MD|BU,81
 Atlético Madrid,2018-2019,10,Ángel Correa,,Argentina,MD|BU,81
 Atlético Madrid,2018-2019,20,Juanfran,Juanfran,Spain,DD|DC|MD,80
 Atlético Madrid,2018-2019,9,Nikola Kalinić,,Croatia,BU,79
-Atlético Madrid,2018-2019,4,Santiago Arias,,Colombia,DD,79
+Atlético Madrid,2018-2019,4,Santiago Arias,,Colombia,DD|MD,79
 Atlético Madrid,2019-2020,13,Jan Oblak,,Slovenia,G,91
 Atlético Madrid,2019-2020,6,Jorge Resurrección,Koke,Spain,MC|MD|MG|MDC,86
 Atlético Madrid,2019-2020,8,Saúl Ñíguez,Saúl,Spain,MG|MD|MC|MDC,85
@@ -377,8 +377,8 @@ Atlético Madrid,2019-2020,5,Thomas Partey,,Ghana,MC|MDC,84
 Atlético Madrid,2019-2020,9,Álvaro Morata,,Spain,BU,83
 Atlético Madrid,2019-2020,15,Stefan Savić,,Montenegro,DC,83
 Atlético Madrid,2019-2020,21,Yannick Carrasco,,Belgium,MG|AG|MDG,83
-Atlético Madrid,2019-2020,16,Héctor Herrera,,Mexico,MC,82
-Atlético Madrid,2019-2020,19,Diego Costa,,Spain,BU,82
+Atlético Madrid,2019-2020,16,Héctor Herrera,,Mexico,MC|MD|AG,82
+Atlético Madrid,2019-2020,19,Diego Costa,,Spain,BU|MOC,82
 Atlético Madrid,2019-2020,11,Thomas Lemar,,France,MG|MC,82
 Atlético Madrid,2019-2020,10,Ángel Correa,,Argentina,MD|BU,82
 Atlético Madrid,2019-2020,1,Antonio Adán,Adán,Spain,G,81
@@ -386,13 +386,13 @@ Atlético Madrid,2019-2020,23,Kieran Trippier,,England,DD|MDD|MD,81
 Atlético Madrid,2019-2020,14,Marcos Llorente,,Spain,MDC|MD|BU|MC|MDD|DD,81
 Atlético Madrid,2019-2020,22,Mario Hermoso,,Spain,DC|DG,81
 Atlético Madrid,2019-2020,20,Vitolo,Vitolo,Spain,MG|MD|BU,80
-Atlético Madrid,2019-2020,24,Šime Vrsaljko,,Croatia,DD,80
+Atlético Madrid,2019-2020,24,Šime Vrsaljko,,Croatia,DD|MD,80
 Atlético Madrid,2019-2020,7,João Félix,,Portugal,BU|MG,80
-Atlético Madrid,2019-2020,4,Santiago Arias,,Colombia,DD,79
+Atlético Madrid,2019-2020,4,Santiago Arias,,Colombia,DD|MD,79
 Atlético Madrid,2019-2020,12,Renan Lodi,Lodi,Brazil,DG|MG,79
 Atlético Madrid,2019-2020,21,Nikola Kalinić,,Croatia,BU,78
 Atlético Madrid,2020-2021,13,Jan Oblak,,Slovenia,G,91
-Atlético Madrid,2020-2021,9,Luis Suárez,,Uruguay,BU,87
+Atlético Madrid,2020-2021,9,Luis Suárez,,Uruguay,BU|MG|AD,87
 Atlético Madrid,2020-2021,6,Jorge Resurrección,Koke,Spain,MDC|MD|MG|MC,85
 Atlético Madrid,2020-2021,2,José María Giménez,,Uruguay,DC,84
 Atlético Madrid,2020-2021,14,Marcos Llorente,,Spain,MC|MD|BU|MDC|MDD|DD,84
@@ -406,11 +406,11 @@ Atlético Madrid,2020-2021,7,João Félix,,Portugal,BU|MG,83
 Atlético Madrid,2020-2021,11,Thomas Lemar,,France,MG|MC,82
 Atlético Madrid,2020-2021,10,Ángel Correa,,Argentina,MD|BU,82
 Atlético Madrid,2020-2021,22,Mario Hermoso,,Spain,DG|DC,82
-Atlético Madrid,2020-2021,16,Héctor Herrera,,Mexico,MC,81
+Atlético Madrid,2020-2021,16,Héctor Herrera,,Mexico,MC|MD|AG,81
 Atlético Madrid,2020-2021,12,Renan Lodi,Lodi,Brazil,DG|MG,81
-Atlético Madrid,2020-2021,19,Diego Costa,,Spain,BU,80
-Atlético Madrid,2020-2021,24,Šime Vrsaljko,,Croatia,DD,80
-Atlético Madrid,2020-2021,4,Santiago Arias,,Colombia,DD,80
+Atlético Madrid,2020-2021,19,Diego Costa,,Spain,BU|MOC,80
+Atlético Madrid,2020-2021,24,Šime Vrsaljko,,Croatia,DD|MD,80
+Atlético Madrid,2020-2021,4,Santiago Arias,,Colombia,DD|MD,80
 Atlético Madrid,2020-2021,20,Vitolo,Vitolo,Spain,MG|MD|BU,79
 Atlético Madrid,2020-2021,19,Moussa Dembélé,,France,BU,79
 Atlético Madrid,2020-2021,3,Caio Henrique,,Brazil,DG|MG,76
@@ -418,7 +418,7 @@ Atlético Madrid,2020-2021,25,Nikola Kalinić,,Croatia,BU,75
 Atlético Madrid,2020-2021,26,Nehuén Pérez,,Argentina,DC,74
 Atlético Madrid,2020-2021,1,Ivo Grbić,,Croatia,G,71
 Atlético Madrid,2021-2022,13,Jan Oblak,,Slovenia,G,89
-Atlético Madrid,2021-2022,9,Luis Suárez,,Uruguay,BU,86
+Atlético Madrid,2021-2022,9,Luis Suárez,,Uruguay,BU|MG|AD,86
 Atlético Madrid,2021-2022,6,Jorge Resurrección,Koke,Spain,MC|MD|MG|MDC,85
 Atlético Madrid,2021-2022,8,Antoine Griezmann,,France,BU|AD|AG,85
 Atlético Madrid,2021-2022,14,Marcos Llorente,,Spain,MDD|MD|BU|MDC|MC|DD,85
@@ -433,9 +433,9 @@ Atlético Madrid,2021-2022,7,João Félix,,Portugal,BU|MG,83
 Atlético Madrid,2021-2022,22,Mario Hermoso,,Spain,DC|DG,82
 Atlético Madrid,2021-2022,23,Kieran Trippier,,England,MD|MDD|DD,84
 Atlético Madrid,2021-2022,12,Renan Lodi,Lodi,Brazil,DG|MG,81
-Atlético Madrid,2021-2022,16,Héctor Herrera,,Mexico,MC,81
+Atlético Madrid,2021-2022,16,Héctor Herrera,,Mexico,MC|MD|AG,81
 Atlético Madrid,2021-2022,17,Daniel Wass,,Denmark,MC|DD,80
-Atlético Madrid,2021-2022,24,Šime Vrsaljko,,Croatia,DD,80
+Atlético Madrid,2021-2022,24,Šime Vrsaljko,,Croatia,DD|MD,80
 Atlético Madrid,2021-2022,1,Benjamin Lecomte,,France,G,79
 Atlético Madrid,2021-2022,19,Matheus Cunha,,Brazil,BU|MOC|MG,79
 Atlético Madrid,2021-2022,4,Geoffrey Kondogbia,,Central African Republic,MC|MDC|DC,79
@@ -465,10 +465,10 @@ Atlético Madrid,2022-2023,24,Daniel Wass,,Denmark,DD|MC,78
 Atlético Madrid,2022-2023,17,Saúl Ñíguez,Saúl,Spain,MC|MG|MD|MDC,80
 Atlético Madrid,2022-2023,23,Reinildo,,Mozambique,DG|DC,80
 Atlético Madrid,2022-2023,3,Sergio Reguilón,,Spain,DG|MDG,79
-Atlético Madrid,2022-2023,3,Santiago Arias,,Colombia,DD,76
+Atlético Madrid,2022-2023,3,Santiago Arias,,Colombia,DD|MD,76
 Atlético Madrid,2022-2023,12,Matt Doherty,,Republic of Ireland,MDD|DD,76
 Atlético Madrid,2022-2023,1,Ivo Grbić,,Croatia,G,74
-Atlético Madrid,2022-2023,24,Pablo Barrios,,Spain,MC,67
+Atlético Madrid,2022-2023,24,Pablo Barrios,,Spain,MC|MDC|MD|MOC,67
 Atlético Madrid,2023-2024,7,Antoine Griezmann,,France,BU|AD|AG,88
 Atlético Madrid,2023-2024,13,Jan Oblak,,Slovenia,G,88
 Atlético Madrid,2023-2024,6,Jorge Resurrección,Koke,Spain,MDC|MD|MG|MC,84
@@ -490,7 +490,7 @@ Atlético Madrid,2023-2024,3,César Azpilicueta,Azpilicueta,Spain,DC|DD|MDD,79
 Atlético Madrid,2023-2024,17,Rodrigo Riquelme,Riquelme,Spain,MG|MOC|MC,78
 Atlético Madrid,2023-2024,4,Gabriel Paulista,,Brazil,DC,77
 Atlético Madrid,2023-2024,18,Arthur Vermeeren,,Belgium,MDC|MC,76
-Atlético Madrid,2023-2024,24,Pablo Barrios,,Spain,MC,76
+Atlético Madrid,2023-2024,24,Pablo Barrios,,Spain,MC|MDC|MD|MOC,76
 Atlético Madrid,2023-2024,1,Horațiu Moldovan,,Romania,G,72
 Atlético Madrid,2023-2024,26,Vitolo,Vitolo,Spain,MG|MD|BU,70
 Atlético Madrid,2024-2025,13,Jan Oblak,,Slovenia,G,88
@@ -508,7 +508,7 @@ Atlético Madrid,2024-2025,16,Nahuel Molina,,Argentina,DD|MDD,81
 Atlético Madrid,2024-2025,4,Conor Gallagher,,England,MC|MOC|MDC,81
 Atlético Madrid,2024-2025,23,Reinildo,,Mozambique,DG|DC,80
 Atlético Madrid,2024-2025,12,Samuel Lino,,Brazil,MG|MDG,79
-Atlético Madrid,2024-2025,8,Pablo Barrios,,Spain,MC,79
+Atlético Madrid,2024-2025,8,Pablo Barrios,,Spain,MC|MDC|MD|MOC,79
 Atlético Madrid,2024-2025,20,Axel Witsel,,Belgium,DC|MDC|MC,79
 Atlético Madrid,2024-2025,3,César Azpilicueta,Azpilicueta,Spain,DC|DD|MDD,79
 Atlético Madrid,2024-2025,1,Juan Musso,,Argentina,G,79
@@ -524,12 +524,12 @@ Atlético Madrid,2025-2026,2,José María Giménez,,Uruguay,DC,83
 Atlético Madrid,2025-2026,9,Alexander Sørloth,,Norway,BU|MD|AD,83
 Atlético Madrid,2025-2026,22,Ademola Lookman,,Nigeria,MG|BU|MD|AD,83
 Atlético Madrid,2025-2026,17,Dávid Hancko,,Slovakia,DC|DG,83
-Atlético Madrid,2025-2026,8,Pablo Barrios,,Spain,MC,83
+Atlético Madrid,2025-2026,8,Pablo Barrios,,Spain,MC|MDC|MD|MOC,83
 Atlético Madrid,2025-2026,10,Álex Baena,,Spain,MG|BU,82
 Atlético Madrid,2025-2026,20,Giuliano Simeone,,Argentina,MD|BU,82
 Atlético Madrid,2025-2026,24,Robin Le Normand,,Spain,DC,81
 Atlético Madrid,2025-2026,6,Jorge Resurrección,Koke,Spain,MC|MD|MG|MDC,81
-Atlético Madrid,2025-2026,18,Marc Pubill,Pubill,Spain,DC,80
+Atlético Madrid,2025-2026,18,Marc Pubill,Pubill,Spain,DC|DD|MDD,80
 Atlético Madrid,2025-2026,1,Juan Musso,,Argentina,G,80
 Atlético Madrid,2025-2026,5,Johnny Cardoso,,United States,MDC,80
 Atlético Madrid,2025-2026,3,Matteo Ruggeri,,Italy,DG,78
