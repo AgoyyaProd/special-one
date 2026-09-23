@@ -519,25 +519,43 @@ button{ font-family:inherit; cursor:pointer; }
 }
 .gm-logo-text{ white-space:nowrap; }
 .gm-logo:hover{ opacity:.8; }
+/* Même famille visuelle que .gm-btn-primary/secondary (typo condensée,
+   coin en écusson) mais en version compacte pour la barre d'en-tête -
+   remplace la pilule fine générique par quelque chose de cohérent avec
+   le reste du jeu. */
 .gm-account-btn{
   display:inline-flex;
   align-items:center;
-  font-family:var(--sans);
-  font-size:14px;
-  font-weight:600;
+  font-family:var(--card-font-bold);
+  font-size:12.5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  font-weight:400;
   color:var(--text-dim);
   background:transparent;
-  border:1px solid var(--border-2);
-  padding:11px 24px;
-  border-radius:999px;
-  transition:transform .18s ease, border-color .3s ease, color .15s ease, background .15s ease;
+  border:1.5px solid var(--border-2);
+  padding:10px 20px;
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .2s cubic-bezier(.22,.85,.32,1.2), border-color .3s ease, color .15s ease, background .15s ease;
+}
+.gm-account-btn::before{
+  content:'';
+  position:absolute;
+  top:-1.5px; right:-1.5px;
+  border-style:solid;
+  border-width:0 11px 11px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
 }
 .gm-account-btn:hover{
-  color:#111;
+  color:#0a0d13;
   background:#fff;
   border-color:#fff;
   transform:translateY(-2px);
 }
+.gm-account-btn:hover::before{ border-color:transparent var(--club-primary) transparent transparent; }
 .gm-account-menu{ position:relative; }
 .gm-header-actions{ display:flex; align-items:center; gap:10px; min-width:0; flex-shrink:1; }
 .gm-account-menu .gm-account-btn{ max-width:180px; }
@@ -640,22 +658,59 @@ button{ font-family:inherit; cursor:pointer; }
   max-width:440px;
   margin:0 0 40px;
 }
+/* Boutons "maillot" : typo condensée des cartes joueurs (déjà utilisée
+   pour les numéros/postes), coin en écusson plutôt que pilule
+   arrondie générique, et bascule franche vers la couleur du club au
+   survol plutôt qu'un simple assombrissement - pour que les CTA
+   ressemblent à une pièce du jeu plutôt qu'à un bouton d'appli
+   quelconque. */
 .gm-btn-primary{
-  font-family:var(--bn-regular);
-  font-size:clamp(15px, 2vw, 22px);
-  letter-spacing:0;
+  font-family:var(--card-font-bold);
+  font-size:clamp(15px, 1.8vw, 21px);
+  letter-spacing:.05em;
+  text-transform:uppercase;
   color:#0a0d13;
   background:var(--text);
   border:none;
-  padding:clamp(14px,2vw,19px) clamp(26px,4vw,44px);
-  border-radius:var(--r-lg);
-  transition:transform .18s ease, background .3s ease;
+  padding:clamp(14px,2vw,19px) clamp(34px,4.6vw,54px) clamp(14px,2vw,19px) clamp(26px,4vw,44px);
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 10px 26px -12px rgba(0,0,0,.6);
+  transition:transform .22s cubic-bezier(.22,.85,.32,1.2), box-shadow .25s ease, background .3s ease, color .2s ease;
 }
-.gm-btn-primary:hover{ transform:translateY(-2px); background:var(--club-accent); }
+/* --club-accent vaut #ffffff FIXE dès qu'un club est actif (voir
+   applyClubTheme) - ce n'est PAS la couleur du club (ça, c'est
+   --club-primary/--club-secondary), juste un blanc de surbrillance.
+   Un texte blanc sur ce fond au survol le rendait donc invisible (blanc
+   sur blanc) partout en jeu, alors que ça semblait correct sur la page
+   d'accueil où --club-accent vaut encore le bleu par défaut. Texte
+   toujours sombre au survol (comme .live-speed-btn.is-active/
+   .league-switch-btn.active le font déjà ailleurs pour la même raison)
+   et écusson coloré avec la vraie couleur du club (--club-primary)
+   plutôt que --club-accent, pour rester visible dans les deux cas. */
+.gm-btn-primary::before{
+  content:'';
+  position:absolute;
+  top:0; right:0;
+  border-style:solid;
+  border-width:0 22px 22px 0;
+  border-color:transparent #0a0d13 transparent transparent;
+  transition:border-color .3s ease;
+}
+.gm-btn-primary:hover{
+  transform:translateY(-3px);
+  background:var(--club-accent);
+  color:#0a0d13;
+  box-shadow:0 16px 34px -12px color-mix(in srgb, var(--club-accent) 55%, transparent);
+}
+.gm-btn-primary:hover::before{ border-color:transparent var(--club-primary) transparent transparent; }
 .gm-btn-primary:disabled{
   opacity:.35; cursor:not-allowed; transform:none;
   background:var(--text);
+  box-shadow:none;
 }
+.gm-btn-primary:disabled::before{ display:none; }
 .landing-cta-row{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
 .landing-cta-row > button{
   /* Sans ça, le bouton "Continuer" refuse de se réduire en dessous de la
@@ -667,18 +722,31 @@ button{ font-family:inherit; cursor:pointer; }
   min-width:0;
 }
 .gm-btn-secondary{
-  font-family:var(--bn-regular);
-  font-size:clamp(15px, 2vw, 22px);
-  letter-spacing:0;
+  font-family:var(--card-font-bold);
+  font-size:clamp(15px, 1.8vw, 21px);
+  letter-spacing:.05em;
+  text-transform:uppercase;
   color:var(--text);
   background:transparent;
-  border:1px solid var(--border-2);
-  padding:clamp(14px,2vw,19px) clamp(26px,4vw,44px);
-  border-radius:var(--r-lg);
-  transition:transform .18s ease, border-color .3s ease, background .15s ease, color .15s ease;
+  border:2px solid var(--border-2);
+  padding:clamp(13px,1.9vw,18px) clamp(33px,4.5vw,53px) clamp(13px,1.9vw,18px) clamp(25px,3.9vw,43px);
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .22s cubic-bezier(.22,.85,.32,1.2), border-color .3s ease, background .2s ease, color .2s ease;
 }
-.gm-btn-secondary:hover{ color:#111; background:#fff; border-color:#fff; transform:translateY(-2px); }
-#btn-resume-save-desc{ display:block; font-size:11px; opacity:.65; font-weight:400; margin-top:1px; line-height:1.2; }
+.gm-btn-secondary::before{
+  content:'';
+  position:absolute;
+  top:-2px; right:-2px;
+  border-style:solid;
+  border-width:0 20px 20px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
+}
+.gm-btn-secondary:hover{ color:#0a0d13; background:#fff; border-color:#fff; transform:translateY(-3px); }
+.gm-btn-secondary:hover::before{ border-color:transparent var(--club-primary) transparent transparent; }
+#btn-resume-save-desc{ display:block; font-family:var(--bn-regular); font-size:11px; letter-spacing:0; text-transform:none; opacity:.65; font-weight:400; margin-top:1px; line-height:1.2; }
 #btn-resume-save{ padding-top:clamp(10px,1.4vw,13px); padding-bottom:clamp(10px,1.4vw,13px); }
 
 /* deux cartes espacées, entièrement visibles, jamais rognées */
@@ -784,13 +852,15 @@ button{ font-family:inherit; cursor:pointer; }
 }
 #btn-end-career{
   font-size:16px;
-  font-weight:700;
-  padding:16px 36px;
+  padding:16px 40px 16px 32px;
   color:#f87171;
+  background:transparent;
   border:1.5px solid #f87171;
-  border-radius:999px;
+  border-radius:4px;
 }
+#btn-end-career::before{ border-color:transparent #f87171 transparent transparent; }
 #btn-end-career:hover{ color:#0a0d13; background:#f87171; border-color:#f87171; }
+#btn-end-career:hover::before{ border-color:transparent #0a0d13 transparent transparent; }
 
 /* ============================= FOOTER ============================= */
 .site-footer{
@@ -829,21 +899,34 @@ button{ font-family:inherit; cursor:pointer; }
   align-items:center;
   gap:8px;
   margin-top:18px;
-  padding:10px 20px;
-  border-radius:999px;
+  padding:10px 22px 10px 18px;
+  border-radius:4px;
   border:1px solid var(--border-2);
-  font-family:var(--sans);
-  font-size:14px;
-  font-weight:600;
+  font-family:var(--card-font-bold);
+  font-size:13px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
   color:var(--text-dim);
   text-decoration:none;
+  position:relative;
+  overflow:hidden;
   transition:color .15s, border-color .15s, background .15s;
+}
+.site-footer-kofi::before{
+  content:'';
+  position:absolute;
+  top:-1px; right:-1px;
+  border-style:solid;
+  border-width:0 12px 12px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
 }
 .site-footer-kofi:hover{
   color:var(--text);
   border-color:#FF5E5B;
   background:rgba(255,94,91,.08);
 }
+.site-footer-kofi:hover::before{ border-color:transparent #FF5E5B transparent transparent; }
 /* Logo Ko-fi officiel (SVG inliné) remplaçant l'emoji tasse de café -
    dimensionné à la hauteur du texte du bouton qui le contient, quel que
    soit ce bouton (footer ou popup de soutien). */
@@ -1092,16 +1175,30 @@ button{ font-family:inherit; cursor:pointer; }
   flex-direction:column;
   align-items:center;
   gap:12px;
-  font-family:var(--bn-regular);
-  font-size:14px;
-  letter-spacing:1px;
+  font-family:var(--card-font-bold);
+  font-size:13px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
   padding:22px 12px;
   border-radius:var(--r-lg);
   border:1px solid var(--border);
   background:var(--surface-2);
   color:var(--text-dim);
+  position:relative;
+  overflow:hidden;
   transition:all .18s ease;
 }
+.league-pill::before{
+  content:'';
+  position:absolute;
+  top:0; right:0;
+  border-style:solid;
+  border-width:0 16px 16px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
+}
+.league-pill:hover::before{ border-color:transparent var(--club-primary) transparent transparent; }
+.league-pill.is-active::before{ border-color:transparent var(--club-primary) transparent transparent; }
 .league-logo-wrap{
   width:64px; height:64px;
   display:flex; align-items:center; justify-content:center;
@@ -1454,24 +1551,41 @@ button{ font-family:inherit; cursor:pointer; }
 .live-scorer-row .l-minute{ color:var(--text-faint); font-variant-numeric:tabular-nums; margin-right:8px; }
 .live-scorer-row .l-assist{ color:var(--text-faint); font-size:11.5px; }
 
+/* Même famille visuelle que .gm-btn-primary/secondary (typo condensée
+   des cartes, coin en écusson) appliquée aux boutons d'action de
+   l'écran de saison. */
 .season-btn{
-  font-family:var(--bn-regular);
-  font-size:14px;
-  letter-spacing:0;
-  padding:12px 20px;
-  border-radius:var(--r-md);
+  font-family:var(--card-font-bold);
+  font-size:13px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:12px 22px 12px 18px;
+  border-radius:4px;
   border:1px solid var(--border-2);
   background:var(--surface-2);
   color:var(--text-dim);
+  position:relative;
+  overflow:hidden;
   transition:all .15s ease;
 }
+.season-btn::before{
+  content:'';
+  position:absolute;
+  top:-1px; right:-1px;
+  border-style:solid;
+  border-width:0 10px 10px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
+}
 .season-btn:hover:not(:disabled){ color:var(--text); border-color:var(--club-accent); }
+.season-btn:hover:not(:disabled)::before{ border-color:transparent var(--club-accent) transparent transparent; }
 .season-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .season-btn-primary{
   background:var(--club-primary);
   border-color:var(--club-primary);
   color:#fff;
 }
+.season-btn-primary::before{ border-color:transparent var(--club-accent) transparent transparent; }
 .season-btn-primary:hover:not(:disabled){ filter:brightness(1.15); border-color:var(--club-primary); color:#fff; }
 .season-btn-ghost{ background:transparent; }
 .euro-tab-group{ margin-top:10px; }
@@ -1630,16 +1744,21 @@ button{ font-family:inherit; cursor:pointer; }
   margin-bottom:12px;
   flex-shrink:0;
 }
+/* Onglets "championnats" et "coupes d'Europe" de l'écran de saison :
+   même famille typographique condensée que les autres boutons, radius
+   resserré plutôt que pilule. Reste un sélecteur à état actif (pas de
+   petit écusson de coin, qui alourdirait ces onglets nombreux et
+   serrés). */
 .league-switch-btn{
-  font-family:var(--sans);
+  font-family:var(--card-font-bold);
   font-size:10.5px;
-  font-weight:600;
-  letter-spacing:.2px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
   color:var(--text-faint);
   background:rgba(255,255,255,.04);
   border:1px solid var(--border-2);
-  padding:6px 10px;
-  border-radius:999px;
+  padding:7px 12px;
+  border-radius:4px;
   transition:all .15s ease;
   white-space:nowrap;
 }
@@ -1648,7 +1767,6 @@ button{ font-family:inherit; cursor:pointer; }
   color:#0a0d13;
   background:var(--club-accent);
   border-color:var(--club-accent);
-  font-weight:700;
 }
 .season-panel > .standings-table, .season-panel > .results-list{ overflow-y:auto; min-height:0; }
 
@@ -2044,13 +2162,14 @@ button{ font-family:inherit; cursor:pointer; }
 .col-left-spacer{ flex:1; min-height:0; }
 .btn-end-mercato{
   width:100%;
-  font-family:var(--bn-regular);
-  font-size:13px;
-  letter-spacing:0;
+  font-family:var(--card-font-bold);
+  font-size:14px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
   color:#fff;
   background:var(--danger);
   border:1px solid transparent;
-  border-radius:var(--r-md);
+  border-radius:4px;
   padding:15px;
   transition:filter .15s ease;
 }
@@ -2421,34 +2540,58 @@ button{ font-family:inherit; cursor:pointer; }
 /* ---- draft panel ---- */
 .draft-btn{
   width:100%;
-  font-family:var(--bn-regular);
-  font-size:16px;
-  letter-spacing:0;
+  font-family:var(--card-font-bold);
+  font-size:17px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
   color:#fff;
   background:var(--club-primary);
   border:none;
   padding:22px;
-  border-radius:var(--r-md);
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
   transition:filter .15s ease, transform .15s ease;
   margin-bottom:14px;
+}
+.draft-btn::before{
+  content:'';
+  position:absolute;
+  top:0; right:0;
+  border-style:solid;
+  border-width:0 16px 16px 0;
+  border-color:transparent var(--club-accent) transparent transparent;
 }
 .draft-btn:hover:not(:disabled){ filter:brightness(1.12); transform:translateY(-1px); }
 .draft-btn:disabled{ opacity:.4; cursor:not-allowed; }
 
 .relance-btn{
   width:100%;
-  font-family:var(--bn-regular);
-  font-size:15px;
-  letter-spacing:0;
+  font-family:var(--card-font-bold);
+  font-size:16px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
   color:var(--text-dim);
   background:transparent;
   border:1px solid var(--border-2);
   padding:20px;
-  border-radius:var(--r-md);
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
   transition:all .15s ease;
   margin-bottom:14px;
 }
+.relance-btn::before{
+  content:'';
+  position:absolute;
+  top:-1px; right:-1px;
+  border-style:solid;
+  border-width:0 14px 14px 0;
+  border-color:transparent var(--border-2) transparent transparent;
+  transition:border-color .3s ease;
+}
 .relance-btn:hover:not(:disabled){ color:var(--text); border-color:var(--club-accent); }
+.relance-btn:hover:not(:disabled)::before{ border-color:transparent var(--club-accent) transparent transparent; }
 .relance-btn:disabled{ opacity:.35; cursor:not-allowed; }
 
 .reroll-count{
@@ -2760,6 +2903,7 @@ button{ font-family:inherit; cursor:pointer; }
 
   .gm-header-inner{ padding:0; }
   .gm-account-btn{ font-size:11px; padding:7px 12px; white-space:nowrap; flex-shrink:0; }
+  .gm-account-btn::before{ border-width:0 8px 8px 0; }
   /* Filet de sécurité pour les téléphones les plus étroits (~320-360px) où
      même le logo réduit à sa seule icône + les 3 boutons compactés ne
      tiennent pas tout à fait : un défilement horizontal discret plutôt
@@ -2821,7 +2965,8 @@ button{ font-family:inherit; cursor:pointer; }
   .modal-tab{ font-size:12px; }
 
   .season-controls{ gap:8px; }
-  .season-btn{ font-size:12px; padding:9px 14px; letter-spacing:0; }
+  .season-btn{ font-size:11px; padding:9px 14px; }
+  .season-btn::before{ border-width:0 8px 8px 0; }
   /* Pause/x1/x2/x4/Changement passaient sur 2 lignes sur mobile (317px de
      contenu pour ~295px disponibles) - resserré pour tenir sur une seule
      ligne, scopé à cet écran pour ne pas réduire les boutons de la page de
@@ -3364,6 +3509,26 @@ button{ font-family:inherit; cursor:pointer; }
   color:var(--text-faint);
   margin-top:2px;
 }
+.pantheon-breakdown{
+  font-family:var(--sans);
+  font-size:10.5px;
+  color:var(--text-faint);
+  opacity:.8;
+  margin-top:3px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pantheon-breakdown span{ white-space:nowrap; }
+.pantheon-breakdown b{ color:var(--text-dim); font-weight:700; }
+.pantheon-path{
+  font-family:var(--sans);
+  font-size:10.5px;
+  color:var(--text-dim);
+  margin-top:4px;
+  line-height:1.6;
+}
+.pantheon-arrow{ color:var(--text-faint); margin:0 1px; }
 .pantheon-score{
   font-family:var(--bn-bold);
   font-size:20px;
@@ -14521,6 +14686,16 @@ async function submitAuthForm(){
       if(error){ showAuthError(error.message); return; }
       state.session = data.session;
     }
+    // Comme pour signInWithGoogle : flush immédiat de la partie en cours vers
+    // localStorage AVANT de réconcilier. reconcileGameStateAfterLogin() lit
+    // localStorage (pas state directement), qui peut être en retard de
+    // quelques centaines de ms sur state à cause du debounce de
+    // scheduleSaveSnapshot() (ex: succès tout juste débloqué en fin de match
+    // en direct, puis connexion immédiate) - sans ce flush, la réconciliation
+    // fusionne une version localStorage périmée puis écrase state avec elle,
+    // faisant disparaître les succès/progrès obtenus dans les instants juste
+    // avant la connexion.
+    if(state.club || state.season) saveSnapshotNow();
     await reconcileGameStateAfterLogin();
     document.getElementById('profile-modal').style.display = 'none';
     const cb = state.pendingAfterProfile;
@@ -15628,6 +15803,35 @@ function countTrophies(history){
   return history.reduce((n,r)=> n + (r.is_champion?1:0) + (r.cup_won?1:0) + (r.domestic_super_cup_won?1:0) + (r.euro_result && r.euro_result.won?1:0) + (r.euro_result && r.euro_result.superCupWon?1:0), 0);
 }
 
+// Chemin de clubs traversés au cours d'une carrière, dans l'ordre des
+// saisons (ex: Rennes -> Lille -> Arsenal -> Real Madrid -> Rennes). Les
+// saisons consécutives passées dans le même club sont fusionnées en une
+// seule étape - un retour ultérieur dans ce club, après être passé
+// ailleurs, réapparaît bien comme une étape distincte.
+function careerClubPath(rows){
+  const sorted = rows.slice().sort((a,b)=>a.season_number-b.season_number);
+  const path = [];
+  sorted.forEach(r=>{ if(path[path.length-1] !== r.club) path.push(r.club); });
+  return path;
+}
+
+// Ligne de détail "Championnat X · Coupe Y · Europe Z" affichée sous chaque
+// entrée du Panthéon, pour expliquer la composition du score total (même
+// principe que le détail déjà affiché dans le Palmarès personnel). Accepte
+// aussi bien un objet score brut ({league,cup,euro}) qu'une entrée agrégée
+// du classement "Carrière" (mêmes clés, sommées sur toutes les saisons).
+function pantheonScoreBreakdownHtml(score){
+  if(!score) return '';
+  const league = Number(score.league) || 0;
+  const cup = Number(score.cup) || 0;
+  const euro = Number(score.euro) || 0;
+  return `<div class="pantheon-breakdown">
+    <span>Championnat <b>${league}</b></span>
+    <span>Coupe <b>${cup}</b></span>
+    <span>Europe <b>${euro}</b></span>
+  </div>`;
+}
+
 async function renderPantheonScreen(){
   document.querySelectorAll('#pantheon-tabs .pantheon-nav-item[data-view]').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.view === state.pantheonView);
@@ -15647,7 +15851,7 @@ async function renderPantheonScreen(){
 
   const { data, error } = await sbClient
     .from('career_history')
-    .select('user_id, player_name, club, league, season_number, score')
+    .select('user_id, player_name, club, league, season_number, score, career_number, is_champion, cup_won, domestic_super_cup_won, euro_result')
     .limit(2000);
 
   if(error){
@@ -15672,29 +15876,41 @@ async function renderPantheonScreen(){
         <div>
           <div class="pantheon-name">${r.player_name || 'Manager anonyme'}</div>
           <div class="pantheon-sub">${r.club} (${r.league}) - Saison ${r.season_number}</div>
+          ${pantheonScoreBreakdownHtml(r.score)}
         </div>
         <div class="pantheon-score">${r.score.total}<span class="l">pts</span></div>
       </div>
     `).join('');
   } else {
-    const byUser = {};
+    // Vue "Carrière" : une entrée par carrière (et non par utilisateur) -
+    // un joueur ayant recommencé plusieurs carrières apparaît donc
+    // potentiellement plusieurs fois, une fois par carrière distincte.
+    const byCareer = {};
     rows.forEach(r=>{
-      const entry = byUser[r.user_id] || (byUser[r.user_id] = { user_id:r.user_id, player_name:r.player_name, total:0, seasons:0 });
+      const key = `${r.user_id}::${r.career_number || 1}`;
+      const entry = byCareer[key] || (byCareer[key] = { user_id:r.user_id, player_name:r.player_name, total:0, rows:[] });
       entry.total += r.score.total;
-      entry.seasons += 1;
+      entry.rows.push(r);
       if(r.player_name) entry.player_name = r.player_name;
     });
-    const ranked = Object.values(byUser).sort((a,b)=> b.total - a.total).slice(0, 50);
-    listEl.innerHTML = ranked.map((r,i)=>`
+    const ranked = Object.values(byCareer).sort((a,b)=> b.total - a.total).slice(0, 50);
+    listEl.innerHTML = ranked.map((r,i)=>{
+      const seasons = r.rows.length;
+      const clubs = new Set(r.rows.map(x=>x.club)).size;
+      const trophies = countTrophies(r.rows);
+      const path = careerClubPath(r.rows);
+      return `
       <div class="pantheon-row ${r.user_id===myId ? 'pantheon-me' : ''}">
         <div class="pantheon-rank">${i+1}</div>
         <div>
           <div class="pantheon-name">${r.player_name || 'Manager anonyme'}</div>
-          <div class="pantheon-sub">${r.seasons} saison${r.seasons>1?'s':''} jouée${r.seasons>1?'s':''}</div>
+          <div class="pantheon-sub">${clubs} club${clubs>1?'s':''} · ${seasons} saison${seasons>1?'s':''} jouée${seasons>1?'s':''} · ${trophies} trophée${trophies>1?'s':''}</div>
+          <div class="pantheon-path">${path.join(' <span class="pantheon-arrow">&#8594;</span> ')}</div>
         </div>
         <div class="pantheon-score">${r.total}<span class="l">pts</span></div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
 }
 
